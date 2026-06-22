@@ -1,0 +1,26 @@
+{
+  "skill_name": "is-analizi-dsl",
+  "evals": [
+    {
+      "id": 1,
+      "name": "satinalma-surec-yeniden-turetim",
+      "prompt": "Şirketimiz için bir satınalma uygulaması istiyorum. Şöyle işliyor: Bir çalışan satınalma talebi açıyor (ne istediği, tutarı, ne zaman lazım olduğu ve bir açıklama yazıyor). Talebi önce taslak olarak kaydedebiliyor, sonra gönderiyor. Taslaktayken düzeltebiliyor veya geri çekebiliyor, ama gönderdikten sonra artık ona karışamıyor. Çalışanın yöneticisi, kendi ekibindeki çalışanların taleplerini görüyor ve karara bağlıyor (onaylıyor veya reddediyor). Onay sadece mesai saatinde olabiliyor ve tutar 50000'i geçmiyorsa. Onaylanınca çalışana haber gidiyor. Reddedilen talep geri dönmüyor. Onaylanan talepleri satınalmacı siparişe çeviriyor ve tedarikçiye gönderiyor (sipariş önce açık, gönderilince düzenlenmiş oluyor). Satınalmacı ayrıca tedarikçi kayıtlarını da yönetiyor (ekleme, güncelleme, listeleme) ve onaylı talepleri en acil olan önce gelecek şekilde listeliyor. Depo görevlisi gelen malı teslim alıyor (mal kabul kaydı) ve siparişi kapatıyor; kısmi teslimatta sipariş açık kalabiliyor. Muhasebeci faturayı kaydedip siparişle eşleştiriyor, sonra vadesi gelen faturaları ödüyor; ödeme yapılınca fatura otomatik kapanıyor. İK yok bu işte. Bir de sistem her gece eski taslakları otomatik temizliyor. Bunu CommandDSL iş analizine (.cdsl) çevir.",
+      "expected_output": "Foundation (actor: Employee/DepartmentManager extends Employee/Buyer/WarehouseClerk/Accountant/System, calendar business-hours, relation managedTeam, entities), operation kataloğu (talep/onay/sipariş/mal kabul/fatura/ödeme + schedule'lı temizlik), flow'lar (her aktörün yolculuğu), ve process (çok aktörlü, of PurchaseRequest, any order Receiving∥Invoicing). examples/real/*.cdsl ile yapısal denk olmalı; gerçek CommandDSL parser'ında 0 error.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "izin-talep-basit",
+      "prompt": "Küçük bir izin talep uygulaması lazım. Çalışan izin talebi gönderiyor (tarihler, sebep). Yöneticisi sadece kendi ekibinin taleplerini onaylıyor ya da reddediyor; onaylanınca çalışana haber gidiyor. İK görüyor ama karışmıyor. Çalışan, yönetici daha bakmadıysa talebini geri çekebiliyor. Bunu süreç, akış ve eylemlere döken bir iş analizi çıkar.",
+      "expected_output": "Foundation (Employee, Manager extends Employee, HR salt-okur, relation managedTeam, entity LeaveRequest), operationlar (submit/approve/reject/withdraw where bakılmadı, list/read), flow'lar, process of LeaveRequest. Parser'da 0 error.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "basit-eticaret-siparis",
+      "prompt": "Bir e-ticaret sipariş akışı modelle. Müşteri ürünleri listeler, sepete ekler, ödeme yapar; ödeme başarısızsa tekrar deneyebilir veya vazgeçebilir. Sipariş oluşunca depo hazırlar ve kargoya verir. Bunu iş analizine çevir.",
+      "expected_output": "Foundation (Customer, WarehouseStaff, entities Product/Cart/Order), operationlar (list/addToCart/pay where, prepare/ship), flow either-or (ödeme başarısız dalı) + abandon, process of Order. Parser'da 0 error.",
+      "files": []
+    }
+  ]
+}

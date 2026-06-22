@@ -1,0 +1,170 @@
+# ============================================================
+# Keyword coverage — Modül 1/2: Shop
+# Amaç: CommandDSL'in TÜM keyword/construct'larını tek modelde kullanmak
+# (dil doğruluğu + dsl-reference.md doğrulama). Gerçek anlam ikincil.
+# ============================================================
+domain Shop
+
+# actor + extends + System
+actor Guest
+actor Customer extends Guest
+actor Admin
+actor System
+
+# calendar (kebab)
+calendar business-hours
+
+# relation ... of ... with  → ownership'te ownedStore's
+relation ownedStore of Admin with Store
+
+# entity + alan tipleri (String/Decimal/Boolean/Int/Date/DateTime/Duration/list of)
+entity Store {
+    name: String
+    rating: Decimal
+    active: Boolean
+}
+entity Order {
+    total: Decimal
+    status: String
+    placedAt: DateTime
+    neededBy: Date
+    waited: Duration
+    items: list of OrderItem
+}
+entity OrderItem {
+    price: Decimal
+    qty: Int
+}
+entity Invoice {
+    total: Decimal
+    status: String
+    dueDate: Date
+}
+entity Refund {
+    amount: Decimal
+}
+
+# verb (açık fiil sözlüğü)
+verb submits
+verb ships
+
+# --- Sorgular: reads/lists + public/own + only when + order by + limit to ---
+BrowsePublic: Guest lists public Store
+ViewOrder: Customer reads own Order
+ListMyOrders: Customer lists own Order
+only when Order.status = 'placed'
+order by Order.placedAt descending
+limit to 50
+
+# --- Komutlar: ownership çeşitleri, on/from/for/where, note, only if/during/when,
+#     on success do → calculate(sum of / if / when) / send / create / perform ---
+PlaceOrder: Customer creates own Order
+note """Müşteri sipariş oluşturur; toplam kalemlerden hesaplanır, durum placed."""
+on success do
+    calculate Order.total = sum of Order.items.price
+    calculate Order.status = 'placed'
+
+SubmitOrder: Customer submits own Order where status = 'placed'
+on success do
+    calculate Order.status = 'submitted'
+
+# only if (tek karşılaştırma) + on (hedef kayıt) + > operatörü
+AddNote: Customer creates own Refund on own Order
+only if Order.total > 100
+
+# zengin where: != <= < > and or parens
+UpdateOrder: Customer updates own Order where (Order.total <= 5000 and Order.total < 9999 and Order.status != 'shipped') or Order.total > 0
+
+# only during + only when (and, >=) + send
+ApproveBigOrder: Admin updates any Order
+only during business-hours
+only when Order.total >= 1000 and Order.status = 'submitted'
+on success do
+    calculate Order.status = 'approved'
+    send ApprovalNotice to Order.owner
+
+# from (girdi dönüşümü) + perform (zincir)
+CreateInvoice: Admin creates any Invoice from any Order
+on success do
+    calculate Invoice.status = 'open'
+    perform NotifyFinance
+
+NotifyFinance: System updates all Invoice
+on success do
+    calculate Invoice.status = 'notified'
+
+# relation ownership (ownedStore's) + create (action) + calculate when
+ShipOrder: Admin ships ownedStore's Order where status = 'approved'
+on success do
+    calculate Order.status = 'shipped'
+    calculate Order.status = 'urgent' when Order.total > 1000
+    create Refund from Order
+    send ShipNotice to Order.owner
+
+# calculate if + aritmetik (*)
+IssueRefund: System updates any Refund
+on success do
+    calculate Refund.amount = Order.total * 0.9 if Order.status = 'returned'
+
+# aritmetik + - / ve parantez
+RecalcInvoice: Admin updates any Invoice
+on success do
+    calculate Invoice.total = (Invoice.total + 10 - 5) / 1
+
+# for <Aktör> (sahip alıcı)
+GiftOrder: Admin creates any Order for Customer
+
+# operation-stage hedefi (hiçbir flow'da değil)
+ArchiveOrder: Admin deletes any Order
+
+# schedule (yalnız System) — day+at / week / hour / month+at
+PurgeOldOrders: System deletes all Order
+schedule: every day at 03:00
+ReindexStores: System updates all Store
+schedule: every hour
+PurgeOldRefunds: System deletes all Refund
+schedule: every week
+RollupOrders: System creates all Invoice
+schedule: every month at 23:00
+
+# grant/revoke + read/write/delete + for <süre> (compact 24h)
+ShareOrder: Customer grants read own Order to Admin for 24h
+RevokeWrite: Admin revokes write any Order from Customer
+RevokeDelete: Admin revokes delete any Order from Customer
+
+# --- Flow'lar: step/optional/repeat/optional repeat/using/include(+mod)/either-or/outside/abandon/note ---
+flow Browse for Guest
+    step See: BrowsePublic
+
+flow Shopping for Customer
+    note """Müşterinin sipariş yolculuğu (keyword kapsama)."""
+    include Browse
+    step Place: PlaceOrder
+    step Review: ViewOrder optional using Place
+    step Submit: SubmitOrder using Place
+    outside "ödeme sağlayıcısına yönlenir"
+    either
+        step Tweak: UpdateOrder using Place
+    or
+        step Look: ListMyOrders
+    abandon anytime "sepeti bırakabilir"
+
+flow Loyalty for Customer
+    include Browse optional repeat
+    step Again: PlaceOrder repeat
+
+flow Fulfil for Admin
+    step Approve: ApproveBigOrder repeat
+    step Invoice: CreateInvoice
+    step Extra: RecalcInvoice optional repeat
+    step Ship: ShipOrder using Approve
+
+# --- Process: of / note / flow-stage by / operation-stage / any order ... and ---
+process SalesProcess of Order
+    note """Uçtan uca satış süreci."""
+    stage Shop: flow Shopping by Customer
+    any order
+        stage Do: flow Fulfil by Admin
+    and
+        stage Loyal: flow Loyalty by Customer
+    stage Clean: ArchiveOrder

@@ -1,0 +1,17 @@
+{
+  "name": "command-dsl-tools",
+  "owner": {
+    "name": "Hakan Soysal",
+    "email": "66327932+Hakan-Soysal@users.noreply.github.com"
+  },
+  "plugins": [
+    {
+      "name": "command-dsl",
+      "source": "./plugins/command-dsl",
+      "description": "İş fikrini adım adım sorgulayarak tutarlı, parse-temiz CommandDSL (.cdsl) iş analizine çeviren skill — gömülü standalone doğrulayıcı ile.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": ["dsl", "business-analysis", "command-dsl", "is-analizi"]
+    }
+  ]
+}

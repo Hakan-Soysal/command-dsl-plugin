@@ -1,0 +1,9 @@
+{
+  "resolution": ["project", "bundled", "url"],
+  "projectPath": "../../CommandDSL",
+  "bundledPath": "./validator/validate.mjs",
+  "url": "",
+  "cacheDir": "./.validator-cache",
+  "runner": "auto",
+  "grammarVersion": "v3.x-2b37f47acc3c"
+}

@@ -1,0 +1,46 @@
+# ============================================================
+# Keyword coverage — Modül 2/2: Support
+# import (çapraz modül referansı), unit-duration (3 days / 2 hours),
+# 2. process, operation-stage. Customer/Admin/Store shop'tan gelir.
+# ============================================================
+import './shop.cdsl'
+
+domain Support
+
+actor SupportAgent
+
+entity Ticket {
+    subject: String
+    status: String
+    openedAt: DateTime
+    waited: Duration
+}
+
+verb resolves
+
+OpenTicket: Customer creates own Ticket
+on success do
+    calculate Ticket.status = 'open'
+
+ResolveTicket: SupportAgent resolves any Ticket where status = 'open'
+on success do
+    calculate Ticket.status = 'resolved'
+
+ListTickets: SupportAgent lists any Ticket
+only when Ticket.status = 'open'
+order by Ticket.openedAt ascending
+limit to 20
+
+# grant (unit duration: 3 days) + grant update perm (cross-module: Admin/Store)
+GrantPeek: Customer grants read own Ticket to SupportAgent for 3 days
+DelegateEdit: Admin grants update any Store to SupportAgent for 2 hours
+
+flow Support for SupportAgent
+    step List: ListTickets
+    step Resolve: ResolveTicket repeat
+    abandon anytime "sonra bakabilir"
+
+process SupportProcess of Ticket
+    note """Destek talebi süreci."""
+    stage Open: OpenTicket
+    stage Handle: flow Support by SupportAgent

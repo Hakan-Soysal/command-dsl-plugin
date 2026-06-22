@@ -1,0 +1,9 @@
+{
+  "name": "command-dsl",
+  "description": "İş fikrini adım adım sorgulayarak tutarlı, parse-temiz CommandDSL (.cdsl) iş analizine (process/flow/operation) çeviren skill — gömülü standalone doğrulayıcı ile.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Hakan Soysal",
+    "email": "66327932+Hakan-Soysal@users.noreply.github.com"
+  }
+}
