@@ -21,6 +21,13 @@
       "prompt": "Bir e-ticaret sipariş akışı modelle. Müşteri ürünleri listeler, sepete ekler, ödeme yapar; ödeme başarısızsa tekrar deneyebilir veya vazgeçebilir. Sipariş oluşunca depo hazırlar ve kargoya verir. Bunu iş analizine çevir.",
       "expected_output": "Foundation (Customer, WarehouseStaff, entities Product/Cart/Order), operationlar (list/addToCart/pay where, prepare/ship), flow either-or (ödeme başarısız dalı) + abandon, process of Order. Parser'da 0 error.",
       "files": []
+    },
+    {
+      "id": 4,
+      "name": "on-gereksinim-kapanis-uretici-yok",
+      "prompt": "Küçük bir mağaza uygulaması. Müşteri ürünleri listeler ve sepete ekleyip sipariş verir. Yönetici siparişleri görür ve onaylar; onaylanınca durum onaylandı olur. Bunu iş analizine çevir. Üretmeden önce eksik ön-gereksinimleri kontrol et: sadece var-oluş yeterli.",
+      "expected_output": "Faz 3.5 ön-gereksinim kapanışı (D1=var-oluş seçili) MUTLAKA çalışmalı. Kullanıcı ürünü listeler/sepete ekler ama hiçbir operasyon Product ÜRETMEZ → step bunu yakalamalı ve tek toplu öneriyle sormalı: ya 'CreateProduct (ürünleri kim ekliyor?)' operation'ı ekle, ya da 'ürünler dışarıdan gelir (seed/ERP)' diye kapsam dışı belgele — körü körüne eklememeli. (Order'ın üreticisi var: sipariş ver = creates Order; gömülü/değer alanlar muaf.) Onaydan sonra model nedensel-tam olmalı; eklenen üretici §A benzersiz 4'lü imza ve foundation kurallarından geçmeli; nihai .cdsl parser'da 0 error.",
+      "files": []
     }
   ]
 }

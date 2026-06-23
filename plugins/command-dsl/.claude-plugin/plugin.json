@@ -1,7 +1,7 @@
 {
   "name": "command-dsl",
   "description": "CommandDSL ailesi için iki skill: (1) is-analizi — iş fikrini parse-temiz CommandDSL (.cdsl) iş analizine çevirir; (2) teknik-analiz — iş analizinden (.cdsl / operations.json) belirsizlikleri sorgulayarak linked Tech DSL (.tcdsl) üretir. Her ikisi gömülü standalone doğrulayıcı ile.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": {
     "name": "Hakan Soysal",
     "email": "66327932+Hakan-Soysal@users.noreply.github.com"

@@ -5,6 +5,12 @@ için asıl risk sözdizimi değil, katmanlar-arası kopukluktur. Üretmeden ÖN
 listeyi geç; bir ihlal varsa **emit etme**, düzelt, tekrar denetle (0 ihlal veya
 bilinçli/belgelenmiş istisna olana kadar).
 
+> Bu liste **referans bütünlüğüne** bakar (ID'ler çözülüyor mu, foundation
+> bildirilmiş mi). **Üretici-tüketici bütünlüğü** (tüketilen kaydı biri üretiyor
+> mu) ayrı bir konudur ve buradan **önce**, Faz 3.5'te yürütülür:
+> `references/dependency-closure.md`. Bu adımda eklenen yeni operation'lar
+> aşağıdaki tüm kurallardan da geçmelidir.
+
 ## A. Tutarlılık kontrol listesi
 
 ### İsim uzayı & referans çözümü

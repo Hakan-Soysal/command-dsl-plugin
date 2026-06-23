@@ -64,7 +64,8 @@ Ton: sıcak, sade, yönlendirici. Örnek açılış:
 > sadece işini anlatır gibi konuş. Başlayalım: bu uygulama temelde ne işe
 > yarayacak, bir cümleyle?"
 
-Sonra dört fazı sırayla yürüt.
+Sonra dört fazı sırayla yürüt; Faz 3'ten sonra emit'ten önce ön-gereksinim
+kapanışını (Faz 3.5) çalıştır.
 
 ---
 
@@ -170,6 +171,48 @@ olur ve çalışana haber gider."), DSL'i değil.
 
 ---
 
+## Faz 3.5 — Ön-Gereksinim Kapanışı (Bağımlılık Denetimi)
+
+**Amaç:** Modelin **nedensel olarak tam** olduğunu güvence altına almak: bir
+operasyonun *tükettiği* her şeyin (listelediği, üzerine iş yaptığı kayıt; bir
+durum koşulu; bir ilişki) modelde onu **üreten** bir karşılığı olmalı. "Ürün
+listele" var ama ürünü hiçbir şey *oluşturmuyorsa* model çalışamayan bir sistemi
+anlatır. Bu, §A'daki referans-bütünlüğünden **farklıdır** (orası ID çözümü;
+burası üretici-tüketici bütünlüğü). CommandDSL doğrulayıcısı bunu yakalamaz —
+bu yüzden **skill adımıdır, validator kuralı değil**.
+
+**Konum:** Faz 3'ten sonra (üretici/tüketici ancak tüm operation gövdeleri
+varken görülür), Tutarlılık self-check'inden önce. Burada eklenen her yeni
+operation sonra §A'nın tüm kurallarından geçmelidir.
+
+**Kapsam = kullanıcı tercihi.** Hangi clause'ların ön-gereksinim sayılacağını
+**her kullanımda** kullanıcıya düz dille sor; varsayılan en az gürültülü
+seviyedir, kullanıcı derinleştirebilir:
+- **D1 — Varlık var-oluşu** (varsayılan): tüketilen her entity'nin bir üreticisi
+  (`creates`, ya da `on success do: create`) olmalı. Örnekteki "ürün listele →
+  ürün tanımlı" ihtiyacını birebir karşılar.
+- **D2 — Durum ulaşılabilirliği:** `where`/`only when` durum geçidinin üreticisi
+  (`calculate …status='X'` veya oluşturma-anı başlangıç durumu) olmalı.
+- **D3 — İlişki popülasyonu:** `<relation>'s` ownership ilişkisi bir yerde
+  doldurulabilmeli (çoğu zaman seed/kurulum → en gürültülü; sadece istenirse).
+
+**Her bulguyu KÖRÜ KÖRÜNE eklemeden sınıflandır:** (1) iç boşluk → `Create<E>`
+operation öner; (2) dış kaynak/seed (ERP'den ürün, SSO'dan kullanıcı, admin'in
+kurduğu mağaza) → operation ekleme, doküman §7 "bilinçli istisnalar"a not düş;
+(3) gömülü/değer entity (`list of` alanı) → muaf. Eklenen üretici yeni
+ön-gereksinim doğurursa **kapanışı** sabit-noktaya kadar yürüt (döngü korumalı).
+
+**⚠ Yanlış-pozitif tuzakları:** `on success do: create` üreticilerini ve
+oluşturma-anı başlangıç durumunu **sayman şart** — yoksa üretilen şeyi
+"üreticisiz" sanırsın.
+
+**Toplu öner + onayla.** Tüm boyutlardaki bulguları **tek listede** sun
+(eklenecekler / dışarıda kabul edilip belgelenecekler), tek soruyla onayla —
+kapanış genişledikçe iteratif sorma. Tam prosedür, üretici/tüketici tespiti,
+muafiyetler ve çalışılmış örnekler: **`references/dependency-closure.md`**.
+
+---
+
 ## Emit öncesi — Tutarlılık self-check (= "hatasız")
 
 Onaylar bittikten sonra, üretmeden ÖNCE katmanlar-arası bütünlüğü denetle. Tam
@@ -214,6 +257,9 @@ döngüsüne gir.
   (foundation, operation+kurallar, flow, process). Faz sırasında ilgili §'a bak.
 - `references/operation-translation.md` — düz cümle → 4'lü imza çeviri prosedürü.
   **Faz 3'te her operation'da oku.** En kritik dosya.
+- `references/dependency-closure.md` — ön-gereksinim kapanışı: üretici-tüketici
+  tespiti, D1/D2/D3 kapsam seçimi, seed/embedded muafiyetleri, sabit-nokta
+  kapanış. **Faz 3.5'te oku.**
 - `references/consistency-and-emit.md` — emit öncesi tutarlılık self-check'i +
   dependency-order emit + dosya bölme. **Emit'ten önce oku.**
 - `references/validator.md` — doğrulayıcı konum zinciri + diagnostics + düzeltme
