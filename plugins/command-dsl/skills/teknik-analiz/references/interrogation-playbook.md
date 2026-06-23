@@ -71,6 +71,12 @@
 
 ## Kapanış — warning'ler ikinci tur sorgudur
 
-Doğrulayıcı warning verdiğinde (ownership-sapma, access-sapma, mode-eksik, görünürlük-belirsiz),
-bunu **kullanıcıya geri sor** — warning'ler senin discharge etmediğin belirsizlikleri işaret eder.
-0 error'a indir; warning'leri ya gider ya da "bilinçli, kabul ediyorum" onayıyla belgele.
+Doğrulayıcı warning verdiğinde (ownership-sapma, access-sapma, mode-eksik, görünürlük-belirsiz,
+**kapsam-eksik**), bunu **kullanıcıya geri sor** — warning'ler senin discharge etmediğin
+belirsizlikleri işaret eder. 0 error'a indir; warning'leri ya gider ya da "bilinçli, kabul
+ediyorum" onayıyla belgele.
+
+**Kapsam (op-düzeyi fidelity):** Linked doğrulayıcı, sözleşmedeki (operations.json) **hiçbir
+tech operation'a bağlanmamış** business-op'ları tek-toplu warning olarak listeler. Bu, iş'in tam
+karşılanıp karşılanmadığının ölçüsüdür: *"Bu business-op'ları bu tasarım kapsamıyor — kapsam-dışı
+mı (bilinçli erteleme), yoksa atladık mı?"* Atladıysan ekle; ertelediyse kullanıcı onayıyla belgele.

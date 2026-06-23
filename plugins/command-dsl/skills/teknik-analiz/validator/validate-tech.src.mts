@@ -33,6 +33,7 @@ import { createTechDslServices } from '@techdsl/services';
 declare const __BUILD_INFO__: {
     grammarVersion: string;
     grammarHash: string;
+    techSrcHash: string;
     commit: string;
     builtAt: string;
     langium: string;
@@ -114,14 +115,14 @@ const ok = errors === 0;
 if (jsonMode) {
     console.error(
         `TechDsl doğrulayıcı · grammar ${__BUILD_INFO__.grammarVersion} (${__BUILD_INFO__.grammarHash}) · ` +
-        `commit ${__BUILD_INFO__.commit} · langium ${__BUILD_INFO__.langium}`);
+        `src ${__BUILD_INFO__.techSrcHash} · commit ${__BUILD_INFO__.commit} · langium ${__BUILD_INFO__.langium}`);
     console.error(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(', ')}`);
     console.error(`Özet: ${errors} error, ${warns} warning, ${infos} info`);
     process.stdout.write(JSON.stringify(diagnostics) + '\n');
 } else {
     const sevName: Record<number, string> = { 1: 'ERROR', 2: 'WARN', 3: 'INFO', 4: 'HINT' };
     console.log(
-        `\n=== TechDsl doğrulama · grammar ${__BUILD_INFO__.grammarVersion} (${__BUILD_INFO__.grammarHash}) ===`);
+        `\n=== TechDsl doğrulama · grammar ${__BUILD_INFO__.grammarVersion} (${__BUILD_INFO__.grammarHash}) · src ${__BUILD_INFO__.techSrcHash} ===`);
     console.log(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(', ')}\n`);
     for (const d of diagnostics) {
         console.log(`${sevName[d.severity] ?? d.severity} ${d.file}:${d.line}: ${d.message}`);

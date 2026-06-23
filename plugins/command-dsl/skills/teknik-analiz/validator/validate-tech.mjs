@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-72b6adbe4fa4", grammarHash: "72b6adbe4fa4", commit: "ce7b2d2", builtAt: "2026-06-22T12:48:28+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-72b6adbe4fa4", grammarHash: "72b6adbe4fa4", techSrcHash: "bea87b713309", commit: "97ba039", builtAt: "2026-06-23T13:07:12+03:00", langium: "4.2.4" };
   }
 });
 
@@ -37620,10 +37620,13 @@ import { readFileSync as readFileSync2 } from "node:fs";
 function resolveContractUri(contractPath, documentUri) {
   return UriUtils.resolvePath(UriUtils.dirname(documentUri), contractPath);
 }
+var contractTextProvider;
 function loadContract(contractPath, documentUri) {
   const uri = resolveContractUri(contractPath, documentUri);
   try {
-    const json = JSON.parse(readFileSync2(uri.fsPath, "utf-8"));
+    const override = contractTextProvider?.(uri);
+    const raw = override !== void 0 ? override : readFileSync2(uri.fsPath, "utf-8");
+    const json = JSON.parse(raw);
     return {
       uri,
       schemaVersion: json.meta?.schemaVersion ?? null,
@@ -38160,6 +38163,27 @@ var TechDslValidator = class {
     if (!contract) return;
     if (contract.schemaVersion !== 2) {
       accept("error", `S\xF6zle\u015Fme schemaVersion '${contract.schemaVersion ?? "(yok)"}' \u2014 Teknik DSL v2 operations.json bekler (schemaVersion: 2). S\xF6zle\u015Fmeyi g\xFCncel \u0130\u015F DSL \xFCreticisiyle yeniden \xFCret.`, { node: model.contract, property: "path" });
+    }
+  }
+  // checkUnrealizedBusinessOps (coverage warning — manifest coverage.unrealizedBusinessOps emsali)
+  /**
+   * LINKED: sözleşmedeki (operations.json) bir business-op hiçbir teknik `operation` tarafından
+   * `realizes` edilmiyorsa → **warning** (kapsam eksikliği; gate DEĞİL — kasıtlı erteleme olabilir).
+   * Standalone'da sözleşme yok → N/A. Hesap manifest `coverage.unrealizedBusinessOps` ile BİREBİR
+   * (contract.operations anahtarları eksi tüm module-op'larının realizes hedefleri). Tek-toplu warning
+   * sözleşme node'una iliştirilir (realize-edilmeyen op'un tech-node'u yok). external/uncharted
+   * boundary-op'ları business realize etmez → sayıma girmez (yalnız module `Operation`'ları).
+   */
+  checkUnrealizedBusinessOps(model, accept) {
+    if (!model.contract?.path) return;
+    const contract = loadContract(model.contract.path, ast_utils_exports.getDocument(model).uri);
+    if (!contract) return;
+    const realizedOps = new Set(
+      model.decls.filter(isModule).flatMap((m) => m.members.filter(isOperation)).map((op) => op.realizes?.$refText).filter((id) => id != null)
+    );
+    const unrealized = [...contract.operations.keys()].filter((id) => !realizedOps.has(id)).sort();
+    if (unrealized.length > 0) {
+      accept("warning", `S\xF6zle\u015Fmedeki \u015Fu business-op'lar hi\xE7bir teknik operation taraf\u0131ndan realize edilmiyor (kapsam eksik): ${unrealized.join(", ")}.`, { node: model.contract, property: "path" });
     }
   }
   // T-3.1: rolemap ters-indeks (repr) yardımcısı
@@ -39264,7 +39288,7 @@ function registerTechValidationChecks(services) {
     // T-3.3: invariant path-scope (saf-tech) + T-2.3: cross-module entity-field ban + sourceOfTruth marker + T-2.1: concurrency ≤1 + uncharted-ban
     EventDecl: [validator.checkEventPayloadEntity],
     Module: [validator.checkEntityCoverage, validator.checkSharedUtils, validator.checkDuplicateErrorName, validator.checkDuplicateEventName],
-    Model: [validator.checkStructural, validator.checkContractVersion, validator.checkDoubleOwnership, validator.checkAnnotationDeclared, validator.checkExtensionDecl, validator.checkPreludeReserved, validator.checkExtensionCollision, validator.checkAnnotationUsage, validator.checkUnprotectedReach, validator.checkWriteCycle, validator.checkImportedPackContent, validator.checkImportResolvable, validator.checkUnusedError, validator.checkUnusedEvent]
+    Model: [validator.checkStructural, validator.checkContractVersion, validator.checkUnrealizedBusinessOps, validator.checkDoubleOwnership, validator.checkAnnotationDeclared, validator.checkExtensionDecl, validator.checkPreludeReserved, validator.checkExtensionCollision, validator.checkAnnotationUsage, validator.checkUnprotectedReach, validator.checkWriteCycle, validator.checkImportedPackContent, validator.checkImportResolvable, validator.checkUnusedError, validator.checkUnusedEvent]
   };
   registry.register(checks, validator);
 }
@@ -39461,7 +39485,7 @@ for (let i = 0; i < loaded.length; i++) {
 var ok = errors === 0;
 if (jsonMode) {
   console.error(
-    `TechDsl do\u011Frulay\u0131c\u0131 \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 commit ${define_BUILD_INFO_default.commit} \xB7 langium ${define_BUILD_INFO_default.langium}`
+    `TechDsl do\u011Frulay\u0131c\u0131 \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 src ${define_BUILD_INFO_default.techSrcHash} \xB7 commit ${define_BUILD_INFO_default.commit} \xB7 langium ${define_BUILD_INFO_default.langium}`
   );
   console.error(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(", ")}`);
   console.error(`\xD6zet: ${errors} error, ${warns} warning, ${infos} info`);
@@ -39470,7 +39494,7 @@ if (jsonMode) {
   const sevName = { 1: "ERROR", 2: "WARN", 3: "INFO", 4: "HINT" };
   console.log(
     `
-=== TechDsl do\u011Frulama \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) ===`
+=== TechDsl do\u011Frulama \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 src ${define_BUILD_INFO_default.techSrcHash} ===`
   );
   console.log(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(", ")}
 `);

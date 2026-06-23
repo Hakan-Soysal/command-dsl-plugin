@@ -213,7 +213,10 @@ node <validator>/validate-tech.mjs <emit-dizini> --json
 - **warning**'leri **kullanıcıya takip sorusu** olarak geri yansıt ("İş analizi bu entity'yi
   salt-okunur sayıyor ama sen yazıyorsun — kasıtlı mı?"). Validator'ın warning'leri ikinci tur
   sorgulamandır.
-- Konum çözümleme, bayatlık (grammar hash) uyarısı ve diagnostics→düzeltme döngüsü:
+- **Kapsam (op-düzeyi fidelity):** Linked doğrulayıcı, sözleşmedeki **hiçbir tech operation'a
+  bağlanmamış** business-op'ları tek warning'le listeler → "bunlar kapsam-dışı mı (bilinçli
+  erteleme) yoksa atlandı mı?" diye sor; atlandıysa ekle, ertelendiyse onayla-belgele.
+- Konum çözümleme, bayatlık (grammar + tech-src hash) uyarısı ve diagnostics→düzeltme döngüsü:
   `references/validator.md`.
 
 ---

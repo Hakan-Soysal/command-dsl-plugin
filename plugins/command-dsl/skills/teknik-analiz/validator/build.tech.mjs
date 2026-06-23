@@ -14,7 +14,7 @@
  * shared.langium); tech grammar değişince hash değişir → bayat bundle yakalanabilir.
  */
 import { createRequire } from 'node:module';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
@@ -42,6 +42,36 @@ function sha(...files) {
 }
 const grammarHash = sha('tech-dsl.langium', 'shared.langium');
 
+// techSrcHash: bundle'a giren VALIDATION-kaynak kapanışının (src/tech + src/shared, recursive
+// *.ts/*.mts) parmak izi. grammarHash GRAMMAR'ı izler; bu hash ise validation MANTIĞINI izler —
+// böylece manifest.ts/edges.ts/validation.ts gibi grammar-DIŞI bir fix bundle'ı bayatlattığında
+// (grammar hash değişmese bile) yakalanır. relpath de hash'lenir → dosya taşıma/yeniden-adlandırma
+// da kaydolur. Over-inclusion bilinçli (generated/ + LSP dosyaları dahil): kaçırmaktansa fazladan
+// tetikle — güvenli yön.
+function walkTs(dir, acc = []) {
+    for (const name of readdirSync(dir).sort()) {
+        const full = resolve(dir, name);
+        if (statSync(full).isDirectory()) walkTs(full, acc);
+        else if (name.endsWith('.ts') || name.endsWith('.mts')) acc.push(full);
+    }
+    return acc;
+}
+function shaTree(...dirs) {
+    const h = createHash('sha256');
+    const files = [];
+    for (const d of dirs) {
+        const abs = resolve(cmdPath, d);
+        if (existsSync(abs)) files.push(...walkTs(abs));
+    }
+    files.sort(); // deterministik (mutlak path sırası)
+    for (const f of files) {
+        h.update(f.slice(cmdPath.length)); // konum-bağımsız relpath → rename/move kaydolur
+        h.update(readFileSync(f));
+    }
+    return h.digest('hex').slice(0, 12);
+}
+const techSrcHash = shaTree('src/tech', 'src/shared');
+
 let commit = 'unknown';
 let commitDate = 'unknown';
 try {
@@ -60,6 +90,7 @@ try {
 const BUILD_INFO = {
     grammarVersion: `tech-v1.x-${grammarHash}`,
     grammarHash,
+    techSrcHash,          // validation-mantığı parmak izi (grammar-dışı bayatlık dedektörü)
     commit,
     builtAt: commitDate,
     langium,
@@ -89,4 +120,4 @@ await esbuild.build({
     logLevel: 'info',
 });
 
-console.error(`\n✓ validate-tech.mjs yazıldı · grammar ${grammarHash} · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ validate-tech.mjs yazıldı · grammar ${grammarHash} · src ${techSrcHash} · commit ${commit} · langium ${langium}`);

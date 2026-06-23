@@ -10,18 +10,24 @@
 ile üretilir (aşağı §2). Linked modda hedef `.tcdsl`'in `contract` yolu **dosya sistemi**nden
 okunur → gerçek dosya konumu (NodeFileSystem) şart; in-memory/stdin ile linked çalışmaz.
 
-## 2. Build & bayatlık (grammar-snapshot disiplini)
+## 2. Build & bayatlık (snapshot disiplini)
 
-Bundle bir **grammar snapshot**'tır. Üretmek/tazelemek:
+Bundle bir **grammar + validation-mantığı snapshot**'tır. Üretmek/tazelemek:
 ```
 node <skill>/validator/build.tech.mjs [<CommandDSL-yolu>]
 # CMDDSL=<yol> node build.tech.mjs   (varsayılan: ../../../CommandDSL)
 ```
 - CommandDSL **read-only** okunur; oraya hiçbir şey yazılmaz. Çıktı yalnız `validate-tech.mjs`.
-- Gömülü `__BUILD_INFO__`: `grammarHash = sha256(tech-dsl.langium + shared.langium)`, commit,
-  builtAt, langium sürümü. `node validate-tech.mjs --version` ile görülür.
-- **Bayatlık:** CommandDSL'in tech grammar'ı değişmişse hash değişir; eski bundle güncel
-  grammar'ı yansıtmaz → şüphede yeniden build et.
+- Gömülü `__BUILD_INFO__` İKİ parmak izi taşır (`node validate-tech.mjs --version`):
+  - **`grammarHash`** = `sha256(tech-dsl.langium + shared.langium)` → **grammar**'ı izler.
+  - **`techSrcHash`** = `sha256(src/tech/**.ts + src/shared/**.ts, relpath dahil)` → **validation
+    mantığını** izler (manifest/edges/validation/entity-graph/witness/scope…).
+- **Bayatlık (iki eksen):** grammar değişti → `grammarHash` değişir; validation mantığı değişti
+  (grammar-DIŞI bir fix — ör. `manifest.ts` görünürlük türevi) → **`techSrcHash` değişir** (grammar
+  hash AYNI kalsa bile). İki hash'ten biri kaynakla uyuşmuyorsa bundle bayattır → yeniden build et.
+  > **Neden iki hash:** grammar-hash tek başına `src/tech/*.ts` mantık değişikliklerini kaçırırdı
+  > (validation `riskOf/modeOf/accessOf/serializeExpr/exprNodeEqual` ve check'leri grammar değil).
+  > `techSrcHash` bu boşluğu kapatır.
 
 ## 3. Çağrı sözleşmesi
 
@@ -41,13 +47,15 @@ node validate-tech.mjs --version
 
 1. Çalıştır. **error (severity 1)** varsa → düzelt, tekrar çalıştır. **0 error olmadan döngüden
    ÇIKMA.** (Yarım bırakma.)
-2. **warning (severity 2)** çoğunlukla **divergence sinyali**dir (ownership/access-sapma,
-   consistency mode-eksik, görünürlük-belirsiz, rolemap-typo, SharedUtils, "differs"). Her birini
-   **kullanıcıya takip sorusu** olarak yansıt:
+2. **warning (severity 2)** çoğunlukla **divergence/kapsam sinyali**dir (ownership/access-sapma,
+   consistency mode-eksik, görünürlük-belirsiz, rolemap-typo, SharedUtils, "differs",
+   **kapsam-eksik**). Her birini **kullanıcıya takip sorusu** olarak yansıt:
    - *Ownership-sapma:* "İş analizi daha dar (`own`) diyor, `any`'e genişletme bilinçli mi?"
    - *Erişim-sapma:* "İş bu kaydı salt-okunur sayıyor; tech'te yazıyorsun — kasıtlı mı?"
    - *Consistency mode-eksik:* "Bu cross-module yazma anında mı (async) yoksa dayanıklı mı (durable)?"
    - *Görünürlük:* "Bu işlem nasıl çağrılıyor — bir protokol mü, yoksa iç (@internal) mi?"
+   - *Kapsam-eksik (`checkUnrealizedBusinessOps`):* "Şu business-op'lar hiçbir tech operation'a
+     bağlanmadı — bunları bu turda kapsamayacak mıyız (bilinçli erteleme) yoksa atladık mı?"
    Warning'i ya **gider** ya da kullanıcı onayıyla "bilinçli" olarak **belgele**.
 3. **info (severity 3):** kayıt amaçlı (kapsama: linklenmemiş guard vb.). Gerekmedikçe kullanıcıya
    taşıma; ama "business guard tech'te ele alınmadı" info'ları bir **eksik** işaret edebilir — gözden geçir.

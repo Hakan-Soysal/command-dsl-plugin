@@ -58,6 +58,11 @@
 > `entity … realizes <E>` olduğundan emin ol. Örnek: `CancelPendingOrder` writes [Order, Refund]
 > → module'de hem `entity Order realizes Order` hem `entity Refund realizes Refund`.
 
+**Op-kapsama (warning — entity-kapsamadan AYRI):** `checkUnrealizedBusinessOps` linked'de,
+`operations.json`'daki **hiçbir tech operation tarafından `realizes` edilmeyen** business-op'ları
+tek-toplu **warning** olarak listeler (gate değil). Yani her business-op ya bir tech op'a bağlanmalı
+ya da kapsam-dışılığı **bilinçli** olmalı. (external/uncharted boundary-op'ları sayıma girmez.)
+
 ## 4. İş tarafında KALAN (operations.json tek-kaynak — tech taşımaz)
 
 `schedule`, `effects`, `calculate`, `delegation`, **yapısal guard** (ownership signature'ı,
