@@ -18,6 +18,9 @@ node <skill>/validator/build.tech.mjs [<CommandDSL-yolu>]
 # CMDDSL=<yol> node build.tech.mjs   (varsayılan: ../../../CommandDSL)
 ```
 - CommandDSL **read-only** okunur; oraya hiçbir şey yazılmaz. Çıktı yalnız `validate-tech.mjs`.
+- **Kardeş self-contained araç:** `emit-operations.mjs` (`.cdsl → operations.json`, "Başlamadan"
+  adımı) aynı dizinde, `build.emit.mjs` ile aynı desende bundle'lanır (business servisleri +
+  generator gömülü; CommandDSL deposu gerekmez). `--version` → `grammarHash` + `srcHash`.
 - Gömülü `__BUILD_INFO__` İKİ parmak izi taşır (`node validate-tech.mjs --version`):
   - **`grammarHash`** = `sha256(tech-dsl.langium + shared.langium)` → **grammar**'ı izler.
   - **`techSrcHash`** = `sha256(src/tech/**.ts + src/shared/**.ts, relpath dahil)` → **validation

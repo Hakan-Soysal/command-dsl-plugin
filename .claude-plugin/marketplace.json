@@ -9,7 +9,7 @@
       "name": "command-dsl",
       "source": "./plugins/command-dsl",
       "description": "CommandDSL ailesi: is-analizi (.cdsl iş analizi) + teknik-analiz (linked .tcdsl teknik tasarım) skill'leri — gömülü standalone doğrulayıcılar ile.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "category": "development",
       "tags": ["dsl", "business-analysis", "technical-analysis", "command-dsl", "tech-dsl", "is-analizi", "teknik-analiz"]
     }

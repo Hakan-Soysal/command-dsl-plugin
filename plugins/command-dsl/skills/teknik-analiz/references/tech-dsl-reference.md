@@ -234,18 +234,33 @@ uncharted=şirkete-ait → deployable'a girebilir).
 
 ## 9. Serving & blessed prelude'lar (decorator)
 
+> **İKİ AYRI arg sözdizimi (grammar):**
+> - **Serving** (`@rest`/`@grpc`/`@queue` — tek-ID protokol, NOKTASIZ) → **POZİSYONEL** arg
+>   (`ServingArg: keyword | string`): `@rest(POST, "/x")`.
+> - **Annotation/prelude** (`@ns.name` — NOKTALI: `@trigger.*`/`@http.*`/`@audit.*`/`@metric.*`/
+>   `@sensitivity.*`/`@crypto.*`) → **İSİMLİ** arg ZORUNLU (`AnnotationArg: name ':' value`):
+>   `@trigger.cron(schedule: "…")`. Pozisyonel (`@trigger.cron("…")`) **parse HATASI**.
+
 Op'un ÜZERİNE decorator olarak; ≥1 yayın protokolü → op **exposed**:
 ```
-@rest(POST, "/x")  @grpc(...)  @queue(...)      // yayın protokolleri (exposed)
+@rest(POST, "/x")  @grpc(...)  @queue(...)      // Serving — POZİSYONEL (exposed)
 @internal                                        // açıkça yayınlanmadı
 ```
-**Blessed std-prelude'lar** (araçla gelir, `import` gerekmez; tüm arg düz `string`):
-- `@trigger.cron("0 0 * * *")` · `@trigger.queue("orders")` · `@trigger.webhook` ·
-  `@trigger.file("/in")` · `@trigger.stream("events")` — **ne tetikliyor** (`on operation`).
-- `@http.path` · `@http.query` · `@http.header` · `@http.payload` (`on param`) · `@http.statusCode`.
-- `@audit.logged` · `@metric.emit("name")` (`on operation`) · `@crypto.encrypted` ·
-  `@sensitivity.tag("pii")` (`on field`).
-Bilinmeyen protokol/zorunlu-arg eksikse → usage diagnostic'i (örn. `@trigger.cron` schedule'sız → error).
+**Blessed std-prelude'lar** (araçla gelir, `import` gerekmez; isimli arg, değer düz `string`):
+- **`@trigger.*`** (`on operation` — ne tetikliyor): zorunlu arg parantezde isimli:
+  ```
+  @trigger.cron(schedule: "0 2 * * *", timezone: "UTC")
+  @trigger.queue(source: "orders.placed", group: "billing")
+  @trigger.webhook(source: "stripe", eventType: "payment.succeeded")
+  @trigger.file(path: "/in/drop", pattern: "*.csv")
+  @trigger.stream(source: "events", from: "latest")
+  ```
+- **`@http.*`** (`on param`): `@http.path` · `@http.query(name: "q")` · `@http.header(name: "X-Id")` ·
+  `@http.payload` · `@http.statusCode` (`on field`). Param'a önek: `operation F(@http.payload body: String): …`.
+- **`@audit.logged(category: "financial", retention: "7y")`** · **`@metric.emit(name: "ledger.post", kind: "counter")`**
+  (`on operation`) · **`@crypto.encrypted(description: "…", algorithm: "AES-256")`** ·
+  **`@sensitivity.tag(level: "pii")`** (`on field`).
+Bilinmeyen protokol/zorunlu-arg eksikse → usage diagnostic'i (örn. `@trigger.cron` `schedule`'sız → error).
 
 ---
 

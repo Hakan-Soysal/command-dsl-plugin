@@ -65,9 +65,10 @@ Girdiyi netleştir:
 
 - **`operations.json` var mı?** Varsa doğrulamanın omurgasıdır; **v2** (`schemaVersion: 2`)
   olduğunu teyit et (değilse doğrulayıcı error verir → güncel İş DSL üreticisiyle yeniden üret).
-- **Sadece `.cdsl` mı var?** Önce ondan operations.json üret:
-  `npx tsx <CommandDSL>/scripts/emit-operations.ts <girdi.cdsl> <çıktı.operations.json>`.
-  `.cdsl` parse hatalıysa CLI emit etmez — **önce iş tarafını düzelttir**, tech'e geçme.
+- **Sadece `.cdsl` mı var?** Önce ondan operations.json üret — **gömülü self-contained araç**
+  (CommandDSL deposu GEREKMEZ):
+  `node <skill>/validator/emit-operations.mjs <girdi.cdsl> <çıktı.operations.json>`.
+  `.cdsl` parse hatalıysa araç emit etmez (exit 1) — **önce iş tarafını düzelttir**, tech'e geçme.
 
 Sonra sekiz fazı sırayla yürüt. (Elicit top-down: büyük resim → detay; emit dependency-order.)
 
