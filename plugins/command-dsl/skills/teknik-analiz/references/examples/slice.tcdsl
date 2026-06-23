@@ -1,0 +1,25 @@
+contract './catalog.operations.json'
+
+// T-5.2 vertical slice — TEK iş işlemi (CancelPendingOrder) uçtan uca:
+// parse → link (realizes çözülür) → validate (entity-kapsama sağlanır) → manifest.
+// Seçilen contract op'u: CancelPendingOrder (kind: command, access.writes [Order, Refund],
+// description=gerçek businessNote). Write-set'in HER entity'si (Order, Refund) aynı
+// module içinde realizes ediliyor → ADR-0007 #5 hâl-OK (0 error).
+
+module OrderManagement {
+  @rest(POST, "/orders/:id/cancel")
+  operation CancelOrder(id: OrderId): Unit realizes CancelPendingOrder {
+    roles Customer
+    ownership own
+    access { updates Order  creates Refund }
+    note "İptal sonrası iade webhook'u beklenmeli — senkron yanıt varsayma."
+  }
+
+  entity Order  realizes Order  { id: OrderId  status: OrderStatus  total: Money }
+  entity Refund realizes Refund { id: RefundId  amount: Money }
+}
+
+module Shared {
+  type Money { amount: Decimal  currency: String }
+  enum OrderStatus { Pending  Cancelled  Completed }
+}

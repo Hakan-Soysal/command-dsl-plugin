@@ -1,0 +1,26 @@
+{
+  "skill_name": "teknik-analiz",
+  "evals": [
+    {
+      "id": 1,
+      "name": "satinalma-teknik-tasarim",
+      "prompt": "Elimde onaylanmış bir satınalma iş analizi var (CommandDSL): çalışan talep açıp gönderiyor; yöneticisi kendi ekibinin talebini mesai saatinde ve 50000 altındaysa onaylıyor; satınalmacı onaylı talebi siparişe çevirip tedarikçiye gönderiyor; depo görevlisi mal kabul yapıp siparişi kapatıyor; muhasebeci faturayı kaydedip ödüyor. Bunun teknik tasarımını (Tech DSL) çıkar: hangi bağımsız sınırlar olmalı, hangi işlem hangi sınırda, imzalar, yetkiler ve sistemler-arası tutarlılık nasıl olmalı?",
+      "expected_output": "Linked .tcdsl (contract → operations.json). Birden çok module (ör. Procurement / Ordering / Receiving / Invoicing) çünkü bunlar farklı tutarlılık balonları; module-arası akış (onaylı talep → sipariş, sipariş kapanış → fatura) cross-module write taşıyan op'larda 'consistency async|durable' bildirilmeli. Her op realizes ile iş işlemine bağlı; her write-set entity kendi module'ünde realizes ediliyor (entity-kapsama). roles+ownership iş signature'ı ile uyumlu (yönetici 'managedTeam' ownership genişletilmemiş). Onay tutarı/saat kısıtı validation/rule + guard-id link. Gömülü validate-tech.mjs ile 0 error; çıkan warning'ler (mode-eksik vb.) kullanıcıya soru olarak yansıtılıp giderilmiş/belgelenmiş.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "izin-talep-teknik-tek-module",
+      "prompt": "Şu izin talep iş analizini teknik tasarıma dök: çalışan izin talebi gönderiyor (tarihler, sebep); yöneticisi sadece kendi ekibinin talebini onaylıyor/reddediyor; onaylanınca çalışana haber gidiyor; çalışan yönetici bakmadıysa geri çekebiliyor. Tek bir uygulama olarak dağıtılacak.",
+      "expected_output": "Linked .tcdsl, tek module (tek deployable; intra-module = strong consistency → mode gerekmez). entity LeaveRequest realizes; operation'lar realizes + açık imza + access (creates/updates/reads). ownership 'managedTeam'/'own' iş signature'ıyla aynı (genişletme yok → weakening warning yok). 'yönetici bakmadıysa geri çek' → rule veya validation + guard-id link. Görünürlük her op'ta açık (@rest/@internal). 0 error.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "eticaret-odeme-saga-idempotent",
+      "prompt": "Bir e-ticaret sipariş akışının teknik tasarımını çıkar: müşteri sepeti ödeyince sipariş oluşuyor; ödeme bir dış sağlayıcıyla (ör. Stripe) yapılıyor ve başarısız olursa geri alınabilmeli; müşteri kendi siparişlerini listeliyor (liste büyüyebilir). Ödeme çağrısı ağ hatasıyla iki kez gelebilir.",
+      "expected_output": "Linked .tcdsl. Dış sağlayıcı 'external Stripe { operation Charge ... }' (üretilmez, çağrı adapter'ı üretilir); ödeme op'u 'calls Stripe.Charge compensate with Stripe.Refund' (saga). 'idempotent by <param>' (çift çağrı no-op). Liste op'u 'paginated by cursor/offset ... size N' (list-dönen sorgu). Sipariş oluşturma cross-module/dış-state → 'consistency' + saga; entity Order/Refund kendi module'ünde realizes. 0 error; görünürlük ve mode warning'leri giderilmiş.",
+      "files": []
+    }
+  ]
+}

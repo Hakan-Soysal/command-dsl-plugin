@@ -1,0 +1,1688 @@
+{
+    "operations": [
+        {
+            "id": "ApproveProposal",
+            "kind": "command",
+            "signature": {
+                "actor": "Admin",
+                "verb": "approves",
+                "ownership": "any",
+                "resource": "Proposal"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "during:0",
+                    "kind": "during",
+                    "calendar": "weekdays"
+                },
+                {
+                    "id": "if:0",
+                    "kind": "if",
+                    "text": "Proposal.amount < 10000",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "<",
+                        "left": {
+                            "path": [
+                                "Proposal",
+                                "amount"
+                            ]
+                        },
+                        "right": {
+                            "kind": "number",
+                            "value": 10000
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "create",
+                    "target": "Order",
+                    "source": "Proposal"
+                },
+                {
+                    "kind": "send",
+                    "message": "ApprovalNotification",
+                    "recipient": [
+                        "Proposal",
+                        "owner"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Order",
+                    "Proposal"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "DecideProposal"
+            ],
+            "processes": [
+                "ProposalLifecycle"
+            ],
+            "domain": "ProposalApproval"
+        },
+        {
+            "id": "BrowsePublicArticle",
+            "kind": "query",
+            "signature": {
+                "actor": "Guest",
+                "verb": "reads",
+                "ownership": "public",
+                "resource": "Article"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Article"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "PublicContent"
+        },
+        {
+            "id": "CalculateCommission",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "calculates",
+                "ownership": "any",
+                "resource": "Commission"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [
+                {
+                    "target": [
+                        "Commission",
+                        "amount"
+                    ],
+                    "text": "Order.total * 0.10",
+                    "expr": {
+                        "node": "mul",
+                        "op": "*",
+                        "left": {
+                            "path": [
+                                "Order",
+                                "total"
+                            ]
+                        },
+                        "right": {
+                            "kind": "number",
+                            "value": 0.1
+                        }
+                    },
+                    "condition": {
+                        "text": "Order.total < 1000",
+                        "ast": {
+                            "node": "cmp",
+                            "op": "<",
+                            "left": {
+                                "path": [
+                                    "Order",
+                                    "total"
+                                ]
+                            },
+                            "right": {
+                                "kind": "number",
+                                "value": 1000
+                            }
+                        }
+                    }
+                },
+                {
+                    "target": [
+                        "Commission",
+                        "amount"
+                    ],
+                    "text": "Order.total * 0.08",
+                    "expr": {
+                        "node": "mul",
+                        "op": "*",
+                        "left": {
+                            "path": [
+                                "Order",
+                                "total"
+                            ]
+                        },
+                        "right": {
+                            "kind": "number",
+                            "value": 0.08
+                        }
+                    },
+                    "condition": {
+                        "text": "Order.total >= 1000",
+                        "ast": {
+                            "node": "cmp",
+                            "op": ">=",
+                            "left": {
+                                "path": [
+                                    "Order",
+                                    "total"
+                                ]
+                            },
+                            "right": {
+                                "kind": "number",
+                                "value": 1000
+                            }
+                        }
+                    }
+                }
+            ],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Commission"
+                ],
+                "reads": [
+                    "Order"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "Calculations"
+        },
+        {
+            "id": "CalculateInvoiceTotal",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "calculates",
+                "ownership": "own",
+                "resource": "Invoice"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [
+                {
+                    "target": [
+                        "Invoice",
+                        "total"
+                    ],
+                    "text": "sum of Invoice.items.price * 1.20",
+                    "expr": {
+                        "node": "mul",
+                        "op": "*",
+                        "left": {
+                            "node": "agg",
+                            "fn": "sum",
+                            "path": [
+                                "Invoice",
+                                "items",
+                                "price"
+                            ]
+                        },
+                        "right": {
+                            "kind": "number",
+                            "value": 1.2
+                        }
+                    },
+                    "condition": null
+                }
+            ],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Invoice"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "Calculations"
+        },
+        {
+            "id": "CancelBranchOrder",
+            "kind": "command",
+            "signature": {
+                "actor": "BranchManager",
+                "verb": "cancels",
+                "ownership": "managedBranch",
+                "resource": "Order"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "status = 'pending'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "pending"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Order"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "OverseeBranchOrders"
+            ],
+            "processes": [
+                "ProposalLifecycle"
+            ],
+            "domain": "BranchManagement"
+        },
+        {
+            "id": "CancelPendingOrder",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "cancels",
+                "ownership": "own",
+                "resource": "Order"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "İptal penceresi DSL'de 'only if Order.age <= 1 hour' ile sınırlı; gerçek\niade SLA'sı (24s) ve 3DS geri-ödeme akışı DSL dışıdır — handler ödeme\nsağlayıcısının iade webhook'unu beklemeli, senkron yanıt varsaymamalı.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "status = 'pending'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "pending"
+                        }
+                    }
+                },
+                {
+                    "id": "during:0",
+                    "kind": "during",
+                    "calendar": "business-hours"
+                },
+                {
+                    "id": "if:0",
+                    "kind": "if",
+                    "text": "Order.age <= 1 hour",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "<=",
+                        "left": {
+                            "path": [
+                                "Order",
+                                "age"
+                            ]
+                        },
+                        "right": {
+                            "kind": "duration",
+                            "value": 1,
+                            "unit": "hour",
+                            "text": "1 hour"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Refund",
+                        "amount"
+                    ],
+                    "text": "Order.total * 0.90",
+                    "expr": {
+                        "node": "mul",
+                        "op": "*",
+                        "left": {
+                            "path": [
+                                "Order",
+                                "total"
+                            ]
+                        },
+                        "right": {
+                            "kind": "number",
+                            "value": 0.9
+                        }
+                    },
+                    "condition": {
+                        "text": "Order.payment = 'credit'",
+                        "ast": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Order",
+                                    "payment"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "credit"
+                            }
+                        }
+                    }
+                },
+                {
+                    "kind": "send",
+                    "message": "CancellationConfirmation",
+                    "recipient": [
+                        "Order",
+                        "owner"
+                    ]
+                },
+                {
+                    "kind": "perform",
+                    "target": "IssueGiftCard"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Order",
+                    "Refund"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CancelOrder"
+            ],
+            "processes": [],
+            "domain": "OrderManagement"
+        },
+        {
+            "id": "CleanupTempFiles",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "deletes",
+                "ownership": "all",
+                "resource": "TempFile"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": {
+                "unit": "day",
+                "time": "03:00"
+            },
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "send",
+                    "message": "CleanupReport",
+                    "recipient": [
+                        "System",
+                        "admin"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "TempFile"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "SystemJobs"
+        },
+        {
+            "id": "CommentOnFriendPhoto",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Comment"
+            },
+            "delegation": null,
+            "target": {
+                "ownership": "friend",
+                "resource": "Photo"
+            },
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Comment",
+                    "Photo"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "SocialMedia"
+        },
+        {
+            "id": "CreateProposal",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Proposal"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Proposal"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "SubmitProposal"
+            ],
+            "processes": [
+                "ProposalLifecycle"
+            ],
+            "domain": "ProposalApproval"
+        },
+        {
+            "id": "DelegateOrderRead",
+            "kind": "command",
+            "signature": null,
+            "delegation": {
+                "operation": "grant",
+                "actor": "Customer",
+                "permission": "read",
+                "ownership": "own",
+                "resource": "Order",
+                "grantee": "SupportAgent",
+                "duration": {
+                    "value": 24,
+                    "unit": "hour",
+                    "text": "24h"
+                }
+            },
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "PermissionDelegation"
+        },
+        {
+            "id": "DeleteComment",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "deletes",
+                "ownership": "any",
+                "resource": "Comment"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Comment"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "SocialMedia"
+        },
+        {
+            "id": "FlagComment",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "flags",
+                "ownership": "any",
+                "resource": "Comment"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Comment"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "SocialMedia"
+        },
+        {
+            "id": "IssueGiftCard",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "creates",
+                "ownership": "any",
+                "resource": "GiftCard"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": "Customer",
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "GiftCard"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CancelOrder"
+            ],
+            "processes": [],
+            "domain": "OrderManagement"
+        },
+        {
+            "id": "LikeFriendComment",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Like"
+            },
+            "delegation": null,
+            "target": {
+                "ownership": "friend",
+                "resource": "Comment"
+            },
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Comment",
+                    "Like"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "SocialMedia"
+        },
+        {
+            "id": "ListAllProposals",
+            "kind": "query",
+            "signature": {
+                "actor": "Admin",
+                "verb": "lists",
+                "ownership": "any",
+                "resource": "Proposal"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Proposal"
+                ]
+            },
+            "flows": [
+                "DecideProposal"
+            ],
+            "processes": [
+                "ProposalLifecycle"
+            ],
+            "domain": "Queries"
+        },
+        {
+            "id": "ListOwnOrders",
+            "kind": "query",
+            "signature": {
+                "actor": "Customer",
+                "verb": "lists",
+                "ownership": "own",
+                "resource": "Order"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Order"
+                ]
+            },
+            "flows": [
+                "BrowseOwnOrders",
+                "CancelOrder"
+            ],
+            "processes": [
+                "ProposalLifecycle"
+            ],
+            "domain": "Queries"
+        },
+        {
+            "id": "ListPublicArticles",
+            "kind": "query",
+            "signature": {
+                "actor": "Guest",
+                "verb": "lists",
+                "ownership": "public",
+                "resource": "Article"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Article"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "Queries"
+        },
+        {
+            "id": "ListRecentReceipts",
+            "kind": "query",
+            "signature": {
+                "actor": "Accountant",
+                "verb": "lists",
+                "ownership": "any",
+                "resource": "Receipt"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": {
+                "path": [
+                    "Receipt",
+                    "date"
+                ],
+                "direction": "descending"
+            },
+            "limit": 50,
+            "guards": [
+                {
+                    "id": "when:0",
+                    "kind": "when",
+                    "role": "result-filter",
+                    "text": "Receipt.date >= '2025-01-01'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": ">=",
+                        "left": {
+                            "path": [
+                                "Receipt",
+                                "date"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "2025-01-01"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Receipt"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "Queries"
+        },
+        {
+            "id": "PlaceOrderFromCart",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Order"
+            },
+            "delegation": null,
+            "target": null,
+            "source": {
+                "ownership": "own",
+                "resource": "Cart"
+            },
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Order"
+                ],
+                "reads": [
+                    "Cart"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "OrderManagement"
+        },
+        {
+            "id": "PostPhoto",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Photo"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Photo"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "SocialMedia"
+        },
+        {
+            "id": "PurgeLogs",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "deletes",
+                "ownership": "all",
+                "resource": "Logs"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Logs"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "SystemJobs"
+        },
+        {
+            "id": "ReadBranchOrder",
+            "kind": "query",
+            "signature": {
+                "actor": "BranchManager",
+                "verb": "reads",
+                "ownership": "managedBranch",
+                "resource": "Order"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Order"
+                ]
+            },
+            "flows": [
+                "OverseeBranchOrders"
+            ],
+            "processes": [
+                "ProposalLifecycle"
+            ],
+            "domain": "BranchManagement"
+        },
+        {
+            "id": "ReadOwnOrder",
+            "kind": "query",
+            "signature": {
+                "actor": "Customer",
+                "verb": "reads",
+                "ownership": "own",
+                "resource": "Order"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Order"
+                ]
+            },
+            "flows": [
+                "CancelOrder"
+            ],
+            "processes": [],
+            "domain": "OrderManagement"
+        },
+        {
+            "id": "RejectProposal",
+            "kind": "command",
+            "signature": {
+                "actor": "Admin",
+                "verb": "rejects",
+                "ownership": "any",
+                "resource": "Proposal"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Proposal"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "DecideProposal"
+            ],
+            "processes": [
+                "ProposalLifecycle"
+            ],
+            "domain": "ProposalApproval"
+        },
+        {
+            "id": "RevokeOperatorUserWrite",
+            "kind": "command",
+            "signature": null,
+            "delegation": {
+                "operation": "revoke",
+                "actor": "Admin",
+                "permission": "write",
+                "ownership": "any",
+                "resource": "User",
+                "grantee": "Operator",
+                "duration": null
+            },
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "PermissionDelegation"
+        },
+        {
+            "id": "UpdateAnyCredentials",
+            "kind": "command",
+            "signature": {
+                "actor": "Admin",
+                "verb": "updates",
+                "ownership": "any",
+                "resource": "Credentials"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Credentials"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "IdentityManagement"
+        },
+        {
+            "id": "UpdateOwnCredentials",
+            "kind": "command",
+            "signature": {
+                "actor": "Customer",
+                "verb": "updates",
+                "ownership": "own",
+                "resource": "Credentials"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Credentials"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "IdentityManagement"
+        }
+    ],
+    "entities": [
+        {
+            "id": "Article",
+            "name": "Article",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "title",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Branch",
+            "name": "Branch",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Cart",
+            "name": "Cart",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "total",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Comment",
+            "name": "Comment",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "text",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Commission",
+            "name": "Commission",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Credentials",
+            "name": "Credentials",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "password",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "GiftCard",
+            "name": "GiftCard",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Invoice",
+            "name": "Invoice",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "total",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "items",
+                    "type": "InvoiceItem",
+                    "collection": true
+                }
+            ]
+        },
+        {
+            "id": "InvoiceItem",
+            "name": "InvoiceItem",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "price",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Like",
+            "name": "Like",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "weight",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Logs",
+            "name": "Logs",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "retention",
+                    "type": "Duration",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Order",
+            "name": "Order",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "total",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "age",
+                    "type": "Duration",
+                    "collection": false
+                },
+                {
+                    "name": "payment",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Photo",
+            "name": "Photo",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "url",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Proposal",
+            "name": "Proposal",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Receipt",
+            "name": "Receipt",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "date",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Refund",
+            "name": "Refund",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "TempFile",
+            "name": "TempFile",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "path",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "User",
+            "name": "User",
+            "domain": null,
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "id": "BrowseOwnOrders",
+            "actor": "Customer",
+            "note": null,
+            "items": [
+                {
+                    "type": "step",
+                    "name": "ListOrders",
+                    "target": "ListOwnOrders",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "outside",
+                    "text": "siparişi seçer"
+                }
+            ]
+        },
+        {
+            "id": "CancelOrder",
+            "actor": "Customer",
+            "note": "Müşteri bu akışı 3DS doğrulaması yarıda kalırsa terk edebilir; E2E düz yolu koşar.",
+            "items": [
+                {
+                    "type": "include",
+                    "target": "BrowseOwnOrders",
+                    "optional": false,
+                    "repeat": false
+                },
+                {
+                    "type": "step",
+                    "name": "Inspect",
+                    "target": "ReadOwnOrder",
+                    "optional": true,
+                    "repeat": true,
+                    "using": null
+                },
+                {
+                    "type": "step",
+                    "name": "Cancel",
+                    "target": "CancelPendingOrder",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "abandon",
+                    "text": "vazgeçip ayrılabilir"
+                }
+            ]
+        },
+        {
+            "id": "SubmitProposal",
+            "actor": "Customer",
+            "note": null,
+            "items": [
+                {
+                    "type": "step",
+                    "name": "Submit",
+                    "target": "CreateProposal",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "outside",
+                    "text": "yönetici kararını bekler"
+                }
+            ]
+        },
+        {
+            "id": "DecideProposal",
+            "actor": "Admin",
+            "note": null,
+            "items": [
+                {
+                    "type": "step",
+                    "name": "Pick",
+                    "target": "ListAllProposals",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "outside",
+                    "text": "karara bağlanacak teklifi seçer"
+                },
+                {
+                    "type": "either",
+                    "branches": [
+                        [
+                            {
+                                "type": "step",
+                                "name": "Approve",
+                                "target": "ApproveProposal",
+                                "optional": false,
+                                "repeat": false,
+                                "using": "Pick"
+                            }
+                        ],
+                        [
+                            {
+                                "type": "step",
+                                "name": "Reject",
+                                "target": "RejectProposal",
+                                "optional": false,
+                                "repeat": false,
+                                "using": "Pick"
+                            }
+                        ]
+                    ]
+                },
+                {
+                    "type": "abandon",
+                    "text": "kararı erteleyebilir"
+                }
+            ]
+        },
+        {
+            "id": "OverseeBranchOrders",
+            "actor": "BranchManager",
+            "note": null,
+            "items": [
+                {
+                    "type": "step",
+                    "name": "Check",
+                    "target": "ReadBranchOrder",
+                    "optional": false,
+                    "repeat": true,
+                    "using": null
+                },
+                {
+                    "type": "step",
+                    "name": "Intervene",
+                    "target": "CancelBranchOrder",
+                    "optional": true,
+                    "repeat": false,
+                    "using": null
+                }
+            ]
+        }
+    ],
+    "processes": [
+        {
+            "id": "ProposalLifecycle",
+            "entity": "Proposal",
+            "note": "Teklif ömrü günler-haftalar sürer; etaplar arası el değiştirme e-posta bildirimiyle tetiklenir (DSL dışı orkestrasyon).",
+            "items": [
+                {
+                    "type": "stage",
+                    "name": "Submit",
+                    "stageKind": "flow",
+                    "flow": "SubmitProposal",
+                    "by": "Customer"
+                },
+                {
+                    "type": "stage",
+                    "name": "Decision",
+                    "stageKind": "flow",
+                    "flow": "DecideProposal",
+                    "by": "Admin"
+                },
+                {
+                    "type": "anyOrder",
+                    "branches": [
+                        [
+                            {
+                                "type": "stage",
+                                "name": "Tracking",
+                                "stageKind": "flow",
+                                "flow": "BrowseOwnOrders",
+                                "by": "Customer"
+                            }
+                        ],
+                        [
+                            {
+                                "type": "stage",
+                                "name": "Oversight",
+                                "stageKind": "flow",
+                                "flow": "OverseeBranchOrders",
+                                "by": "BranchManager"
+                            }
+                        ]
+                    ]
+                }
+            ]
+        }
+    ],
+    "relations": [
+        {
+            "id": "friend",
+            "source": "Customer",
+            "target": "Customer"
+        },
+        {
+            "id": "managedBranch",
+            "source": "BranchManager",
+            "target": "Branch"
+        },
+        {
+            "id": "subordinate",
+            "source": "Manager",
+            "target": "Employee"
+        }
+    ],
+    "actors": [
+        {
+            "id": "Accountant",
+            "extends": null
+        },
+        {
+            "id": "Admin",
+            "extends": "Employee"
+        },
+        {
+            "id": "BranchManager",
+            "extends": null
+        },
+        {
+            "id": "Customer",
+            "extends": null
+        },
+        {
+            "id": "Employee",
+            "extends": null
+        },
+        {
+            "id": "Guest",
+            "extends": null
+        },
+        {
+            "id": "Manager",
+            "extends": null
+        },
+        {
+            "id": "Moderator",
+            "extends": null
+        },
+        {
+            "id": "Operator",
+            "extends": null
+        },
+        {
+            "id": "SupportAgent",
+            "extends": null
+        },
+        {
+            "id": "System",
+            "extends": null
+        }
+    ],
+    "calendars": [
+        "business-hours",
+        "non-holiday",
+        "weekdays"
+    ],
+    "verbs": [
+        "flags"
+    ],
+    "domains": [
+        "BranchManagement",
+        "Calculations",
+        "CustomerJourneys",
+        "IdentityManagement",
+        "OrderManagement",
+        "PermissionDelegation",
+        "ProposalApproval",
+        "ProposalJourneys",
+        "ProposalProcess",
+        "PublicContent",
+        "Queries",
+        "SocialMedia",
+        "SystemJobs"
+    ],
+    "meta": {
+        "schemaVersion": 2,
+        "hasErrors": false,
+        "errorCount": 0
+    }
+}

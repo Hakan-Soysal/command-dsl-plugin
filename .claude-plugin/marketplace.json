@@ -8,10 +8,10 @@
     {
       "name": "command-dsl",
       "source": "./plugins/command-dsl",
-      "description": "İş fikrini adım adım sorgulayarak tutarlı, parse-temiz CommandDSL (.cdsl) iş analizine çeviren skill — gömülü standalone doğrulayıcı ile.",
-      "version": "0.1.0",
+      "description": "CommandDSL ailesi: is-analizi (.cdsl iş analizi) + teknik-analiz (linked .tcdsl teknik tasarım) skill'leri — gömülü standalone doğrulayıcılar ile.",
+      "version": "0.2.0",
       "category": "development",
-      "tags": ["dsl", "business-analysis", "command-dsl", "is-analizi"]
+      "tags": ["dsl", "business-analysis", "technical-analysis", "command-dsl", "tech-dsl", "is-analizi", "teknik-analiz"]
     }
   ]
 }
