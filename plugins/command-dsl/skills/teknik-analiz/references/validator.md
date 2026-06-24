@@ -6,7 +6,8 @@
 
 ## 1. Konum
 
-`<skill>/validator/validate-tech.mjs` (bu skill'in `validator/` dizini). Yoksa `build.tech.mjs`
+`${CLAUDE_SKILL_DIR}/validator/validate-tech.mjs` (bu skill'in `validator/` dizini; `${CLAUDE_SKILL_DIR}`
+çağrıyı CWD'den bağımsız kılar — skill bash'inin CWD'si kullanıcının cwd'sidir, göreli yol güvenilmez). Yoksa `build.tech.mjs`
 ile üretilir (aşağı §2). Linked modda hedef `.tcdsl`'in `contract` yolu **dosya sistemi**nden
 okunur → gerçek dosya konumu (NodeFileSystem) şart; in-memory/stdin ile linked çalışmaz.
 

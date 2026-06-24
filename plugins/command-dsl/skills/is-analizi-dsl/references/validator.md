@@ -18,7 +18,7 @@ Skill, kendi dizininde `validator.config.json` arar (yoksa varsayılan zincir).
 {
   "resolution": ["project", "bundled", "url"],
   "projectPath": "../../CommandDSL",
-  "bundledPath": "./validator/validate.mjs",
+  "bundledPath": "${CLAUDE_SKILL_DIR}/validator/validate.mjs",
   "url": "",
   "cacheDir": "./.validator-cache",
   "runner": "auto",
@@ -30,7 +30,8 @@ Skill, kendi dizininde `validator.config.json` arar (yoksa varsayılan zincir).
   `["project","bundled","url"]` — canlı proje **drift yemez**; bundle/url snapshot.
 - `projectPath`: canlı CommandDSL deposunun yolu (içinde grammar + `src/language`
   + node_modules olan dizin).
-- `bundledPath`: skill'in yanına konan tek dosyalık doğrulayıcı.
+- `bundledPath`: skill'in yanına konan tek dosyalık doğrulayıcı. `${CLAUDE_SKILL_DIR}` ile çağır →
+  skill bash'inin CWD'si kullanıcının cwd'si olduğundan göreli yol (`./validator/...`) güvenilmez.
 - `url`: indirilecek doğrulayıcı paketi (boşsa atlanır); `cacheDir`'e indirilir.
 - `runner`: `node` | `tsx` | `auto` (auto: önce node, sonra npx tsx dener).
 

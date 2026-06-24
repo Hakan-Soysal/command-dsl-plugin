@@ -67,7 +67,8 @@ Girdiyi netleştir:
   olduğunu teyit et (değilse doğrulayıcı error verir → güncel İş DSL üreticisiyle yeniden üret).
 - **Sadece `.cdsl` mı var?** Önce ondan operations.json üret — **gömülü self-contained araç**
   (CommandDSL deposu GEREKMEZ):
-  `node <skill>/validator/emit-operations.mjs <girdi.cdsl> <çıktı.operations.json>`.
+  `node ${CLAUDE_SKILL_DIR}/validator/emit-operations.mjs <girdi.cdsl> <çıktı.operations.json>`
+  (`${CLAUDE_SKILL_DIR}` = bu skill'in dizini; CWD kullanıcının cwd'si olduğundan göreli yol kullanma).
   `.cdsl` parse hatalıysa araç emit etmez (exit 1) — **önce iş tarafını düzelttir**, tech'e geçme.
 
 Sonra sekiz fazı sırayla yürüt. (Elicit top-down: büyük resim → detay; emit dependency-order.)
@@ -208,7 +209,7 @@ Tam tutarlılık self-check'i ve dosya bölme: `references/consistency-and-emit.
 
 **Doğrula (zorunlu):** Gömülü Tech doğrulayıcısını çalıştır:
 ```
-node <validator>/validate-tech.mjs <emit-dizini> --json
+node ${CLAUDE_SKILL_DIR}/validator/validate-tech.mjs <emit-dizini> --json
 ```
 - **error** varsa → düzelt, tekrar çalıştır. **0 error olmadan döngüden çıkma.**
 - **warning**'leri **kullanıcıya takip sorusu** olarak geri yansıt ("İş analizi bu entity'yi
