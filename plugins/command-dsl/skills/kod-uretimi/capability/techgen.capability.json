@@ -1,0 +1,42 @@
+{
+  "id": "techgen",
+  "version": "0.2.0",
+  "package": "Vennyx.TechGen",
+  "languages": [".NET/C#"],
+  "frameworks": ["ASP.NET Core Minimal API"],
+  "architectures": ["modular-monolith / vertical-slice (CQRS handler), REST-only"],
+  "transports": ["REST"],
+  "supportedSubDetails": {
+    "dbProvider": {
+      "allowed": ["postgres", "sqlite", "sqlserver", "inmemory"],
+      "source": "DotnetEmitter.cs (DbContextRegistration switch satır 1032-1035 + EF paket switch 994-997) — kaynaktan doğrulandı",
+      "effect": "her değer EF provider paketi + AddDbContext UseXxx() kaydı üretir (postgres→Npgsql.EntityFrameworkCore.PostgreSQL 10.0.2 vb.)",
+      "unknownBehavior": "null → sadece seam (manuel provider, mevcut davranış, byte-aynı). Whitelist DIŞI değer (ör. mysql) → build-report 'unsupported(dbProvider, reason)' + DbContext seam fallback. SilentDrop DEĞİL (exit 0 kalır), crash DEĞİL — AÇIK, belgeli degradasyon (insan provider'ı seam'de bağlar)."
+    }
+  },
+  "boundaries": [
+    "non-REST transport (gRPC / GraphQL / queue) — desteklenmez",
+    "çok-projeli layered/Clean düzen — desteklenmez (tek-app modular-monolith)",
+    "framework icadı — desteklenmez",
+    "dile-özel manifest varyantı — desteklenmez (4 dil de aynı manifest.json)",
+    "drift/regeneration engine, protocol-binding pluggability, GM JSON Schema — kapsam dışı"
+  ],
+  "inputs": {
+    "dsl": "manifest.json (+ opsiyonel operations.json = linked contract; 4 dilde aynı, dil-nötr)",
+    "config": {
+      "file": "gen.config.json (.NET-özel; manifest yanında)",
+      "schema": { "DbProvider": "string? (postgres|sqlite|sqlserver|inmemory; yoksa null → provider yok)" },
+      "note": "Dosya yoksa null → mevcut davranış (provider yok). DbProvider paylaşılan manifest'e GİRMEZ (dile-özel varyant yasak)."
+    }
+  },
+  "outputs": {
+    "report": "build-report.json (her construct: realized | unsupported(reason); INV-7: SilentDrop = exit 1)"
+  },
+  "fileOwnership": {
+    "generated": "gen/** (üreteç-sahibi, her run ezilir + orphan prune)",
+    "humanShell": "Program.cs / App.csproj (insan-sahibi, yoksa-üret, asla ezilmez)",
+    "humanSeam": "src/{Module}/*Handler.Logic.cs (insan-sahibi iş gövdesi, NotImplemented stub, asla ezilmez)"
+  },
+  "executorSkill": "techgen-sync",
+  "invocation": "techgen <manifest.json> <targetDir>   # paketli tool; veya: dotnet run --project src/Gen.Cli -- <manifest.json> <targetDir>"
+}

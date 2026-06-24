@@ -1,0 +1,23 @@
+{
+  "generator": "techgen",
+  "capabilityFile": "techgen.capability.json",
+  "pinnedVersion": "0.2.0",
+  "package": "Vennyx.TechGen",
+  "source": {
+    "repo": "CoreTemplate1 (local; ayrı .git)",
+    "spec": "SPEC.md",
+    "verifiedFrom": [
+      "SPEC.md (§1-6: objective, features, stack, boundaries)",
+      "src/Gen.Dotnet/GenConfig.cs (DbProvider tek alan)",
+      "src/Gen.Cli/Program.cs (manifest+gen.config → DotnetEmitter; INV-7 SilentDrop gate)",
+      ".claude/skills/techgen-sync/SKILL.md (executor akışı + fileOwnership)",
+      "nupkg/Vennyx.TechGen.0.2.0.nupkg (paket sürümü)"
+    ]
+  },
+  "capturedOn": "2026-06-24",
+  "staleness": {
+    "rule": "techgen nupkg sürümü 0.2.0'dan artınca bu snapshot bayattır → capability'yi yeni SPEC/GenConfig/Program.cs'ten yeniden türet ve pinnedVersion'ı güncelle.",
+    "refresh": "CoreTemplate1 SPEC.md + GenConfig.cs + techgen-sync/SKILL.md oku → techgen.capability.json'ı güncelle → capturedOn + pinnedVersion'ı tazele."
+  },
+  "note": "Ayrı repo: ön-kapı runtime'da CoreTemplate1 frontmatter'ını okuyamaz; bu yüzden capability ailede GÖMÜLÜ snapshot'tır (aile validator/grammar-snapshot disiplini). Handoff = paketli techgen CLI (sürüm-sabit)."
+}

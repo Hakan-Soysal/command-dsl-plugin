@@ -1,0 +1,10 @@
+{
+  "mode": "greenfield",
+  "intent": "Sipariş yönetimi backend'i — sepet→sipariş, ödeme (dış sağlayıcı), sipariş listeleme.",
+  "language":     { "value": ".NET/C#", "source": "elicited", "rationale": "Ekip .NET standardı; zorunlu." },
+  "architecture": { "value": "modular-monolith / vertical-slice", "source": "elicited" },
+  "transport":    { "value": "REST", "source": "elicited" },
+  "persistence":  { "dbProvider": "postgres", "source": "elicited" },
+  "subDetails":   {},
+  "_match": "TAM (techgen 0.2.0): dil .NET ✓ · transport REST ✓ · mimari modular-monolith/VSA ✓ · dbProvider postgres ∈ supportedSubDetails ✓"
+}

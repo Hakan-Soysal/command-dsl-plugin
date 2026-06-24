@@ -1,0 +1,26 @@
+{
+  "skill_name": "kod-uretimi",
+  "evals": [
+    {
+      "id": 1,
+      "name": "brownfield-dotnet-tam-eslesme",
+      "prompt": "Elimde teknik-analiz çıktısı bir operations.json + manifest.json var ve mevcut bir .NET app'e (postgres, Minimal API REST, modular-monolith) kod üretmek istiyorum. Bu hedefi doğru üretece bağla ve üretimi başlat.",
+      "expected_output": "Mod = brownfield (mevcut app var). Profil app'ten türetilir, her alan source'lu: language .NET/C# (csproj), transport REST (minimal API), architecture modular-monolith/VSA, persistence postgres (Npgsql). Capability eşleşme techgen 0.2.0'a karşı = TAM, her eksende snapshot satırı kanıtıyla (dil/transport/mimari/dbProvider postgres ∈ supportedSubDetails). Girdi hazırlanır: manifest.json teyit + gen.config.json = {\"DbProvider\":\"postgres\"}. Çalıştırma techgen-sync'e DEVREDİLİR (bu skill techgen/dotnet build çalıştırmaz). Özet: mod·profil·verdict(TAM)·config·boşluk yok·executor techgen-sync. Sessiz default yok.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "greenfield-grpc-yok-eslesme",
+      "prompt": "Sıfırdan bir servis yapacağım: dışarıyla gRPC ile konuşacak, Go ya da .NET olabilir farketmez, postgres kullanacak. Tech tasarımım hazır (operations.json). Hangi üreteçle üretebilirim?",
+      "expected_output": "Mod = greenfield. Profil elicit edilir: transport gRPC, language unconstrained (Go|.NET), dbProvider postgres. Capability eşleşme = YOK çünkü techgen snapshot boundaries 'non-REST transport (gRPC/GraphQL/queue) desteklenmez'. Bloklayan eksen AÇIKÇA transport=gRPC olarak raporlanır (boundaries: non-REST desteklenmez); en yakın aday = techgen (tek kayıtlı üreteç) ama REST-only olduğu için gRPC'yi karşılamaz. Sessizce REST'e çevirme YOK. İstenirse gRPC desteği improvements.md'ye üreteç-iyileştirmesi olarak kaydedilebilir (kaydet, uygulama yok). Devretme YAPILMAZ (eşleşme yok).",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "kismi-eslesme-bilinmeyen-dbprovider",
+      "prompt": "operations.json hazır; .NET, REST, modular-monolith bir app üreteceğim ama veritabanı MySQL olacak. Üretimi başlat.",
+      "expected_output": "Mod tespit edilir. Profil: language .NET, transport REST, architecture modular-monolith ✓; persistence.dbProvider = mysql. Capability eşleşme = KISMİ çünkü dil/transport/mimari ✓ ama mysql ∉ supportedSubDetails.dbProvider {postgres,sqlite,sqlserver,inmemory}. Boşluk dispozisyonu KULLANICIYA bırakılır: (a) desteklenen bir provider'a çek (ör. postgres) ve devret, veya (b) raporla & ertele. Otomatik en-yakına çevirme YOK. Somut iyileştirme (GenConfig.DbProvider'a mysql + EF MySql seam) improvements.md'ye ek-onaysız KAYDEDİLİR, uygulanmaz. Kullanıcı (a)'yı seçerse gen.config.json hazırlanıp techgen-sync'e devredilir.",
+      "files": []
+    }
+  ]
+}
