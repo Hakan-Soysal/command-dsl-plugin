@@ -1,0 +1,19 @@
+{
+  "skill_name": "<skill-adı>",
+  "evals": [
+    {
+      "id": 1,
+      "name": "<senaryo-kısa-ad>",
+      "prompt": "<Kullanıcının bu skill'i tetikleyecek gerçekçi isteği — profil/girdi gerçeklerini içersin.>",
+      "expected_output": "<Skill'in üreteceği DAVRANIŞ: hangi fazlar, hangi kararlar, hangi çıktı/artefakt, doğrulama sonucu (0 error). Kanıtlanabilir ifadeler kullan.>",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "<sınır/negatif-senaryo>",
+      "prompt": "<Bir boşluk/uyumsuzluk/eksik içeren istek.>",
+      "expected_output": "<Skill'in sessiz default vermeden boşluğu yüzeyleyip kullanıcıya sorması; otomatik çözüm YOK.>",
+      "files": []
+    }
+  ]
+}
