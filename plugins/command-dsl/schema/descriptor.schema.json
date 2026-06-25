@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://command-dsl.vennyx.dev/schema/descriptor.schema.json",
+  "title": "Capability Descriptor",
+  "description": "Üreteç-nötr capability descriptor şeması (SEAM-DOLDURMA-SKILL-TASARIM.md §A.2). Şema ŞEKLİ üreteç-nötr; dil-özeli değerler emissionContract DEĞERLERİNDE yaşar, şema şeklinde değil.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "invocation",
+    "capability",
+    "emissionContract",
+    "gapProtocol",
+    "build",
+    "conformance"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "source": {
+      "type": "object",
+      "description": "Opsiyonel — klon/bootstrap için (§A.6).",
+      "properties": {
+        "marketplace": {
+          "type": "string"
+        },
+        "install": {
+          "type": "string"
+        }
+      }
+    },
+    "invocation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["cli", "skill", "plugin"]
+        },
+        "entry": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["constructsCovered"],
+      "properties": {
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "architectures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "persistence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constructsCovered": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "emissionContract": {
+      "type": "object",
+      "description": "Değerleri serbest-string (üreteç-nötr). Paket kendi konvansiyon değerlerini doldurur; şema değerleri zorlamaz. additionalProperties:true — paket ekleyebilir.",
+      "additionalProperties": true,
+      "properties": {
+        "seamPath": {
+          "type": ["string", "array"]
+        },
+        "emptyStubMarker": {
+          "type": "string"
+        },
+        "ownedTree": {
+          "type": "string"
+        },
+        "humanTree": {
+          "type": "array"
+        },
+        "handlerSurfaceMap": {
+          "type": "object"
+        },
+        "canonicalOrder": {
+          "type": "array"
+        },
+        "buildReportSchema": {
+          "type": "object"
+        }
+      }
+    },
+    "gapProtocol": {
+      "type": "object",
+      "required": ["compliant"],
+      "properties": {
+        "compliant": {
+          "const": true
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "success": {
+          "type": "string"
+        }
+      }
+    },
+    "conformance": {
+      "type": "object",
+      "properties": {
+        "adapter": {
+          "type": "string"
+        },
+        "run": {
+          "type": "string"
+        }
+      }
+    },
+    "archetypeRules": {
+      "type": "array",
+      "description": "Opsiyonel.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "detect": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

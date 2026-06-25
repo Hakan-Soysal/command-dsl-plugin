@@ -1,0 +1,26 @@
+{
+  "skill_name": "kesif",
+  "evals": [
+    {
+      "id": 1,
+      "name": "brownfield-dotnet-tam-secim-devret",
+      "prompt": "Elimde teknik-analiz çıktısı bir operations.json + manifest.json var ve mevcut bir .NET app'e (postgres, Minimal API REST, modular-monolith) kod üretmek istiyorum. Bu hedefi doğru üretece bağla ve üretimi başlat.",
+      "expected_output": "Mod = brownfield (mevcut app var). Profil app'ten türetilir, her alan source'lu: language .NET/C# (csproj), transport REST (minimal API), architecture modular-monolith/VSA, persistence postgres (Npgsql). KARAR = paket SEÇİMİ: techgen adayı describe-ile-dönen capability descriptor'ından okunur (yerel snapshot DEĞİL); profil eksenleri o descriptor'a karşı eşleştirilir → verdict = TAM. Kanıt describe-çıktısından: language ∈ capability.languages ([.NET/C#]), transport REST ∈ capability.transports ([REST]), architecture ∈ capability.architectures, dbProvider postgres ∈ capability.supportedSubDetails.dbProvider.allowed ([postgres,sqlite,sqlserver,inmemory]). Tek TAM aday olsa dahi ÖNER+ONAY zorunlu (Faz 4.5): aday gerekçesiyle (hangi eksen hangi capability alanıyla kanıtlı) sunulur, kullanıcı onayı beklenir; sessiz/otomatik seçim YOK. Onay sonrası girdiler hazırlanır (manifest.json teyit + gen.config.json = {\"DbProvider\":\"postgres\"}), descriptor pinlenir ve çalıştırma techgen-sync executor'ına DEVREDİLİR (bu skill techgen/dotnet build çalıştırmaz). Özet: mod·profil·verdict(TAM, capability-kanıtlı)·öner+onay·seçilen üreteç·config·boşluk yok·executor techgen-sync. Sessiz default yok.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "greenfield-grpc-yok-secim",
+      "prompt": "Sıfırdan bir servis yapacağım: dışarıyla gRPC ile konuşacak, Go ya da .NET olabilir farketmez, postgres kullanacak. Tech tasarımım hazır (operations.json). Hangi üreteçle üretebilirim?",
+      "expected_output": "Mod = greenfield. Profil elicit edilir: transport gRPC, language unconstrained (Go|.NET), dbProvider postgres. KARAR = paket SEÇİMİ: profil techgen'in describe-ile-dönen capability descriptor'ına karşı eşleştirilir → verdict = YOK. Kanıt describe-çıktısından: transport=gRPC ∉ capability.transports ([REST]); ayrıca capability.boundaries 'non-REST transport (gRPC/GraphQL/queue) desteklenmez' der. Bloklayan eksen AÇIKÇA transport=gRPC olarak raporlanır; en yakın aday = techgen (tek kayıtlı/token'lı describe-eden üreteç) ama REST-only beyan ettiği için gRPC'yi karşılamaz. Sessizce REST'e çevirme YOK. İstenirse gRPC desteği üreteç-iyileştirmesi olarak ek-onaysız capability/improvements.md'ye KAYDEDİLEBİLİR (kaydet, uygulama yok). Eşleşme olmadığı için seçim/devretme YAPILMAZ → üretme, eksik capability'yi raporla.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "kismi-secim-desteksiz-dbprovider",
+      "prompt": "operations.json hazır; .NET, REST, modular-monolith bir app üreteceğim ama veritabanı MySQL olacak. Üretimi başlat.",
+      "expected_output": "Mod tespit edilir. Profil: language .NET, transport REST, architecture modular-monolith; persistence.dbProvider = mysql. KARAR = paket SEÇİMİ: profil techgen'in describe-ile-dönen capability descriptor'ına karşı eşleştirilir → verdict = KISMİ. Kanıt describe-çıktısından: language ∈ capability.languages ✓, transport REST ∈ capability.transports ✓, architecture ∈ capability.architectures ✓ AMA dbProvider mysql ∉ capability.supportedSubDetails.dbProvider.allowed ([postgres,sqlite,sqlserver,inmemory]). Boşluk dispozisyonu KULLANICIYA bırakılır (Faz 3): (a) desteklenen bir provider'a çek (ör. postgres) ve devret, veya (b) raporla & ertele. Otomatik en-yakına çevirme YOK (sessiz daraltma yasak). Somut iyileştirme (capability.supportedSubDetails.dbProvider'a mysql + EF MySql seam) ek-onaysız capability/improvements.md'ye KAYDEDİLİR, uygulanmaz. Kullanıcı (a)'yı seçerse: aday öner+onay (Faz 4.5) geçilir, gen.config.json {\"DbProvider\":\"postgres\"} hazırlanır, descriptor pinlenir ve techgen-sync'e DEVREDİLİR.",
+      "files": []
+    }
+  ]
+}
