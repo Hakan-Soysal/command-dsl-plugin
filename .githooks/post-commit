@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# post-commit — yayınlanan plugin içeriği değişince sürümü OTOMATİK bumplar ve bumpı
+# AYNI commit'e katlar (amend). CONVENTIONS.md §8 konvansiyonunu otomatikleştirir:
+#   feat → minor · fix → patch · diğer tipler (docs/refactor/chore/...) → bump YOK.
+#   Path kapısı: yalnız plugins/command-dsl/** değiştiğinde tetiklenir.
+#   major bumpı bu otomatik akışta YAPILMAZ — sadece elle: scripts/bump-version.sh major
+set -euo pipefail
+
+# Recursion guard: aşağıdaki amend post-commit'i yeniden tetikler; ikinci girişte çık.
+[ -n "${CMDDSL_BUMP_GUARD:-}" ] && exit 0
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# Path kapısı: yalnız yayınlanan plugin içeriği değiştiyse devam et (kök docs vb. bumplamaz).
+CHANGED="$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null || true)"
+printf '%s\n' "$CHANGED" | grep -q '^plugins/command-dsl/' || exit 0
+
+# Magnitude: conventional-commit tipinden. feat→minor, fix→patch, gerisi→bump yok.
+SUBJ="$(git log -1 --pretty=%s)"
+if printf '%s' "$SUBJ" | grep -Eq '^feat(\([^)]*\))?!?:'; then
+  LEVEL=minor
+elif printf '%s' "$SUBJ" | grep -Eq '^fix(\([^)]*\))?!?:'; then
+  LEVEL=patch
+else
+  exit 0
+fi
+
+OUT="$("$REPO_ROOT/scripts/bump-version.sh" "$LEVEL")" \
+  || { echo "post-commit bump: başarısız, commit olduğu gibi bırakıldı" >&2; exit 0; }
+echo "$OUT"
+
+git -C "$REPO_ROOT" add \
+  plugins/command-dsl/.claude-plugin/plugin.json \
+  .claude-plugin/marketplace.json
+CMDDSL_BUMP_GUARD=1 git -C "$REPO_ROOT" commit --amend --no-edit --no-verify -q
+echo "post-commit bump: $(git -C "$REPO_ROOT" rev-parse --short HEAD) commit'ine katlandı"
