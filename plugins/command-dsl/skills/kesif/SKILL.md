@@ -79,16 +79,40 @@ Sonra altı fazı sırayla yürüt.
 
 ---
 
-## Faz 0 — Mod tespiti
+## Faz 0 — Mod tespiti (+ brownfield'de emission-topology)
 
-**Amaç:** Keşfin nasıl yapılacağını belirle.
-**Yap:**
+**Amaç:** Keşfin nasıl yapılacağını **ve üretilen kodun mevcut app'le ilişkisini** belirle.
+
+**0a — Brownfield / greenfield:**
 - **Brownfield** — mevcut bir hedef app var → keşif onu **inceler** (kod, paket/manifest, config).
 - **Greenfield** — yalnız niyet/gereksinim → keşif **elicit/türetir**.
 - Belirsizse **kullanıcıya sor.** İkisini de destekle.
 
+**0b — Emission-topology (brownfield ise MUTLAKA sor — sessiz `./App` standalone YASAK):**
+Mevcut app, üretilen kodun **HOST'u mu**, yoksa **yanında ayrı bir sistem mi**? Bu, "mevcut app var"dan
+**ayrı bir eksendir** ve sorulmazsa executor sessizce standalone varsayar → tüm cross-system friction
+(ayrı DB/host/Program.cs) bu varsayımın yan ürünü olur. "Sessiz default YOK" bunu da kapsar.
+- **integrated-module:** mevcut app HOST; üreteç bir **library/modül** emit eder, host onu
+  `AddGenerated()`/`MapGenerated()` ile bağlar; **host'un DI/DbContext/auth pipeline'ı paylaşılır.**
+- **standalone:** üreteç kendi `Program.cs`+`csproj`+host'uyla **ayrı app** emit eder.
+- Seçimi profile **`integrationMode`** olarak kaydet (kaynak+gerekçe) → `references/profile-discovery.md`.
+  Brownfield+integrated ise host'un **kompozisyon noktalarını** (entry, DI, DbContext, auth, csproj türü)
+  keşfet ve kaydet (handoff'ta paylaşım sözleşmesi olur).
+
+> **Kapsam notu (item-3 ertelendi):** emission-mode bu sürümde **elicit + onay + handoff** edilir ama
+> **capability-gate EDİLMEZ** — techgen descriptor'ı henüz `emissionModes` eksenini *declare* etmiyor;
+> declare etmeden gate = çıkarsama (A1 ihlali). techgen 0.2.x integrated-module'ü **dikişle** destekler
+> (`AddGenerated`/`MapGenerated` + Program.cs/csproj "yoksa-üret") ama **sınırlıdır**: kendi
+> `App.AppDbContext`'ini üretip kaydeder (host onu *benimser* + `"Default"` connection verir — host'un
+> mevcut DbContext'ine bağlanmaz), namespace `App`'tir (rootNamespace knob'u yok), build/conformance
+> `App.csproj` varsayar. Bu sınır host-binding'de doğrulanır (executor + devret-sonrası kapı). Tam
+> capability-gate, descriptor `emissionModes` eksenini kazanınca eklenir (`capability/improvements.md`'ye yaz).
+
 **⚠ Anti-pattern — mod varsayımı:** "kod üret" denince greenfield sanıp mevcut app'i yok sayma
 (ya da tersi). Hedef app'in olup olmadığını açıkça teyit et.
+**⚠ Anti-pattern — emission-topology varsayımı:** mevcut app'i "yanında ayrı app" sanıp standalone
+üretmek (ya da tersi). Mevcut app'in ROLÜ (host-to-extend vs adjacent) açıkça teyit edilmeli — tek
+mode mümkün görünse bile (bkz. Faz 4.5).
 
 ---
 
@@ -214,9 +238,14 @@ kullanıcı kararıdır.
 **Yap:**
 - En iyi TAM adayı **gerekçesiyle** sun: hangi profil eksenleri + hangi construct'lar adayın
   `capability` beyanıyla **kanıtlı** karşılanıyor (describe-ile-dönen descriptor'a referansla).
+- **Emission-mode'u AÇIKÇA söyle (targetDir önerisiyle birlikte).** Profilin `integrationMode`'unu
+  öneriye dök: ya **"standalone (kendi `Program.cs`/`csproj`)"** ya da **"host-integrated library
+  (mevcut app referans eder; `AddGenerated`/`MapGenerated`; paylaşılan DbContext=App.AppDbContext + auth
+  pipeline; host kompozisyon hedefi `hostComposition`'dan)"**. integrated ise gerçekçilik sınırını da
+  belirt (techgen kendi App.AppDbContext'ini üretir; host `"Default"` connection sağlar).
 - **Kullanıcı onayı ZORUNLU.** Onay gelmeden bir sonraki faza (devretme) **geçme**.
-- **Tek aday bile olsa otomatik seçme YOK.** Bir tek TAM aday varsa dahi onu öner + onay bekle;
-  onaysız hiçbir devretme tetiklenmez.
+- **Tek aday/tek mode bile olsa otomatik seçme YOK.** Bir tek TAM aday veya tek mümkün emission-mode olsa
+  dahi hem **adayı** hem **emission-mode'u** öner + onay bekle; onaysız hiçbir devretme tetiklenmez.
 - TAM yoksa: KISMİ → Faz 3 dispozisyonu; hepsi YOK / aday yok → Faz 1.5/2 gereği **üretme, raporla**
   (uydurma seçim YOK).
 

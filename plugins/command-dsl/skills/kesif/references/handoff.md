@@ -17,6 +17,20 @@ filler-skill'ine fold edildi; binary paketin `bin/`'inde veya `dotnet tool` ile 
 
 Dört artefaktın hepsi hazır+kayıtlı olmadan devretme YOK.
 
+## Emission-topology — integrated-module ise host kompozisyon hedefi (5. taşıma)
+
+Profilin `integrationMode`'u (Faz 0b / profile-discovery) handoff'a taşınır:
+- **standalone:** üreteç kendi `Program.cs`+`csproj`+host'unu emit eder (HumanShell "yoksa-üret").
+- **integrated-module:** mevcut app HOST. Dört artefakta ek olarak `profile.hostComposition`'ı taşı —
+  hangi host dosyası (`Program.cs`/`Startup`) `AddGenerated()`/`MapGenerated()` çağıracak, hangi
+  DbContext/connection paylaşılacak, auth/JWT host'tan mı gelecek. **techgen `Program.cs`/`csproj`'u
+  "yoksa-üret"** → host varsa **ÜRETME, host'a bağlan**.
+  - **Gerçekçilik sınırı (techgen 0.2.x):** techgen kendi `App.AppDbContext`'ini üretip `AddGenerated()`
+    içinde kaydeder (`UseNpgsql(...GetConnectionString("Default"))`). Yani host "shared DbContext"i
+    **techgen'inkini benimseyerek** (+ `"Default"` connection string sağlayarak) yapar; techgen host'un
+    mevcut DbContext'ine bağlanmaz. Namespace `App`. Auth pipeline host-owned (gerçek paylaşım).
+    Bu sınır handoff'ta açıkça yazılır; host-binding'i executor + devret-sonrası kapı doğrular.
+
 ## Bootstrap (klon — paket kurulu değilse, §A.6)
 
 `.dsl/generators/<id>@<version>.json` pin'i var **ama** paket kurulu değilse (token'lı aday yok) →
@@ -37,8 +51,10 @@ listesinde görünür → keşif normal akar. (Kanonik mekanik: `protocol/self-d
 
 ## Dosya sahipliği (filler uygular; keşif sadece bilir)
 
-- `gen/**` — üreteç-sahibi, her run ezilir + prune. **Elle düzenlenmez.**
-- `Program.cs` / `App.csproj` — HumanShell, yoksa-üret, **asla ezilmez.**
+- `gen/**` — üreteç-sahibi, her run ezilir + prune. **Elle düzenlenmez.** (`AddGenerated`/`MapGenerated`
+  bu ağaçtadır — `gen/Bootstrap.g.cs`; host bunları çağırarak entegre olur.)
+- `Program.cs` / `App.csproj` — HumanShell, **yoksa-üret, asla ezilmez.** **integrated-module'de host
+  bunları zaten sağlar → techgen üretmez; host `AddGenerated()`/`MapGenerated()` çağırır.**
 - `src/{Module}/*Handler.Logic.cs` — HumanSeam (iş gövdesi, NotImplemented stub), **asla ezilmez.**
 
 ## Determinizm sözleşmesi

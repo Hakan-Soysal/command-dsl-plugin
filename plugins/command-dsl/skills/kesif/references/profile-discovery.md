@@ -9,6 +9,19 @@ Profil, hedefin **dil-/mimari-/altyapı-bağımsız** tanımıdır. Domain DSL'i
 {
   "mode": "brownfield | greenfield",
   "intent": "<domain / niyet özeti>",
+  "integrationMode": {
+    "value": "integrated-module | standalone",
+    "source": "declared-fact <nereden> | elicited",
+    "rationale": "<mevcut app HOST mu (kod ona girer) yoksa adjacent mi>",
+    // yalnız brownfield+integrated-module'de doldurulur — host kompozisyon noktaları (paylaşım sözleşmesi):
+    "hostComposition": {
+      "entry": "<host giriş dosyası: Program.cs / Startup.cs>",
+      "diContainer": "<IServiceCollection kurulumu nerede>",
+      "dbContext": "<host DbContext(ler) + connection adı; techgen App.AppDbContext'i benimser>",
+      "authPipeline": "<auth/JWT pipeline nerede — host-owned>",
+      "csprojKind": "<Sdk.Web host mu, yoksa lib mi>"
+    }
+  },
   "language": {
     "value": "<dil> | unconstrained",
     "source": "declared-fact <nereden> | elicited",
@@ -23,6 +36,24 @@ Profil, hedefin **dil-/mimari-/altyapı-bağımsız** tanımıdır. Domain DSL'i
 
 **Kural:** her alanda `source` zorunlu. Brownfield'de `declared-fact` + nereden bulduğun
 (paket/manifest/config/kod). Greenfield'de `elicited`. **Tahmin/uydurma yok** — bilinmeyeni sor.
+`integrationMode` brownfield'de **MUTLAKA** elicit edilir (sessiz standalone yasak, Faz 0b); greenfield'de
+genelde standalone (yeni app) ama yine de onaylanır (Faz 4.5).
+
+## Emission-topology keşfi — `integrationMode` (brownfield, Faz 0b)
+
+Mevcut app, üretilen kodun **HOST'u mu** (integrated-module) yoksa **komşu/ayrı sistem mi** (standalone)?
+Bu eksen sorulmazsa executor standalone varsayar ve cross-system friction üretir.
+- **integrated-module** seçildiyse, host'un **kompozisyon noktalarını** keşfet ve `hostComposition`'a yaz:
+  host entry (`Program.cs`/`Startup`), DI container, **DbContext(ler) + connection adı**, auth/JWT
+  pipeline, csproj türü (`Sdk.Web` host mü, lib mi). Bunlar handoff'ta paylaşım sözleşmesi olur.
+- **Gerçekçilik sınırı (techgen 0.2.x — abartma):** dikiş `AddGenerated()`/`MapGenerated()` mevcut +
+  `Program.cs`/`csproj` "yoksa-üret" (host varsa üretilmez). AMA techgen **kendi `App.AppDbContext`'ini**
+  üretip kaydeder (`UseNpgsql` + `"Default"` connection) → "shared DbContext" = **host techgen'inkini
+  benimser** (+ `"Default"` connection string sağlar), techgen host'un mevcut DbContext'ine *bağlanmaz*.
+  Namespace `App` (rootNamespace knob yok). Auth paylaşımı gerçek (pipeline host-owned). Bu sınır
+  handoff `hostComposition` sözleşmesinde açıkça yazılır; host-binding executor + devret-sonrası kapıda
+  doğrulanır. (Daha temiz integrated-module: descriptor `emissionModes` + `rootNamespace`/host-DbContext
+  knob'ları gelince — `capability/improvements.md`.)
 
 ## Brownfield keşfi — lens: `architecture-reviewer` (Faz 0 "understand the system")
 
