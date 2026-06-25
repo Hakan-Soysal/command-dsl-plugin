@@ -8,6 +8,16 @@ servisleriyle** parse-temiz + tutarlı olduğunu kanıtlayan tek dosyalık bundl
 - **`validate.src.mts`** — bundle'ın kaynağı (CLI mantığı).
 - **`build.mjs`** — kaynağı canlı CommandDSL'den `validate.mjs`'e derleyen script.
 
+**Kardeş araç — operations.json üreteci (kanonik):**
+- **`emit-operations.mjs`** — `.cdsl → operations.json` (v2, `meta.schemaVersion: 2`) tek dosyalık
+  bundle; CommandDSL deposu/`node_modules` gerekmez. `.cdsl`'de severity-1 error varsa emit ETMEZ
+  (exit 1) → "doğrulama tamamlanınca üret" garantisi araçta. Skill bunu, validator 0-error geçince
+  **otomatik** çağırır (makine-devir sözleşmesi; `teknik-analiz`/`kesif` tüketir).
+- **`emit-operations.src.mts`** / **`build.emit.mjs`** — kaynağı + derleyici (business servisleri +
+  generator gömülü). `node build.emit.mjs [<CommandDSL-yolu>]` (vars. `../../../CommandDSL`; `CMDDSL=`
+  de olur). `--version` → `grammarHash` + `srcHash`. `teknik-analiz`'deki kopya yalnız ".cdsl-only"
+  fallback'tir; **kanonik üretici burasıdır**.
+
 Bu, `references/validator.md`'deki **`bundled`** çözümleme yolunun artefaktıdır
 (config: `bundledPath: "./validator/validate.mjs"`). Aynı dosya bir URL'e konursa
 **`url`** yolunu da besler (aşağıda "Dağıtım").

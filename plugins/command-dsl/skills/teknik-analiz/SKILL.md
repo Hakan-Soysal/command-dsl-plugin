@@ -6,7 +6,8 @@ description: >-
   ve her aşamada onay alarak tutarlı bir Teknik Analiz'e — module/deployable topolojisi,
   entity sınırları, operation imzaları, yetki eksenleri, hata taksonomisi, tutarlılık ve
   etkileşim — çevirir; çıktıyı **linked** TechDsl (`.tcdsl`) olarak üretir ve Tech DSL'in
-  kendi doğrulayıcısıyla 0 error'a kadar kanıtlar. Şu durumlarda MUTLAKA kullan: kullanıcı
+  kendi doğrulayıcısıyla 0 error'a kadar kanıtlar. 0-error geçince gömülü araçla
+  üreteç/kesif girdisi `manifest.json` (dil-nötr tech model) OTOMATİK üretilir. Şu durumlarda MUTLAKA kullan: kullanıcı
   bir iş analizini/`.cdsl`'i teknik tasarıma dökmek istediğinde — "teknik analiz",
   "tech DSL üret", ".tcdsl yaz", "module/deployable tasarla", "operation imzası çıkar",
   "yetki/consistency/saga kararı", "operations.json'dan tech üret" dediğinde — veya açıkça
@@ -201,11 +202,13 @@ list-değilde pagination (error); ne protokol ne `@internal` (warning).
 
 ---
 
-## Emit (dependency-order) + Doğrulama
+## Emit (dependency-order) + Doğrulama + manifest.json
 
-**Emit:** Linked `.tcdsl`, **module-bazlı** dosyalara böl (tip bazlı değil), dependency
-sırasında (referans verilen önce). `contract` + her op/entity'de `realizes` zorunlu.
-Tam tutarlılık self-check'i ve dosya bölme: `references/consistency-and-emit.md`.
+**Emit:** Linked `.tcdsl`. ⚠ Bir sistemin **tüm domain module'leri TEK kök dosyada** olmalı
+(manifest üreteci yalnız kök dokümanı gezer — `consistency-and-emit.md §C` manifest kısıtı);
+modülleri tip-bazlı dosyalara **bölme**, dosya içinde dependency sırasında diz (referans verilen
+önce). `import` yalnız extension-pack içindir. `contract` + her op/entity'de `realizes` zorunlu.
+Tam tutarlılık self-check'i ve dosya kuralı: `references/consistency-and-emit.md`.
 
 **Doğrula (zorunlu):** Gömülü Tech doğrulayıcısını çalıştır:
 ```
@@ -220,6 +223,23 @@ node ${CLAUDE_SKILL_DIR}/validator/validate-tech.mjs <emit-dizini> --json
   erteleme) yoksa atlandı mı?" diye sor; atlandıysa ekle, ertelendiyse onayla-belgele.
 - Konum çözümleme, bayatlık (grammar + tech-src hash) uyarısı ve diagnostics→düzeltme döngüsü:
   `references/validator.md`.
+
+**manifest.json'ı OTOMATİK üret (validate-tech 0-error geçince).** Bu, `kesif`/üretecin
+(techgen) tükettiği **dil-nötr tech model**dir — `operations.json` ile birlikte devir paketini
+tamamlar. Gömülü araç, `validate-tech` ile **aynı kaynaktan** derlenir (grammar+src hash birebir eşit):
+```
+node ${CLAUDE_SKILL_DIR}/validator/emit-manifest.mjs <kök.tcdsl | emit-dizini> <çıktı/manifest.json>
+```
+- Manifest, `contract`'ı bildiren **kök** `.tcdsl`'den üretilir; `contract` (operations.json)
+  araç içinde doc.uri'ye göre çözülür → `realizes` join'leri ve `coverage` dolar. Import edilen
+  extension-pack'ler (ADR-0019) manifest'e **girmez** ama closure'a yüklenir.
+- Araç **kendi içinde gate'ler**: `.tcdsl`'de severity-1 error varsa manifest ÜRETMEZ (exit 1) —
+  `emitManifest` hatalı modelde de degrade manifest döndürdüğü için "doğrulama tamamlanınca üret"
+  garantisi prose'a değil **araca** gömülüdür.
+- ⚠ **Validator-temiz ≠ üreteç-derlenebilir.** Doğrulayıcının kabul ettiği bazı yapılar üretecin
+  desteğinin dışında olabilir (ör. techgen 0.2.x: `Timestamp` skaleri C#'a eşlenmez; `Money >= int`
+  invariant'ı derlenmez). Bu emit'in değil **üreteç yeteneğinin** sınırıdır — kapsam eşlemesi
+  `kesif` skill'inin işidir (capability gate). Manifest sadık kalır; sapma orada raporlanır.
 
 ---
 

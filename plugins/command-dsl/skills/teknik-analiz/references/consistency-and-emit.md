@@ -39,9 +39,19 @@ Module içinde: `error`/`event`/`type`/`enum` (op'ların referansı) → `entity
 
 ## C. Module-bazlı dosya bölme (tip bazlı DEĞİL)
 
+> ⚠ **MANİFEST KISITI (kritik):** `manifest.json` üreteci (`emit-manifest.mjs` → `emitManifest`)
+> **YALNIZ tek kök dokümanı** gezer (ADR-0019: import edilen içerik manifest'e girmez). Bu yüzden
+> bir sistemin **tüm domain module'leri TEK kök `.tcdsl` dosyasında** olmalıdır (örnek/fixture'lar
+> böyle: `slice.tcdsl`, `order-management.tcdsl` — birden çok `module` tek dosyada). Domain
+> module'lerini ayrı dosyalara bölersen manifest **eksik** olur; `emit-manifest.mjs` bunu **hata
+> verir** (kök dışı `module` → exit 2), sessiz partial üretmez. `import` yalnız **extension-pack**
+> (annotation şeması) içindir — pack dosyaları `module` değil yalnız `extension` bildirir, manifest'e
+> girmez. (Bu kural toolchain'in bugünkü gerçeğidir: çok-doküman manifest birleştirme YOK.)
+
 - **Tek-module analiz** → tek `<module>.tcdsl` (içinde dependency sırası).
-- **Çok-module analiz** → module kadar dosya (ör. `orders.tcdsl`, `billing.tcdsl`) + paylaşılan
-  saf-teknik tipler için `shared.tcdsl`. `contract` her dosyada bildirilir (linked çözüm doc-başına).
+- **Çok-module analiz** → module'leri **tek kök `.tcdsl`'de** topla (yukarıdaki manifest kısıtı);
+  paylaşılan saf-teknik tipler aynı dosyada veya import edilen extension-pack'te. `contract` kökte
+  bildirilir.
 - `operations.tcdsl` / `entities.tcdsl` gibi **tipe göre dosya AÇMA.**
 - Aynı isim uzayında çakışma olmasın: farklı module'lerde aynı `type`/`enum`/`entity` adını
   tekrar tanımlama (cross-document çift-tanım çakışır — `examples/` her dosyayı izole tutar).
