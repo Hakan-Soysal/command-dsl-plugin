@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-476654d7618f", grammarHash: "476654d7618f", techSrcHash: "6c514439f8bc", commit: "9b5c5a0", builtAt: "2026-06-30T09:03:49+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-476654d7618f", grammarHash: "476654d7618f", techSrcHash: "9e40cd6784c9", commit: "9b5c5a0", builtAt: "2026-06-30T09:03:49+03:00", langium: "4.2.4" };
   }
 });
 
@@ -38183,6 +38183,29 @@ function checkPathScope(rootFields, segments, model, accept, subjectNode, origin
     return;
   }
 }
+function arrEq(a2, b) {
+  return a2.length === b.length && a2.every((x, i) => x === b[i]);
+}
+function pathEqRealizes(techPath, bizPath, ctx) {
+  const realizes = techPath.length ? ctx.rootToRealizes.get(techPath[0]) : void 0;
+  if (realizes && bizPath.length) {
+    const bizQualified = ctx.bizEntities.has(bizPath[0]);
+    const bizEntity = bizQualified ? bizPath[0] : ctx.resource;
+    const bizFields = bizQualified ? bizPath.slice(1) : bizPath;
+    if (bizEntity && realizes.has(bizEntity) && arrEq(techPath.slice(1), bizFields)) return true;
+  }
+  return arrEq(techPath, bizPath);
+}
+function exprEqRealizes(t, b, ctx) {
+  const tPath = !("node" in t) && "path" in t ? t.path : void 0;
+  const bPath = !("node" in b) && "path" in b ? b.path : void 0;
+  if (tPath && bPath) return pathEqRealizes(tPath, bPath, ctx);
+  if ("node" in t && "node" in b && t.node === "agg" && b.node === "agg")
+    return t.fn === b.fn && pathEqRealizes(t.path, b.path, ctx);
+  if ("node" in t && "node" in b && t.node === b.node && t.node !== "agg" && t.node !== "call" && b.node !== "agg" && b.node !== "call")
+    return t.op === b.op && exprEqRealizes(t.left, b.left, ctx) && exprEqRealizes(t.right, b.right, ctx);
+  return exprNodeEqual(t, b);
+}
 var TechDslValidator = class {
   constructor(documents2) {
     this.documents = documents2;
@@ -38536,6 +38559,23 @@ var TechDslValidator = class {
     if (!bizOp) return;
     const guardsById = new Map(bizOp.guards.filter((g) => g.ast != null).map((g) => [g.id, g]));
     const linkedGuardIds = /* @__PURE__ */ new Set();
+    const rootToRealizes = /* @__PURE__ */ new Map();
+    for (const c of op.clauses.filter(isAccessClause)) {
+      for (const eff of c.effects) {
+        for (const ref of eff.entities) {
+          const ent = ref.ref;
+          if (ent) rootToRealizes.set(ent.name, new Set(ent.realizes.map((r) => r.$refText)));
+        }
+        if (eff.alias && eff.entities.length === 1 && eff.entities[0]?.ref) {
+          rootToRealizes.set(eff.alias, new Set(eff.entities[0].ref.realizes.map((r) => r.$refText)));
+        }
+      }
+    }
+    const divCtx = {
+      resource: bizOp.signature?.resource,
+      bizEntities: new Set(contract.entities.keys()),
+      rootToRealizes
+    };
     for (const clause of op.clauses) {
       if (!isValidationClause(clause) && !isRuleClause(clause)) continue;
       for (const g of clause.checks) {
@@ -38550,7 +38590,7 @@ var TechDslValidator = class {
           continue;
         }
         const techAst = serializeExpr(g.expr);
-        if (!exprNodeEqual(techAst, guard.ast)) {
+        if (!exprEqRealizes(techAst, guard.ast, divCtx)) {
           acceptWitness(
             accept,
             "warning",
