@@ -43,6 +43,13 @@ hatırlatması). info ≠ error; doğrulama temiz sayılır.
 ## Cross-module / saga örnekleri
 
 `order-management.tcdsl` tek-module (intra → strong consistency) tutuldu ki temiz kalsın.
-Cross-module write + `consistency async|durable`, `calls Sys.Op compensate with Sys.Undo`
-(saga) ve `emits`/`on` (event) sözdizimi için `../tech-dsl-reference.md`'ye bak — bu eksenler
-ikinci bir module ve `consistency` mode'u gerektirir (aksi halde "mode bildirilmemiş" warning).
+Şu eksenlerin sözdizimi için `../tech-dsl-reference.md`'ye bak (ikinci bir module ya da boundary gerektirir):
+- **Cross-module WRITE** + `consistency async|durable`, `calls Sys.Op compensate with Sys.Undo`
+  (saga), `emits`/`on` (event) — async; aksi halde "mode bildirilmemiş" warning.
+- **Cross-module READ (ADR-0030):** `calls <Module>.<Query> as <alias>` — kardeş module'ün
+  **query** op'una **senkron** çağrı (write hedef → error; `@internal` hedef → error); sonuç
+  `rule { … alias … }` ile gate-edilir; consistency-garantisiz (türev callEdge).
+- **Provenance (ADR-0031):** `validation` yalnız input param'a bakar (state → error); `rule`
+  state-kökü `access { reads E as <alias> by <param> }` veya `calls … as <alias>` ile
+  **bildirilmeli** (çıplak alan → "gizli veri bağımlılığı" error; aynı tipten ≥2 read → `as`/`by`,
+  B3). Boundary-op `readonly` ise sonucu rule-gate-edilebilir.

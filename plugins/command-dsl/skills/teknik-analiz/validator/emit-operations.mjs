@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-dcf5a5d2bf5a", grammarHash: "dcf5a5d2bf5a", srcHash: "fef731319ffb", commit: "6164d21", builtAt: "2026-06-23T13:19:49+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-dcf5a5d2bf5a", grammarHash: "dcf5a5d2bf5a", srcHash: "fef731319ffb", commit: "9b5c5a0", builtAt: "2026-06-30T09:03:49+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../DSL Business Analyses/teknik-analiz/validator/emit-operations.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/emit-operations.src.mts
 init_define_BUILD_INFO();
 import { writeFileSync, statSync as statSync2 } from "node:fs";
 import { resolve, isAbsolute } from "node:path";
@@ -38944,7 +38944,7 @@ function collectCommands(model2) {
   return [...map2.values()];
 }
 
-// ../DSL Business Analyses/teknik-analiz/validator/emit-operations.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/emit-operations.src.mts
 var argv = process.argv.slice(2);
 if (argv.includes("--version")) {
   console.log(JSON.stringify(define_BUILD_INFO_default, null, 2));

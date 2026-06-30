@@ -43,7 +43,9 @@
 | `signature.ownership` | `ownership own\|any\|all\|public\|<relation>` | "Kimin kaydı üzerinde?" Business'tan **geniş yazma** → weakening warning. `<relation>` → `relations[]`. |
 | `access.writes` (kaba) | `access { creates/updates/deletes <Entity> }` | "Yaratıyor mu / güncelliyor mu / siliyor mu?" Kaba write'ı **CRUD'a inceltirsin**. |
 | `access.reads` (kaba) | `access { reads <Entity> }` | "Hangi kayıtları okuyor?" |
-| `guards[].ast` (`where`/`if`/`when`) | `validation { … }` (400) / `rule { … }` (422) + `for guard "<id>"` | "İstek-anı mı (400) / stateful mı (422)?" guard-id link → ifade-divergence kontrolü. |
+| `guards[].ast` (`where`/`if`/`when`) | `validation { … }` (400) / `rule { … }` (422) + `for guard "<id>"` | "Kontrol **request payload**'ında mı (→ validation, input-only) yoksa **stored state**'te mi (→ rule)?" **ARTIK YAPISAL ENFORCE (ADR-0031):** validation path kökü yalnız `op.params`; rule state-kökü `access` (entity/`as`-alias) veya `calls`-alias ile **bildirilmeli** — çıplak/bildirilmemiş kök → error. guard-id link (dik eksen) → ifade-divergence. |
+| (state-ihtiyacı, business'ta implicit) | `access { reads <E> as <alias> by <param> }` → `rule { alias.field … }` | "Bu kural **hangi kaydın** state'ine bakıyor, **hangi input** o kaydı seçiyor?" Aynı tipten ≥2 instance → her birine ayrı `as`/`by`. |
+| (başka module'ün verisi gerekli) | `calls <Module>.<Query> as <alias>` → `rule { alias.field … }` | "Bu op başka bir context'in verisini **senkron okumalı** mı? Hedef **query** olmalı (write → event/saga); sonuç consistency-garantisiz (ADR-0030)." |
 | `guards[].kind = during` | (calendar) — `@trigger.*`/policy | `during` AST taşımaz; ifade-divergence'a girmez. |
 | `signature.resource` | `permit when resource.*` bağlamı | ABAC `resource` = op'un tek write-hedefi entity'si. |
 

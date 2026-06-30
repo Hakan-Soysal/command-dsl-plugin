@@ -50,7 +50,9 @@ bütünlük kuralını discharge eder — bu, "tutarlılık > sözdizimi" ilkesi
 - **DSL-jargonu gösterme.** "consistency mode", "ABAC", "saga", "sourceOfTruth", "deployable"
   gibi terimleri ASLA kullanıcıya sorma. Somut cümleden *sen* türet: kullanıcı "bu işlem
   ödeme sağlayıcısını çağırıp başarısız olursa geri almalı" der; sen bunu
-  `calls Stripe.Charge compensate with Stripe.Refund`'a çevirirsin.
+  `calls Stripe.Charge compensate with Stripe.Refund`'a çevirirsin. "Havale, hesabın bakiyesi
+  yeterliyse geçer" → `access { reads Account as src by from }` + `rule { amount <= src.balance }`.
+  "Limit kontrolü için risk-module'üne bakmalı" → `calls Risk.GetLimit as cap` + `rule { amount <= cap }`.
 - **Hibrit onay.** Her fazda önce **toplu öneri** (kısa liste), sonra tek soruyla onay.
   Kullanıcı bir öğeye takılırsa orada derinleş. Onay almadan alt faza inme.
 - **Güvenlik-zayıflatan her eksende MUTLAKA sor.** ownership genişletme, roles yetki-aşımı,
@@ -163,10 +165,20 @@ yetkili aktör kümesini aşma. Bunlar **güvenlik-zayıflatma warning**'i — h
 - "Bu kontrol **isteğin kendisiyle** mi (yanlış format → 400) yoksa **sistem durumuyla** mı
   (yetersiz bakiye → 422) ilgili?" → `validation { }` (400) vs `rule { }` (422). İş guard'ına
   bağlanıyorsa guard-id link ver.
+- **Provenance ZORUNLU (ADR-0031 — validator artık enforce eder):** ayraç verinin kökenidir.
+  - `validation` ifadesi **yalnız input param**'a bakabilir (`amount > 0`). State'e bakıyorsa →
+    error; ya `rule`'a taşı ya param'la.
+  - `rule` state-kökü **bildirilmeli.** Stateful bir kural çıkarınca DEVAMINDA sor: "Bu kural
+    **hangi kaydın** state'ine bakıyor, **hangi input** o kaydı seçiyor?" → `access { reads <E>
+    as <alias> by <param> }`, rule'da `alias.field`. (Çıplak `balance` YAZMA → "gizli veri
+    bağımlılığı" error; aynı tipten ≥2 read → `as`/`by` zorunlu, B3.) Başka context'in verisi
+    gerekiyorsa → cross-module query (Faz 6).
 
-**⚠ Anti-pattern — validation↔rule karışması:** request-only deterministik-fail → validation;
-dış/stateful data gereken → rule. İş guard'ından ifade sapması → warning.
-**Kapatır:** `checkExprDivergence`; 6'lı result-type taksonomisi.
+**⚠ Anti-pattern — validation↔rule karışması + bildirilmemiş kök:** request-only deterministik-fail
+→ validation; dış/stateful → rule (state-kökü access/calls ile **bildirilmiş**). state-in-validation
+→ error; yalnız-input rule → misclassification warning; bildirilmemiş rule kökü → "gizli veri
+bağımlılığı" error. İş guard'ından ifade sapması → "differs" warning (dik eksen).
+**Kapatır:** `checkValidationInputScope`, `checkRuleStateScope`, `checkExprDivergence`; 6'lı result-type.
 
 ---
 
@@ -175,9 +187,16 @@ dış/stateful data gereken → rule. İş guard'ından ifade sapması → warni
 **Amaç:** Sistemler-arası akışı, tutarlılığı ve tetiklemeyi netleştirmek.
 **Elicit et:**
 - "Dış sistem / başka module çağrısı var mı?" → `calls Sys.Op`. "Başarısız olursa geri
-  alınmalı mı?" → `compensate with Sys.Undo` (saga).
-- "Cross-module yazma **anında mı** olmalı yoksa **arka planda dayanıklı** mı?" →
-  `consistency async|durable`. (Cross-write var ama mode yoksa → warning.)
+  alınmalı mı?" → `compensate with Sys.Undo` (saga). **`calls` argümansızdır** (arg = gövde-seam).
+- **Cross-module READ (ADR-0030):** "Bu işlem **başka bir module'ün** verisine (limit, skor,
+  durum) ihtiyaç duyuyor mu — ve buna göre mi karar veriyor?" → `calls <Module>.<Query> as <alias>`,
+  sonra `rule { … <alias> … }`. **Yalnız QUERY hedeflenebilir** (hedef write-sınıfı/command ise
+  error → o etkileşim **event/saga**'dır); hedef **non-`@internal`** olmalı. Senkron read ama
+  **consistency-garantisiz** (türev; ayrı `consistency` gerekmez). Entity'ler private → başka
+  module'ün verisine **yalnız** böyle (op-çağrısıyla) erişilir.
+- "Cross-module **yazma** **anında mı** olmalı yoksa **arka planda dayanıklı** mı?" →
+  `consistency async|durable`. (Cross-write var ama mode yoksa → warning. Cross-module write
+  `calls` ile DEĞİL — `emits`/`on`/saga ile.)
 - "Aynı çağrı yanlışlıkla iki kez gelirse ne olmalı?" → `idempotent by <param>`.
 - "Bir olay yayıyor / dinliyor mu?" → `emits <Event>` / `on <Module.Event>`.
 - "Liste dönüşü sayfalanıyor mu?" → `paginated by cursor|offset <field> asc|desc`.
@@ -185,8 +204,11 @@ dış/stateful data gereken → rule. İş guard'ından ifade sapması → warni
   (Görünürlük belirsizse → warning.)
 
 **⚠ Anti-pattern:** mode'suz cross-write (warning); key'siz idempotent (error); komutta/
-list-değilde pagination (error); ne protokol ne `@internal` (warning).
-**Kapatır:** `checkConsistencyMode`, `checkPagination`, `checkVisibility`, idempotent/emits/on linker'ları.
+list-değilde pagination (error); ne protokol ne `@internal` (warning); **cross-module `calls`
+hedefi command/write (error — event/saga'ya çevir) veya `@internal` (error — module-private)**;
+`calls X.Y(arg)` (parse hatası — argümansız).
+**Kapatır:** `checkConsistencyMode`, `checkPagination`, `checkVisibility`, `checkCrossModuleCall`,
+idempotent/emits/on linker'ları.
 
 ---
 
@@ -197,8 +219,11 @@ list-değilde pagination (error); ne protokol ne `@internal` (warning).
 - "3. parti mi (Stripe — sahibi sen değilsin) yoksa **şirkete ait ama dökümante edilmemiş**
   bir sistem mi (mainframe)?" → `external N{…}` vs `uncharted N{…}`.
 - Her çağrılan uç: imza + (varsa) `serving` (nasıl çağrılır) + bilinen `validation` (caller-side
-  fail-fast). Üreteç bu sistemin KENDİSİNİ üretmez ama **çağrı adapter'ını** üretir.
-**Kapatır:** sınır muafiyeti (entity-kapsamadan muaf).
+  fail-fast, **input-only**). Üreteç bu sistemin KENDİSİNİ üretmez ama **çağrı adapter'ını** üretir.
+- "Bu dış uç **yan-etkisiz bir sorgu** mu (fraud-skoru, fiyat) ve sonucuna göre **rule** mı
+  vereceksin?" → `readonly operation …` (ADR-0030 K4). Yalnız `readonly` işaretli boundary-op
+  sonucu `rule`'da gate-edilebilir; işaretsiz = yan-etkili varsayılır (compensate-eligible).
+**Kapatır:** sınır muafiyeti (entity-kapsamadan muaf); `readonly` ile rule-gateability.
 
 ---
 

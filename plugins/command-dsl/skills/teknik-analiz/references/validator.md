@@ -56,7 +56,18 @@ node validate-tech.mjs --version
 ## 4. Diagnostics → düzeltme döngüsü
 
 1. Çalıştır. **error (severity 1)** varsa → düzelt, tekrar çalıştır. **0 error olmadan döngüden
-   ÇIKMA.** (Yarım bırakma.)
+   ÇIKMA.** (Yarım bırakma.) Yeni provenance/cross-module error sınıfları (ADR-0030/0031) ve fix'i:
+   - *`validation = input-only; 'X' input parametresi değil`* → `validation` state'e bakıyor; ya
+     `X`'i param yap ya da bu kontrolü **`rule`'a taşı** (state-bağımlıysa).
+   - *`rule: 'X' gizli veri bağımlılığı`* → rule kökü bildirilmemiş; `access { reads E as X by <param> }`
+     ekle (entity state) ya da `calls M.Q as X` (cross-module/dış read).
+   - *`rule: 'X' belirsiz instance (≥2 read)`* (B3) → aynı tipten iki read; her birine `as <alias> by <param>`
+     ver, rule'da alias kullan.
+   - *`cross-module 'X' write-sınıfı (command)`* → cross-module `calls` query-only; write'ı **event/saga**'ya
+     çevir (`emits`/`on`). *`'X' @internal (module-private)`* → hedef op'tan `@internal`'i kaldır (cross-module
+     çağrılabilir olmalı) ya da farklı (exposed) bir query çağır.
+   - *`read-only olmayan call sonucu gate-edilemez`* → gate edilen boundary-op'a `readonly` ekle (gerçekten
+     read-only ise) ya da rule'u o sonuçtan ayır.
 2. **warning (severity 2)** çoğunlukla **divergence/kapsam sinyali**dir (ownership/access-sapma,
    consistency mode-eksik, görünürlük-belirsiz, rolemap-typo, SharedUtils, "differs",
    **kapsam-eksik**). Her birini **kullanıcıya takip sorusu** olarak yansıt:
@@ -64,6 +75,8 @@ node validate-tech.mjs --version
    - *Erişim-sapma:* "İş bu kaydı salt-okunur sayıyor; tech'te yazıyorsun — kasıtlı mı?"
    - *Consistency mode-eksik:* "Bu cross-module yazma anında mı (async) yoksa dayanıklı mı (durable)?"
    - *Görünürlük:* "Bu işlem nasıl çağrılıyor — bir protokol mü, yoksa iç (@internal) mi?"
+   - *Rule misclassification (ADR-0031):* "rule yalnız input'a bağlı (state kökü yok) → `validation`
+     daha doğru" — kontrol gerçekten request-only mi? Öyleyse `validation`'a çevir.
    - *Kapsam-eksik (`checkUnrealizedBusinessOps`):* "Şu business-op'lar hiçbir tech operation'a
      bağlanmadı — bunları bu turda kapsamayacak mıyız (bilinçli erteleme) yoksa atladık mı?"
    Warning'i ya **gider** ya da kullanıcı onayıyla "bilinçli" olarak **belgele**.

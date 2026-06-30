@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-72b6adbe4fa4", grammarHash: "72b6adbe4fa4", techSrcHash: "bea87b713309", commit: "97ba039", builtAt: "2026-06-23T13:07:12+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-476654d7618f", grammarHash: "476654d7618f", techSrcHash: "6c514439f8bc", commit: "9b5c5a0", builtAt: "2026-06-30T09:03:49+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../DSL Business Analyses/teknik-analiz/validator/validate-tech.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/validate-tech.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, statSync as statSync2 } from "node:fs";
 import { join, isAbsolute, dirname, resolve } from "node:path";
@@ -31946,9 +31946,14 @@ function isAccessClause(item) {
 }
 var AccessEffect = {
   $type: "AccessEffect",
+  alias: "alias",
   entities: "entities",
+  key: "key",
   verb: "verb"
 };
+function isAccessEffect(item) {
+  return reflection2.isInstance(item, AccessEffect.$type);
+}
 var Additive = {
   $type: "Additive"
 };
@@ -32007,6 +32012,7 @@ var BoundaryOp = {
   annotations: "annotations",
   name: "name",
   params: "params",
+  readOnly: "readOnly",
   returns: "returns",
   servings: "servings",
   validation: "validation"
@@ -32034,6 +32040,7 @@ var CallableSystem = {
 };
 var CallsClause = {
   $type: "CallsClause",
+  alias: "alias",
   compensator: "compensator",
   target: "target"
 };
@@ -32434,10 +32441,17 @@ var TechDslAstReflection = class extends AbstractAstReflection {
     AccessEffect: {
       name: AccessEffect.$type,
       properties: {
+        alias: {
+          name: AccessEffect.alias
+        },
         entities: {
           name: AccessEffect.entities,
           defaultValue: [],
           referenceType: Entity.$type
+        },
+        key: {
+          name: AccessEffect.key,
+          referenceType: Param.$type
         },
         verb: {
           name: AccessEffect.verb
@@ -32553,6 +32567,10 @@ var TechDslAstReflection = class extends AbstractAstReflection {
           name: BoundaryOp.params,
           defaultValue: []
         },
+        readOnly: {
+          name: BoundaryOp.readOnly,
+          defaultValue: false
+        },
         returns: {
           name: BoundaryOp.returns
         },
@@ -32602,6 +32620,9 @@ var TechDslAstReflection = class extends AbstractAstReflection {
     CallsClause: {
       name: CallsClause.$type,
       properties: {
+        alias: {
+          name: CallsClause.alias
+        },
         compensator: {
           name: CallsClause.compensator
         },
@@ -32988,7 +33009,7 @@ var TechDslAstReflection = class extends AbstractAstReflection {
           name: Module2.name
         }
       },
-      superTypes: [TopDecl.$type, DeployUnit.$type]
+      superTypes: [TopDecl.$type, CallableSystem.$type, DeployUnit.$type]
     },
     ModuleMember: {
       name: ModuleMember.$type,
@@ -33067,7 +33088,7 @@ var TechDslAstReflection = class extends AbstractAstReflection {
           defaultValue: []
         }
       },
-      superTypes: [ModuleMember.$type]
+      superTypes: [ModuleMember.$type, CallableOp.$type]
     },
     OrExpr: {
       name: OrExpr.$type,
@@ -35033,6 +35054,58 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               }
             ],
             "cardinality": "*"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "as"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "alias",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "by"
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "key",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "CrossReference",
+                      "type": {
+                        "$ref": "#/rules@18"
+                      },
+                      "terminal": {
+                        "$type": "RuleCall",
+                        "rule": {
+                          "$ref": "#/rules@68"
+                        },
+                        "arguments": []
+                      },
+                      "deprecatedSyntax": false,
+                      "isMulti": false
+                    }
+                  }
+                ],
+                "cardinality": "?"
+              }
+            ],
+            "cardinality": "?"
           }
         ]
       },
@@ -35185,6 +35258,28 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               },
               "arguments": []
             }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "as"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "alias",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
           },
           {
             "$type": "Group",
@@ -36654,6 +36749,16 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "cardinality": "*"
           },
           {
+            "$type": "Assignment",
+            "feature": "readOnly",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "readonly"
+            },
+            "cardinality": "?"
+          },
+          {
             "$type": "Keyword",
             "value": "operation"
           },
@@ -37462,6 +37567,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "typeRef": {
               "$ref": "#/rules@52"
             }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@11"
+            }
           }
         ]
       }
@@ -37470,10 +37581,21 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
       "$type": "Type",
       "name": "CallableOp",
       "type": {
-        "$type": "SimpleType",
-        "typeRef": {
-          "$ref": "#/rules@54"
-        }
+        "$type": "UnionType",
+        "types": [
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@54"
+            }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@13"
+            }
+          }
+        ]
       }
     }
   ],
@@ -37731,10 +37853,15 @@ var TechDslScopeProvider = class extends DefaultScopeProvider {
     if (context.property === "op" && isQualifiedRef(context.container)) {
       const system = context.container.system.ref;
       if (!system) return EMPTY_SCOPE;
-      const ops = isExternal(system) ? system.ops : system.members.filter(isBoundaryOp);
+      const ops = isExternal(system) ? system.ops : isModule(system) ? system.members.filter(isOperation) : system.members.filter(isBoundaryOp);
       return this.createScopeForNodes(ops);
     }
     if (context.property === "keys" && isIdempotentClause(context.container)) {
+      const op = ast_utils_exports.getContainerOfType(context.container, isOperation);
+      if (!op) return EMPTY_SCOPE;
+      return this.createScopeForNodes(op.params);
+    }
+    if (context.property === "key" && isAccessEffect(context.container)) {
       const op = ast_utils_exports.getContainerOfType(context.container, isOperation);
       if (!op) return EMPTY_SCOPE;
       return this.createScopeForNodes(op.params);
@@ -38536,6 +38663,110 @@ var TechDslValidator = class {
       }
     }
   }
+  // ADR-0031 K2: validation = input-only. Path kökü op.params olmalı; state ref → error.
+  validationInputScope(params, clauses, model, originModule, accept) {
+    const paramNames = new Set(params.map((p) => p.name));
+    for (const cl of clauses) {
+      for (const g of cl.checks) {
+        for (const node of ast_utils_exports.streamAllContents(g.expr)) {
+          if (!isPath(node)) continue;
+          const root2 = node.segments[0];
+          if (!paramNames.has(root2)) {
+            accept("error", `validation = input-only; '${root2}' bir input parametresi de\u011Fil (state'e ba\u011Fl\u0131ysa 'rule' kullan) \u2014 ADR-0031.`, { node });
+            continue;
+          }
+          const underAggregate = isAggregate(node.$container);
+          checkPathScope(params, node.segments, model, accept, node, originModule, underAggregate);
+        }
+      }
+    }
+  }
+  checkValidationInputScope(op, accept) {
+    const model = ast_utils_exports.getDocument(op).parseResult.value;
+    const originModule = ast_utils_exports.getContainerOfType(op, isModule)?.name ?? "";
+    this.validationInputScope(op.params, op.clauses.filter(isValidationClause), model, originModule, accept);
+  }
+  // ADR-0031 K3/K4/K5: rule = data-bağımlı. Kökler: param | access-entity/alias (reads/updates/deletes) | call-alias.
+  checkRuleStateScope(op, accept) {
+    const rules = op.clauses.filter(isRuleClause);
+    if (rules.length === 0) return;
+    const model = ast_utils_exports.getDocument(op).parseResult.value;
+    const originModule = ast_utils_exports.getContainerOfType(op, isModule)?.name ?? "";
+    const index = buildTypeIndex(model);
+    const paramNames = new Set(op.params.map((p) => p.name));
+    const aliasToEntity = /* @__PURE__ */ new Map();
+    const bareEntityCount = /* @__PURE__ */ new Map();
+    const stateEntityNames = /* @__PURE__ */ new Set();
+    for (const c of op.clauses.filter(isAccessClause)) {
+      for (const eff of c.effects) {
+        if (eff.verb === "creates") continue;
+        for (const ref of eff.entities) {
+          const ent = ref.ref;
+          if (!ent) continue;
+          stateEntityNames.add(ent.name);
+          bareEntityCount.set(ent.name, (bareEntityCount.get(ent.name) ?? 0) + 1);
+        }
+        if (eff.alias && eff.entities.length === 1 && eff.entities[0].ref) {
+          aliasToEntity.set(eff.alias, eff.entities[0].ref);
+        }
+      }
+    }
+    const callAliasReturn = /* @__PURE__ */ new Map();
+    const nonGateableAlias = /* @__PURE__ */ new Set();
+    for (const cl of op.clauses.filter(isCallsClause)) {
+      const t = cl.target?.op?.ref;
+      if (!cl.alias || !t) continue;
+      if (isBoundaryOp(t) && t.readOnly !== true) nonGateableAlias.add(cl.alias);
+      if ("returns" in t && t.returns) callAliasReturn.set(cl.alias, t.returns.name);
+    }
+    for (const rule of rules) {
+      let sawStateRoot = false, hadPath = false;
+      for (const g of rule.checks) {
+        for (const node of ast_utils_exports.streamAllContents(g.expr)) {
+          if (!isPath(node)) continue;
+          hadPath = true;
+          const root2 = node.segments[0];
+          const underAggregate = isAggregate(node.$container);
+          if (paramNames.has(root2)) {
+            continue;
+          }
+          if (aliasToEntity.has(root2)) {
+            sawStateRoot = true;
+            checkPathScope(aliasToEntity.get(root2).fields, node.segments.slice(1), model, accept, node, originModule, underAggregate);
+          } else if (stateEntityNames.has(root2)) {
+            sawStateRoot = true;
+            if ((bareEntityCount.get(root2) ?? 0) >= 2) {
+              accept("error", `rule: '${root2}' belirsiz instance (\u22652 read); 'as <alias> by <param>' ile ay\u0131r (ADR-0031 K4/B3).`, { node });
+              continue;
+            }
+            const ent = index.entities.get(root2);
+            if (ent) checkPathScope(ent.fields, node.segments.slice(1), model, accept, node, originModule, underAggregate);
+          } else if (callAliasReturn.has(root2) || nonGateableAlias.has(root2)) {
+            sawStateRoot = true;
+            if (nonGateableAlias.has(root2)) {
+              accept("error", `rule: '${root2}' read-only olmayan call sonucu gate-edilemez \u2014 hedef boundary-op 'readonly' i\u015Faretli de\u011Fil (yaln\u0131z query sonucu gate-edilebilir, ADR-0030 K4).`, { node });
+              continue;
+            }
+            const rt = callAliasReturn.get(root2);
+            const target2 = index.entities.get(rt) ?? index.typeDecls.get(rt);
+            if (target2) checkPathScope(target2.fields, node.segments.slice(1), model, accept, node, originModule, underAggregate);
+          } else {
+            accept("error", `rule: '${root2}' gizli veri ba\u011F\u0131ml\u0131l\u0131\u011F\u0131 \u2014 ne input param, ne 'access' (reads/updates/deletes) entity'si/alias'\u0131, ne 'calls \u2026 as' sonucu (ADR-0031 K3).`, { node });
+          }
+        }
+      }
+      if (hadPath && !sawStateRoot) {
+        const msg = `rule yaln\u0131z input'a ba\u011Fl\u0131 (state k\xF6k\xFC yok) \u2192 deterministik-fail; 'validation' (input-only) daha do\u011Fru (ADR-0031 K5 misclassification).`;
+        if (rule.checks[0]?.expr) accept("warning", msg, { node: rule.checks[0].expr });
+        else accept("warning", msg, { node: op, property: "name" });
+      }
+    }
+  }
+  checkBoundaryValidationInputScope(bop, accept) {
+    const model = ast_utils_exports.getDocument(bop).parseResult.value;
+    const originModule = ast_utils_exports.getContainerOfType(bop, isExternal)?.name ?? ast_utils_exports.getContainerOfType(bop, isUncharted)?.name ?? "";
+    this.validationInputScope(bop.params, bop.validation, model, originModule, accept);
+  }
   // T-4.2: checkAbac (ABAC permit: resource çözümü + path-scope + actor-opak + tek-permit)
   /**
    * ADR-0020 Karar 7/8/9: ABAC hibrit (saf-tech, divergence YOK).
@@ -38579,6 +38810,24 @@ var TechDslValidator = class {
         checkPathScope(resourceEntity.fields, node.segments.slice(1), model, accept, op, originModule, underAggregate, "name");
       } else {
         accept("error", `permit when path'i 'actor.' veya 'resource.' ile ba\u015Flamal\u0131: '${node.segments.join(".")}'`, { node: op, property: "name" });
+      }
+    }
+  }
+  // ADR-0030 K2/K3: cross-module calls query-only + @internal-private
+  /**
+   * Bir `calls` hedefi kardeş Module ise: hedef op query olmalı (write-sınıfı access →
+   * error: cross-module write event/saga'dır), ve @internal olmamalı (module-private).
+   * External/Uncharted hedefler GİRMEZ (kind bildirmez; gateability T-4.3 readonly-marker).
+   */
+  checkCrossModuleCall(op, accept) {
+    for (const cl of op.clauses.filter(isCallsClause)) {
+      const targetOp = cl.target?.op?.ref;
+      if (!targetOp || !isOperation(targetOp)) continue;
+      if (targetOp.internal) {
+        accept("error", `'${op.name}': '${targetOp.name}' @internal (module-private) \u2014 karde\u015F module \xE7a\u011F\u0131ramaz (ADR-0030).`, { node: cl, property: "target" });
+      }
+      if (deriveKind(targetOp) === "command") {
+        accept("error", `'${op.name}': cross-module '${targetOp.name}' write-s\u0131n\u0131f\u0131 (command) \u2014 cross-module write transaction'\u0131 a\u015Fmaz; senkron \xE7a\u011Fr\u0131lamaz (event/saga kullan, ADR-0030 K2).`, { node: cl, property: "target" });
       }
     }
   }
@@ -38771,6 +39020,7 @@ var TechDslValidator = class {
         for (const cl of op.clauses.filter(isCallsClause)) {
           const target2 = cl.target.op.ref;
           if (!target2) continue;
+          if (!isBoundaryOp(target2)) continue;
           if (entryHasValidation) continue;
           if (target2.validation.length > 0) continue;
           const targetRef = `${cl.target.system.$refText}.${cl.target.op.$refText}`;
@@ -39283,7 +39533,8 @@ function registerTechValidationChecks(services) {
   const validator = services.validation.TechDslValidator;
   const checks = {
     // M3.2-3.6 + Faz-1.5 (roles/ownership/version) kancaları (Operation/Module/Model bazlı)
-    Operation: [validator.checkVisibility, validator.checkCqrsKind, validator.checkRoles, validator.checkOwnershipRelation, validator.checkOwnershipDivergence, validator.checkAccessDivergence, validator.checkExprDivergence, validator.checkConsistencyMode, validator.checkAbac, validator.checkDuplicateThrows, validator.checkCompensateSameSystem, validator.checkIdempotent, validator.checkDuplicateEmits, validator.checkPagination, validator.checkSubscription],
+    Operation: [validator.checkVisibility, validator.checkCqrsKind, validator.checkRoles, validator.checkOwnershipRelation, validator.checkOwnershipDivergence, validator.checkAccessDivergence, validator.checkExprDivergence, validator.checkConsistencyMode, validator.checkAbac, validator.checkDuplicateThrows, validator.checkCompensateSameSystem, validator.checkIdempotent, validator.checkDuplicateEmits, validator.checkPagination, validator.checkSubscription, validator.checkCrossModuleCall, validator.checkValidationInputScope, validator.checkRuleStateScope],
+    BoundaryOp: [validator.checkBoundaryValidationInputScope],
     Entity: [validator.checkInvariantScope, validator.checkCrossModuleEntityField, validator.checkSourceOfTruth, validator.checkConcurrency],
     // T-3.3: invariant path-scope (saf-tech) + T-2.3: cross-module entity-field ban + sourceOfTruth marker + T-2.1: concurrency ≤1 + uncharted-ban
     EventDecl: [validator.checkEventPayloadEntity],
@@ -39417,7 +39668,7 @@ function createTechDslServices(context) {
   return { shared: shared2, TechDsl };
 }
 
-// ../DSL Business Analyses/teknik-analiz/validator/validate-tech.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/validate-tech.src.mts
 var argv = process.argv.slice(2);
 var jsonMode = argv.includes("--json");
 var wantVersion = argv.includes("--version");

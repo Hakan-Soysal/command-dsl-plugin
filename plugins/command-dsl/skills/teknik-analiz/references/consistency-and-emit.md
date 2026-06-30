@@ -15,13 +15,19 @@ Doğrulayıcı bunların çoğunu yakalar; ama emit'ten önce gözden geçir —
 
 **Referans bütünlüğü:**
 - [ ] Her `access` entity'si, her `throws` error'u, her `emits`/`on` event'i, her `calls`
-      `System.Op`'u tanımlı bir hedefe çözülüyor (dangling → linker error).
-- [ ] `idempotent by <k>` / `paginated by <field>` anahtarları gerçek param/alana çözülüyor.
+      `System.Op`'u tanımlı bir hedefe çözülüyor (dangling → linker error). `calls` hedefi
+      external/uncharted boundary-op'u **veya** kardeş `module`'ün `operation`'ı olabilir.
+- [ ] `idempotent by <k>` / `paginated by <field>` / `access … by <param>` anahtarları gerçek
+      param/alana çözülüyor.
 - [ ] Cross-module bağlar **ID + sourceOfTruth** (entity-tipli cross-module alan YOK).
+- [ ] `rule`'un her state-kökü **bildirilmiş** (`access` entity/`as`-alias veya `calls … as`-alias);
+      `validation` yalnız `op.params`'a bakıyor (state ref yok). (ADR-0031; aksi → error.)
 
 **Eksen tutarlılığı:**
 - [ ] Görünürlük: her op'ta serving **veya** `@internal` **veya** `on`.
-- [ ] Cross-module write içeren op'ta `consistency async|durable` bildirildi.
+- [ ] Cross-module **write** içeren op'ta `consistency async|durable` bildirildi. (Cross-module
+      **read** = `calls <Module>.<Query>`; hedef **query** + **non-`@internal`**; consistency-garantisiz
+      TÜREV — ayrı `consistency` gerekmez.)
 - [ ] ownership/roles iş'ten **geniş** değil (geniştiyse kullanıcı onayı belgeli).
 - [ ] `permit when` op'unda **tam bir** write-hedefi var (resource çözülebilir).
 - [ ] pagination yalnız `list of` dönen **sorgu**da; `concurrency` yalnız sahip-olunan entity'de.

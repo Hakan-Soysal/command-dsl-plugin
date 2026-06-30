@@ -50,7 +50,10 @@ Varsayılan tek görünmez monolit; **yalnız >1 olunca bildir**. Module-arası 
 mü ağ mı olduğunu belirler — **tutarlılığı değil**.
 
 **`module`** — hem tutarlılık hem deploy sınırı; `operation` + `entity` sahibi. **Transaction bu
-sınırı AŞMAZ** (module-arası = async/eventual). Üreteç bunun için kod ÜRETİR.
+sınırı AŞMAZ**: module-arası **write** async/eventual (saga/outbox-event), **read** ise **senkron**
+olabilir — kardeş module'ün **query** op'unu `calls` ile çağırarak (sonuç consistency-garantisiz;
+§7, ADR-0030). **Entity'ler private:** bir module başka module'ün entity'sine erişemez (cross-module
+veri YALNIZ operasyon çağrısıyla; entity-alanı YASAK, §2). Üreteç bunun için kod ÜRETİR.
 ```
 module Orders { /* operation, entity, type, enum, error, event */ }
 ```
@@ -148,16 +151,32 @@ NotValid · NotProcessable · ServerError. Wire-kod (400/422…) **üreteç terc
 
 ```
 error InsufficientBalance : NotProcessable        // module üyesi; 4 taggable failure-tipinden biri
-operation Transfer(...): Unit {
+operation Transfer(from: Iban, to: Iban, amount: Money): Unit {
   throws InsufficientBalance, AccountFrozen          // salt-bildirim (tetikleyici/Expr YOK)
-  validation { amount > 0 for guard "where:0" }      // request-only → 400 (deterministik-fail)
-  rule { amount <= balance }                          // dış/stateful → 422
+  access { reads Account as src by from  updates Account }   // src = kaynak Account (from anahtarı)
+  validation { amount > 0 for guard "where:0" }      // INPUT-only → 400 (amount = param)
+  rule { amount <= src.balance }                      // STATE → 422 (src = access-alias kökü)
 }
 ```
-- **`validation`** = sadece request datasıyla denetlenebilir (deterministik-fail). **`rule`** =
-  dış/stateful data gerekir. İkisi de yapısal `Expr`.
-- `for guard "<id>"` → business guard'ına link; ifade business'tan saparsa `checkExprDivergence`
-  → **"differs" warning** (insan-yargı sinyali, hata değil). Link'siz tech check → info (ekleme).
+**Provenance — ayraç verinin KÖKENİDİR, tipi değil (ADR-0031, ARTIK YAPISAL ENFORCE):**
+- **`validation`** = **yalnız request datası** (input). Her path kökü `op.params` olmalı; **state'e
+  referans → error** (`checkValidationInputScope`: "input-only; 'X' input parametresi değil →
+  rule kullan"). Deterministik-fail (input değişmeden hep aynı sonuç). `@http.payload` ile gelen
+  composite param'ın alanları da input'tur (`sum of order.lines.amount = order.total` gibi cross-field
+  serbest). BoundaryOp (external/uncharted) `validation`'ı da input-only.
+- **`rule`** = **data-bağımlı** (state); kökleri YALNIZ **bildirilen** üç kanaldan:
+  (a) `op.params` (input — rule'da da serbest, ama state işareti DEĞİL),
+  (b) **`access reads/updates/deletes`** entity'si — çıplak entity-adı (tek-instance) veya **`as <alias>`**
+      (`src.balance`); `creates` HARİÇ (henüz state yok),
+  (c) **read-only call sonucu** — `calls … as <alias>` (`cap.score`; §7).
+  Bildirilmemiş kök → **"gizli veri bağımlılığı" error**. Aynı tipten ≥2 read'i çıplak adla gezmek →
+  **B3 belirsizlik error** ("`as <alias> by <param>` ile ayır"). TÜM kökleri param olan rule →
+  **misclassification warning** ("`validation` daha doğru"). state-in-validation = error / pure-input-rule
+  = warning (asimetrik).
+- **Instance-binding** (Model 1, §7 access): `reads Account as src by from` — `as` = isim, `by` =
+  instance'ı seçen **input key'i** (`from` param'ı). Tek-belirsizsiz instance → çıplak ad yeter.
+- `for guard "<id>"` → business guard'ına link (dik eksen; provenance'tan bağımsız); ifade business'tan
+  saparsa `checkExprDivergence` → **"differs" warning**. Link'siz tech check → info.
 - `throws` hedefi module-level `error`'a çözülür (dangling → linker error). ResultType ∈
   {NotAuthenticated, NotAuthorized, NotValid, NotProcessable}.
 
@@ -165,21 +184,41 @@ operation Transfer(...): Unit {
 
 ## 7. Erişim, etkileşim & tutarlılık
 
-**`access`** — CRUD-net entity erişim kümesi:
+**`access`** — CRUD-net entity erişim kümesi (+ rule için instance-binding):
 ```
 access { reads Cart  creates Order  updates Order  deletes TempFile }
+access { reads Account as src by from }        // instance-binding: alias + input-key (rule kökü)
 ```
 `creates`/`updates`/`deletes` = write-sınıfı. Entity ref'leri **tech** entity'lere çözülür.
 `checkEntityCoverage`: realized op'un business write-set entity'sinin her biri **aynı module'de**
 realizes edilmeli (yoksa error). `checkAccessDivergence`: business salt-okunur + tech write →
 güvenlik-zayıflatma warning.
+**Instance-binding (`as <alias> by <param>`, ADDİTİF — `entities` listesi değişmez):** bir reads
+effect'ine isim (`as src`) + onu seçen input-key (`by from`, op param'ına çözülür) verir; `rule`
+o alias'ı state-kökü olarak gezer (`src.balance`). Aynı tipten ≥2 instance gerekiyorsa her birini
+ayrı `reads … as … by …` ile bildir (transfer: `reads Account as src by from`, `reads Account as
+dst by to`). Tek-instance'ta çıplak entity-adı yeter. (Bkz. §6 provenance.)
 
-**`calls` / `compensate with`** (saga adımı):
+**`calls`** — cross-boundary etkileşim (saga adımı VE/VEYA cross-module senkron read):
 ```
-calls Stripe.Charge compensate with Stripe.Refund
+calls Stripe.Charge compensate with Stripe.Refund     // external/uncharted yan-etkili çağrı (saga)
+calls Billing.GetLimit as cap                          // CROSS-MODULE QUERY (ADR-0030): senkron read
 ```
-Hedef nitelikli `System.Op` (external/uncharted). Kompanzatör **aynı sistemin** op'u olmalı
-(farklı → error; self → warning). Cross-module write içerir → consistency `risk = eventual`.
+Hedef nitelikli `System.Op` — **external/uncharted** boundary-op'u VEYA **kardeş `module`'ün
+`operation`'ı** (ADR-0030, `CallableSystem += Module`). **`calls` ARGÜMANSIZDIR** (`calls X.Y(arg)`
+parse hatası; arg-geçişi gövde-seam, üreteç wire'lar). Opsiyonel **`as <alias>`** → sonucu adlandırır
+(`rule { amount <= cap }`). İki kullanım:
+- **Cross-module (kardeş module hedefi) — yalnız QUERY** (ADR-0030 K2): hedef op **query** olmalı
+  (write-sınıfı access → command → error: "cross-module write transaction'ı aşmaz; event/saga
+  kullan"); hedef **`@internal` olmamalı** (module-private → error). Senkron read AMA
+  **consistency-garantisiz** → manifest `callEdges[].{crossModule:true, consistency:'eventual',
+  kind:'module'}` (TÜREV; `riskOf`/op-`{risk,mode}` DOKUNULMAZ). Cross-module **write** yine async
+  (event/saga; `calls` ile değil).
+- **External/uncharted** — yan-etkili (Stripe.Charge) veya read-only. Kompanzatör (`compensate with`)
+  **aynı sistemin** op'u olmalı (farklı → error; self → warning).
+- **Rule-gateability (ADR-0030 K4):** bir call sonucu `rule`'da gate-edilebilir **⟺ hedef query**.
+  Module hedefinde query `access`'ten türev (K2 garantisi); **boundary-op**'ta `readonly` marker'la
+  bildirilir (§8) — işaretsiz boundary-op sonucu gate edilirse → error.
 
 **`consistency`** (cross-module write tutarlılığı):
 ```
@@ -219,12 +258,18 @@ paginated by cursor createdAt desc, id asc size 50     // ya da: paginated by of
 ```
 external Stripe {                               // 3.parti (sahibi sen değilsin)
   @rest(POST, "/v1/charges")
-  operation Charge(amount: Money): ChargeId { validation { amount > 0 } }
+  operation Charge(amount: Money): ChargeId { validation { amount > 0 } }   // yan-etkili (compensate-eligible)
+  readonly operation Score(ref: String): Risk   // read-only marker → sonucu rule'da gate-edilebilir
 }
 uncharted MainframeBilling {                    // şirkete ait ama dökümante edilmemiş
   operation Post(entry: Entry): Unit            // module-gibi: operation/entity/type taşıyabilir (kısmi)
 }
 ```
+**`readonly` marker (ADR-0030 K4) — yalnız boundary-op'ta** (external/uncharted; **module
+op'unda DEĞİL** — orada query'lik `access`'ten türer). Boundary-op'un `access` clause'u yoktur,
+bu yüzden read-only'liği `readonly` ile açıkça bildirilir → sonucu `rule`'da gate-edilebilir
+(query). İşaretsiz boundary-op = yan-etkili varsayılır (compensate-eligible, rule-gate-edilemez).
+`readonly` sıra: `(serving'ler)* readonly operation …` (operation keyword'ünden önce).
 Üreteç bu sistemlerin KENDİSİNİ üretmez (manifest `generated:false`) ama **çağrı adapter'ını**
 bizim module'de üretir ve bilinen `validation`'ı öne çeker (caller-side fail-fast). Teknik op
 bunlara `calls System.Op` ile bağlanır. Fark tek eksende: **sahiplik** (external=3.parti,
@@ -274,3 +319,7 @@ fn(arg, …)                                       // çağrı
 a.b.c                                            // path (segment'ler)
 "str" | 123 | true | false                       // literal
 ```
+**Path kökü = provenance (ADR-0031, bağlam-duyarlı):** `validation` path kökü yalnız `op.params`;
+`rule` kökü param/`access`-entity-veya-alias/`calls`-alias; `invariant`/`permit when` kökü entity
+alanları/`resource.*` (cross-module entity navigasyonu → error). Bildirilmemiş/yanlış-eksen kök →
+error (bkz. §6).
