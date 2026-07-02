@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-476654d7618f", grammarHash: "476654d7618f", techSrcHash: "9e40cd6784c9", commit: "9b5c5a0", builtAt: "2026-06-30T09:03:49+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-476654d7618f", grammarHash: "476654d7618f", techSrcHash: "4a75d0f76aa6", commit: "6cdeae5", builtAt: "2026-07-02T14:28:54+03:00", langium: "4.2.4" };
   }
 });
 
@@ -37755,7 +37755,8 @@ function loadContract(contractPath, documentUri) {
       operations: new Map((json.operations ?? []).map((o) => [o.id, o])),
       entities: new Map((json.entities ?? []).map((e) => [e.id, e])),
       actors: new Map((json.actors ?? []).map((a2) => [a2.id, a2])),
-      relations: new Map((json.relations ?? []).map((r) => [r.id, r]))
+      relations: new Map((json.relations ?? []).map((r) => [r.id, r])),
+      rules: new Map((json.rules ?? []).map((r) => [r.id, r]))
     };
   } catch {
     return null;
@@ -38206,6 +38207,17 @@ function exprEqRealizes(t, b, ctx) {
     return t.op === b.op && exprEqRealizes(t.left, b.left, ctx) && exprEqRealizes(t.right, b.right, ctx);
   return exprNodeEqual(t, b);
 }
+function renderExpr(n, qualify = (p) => p) {
+  if ("node" in n) {
+    if (n.node === "agg") return `${n.fn} of ${qualify(n.path).join(".")}`;
+    if (n.node === "call") return `${n.name}(${n.args.map((a2) => renderExpr(a2, qualify)).join(", ")})`;
+    return `${renderExpr(n.left, qualify)} ${n.op ?? n.node} ${renderExpr(n.right, qualify)}`;
+  }
+  if ("path" in n) return qualify(n.path).join(".");
+  if (n.kind === "string") return `'${n.value}'`;
+  if (n.kind === "duration") return n.text;
+  return String(n.value);
+}
 var TechDslValidator = class {
   constructor(documents2) {
     this.documents = documents2;
@@ -38300,7 +38312,7 @@ var TechDslValidator = class {
   }
   // Faz-1.5: checkContractVersion
   /**
-   * Faz-1.5 (uyum-raporu §3.7): linked sözleşmenin `meta.schemaVersion` v2 (=2)
+   * Faz-1.5 (uyum-raporu §3.7; ADR-0033 ile v3): linked sözleşmenin `meta.schemaVersion` v3 (=3)
    * olmalı. Değilse Teknik DSL eski/yanlış-şekilli operations.json'u sessizce
    * tüketebilir → **error** (açık tanılama; K6-tarzı bildirim — gate değil, manifest
    * yine üretilir). Yalnız linked + dosya yüklenebiliyorsa (yoksa realizes zaten
@@ -38311,8 +38323,8 @@ var TechDslValidator = class {
     if (!path) return;
     const contract = loadContract(path, ast_utils_exports.getDocument(model).uri);
     if (!contract) return;
-    if (contract.schemaVersion !== 2) {
-      accept("error", `S\xF6zle\u015Fme schemaVersion '${contract.schemaVersion ?? "(yok)"}' \u2014 Teknik DSL v2 operations.json bekler (schemaVersion: 2). S\xF6zle\u015Fmeyi g\xFCncel \u0130\u015F DSL \xFCreticisiyle yeniden \xFCret.`, { node: model.contract, property: "path" });
+    if (contract.schemaVersion !== 3) {
+      accept("error", `S\xF6zle\u015Fme schemaVersion '${contract.schemaVersion ?? "(yok)"}' \u2014 Teknik DSL v3 operations.json bekler (schemaVersion: 3). S\xF6zle\u015Fmeyi g\xFCncel \u0130\u015F DSL \xFCreticisiyle yeniden \xFCret.`, { node: model.contract, property: "path" });
     }
   }
   // checkUnrealizedBusinessOps (coverage warning — manifest coverage.unrealizedBusinessOps emsali)
@@ -38334,6 +38346,37 @@ var TechDslValidator = class {
     const unrealized = [...contract.operations.keys()].filter((id) => !realizedOps.has(id)).sort();
     if (unrealized.length > 0) {
       accept("warning", `S\xF6zle\u015Fmedeki \u015Fu business-op'lar hi\xE7bir teknik operation taraf\u0131ndan realize edilmiyor (kapsam eksik): ${unrealized.join(", ")}.`, { node: model.contract, property: "path" });
+    }
+  }
+  // ADR-0033 K9: requires edilen rule tech'te realize edilmemiş → coverage warning (gate DEĞİL).
+  /**
+   * LINKED: realized business-op'ların `requires` ettiği rule'lardan (contract guards[].kind:'rule')
+   * teknik realize edilmeyenler → warning. Bu turda tech rule-realize mekanizması (`for rule`) YOK
+   * (codegen downstream) → hepsi realize-edilmemiş sayılır (kapsam sinyali). Standalone → N/A.
+   * NOT: rule GÖVDESİ divergence'a GİRMEZ (Karar 7) — bu check yalnız İSİM-kapsaması; AST-kıyas YOK.
+   */
+  checkRequiredRuleCoverage(model, accept) {
+    if (!model.contract?.path) return;
+    const contract = loadContract(model.contract.path, ast_utils_exports.getDocument(model).uri);
+    if (!contract) return;
+    const realizedOpIds = new Set(
+      model.decls.filter(isModule).flatMap((m) => m.members.filter(isOperation)).map((op) => op.realizes?.$refText).filter((id) => id != null)
+    );
+    const required = /* @__PURE__ */ new Set();
+    for (const id of realizedOpIds) {
+      const cop = contract.operations.get(id);
+      if (!cop) continue;
+      for (const g of cop.guards ?? []) {
+        if (g.kind === "rule" && g.ref) required.add(g.ref);
+      }
+    }
+    const unrealizedRules = [...required].filter((r) => contract.rules.has(r)).sort();
+    if (unrealizedRules.length > 0) {
+      accept(
+        "warning",
+        `requires edilen \u015Fu rule'lar teknik olarak hen\xFCz realize edilmemi\u015F (kapsam eksik; codegen downstream): ${unrealizedRules.join(", ")}.`,
+        { node: model.contract, property: "path" }
+      );
     }
   }
   // T-3.1: rolemap ters-indeks (repr) yardımcısı
@@ -38393,7 +38436,7 @@ var TechDslValidator = class {
         }
         if (!authorized) continue;
         if (![...repr].every((a2) => authorized.has(a2))) {
-          acceptWitness(accept, "warning", `Rol '${role}' temsil etti\u011Fi akt\xF6r(ler) op'un yetkili k\xFCmesi d\u0131\u015F\u0131nda \u2014 g\xFCvenlik-zay\u0131flatma ('${op.name}').`, op, "name", "weakening", [
+          acceptWitness(accept, "warning", `Rol '${role}' (\u2192 {${[...repr].join(", ")}}) op'un yetkili k\xFCmesi {${[...authorized].join(", ")}} (actor '${actor}') d\u0131\u015F\u0131nda \u2014 g\xFCvenlik-zay\u0131flatma ('${op.name}').`, op, "name", "weakening", [
             { node: c, message: `authored: roles '${role}' \u2192 repr {${[...repr].join(", ")}} (yetkili \u2284)` },
             { node: op, message: `s\xF6zle\u015Fme: yetkili = {${[...authorized].join(", ")}} (actor '${actor}')` }
           ]);
@@ -38586,19 +38629,22 @@ var TechDslValidator = class {
         linkedGuardIds.add(g.guardId);
         const guard = guardsById.get(g.guardId);
         if (!guard || guard.ast == null) {
-          accept("info", `'${op.name}': '${g.guardId}' guard'\u0131 i\xE7in kar\u015F\u0131la\u015Ft\u0131r\u0131labilir business AST yok (yanl\u0131\u015F id veya 'during'?).`, { node: op, property: "name" });
+          accept("info", `'${op.name}': '${g.guardId}' guard'\u0131 i\xE7in kar\u015F\u0131la\u015Ft\u0131r\u0131labilir business AST yok \u2014 yanl\u0131\u015F id ya da 'during' (temporal). Kar\u015F\u0131la\u015Ft\u0131r\u0131labilir guard id'leri: ${guardsById.size > 0 ? [...guardsById.keys()].join(", ") : "(yok)"}.`, { node: op, property: "name" });
           continue;
         }
         const techAst = serializeExpr(g.expr);
         if (!exprEqRealizes(techAst, guard.ast, divCtx)) {
+          const qualifyBiz = (p) => p.length > 0 && !divCtx.bizEntities.has(p[0]) && divCtx.resource ? [divCtx.resource, ...p] : p;
+          const techStr = renderExpr(techAst);
+          const bizStr = renderExpr(guard.ast, qualifyBiz);
           acceptWitness(
             accept,
             "warning",
-            `'${op.name}': ifade '${g.guardId}' business guard'\u0131ndan sap\u0131yor (differs). Business: ${guard.text ?? "(ast)"}.`,
+            `'${op.name}': ifade '${g.guardId}' business guard'\u0131ndan sap\u0131yor (differs). tech: ${techStr}; business${divCtx.resource ? ` (resource=${divCtx.resource})` : ""}: ${bizStr}.`,
             op,
             "name",
             "expr-differs",
-            [{ node: g.expr, message: `tech ifadesi (authored)` }]
+            [{ node: g.expr, message: `tech ifadesi (authored): ${techStr}` }]
           );
         }
       }
@@ -39579,7 +39625,7 @@ function registerTechValidationChecks(services) {
     // T-3.3: invariant path-scope (saf-tech) + T-2.3: cross-module entity-field ban + sourceOfTruth marker + T-2.1: concurrency ≤1 + uncharted-ban
     EventDecl: [validator.checkEventPayloadEntity],
     Module: [validator.checkEntityCoverage, validator.checkSharedUtils, validator.checkDuplicateErrorName, validator.checkDuplicateEventName],
-    Model: [validator.checkStructural, validator.checkContractVersion, validator.checkUnrealizedBusinessOps, validator.checkDoubleOwnership, validator.checkAnnotationDeclared, validator.checkExtensionDecl, validator.checkPreludeReserved, validator.checkExtensionCollision, validator.checkAnnotationUsage, validator.checkUnprotectedReach, validator.checkWriteCycle, validator.checkImportedPackContent, validator.checkImportResolvable, validator.checkUnusedError, validator.checkUnusedEvent]
+    Model: [validator.checkStructural, validator.checkContractVersion, validator.checkUnrealizedBusinessOps, validator.checkRequiredRuleCoverage, validator.checkDoubleOwnership, validator.checkAnnotationDeclared, validator.checkExtensionDecl, validator.checkPreludeReserved, validator.checkExtensionCollision, validator.checkAnnotationUsage, validator.checkUnprotectedReach, validator.checkWriteCycle, validator.checkImportedPackContent, validator.checkImportResolvable, validator.checkUnusedError, validator.checkUnusedEvent]
   };
   registry.register(checks, validator);
 }

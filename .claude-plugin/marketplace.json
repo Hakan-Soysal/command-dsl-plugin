@@ -8,10 +8,10 @@
     {
       "name": "command-dsl",
       "source": "./plugins/command-dsl",
-      "description": "CommandDSL ailesi: is-analizi (.cdsl iş analizi) + teknik-analiz (linked .tcdsl teknik tasarım) + kesif (teknik tasarımı üretece bağlayan seçici keşif + kapı, executor'a devreder) skill'leri.",
-      "version": "0.9.1",
+      "description": "CommandDSL ailesi: is-analizi (.cdsl iş analizi) + teknik-analiz (linked .tcdsl teknik tasarım) + frontend-analiz (linked .fcdsl deneyim tasarımı + experience.json) + kesif (teknik tasarımı üretece bağlayan seçici keşif + kapı, executor'a devreder) skill'leri.",
+      "version": "0.11.0",
       "category": "development",
-      "tags": ["dsl", "business-analysis", "technical-analysis", "code-generation", "command-dsl", "tech-dsl", "is-analizi", "teknik-analiz", "kesif"]
+      "tags": ["dsl", "business-analysis", "technical-analysis", "frontend-analysis", "code-generation", "command-dsl", "tech-dsl", "frontend-dsl", "is-analizi", "teknik-analiz", "frontend-analiz", "kesif"]
     }
   ]
 }

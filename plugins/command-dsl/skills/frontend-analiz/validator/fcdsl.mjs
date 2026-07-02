@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-4221001a93cc", grammarHash: "4221001a93cc", srcHash: "a80d4f9bda24", commit: "6cdeae5", builtAt: "2026-07-02T14:28:54+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-e5764dfe0cec", grammarHash: "e5764dfe0cec", frontendSrcHash: "a4f0d2a6d1fa", commit: "6cdeae5", builtAt: "2026-07-02T14:28:54+03:00", langium: "4.2.4" };
   }
 });
 
@@ -161,14 +161,14 @@ var require_events = __commonJS({
           throw new Error("When adding a listener with a context, you should remove it with the same context");
         }
       }
-      invoke(...args) {
+      invoke(...args2) {
         if (!this._callbacks) {
           return [];
         }
         const ret = [], callbacks = this._callbacks.slice(0), contexts = this._contexts.slice(0);
         for (let i = 0, len = callbacks.length; i < len; i++) {
           try {
-            ret.push(callbacks[i].apply(contexts[i], args));
+            ret.push(callbacks[i].apply(contexts[i], args2));
           } catch (e) {
             (0, ral_1.default)().console.error(e);
           }
@@ -1074,14 +1074,14 @@ var require_events2 = __commonJS({
           throw new Error("When adding a listener with a context, you should remove it with the same context");
         }
       }
-      invoke(...args) {
+      invoke(...args2) {
         if (!this._callbacks) {
           return [];
         }
         const ret = [], callbacks = this._callbacks.slice(0), contexts = this._contexts.slice(0);
         for (let i = 0, len = callbacks.length; i < len; i++) {
           try {
-            ret.push(callbacks[i].apply(contexts[i], args));
+            ret.push(callbacks[i].apply(contexts[i], args2));
           } catch (e) {
             (0, ral_1.default)().console.error(e);
           }
@@ -1778,14 +1778,14 @@ var require_messageBuffer = __commonJS({
           return result;
         }
         for (let i = 0; i < headers.length - 2; i++) {
-          const header2 = headers[i];
-          const index = header2.indexOf(":");
+          const header = headers[i];
+          const index = header.indexOf(":");
           if (index === -1) {
             throw new Error(`Message header must separate key and value using ':'
-${header2}`);
+${header}`);
           }
-          const key = header2.substr(0, index);
-          const value = header2.substr(index + 1).trim();
+          const key = header.substr(0, index);
+          const value = header.substr(index + 1).trim();
           result.set(lowerCaseKeys ? key.toLowerCase() : key, value);
         }
         return result;
@@ -2686,37 +2686,37 @@ ${JSON.stringify(message, null, 4)}`);
         return result;
       }
       const connection = {
-        sendNotification: (type, ...args) => {
+        sendNotification: (type, ...args2) => {
           throwIfClosedOrDisposed();
           let method;
           let messageParams;
           if (Is2.string(type)) {
             method = type;
-            const first2 = args[0];
+            const first2 = args2[0];
             let paramStart = 0;
             let parameterStructures = messages_1.ParameterStructures.auto;
             if (messages_1.ParameterStructures.is(first2)) {
               paramStart = 1;
               parameterStructures = first2;
             }
-            let paramEnd = args.length;
+            let paramEnd = args2.length;
             const numberOfParams = paramEnd - paramStart;
             switch (numberOfParams) {
               case 0:
                 messageParams = void 0;
                 break;
               case 1:
-                messageParams = computeSingleParam(parameterStructures, args[paramStart]);
+                messageParams = computeSingleParam(parameterStructures, args2[paramStart]);
                 break;
               default:
                 if (parameterStructures === messages_1.ParameterStructures.byName) {
                   throw new Error(`Received ${numberOfParams} parameters for 'by Name' notification parameter structure.`);
                 }
-                messageParams = args.slice(paramStart, paramEnd).map((value) => undefinedToNull(value));
+                messageParams = args2.slice(paramStart, paramEnd).map((value) => undefinedToNull(value));
                 break;
             }
           } else {
-            const params = args;
+            const params = args2;
             method = type.method;
             messageParams = computeMessageParams(type, params);
           }
@@ -2770,7 +2770,7 @@ ${JSON.stringify(message, null, 4)}`);
           return connection.sendNotification(ProgressNotification.type, { token, value });
         },
         onUnhandledProgress: unhandledProgressEmitter.event,
-        sendRequest: (type, ...args) => {
+        sendRequest: (type, ...args2) => {
           throwIfClosedOrDisposed();
           throwIfNotListening();
           let method;
@@ -2778,15 +2778,15 @@ ${JSON.stringify(message, null, 4)}`);
           let token = void 0;
           if (Is2.string(type)) {
             method = type;
-            const first2 = args[0];
-            const last = args[args.length - 1];
+            const first2 = args2[0];
+            const last = args2[args2.length - 1];
             let paramStart = 0;
             let parameterStructures = messages_1.ParameterStructures.auto;
             if (messages_1.ParameterStructures.is(first2)) {
               paramStart = 1;
               parameterStructures = first2;
             }
-            let paramEnd = args.length;
+            let paramEnd = args2.length;
             if (cancellation_1.CancellationToken.is(last)) {
               paramEnd = paramEnd - 1;
               token = last;
@@ -2797,17 +2797,17 @@ ${JSON.stringify(message, null, 4)}`);
                 messageParams = void 0;
                 break;
               case 1:
-                messageParams = computeSingleParam(parameterStructures, args[paramStart]);
+                messageParams = computeSingleParam(parameterStructures, args2[paramStart]);
                 break;
               default:
                 if (parameterStructures === messages_1.ParameterStructures.byName) {
                   throw new Error(`Received ${numberOfParams} parameters for 'by Name' request parameter structure.`);
                 }
-                messageParams = args.slice(paramStart, paramEnd).map((value) => undefinedToNull(value));
+                messageParams = args2.slice(paramStart, paramEnd).map((value) => undefinedToNull(value));
                 break;
             }
           } else {
-            const params = args;
+            const params = args2;
             method = type.method;
             messageParams = computeMessageParams(type, params);
             const numberOfParams = type.numberOfParams;
@@ -3308,16 +3308,16 @@ var require_ril = __commonJS({
       }),
       console,
       timer: Object.freeze({
-        setTimeout(callback, ms, ...args) {
-          const handle = setTimeout(callback, ms, ...args);
+        setTimeout(callback, ms, ...args2) {
+          const handle = setTimeout(callback, ms, ...args2);
           return { dispose: () => clearTimeout(handle) };
         },
-        setImmediate(callback, ...args) {
-          const handle = setImmediate(callback, ...args);
+        setImmediate(callback, ...args2) {
+          const handle = setImmediate(callback, ...args2);
           return { dispose: () => clearImmediate(handle) };
         },
-        setInterval(callback, ms, ...args) {
-          const handle = setInterval(callback, ms, ...args);
+        setInterval(callback, ms, ...args2) {
+          const handle = setInterval(callback, ms, ...args2);
           return { dispose: () => clearInterval(handle) };
         }
       })
@@ -3627,13 +3627,13 @@ var require_main2 = __commonJS({
         }
         DocumentUri3.is = is;
       })(DocumentUri2 || (exports3.DocumentUri = DocumentUri2 = {}));
-      var URI4;
-      (function(URI5) {
+      var URI5;
+      (function(URI6) {
         function is(value) {
           return typeof value === "string";
         }
-        URI5.is = is;
-      })(URI4 || (exports3.URI = URI4 = {}));
+        URI6.is = is;
+      })(URI5 || (exports3.URI = URI5 = {}));
       var integer2;
       (function(integer3) {
         integer3.MIN_VALUE = -2147483648;
@@ -3858,13 +3858,13 @@ var require_main2 = __commonJS({
       var Command2;
       (function(Command3) {
         function create(title, command) {
-          var args = [];
+          var args2 = [];
           for (var _i = 2; _i < arguments.length; _i++) {
-            args[_i - 2] = arguments[_i];
+            args2[_i - 2] = arguments[_i];
           }
           var result = { title, command };
-          if (Is2.defined(args) && args.length > 0) {
-            result.arguments = args;
+          if (Is2.defined(args2) && args2.length > 0) {
+            result.arguments = args2;
           }
           return result;
         }
@@ -4626,8 +4626,8 @@ var require_main2 = __commonJS({
       })(CodeActionTriggerKind2 || (exports3.CodeActionTriggerKind = CodeActionTriggerKind2 = {}));
       var CodeActionContext2;
       (function(CodeActionContext3) {
-        function create(diagnostics, only, triggerKind) {
-          var result = { diagnostics };
+        function create(diagnostics2, only, triggerKind) {
+          var result = { diagnostics: diagnostics2 };
           if (only !== void 0 && only !== null) {
             result.only = only;
           }
@@ -4852,13 +4852,13 @@ var require_main2 = __commonJS({
         }
         InlayHint3.is = is;
       })(InlayHint2 || (exports3.InlayHint = InlayHint2 = {}));
-      var StringValue3;
-      (function(StringValue4) {
+      var StringValue2;
+      (function(StringValue3) {
         function createSnippet(value) {
           return { kind: "snippet", value };
         }
-        StringValue4.createSnippet = createSnippet;
-      })(StringValue3 || (exports3.StringValue = StringValue3 = {}));
+        StringValue3.createSnippet = createSnippet;
+      })(StringValue2 || (exports3.StringValue = StringValue2 = {}));
       var InlineCompletionItem2;
       (function(InlineCompletionItem3) {
         function create(insertText, filterText, range, command) {
@@ -4896,15 +4896,15 @@ var require_main2 = __commonJS({
       (function(WorkspaceFolder3) {
         function is(value) {
           var candidate = value;
-          return Is2.objectLiteral(candidate) && URI4.is(candidate.uri) && Is2.string(candidate.name);
+          return Is2.objectLiteral(candidate) && URI5.is(candidate.uri) && Is2.string(candidate.name);
         }
         WorkspaceFolder3.is = is;
       })(WorkspaceFolder2 || (exports3.WorkspaceFolder = WorkspaceFolder2 = {}));
       exports3.EOL = ["\n", "\r\n", "\r"];
       var TextDocument3;
       (function(TextDocument4) {
-        function create(uri, languageId, version, content2) {
-          return new FullTextDocument3(uri, languageId, version, content2);
+        function create(uri, languageId, version, content) {
+          return new FullTextDocument3(uri, languageId, version, content);
         }
         TextDocument4.create = create;
         function is(value) {
@@ -4968,11 +4968,11 @@ var require_main2 = __commonJS({
       var FullTextDocument3 = (
         /** @class */
         (function() {
-          function FullTextDocument4(uri, languageId, version, content2) {
+          function FullTextDocument4(uri, languageId, version, content) {
             this._uri = uri;
             this._languageId = languageId;
             this._version = version;
-            this._content = content2;
+            this._content = content;
             this._lineOffsets = void 0;
           }
           Object.defineProperty(FullTextDocument4.prototype, "uri", {
@@ -9062,9 +9062,9 @@ var require_main4 = __commonJS({
           runTimer(process.argv[i + 1]);
           return;
         } else {
-          let args = arg.split("=");
-          if (args[0] === argName) {
-            runTimer(args[1]);
+          let args2 = arg.split("=");
+          if (args2[0] === argName) {
+            runTimer(args2[1]);
           }
         }
       }
@@ -9120,9 +9120,9 @@ var require_main4 = __commonJS({
       if (!input && !output && process.argv.length > 2) {
         let port = void 0;
         let pipeName = void 0;
-        let argv2 = process.argv.slice(2);
-        for (let i = 0; i < argv2.length; i++) {
-          let arg = argv2[i];
+        let argv = process.argv.slice(2);
+        for (let i = 0; i < argv.length; i++) {
+          let arg = argv[i];
           if (arg === "--node-ipc") {
             input = new node_1.IPCMessageReader(process);
             output = new node_1.IPCMessageWriter(process);
@@ -9133,18 +9133,18 @@ var require_main4 = __commonJS({
             output = process.stdout;
             break;
           } else if (arg === "--socket") {
-            port = parseInt(argv2[i + 1]);
+            port = parseInt(argv[i + 1]);
             break;
           } else if (arg === "--pipe") {
-            pipeName = argv2[i + 1];
+            pipeName = argv[i + 1];
             break;
           } else {
-            var args = arg.split("=");
-            if (args[0] === "--socket") {
-              port = parseInt(args[1]);
+            var args2 = arg.split("=");
+            if (args2[0] === "--socket") {
+              port = parseInt(args2[1]);
               break;
-            } else if (args[0] === "--pipe") {
-              pipeName = args[1];
+            } else if (args2[0] === "--pipe") {
+              pipeName = args2[1];
               break;
             }
           }
@@ -9187,18 +9187,18 @@ var require_main4 = __commonJS({
       return (0, server_1.createConnection)(connectionFactory, watchDog, factories);
     }
     function patchConsole(logger) {
-      function serialize(args) {
-        return args.map((arg) => typeof arg === "string" ? arg : (0, node_util_1.inspect)(arg)).join(" ");
+      function serialize(args2) {
+        return args2.map((arg) => typeof arg === "string" ? arg : (0, node_util_1.inspect)(arg)).join(" ");
       }
       const counters = /* @__PURE__ */ new Map();
-      console.assert = function assert(assertion, ...args) {
+      console.assert = function assert(assertion, ...args2) {
         if (assertion) {
           return;
         }
-        if (args.length === 0) {
+        if (args2.length === 0) {
           logger.error("Assertion failed");
         } else {
-          const [message, ...rest] = args;
+          const [message, ...rest] = args2;
           logger.error(`Assertion failed: ${message} ${serialize(rest)}`);
         }
       };
@@ -9216,38 +9216,38 @@ var require_main4 = __commonJS({
           counters.delete(String(label));
         }
       };
-      console.debug = function debug(...args) {
-        logger.log(serialize(args));
+      console.debug = function debug(...args2) {
+        logger.log(serialize(args2));
       };
       console.dir = function dir(arg, options) {
         logger.log((0, node_util_1.inspect)(arg, options));
       };
-      console.log = function log(...args) {
-        logger.log(serialize(args));
+      console.log = function log(...args2) {
+        logger.log(serialize(args2));
       };
-      console.error = function error(...args) {
-        logger.error(serialize(args));
+      console.error = function error(...args2) {
+        logger.error(serialize(args2));
       };
-      console.trace = function trace(...args) {
+      console.trace = function trace(...args2) {
         const stack = new Error().stack.replace(/(.+\n){2}/, "");
         let message = "Trace";
-        if (args.length !== 0) {
-          message += `: ${serialize(args)}`;
+        if (args2.length !== 0) {
+          message += `: ${serialize(args2)}`;
         }
         logger.log(`${message}
 ${stack}`);
       };
-      console.warn = function warn(...args) {
-        logger.warn(serialize(args));
+      console.warn = function warn(...args2) {
+        logger.warn(serialize(args2));
       };
     }
   }
 });
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/emit-operations.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
 init_define_BUILD_INFO();
-import { writeFileSync, statSync as statSync2 } from "node:fs";
-import { resolve, isAbsolute } from "node:path";
+import { readdirSync as readdirSync2, statSync as statSync2, writeFileSync, mkdirSync } from "node:fs";
+import { resolve, join, basename } from "node:path";
 
 // node_modules/langium/lib/index.js
 var lib_exports = {};
@@ -17300,7 +17300,7 @@ var Recoverable = class {
     }
     return resyncedTokens.slice(0, -1);
   }
-  attemptInRepetitionRecovery(prodFunc, args, lookaheadFunc, dslMethodIdx, prodOccurrence, nextToksWalker, notStuck) {
+  attemptInRepetitionRecovery(prodFunc, args2, lookaheadFunc, dslMethodIdx, prodOccurrence, nextToksWalker, notStuck) {
   }
   getCurrentGrammarPath(tokType, tokIdxInRule) {
     const pathRuleStack = this.getHumanReadableRuleStack();
@@ -17322,7 +17322,7 @@ var Recoverable = class {
     return result;
   }
 };
-function attemptInRepetitionRecovery(prodFunc, args, lookaheadFunc, dslMethodIdx, prodOccurrence, nextToksWalker, notStuck) {
+function attemptInRepetitionRecovery(prodFunc, args2, lookaheadFunc, dslMethodIdx, prodOccurrence, nextToksWalker, notStuck) {
   const key = this.getKeyForAutomaticLookahead(dslMethodIdx, prodOccurrence);
   let firstAfterRepInfo = this.firstAfterRepMap[key];
   if (firstAfterRepInfo === void 0) {
@@ -17343,7 +17343,7 @@ function attemptInRepetitionRecovery(prodFunc, args, lookaheadFunc, dslMethodIdx
     return;
   }
   if (this.shouldInRepetitionRecoveryBeTried(expectTokAfterLastMatch, nextTokIdx, notStuck)) {
-    this.tryInRepetitionRecovery(prodFunc, args, lookaheadFunc, expectTokAfterLastMatch);
+    this.tryInRepetitionRecovery(prodFunc, args2, lookaheadFunc, expectTokAfterLastMatch);
   }
 }
 
@@ -18189,14 +18189,14 @@ var RecognizerApi = class {
     this[name] = ruleImplementation;
     return ruleImplementation;
   }
-  BACKTRACK(grammarRule, args) {
+  BACKTRACK(grammarRule, args2) {
     var _a;
     const ruleToCall = (_a = grammarRule.coreRule) !== null && _a !== void 0 ? _a : grammarRule;
     return function() {
       this.isBackTrackingStack.push(1);
       const orgState = this.saveRecogState();
       try {
-        ruleToCall.apply(this, args);
+        ruleToCall.apply(this, args2);
         return true;
       } catch (e) {
         if (isRecognitionException(e)) {
@@ -18291,10 +18291,10 @@ Make sure that all grammar rule definitions are done before 'performSelfAnalysis
     this.fullRuleNameToShort[ruleName] = shortName;
     let coreRuleFunction;
     if (this.outputCst === true) {
-      coreRuleFunction = function invokeRuleWithTry(...args) {
+      coreRuleFunction = function invokeRuleWithTry(...args2) {
         try {
           this.ruleInvocationStateUpdate(shortName, ruleName, this.subruleIdx);
-          impl.apply(this, args);
+          impl.apply(this, args2);
           const cst = this.CST_STACK[this.CST_STACK.length - 1];
           this.cstPostRule(cst);
           return cst;
@@ -18305,10 +18305,10 @@ Make sure that all grammar rule definitions are done before 'performSelfAnalysis
         }
       };
     } else {
-      coreRuleFunction = function invokeRuleWithTryCst(...args) {
+      coreRuleFunction = function invokeRuleWithTryCst(...args2) {
         try {
           this.ruleInvocationStateUpdate(shortName, ruleName, this.subruleIdx);
-          return impl.apply(this, args);
+          return impl.apply(this, args2);
         } catch (e) {
           return this.invokeRuleCatch(e, resyncEnabled, recoveryValueFunc);
         } finally {
@@ -18316,10 +18316,10 @@ Make sure that all grammar rule definitions are done before 'performSelfAnalysis
         }
       };
     }
-    const rootRuleFunction = function rootRule(...args) {
+    const rootRuleFunction = function rootRule(...args2) {
       this.onBeforeParse(ruleName);
       try {
-        return coreRuleFunction.apply(this, args);
+        return coreRuleFunction.apply(this, args2);
       } finally {
         this.onAfterParse(ruleName);
       }
@@ -18548,9 +18548,9 @@ Make sure that all grammar rule definitions are done before 'performSelfAnalysis
   subruleInternal(ruleToCall, idx, options) {
     let ruleResult;
     try {
-      const args = options !== void 0 ? options.ARGS : void 0;
+      const args2 = options !== void 0 ? options.ARGS : void 0;
       this.subruleIdx = idx;
-      ruleResult = ruleToCall.coreRule.apply(this, args);
+      ruleResult = ruleToCall.coreRule.apply(this, args2);
       this.cstPostNonTerminal(ruleResult, options !== void 0 && options.LABEL !== void 0 ? options.LABEL : ruleToCall.ruleName);
       return ruleResult;
     } catch (e) {
@@ -18888,7 +18888,7 @@ var GastRecorder = class {
   ACTION_RECORD(impl) {
   }
   // Executing backtracking logic will break our recording logic assumptions
-  BACKTRACK_RECORD(grammarRule, args) {
+  BACKTRACK_RECORD(grammarRule, args2) {
     return () => true;
   }
   // LA is part of the official API and may be used for custom lookahead logic
@@ -20599,11 +20599,11 @@ function memoize(func, resolver) {
     throw new TypeError(FUNC_ERROR_TEXT);
   }
   var memoized = function() {
-    var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache = memoized.cache;
+    var args2 = arguments, key = resolver ? resolver.apply(this, args2) : args2[0], cache = memoized.cache;
     if (cache.has(key)) {
       return cache.get(key);
     }
-    var result = func.apply(this, args);
+    var result = func.apply(this, args2);
     memoized.cache = cache.set(key, result) || cache;
     return result;
   };
@@ -22174,11 +22174,11 @@ var DocumentUri;
   DocumentUri2.is = is;
 })(DocumentUri || (DocumentUri = {}));
 var URI;
-(function(URI4) {
+(function(URI5) {
   function is(value) {
     return typeof value === "string";
   }
-  URI4.is = is;
+  URI5.is = is;
 })(URI || (URI = {}));
 var integer;
 (function(integer2) {
@@ -22403,10 +22403,10 @@ var Diagnostic;
 })(Diagnostic || (Diagnostic = {}));
 var Command;
 (function(Command2) {
-  function create(title, command, ...args) {
+  function create(title, command, ...args2) {
     let result = { title, command };
-    if (Is.defined(args) && args.length > 0) {
-      result.arguments = args;
+    if (Is.defined(args2) && args2.length > 0) {
+      result.arguments = args2;
     }
     return result;
   }
@@ -22875,8 +22875,8 @@ var CodeActionTriggerKind;
 })(CodeActionTriggerKind || (CodeActionTriggerKind = {}));
 var CodeActionContext;
 (function(CodeActionContext2) {
-  function create(diagnostics, only, triggerKind) {
-    let result = { diagnostics };
+  function create(diagnostics2, only, triggerKind) {
+    let result = { diagnostics: diagnostics2 };
     if (only !== void 0 && only !== null) {
       result.only = only;
     }
@@ -23102,11 +23102,11 @@ var InlayHint;
   InlayHint2.is = is;
 })(InlayHint || (InlayHint = {}));
 var StringValue;
-(function(StringValue3) {
+(function(StringValue2) {
   function createSnippet(value) {
     return { kind: "snippet", value };
   }
-  StringValue3.createSnippet = createSnippet;
+  StringValue2.createSnippet = createSnippet;
 })(StringValue || (StringValue = {}));
 var InlineCompletionItem;
 (function(InlineCompletionItem2) {
@@ -23151,8 +23151,8 @@ var WorkspaceFolder;
 })(WorkspaceFolder || (WorkspaceFolder = {}));
 var TextDocument;
 (function(TextDocument3) {
-  function create(uri, languageId, version, content2) {
-    return new FullTextDocument(uri, languageId, version, content2);
+  function create(uri, languageId, version, content) {
+    return new FullTextDocument(uri, languageId, version, content);
   }
   TextDocument3.create = create;
   function is(value) {
@@ -23214,11 +23214,11 @@ var TextDocument;
   }
 })(TextDocument || (TextDocument = {}));
 var FullTextDocument = class {
-  constructor(uri, languageId, version, content2) {
+  constructor(uri, languageId, version, content) {
     this._uri = uri;
     this._languageId = languageId;
     this._version = version;
-    this._content = content2;
+    this._content = content;
     this._lineOffsets = void 0;
   }
   get uri() {
@@ -23696,7 +23696,7 @@ var LangiumParser = class extends AbstractLangiumParser {
     return result;
   }
   startImplementation($type, infixName, implementation) {
-    return (args) => {
+    return (args2) => {
       const createNode = !this.isRecording() && $type !== void 0;
       if (createNode) {
         const node = { $type };
@@ -23707,7 +23707,7 @@ var LangiumParser = class extends AbstractLangiumParser {
           node.$infixName = infixName;
         }
       }
-      implementation(args);
+      implementation(args2);
       return createNode ? this.construct() : void 0;
     };
   }
@@ -23754,14 +23754,14 @@ var LangiumParser = class extends AbstractLangiumParser {
   isValidToken(token) {
     return !token.isInsertedInRecovery && !isNaN(token.startOffset) && typeof token.endOffset === "number" && !isNaN(token.endOffset);
   }
-  subrule(idx, rule, fragment, feature, args) {
+  subrule(idx, rule, fragment, feature, args2) {
     let cstNode;
     if (!this.isRecording() && !fragment) {
       cstNode = this.nodeBuilder.buildCompositeNode(feature);
     }
     let result;
     try {
-      result = this.wrapper.wrapSubrule(idx, rule, args);
+      result = this.wrapper.wrapSubrule(idx, rule, args2);
     } finally {
       if (!this.isRecording()) {
         if (result === void 0 && !fragment) {
@@ -23997,10 +23997,10 @@ var LangiumCompletionParser = class extends AbstractLangiumParser {
     this.stackSize = 0;
   }
   startImplementation(implementation) {
-    return (args) => {
+    return (args2) => {
       const size = this.keepStackSize();
       try {
-        implementation(args);
+        implementation(args2);
       } finally {
         this.resetStackSize(size);
       }
@@ -24025,9 +24025,9 @@ var LangiumCompletionParser = class extends AbstractLangiumParser {
       this.nextTokenIndex = this.currIdx + 1;
     }
   }
-  subrule(idx, rule, fragment, feature, args) {
+  subrule(idx, rule, fragment, feature, args2) {
     this.before(feature);
-    this.wrapper.wrapSubrule(idx, rule, args);
+    this.wrapper.wrapSubrule(idx, rule, args2);
     this.after(feature);
   }
   before(element) {
@@ -24079,9 +24079,9 @@ var ChevrotainWrapper = class extends EmbeddedActionsParser {
   wrapConsume(idx, tokenType) {
     return this.consume(idx, tokenType, void 0);
   }
-  wrapSubrule(idx, rule, args) {
+  wrapSubrule(idx, rule, args2) {
     return this.subrule(idx, rule, {
-      ARGS: [args]
+      ARGS: [args2]
     });
   }
   wrapOr(idx, choices) {
@@ -24206,13 +24206,13 @@ function buildInfixRule(ctx, rule) {
     ALT: () => ctx.parser.consume(index, token, operatorAssignment)
   }));
   let subrule;
-  return (args) => {
+  return (args2) => {
     subrule ?? (subrule = getRule(ctx, expressionRule));
-    ctx.parser.subrule(0, subrule, false, part1Assignment, args);
+    ctx.parser.subrule(0, subrule, false, part1Assignment, args2);
     ctx.parser.many(0, {
       DEF: () => {
         ctx.parser.alternatives(0, orAlts);
-        ctx.parser.subrule(1, subrule, false, part2Assignment, args);
+        ctx.parser.subrule(1, subrule, false, part2Assignment, args2);
       }
     });
   };
@@ -24254,9 +24254,9 @@ function buildRuleCall(ctx, ruleCall) {
     const fragment = isParserRule(rule) && rule.fragment;
     const predicate = ruleCall.arguments.length > 0 ? buildRuleCallPredicate(rule, ruleCall.arguments) : () => ({});
     let subrule;
-    return (args) => {
+    return (args2) => {
       subrule ?? (subrule = getRule(ctx, rule));
-      ctx.parser.subrule(idx, subrule, fragment, ruleCall, predicate(args));
+      ctx.parser.subrule(idx, subrule, fragment, ruleCall, predicate(args2));
     };
   } else if (isTerminalRule(rule)) {
     const idx = ctx.consume++;
@@ -24275,24 +24275,24 @@ function buildRuleCallPredicate(rule, namedArgs) {
       parameterName: arg.parameter?.ref?.name,
       predicate: buildPredicate(arg.value)
     }));
-    return (args) => {
+    return (args2) => {
       const ruleArgs = {};
       for (const { parameterName, predicate } of namedPredicates) {
         if (parameterName) {
-          ruleArgs[parameterName] = predicate(args);
+          ruleArgs[parameterName] = predicate(args2);
         }
       }
       return ruleArgs;
     };
   } else {
     const predicates = namedArgs.map((arg) => buildPredicate(arg.value));
-    return (args) => {
+    return (args2) => {
       const ruleArgs = {};
       for (let i = 0; i < predicates.length; i++) {
         if (i < rule.parameters.length) {
           const parameterName = rule.parameters[i].name;
           const predicate = predicates[i];
-          ruleArgs[parameterName] = predicate(args);
+          ruleArgs[parameterName] = predicate(args2);
         }
       }
       return ruleArgs;
@@ -24303,17 +24303,17 @@ function buildPredicate(condition) {
   if (isDisjunction(condition)) {
     const left = buildPredicate(condition.left);
     const right = buildPredicate(condition.right);
-    return (args) => left(args) || right(args);
+    return (args2) => left(args2) || right(args2);
   } else if (isConjunction(condition)) {
     const left = buildPredicate(condition.left);
     const right = buildPredicate(condition.right);
-    return (args) => left(args) && right(args);
+    return (args2) => left(args2) && right(args2);
   } else if (isNegation(condition)) {
     const value = buildPredicate(condition.value);
-    return (args) => !value(args);
+    return (args2) => !value(args2);
   } else if (isParameterReference(condition)) {
     const name = condition.parameter.ref.name;
-    return (args) => args !== void 0 && args[name] === true;
+    return (args2) => args2 !== void 0 && args2[name] === true;
   } else if (isBooleanLiteral(condition)) {
     const value = Boolean(condition.true);
     return () => value;
@@ -24338,13 +24338,13 @@ function buildAlternatives(ctx, alternatives) {
       methods.push(predicatedMethod);
     }
     const idx = ctx.or++;
-    return (args) => ctx.parser.alternatives(idx, methods.map((method) => {
+    return (args2) => ctx.parser.alternatives(idx, methods.map((method) => {
       const alt = {
-        ALT: () => method.ALT(args)
+        ALT: () => method.ALT(args2)
       };
       const gate = method.GATE;
       if (gate) {
-        alt.GATE = () => gate(args);
+        alt.GATE = () => gate(args2);
       }
       return alt;
     }));
@@ -24372,11 +24372,11 @@ function buildUnorderedGroup(ctx, group) {
     const stackId = lParser.getRuleStack().join("-");
     return `uGroup_${groupIdx}_${stackId}`;
   };
-  const alternatives = (args) => ctx.parser.alternatives(orIdx, methods.map((method, idx) => {
+  const alternatives = (args2) => ctx.parser.alternatives(orIdx, methods.map((method, idx) => {
     const alt = { ALT: () => true };
     const parser = ctx.parser;
     alt.ALT = () => {
-      method.ALT(args);
+      method.ALT(args2);
       if (!parser.isRecording()) {
         const key = idFunc(orIdx, parser);
         if (!parser.unorderedGroups.get(key)) {
@@ -24390,7 +24390,7 @@ function buildUnorderedGroup(ctx, group) {
     };
     const gate = method.GATE;
     if (gate) {
-      alt.GATE = () => gate(args);
+      alt.GATE = () => gate(args2);
     } else {
       alt.GATE = () => {
         const trackedAlternatives = parser.unorderedGroups.get(idFunc(orIdx, parser));
@@ -24401,8 +24401,8 @@ function buildUnorderedGroup(ctx, group) {
     return alt;
   }));
   const wrapped = wrap(ctx, getGuardCondition(group), alternatives, "*");
-  return (args) => {
-    wrapped(args);
+  return (args2) => {
+    wrapped(args2);
     if (!ctx.parser.isRecording()) {
       ctx.parser.unorderedGroups.delete(idFunc(orIdx, ctx.parser));
     }
@@ -24410,7 +24410,7 @@ function buildUnorderedGroup(ctx, group) {
 }
 function buildGroup(ctx, group) {
   const methods = group.elements.map((e) => buildElement(ctx, e));
-  return (args) => methods.forEach((method) => method(args));
+  return (args2) => methods.forEach((method) => method(args2));
 }
 function getGuardCondition(element) {
   if (isGroup(element)) {
@@ -24433,9 +24433,9 @@ function buildCrossReference(ctx, crossRef, terminal = crossRef.terminal) {
     const rule = terminal.rule.ref;
     const idx = ctx.subrule++;
     let subrule;
-    return (args) => {
+    return (args2) => {
       subrule ?? (subrule = getRule(ctx, rule));
-      ctx.parser.subrule(idx, subrule, false, crossRef, args);
+      ctx.parser.subrule(idx, subrule, false, crossRef, args2);
     };
   } else if (isRuleCall(terminal) && isTerminalRule(terminal.rule.ref)) {
     const idx = ctx.consume++;
@@ -24462,14 +24462,14 @@ function wrap(ctx, guard, method, cardinality) {
   if (!cardinality) {
     if (gate) {
       const idx = ctx.or++;
-      return (args) => ctx.parser.alternatives(idx, [
+      return (args2) => ctx.parser.alternatives(idx, [
         {
-          ALT: () => method(args),
-          GATE: () => gate(args)
+          ALT: () => method(args2),
+          GATE: () => gate(args2)
         },
         {
           ALT: EMPTY_ALT(),
-          GATE: () => !gate(args)
+          GATE: () => !gate(args2)
         }
       ]);
     } else {
@@ -24478,36 +24478,36 @@ function wrap(ctx, guard, method, cardinality) {
   }
   if (cardinality === "*") {
     const idx = ctx.many++;
-    return (args) => ctx.parser.many(idx, {
-      DEF: () => method(args),
-      GATE: gate ? () => gate(args) : void 0
+    return (args2) => ctx.parser.many(idx, {
+      DEF: () => method(args2),
+      GATE: gate ? () => gate(args2) : void 0
     });
   } else if (cardinality === "+") {
     const idx = ctx.many++;
     if (gate) {
       const orIdx = ctx.or++;
-      return (args) => ctx.parser.alternatives(orIdx, [
+      return (args2) => ctx.parser.alternatives(orIdx, [
         {
           ALT: () => ctx.parser.atLeastOne(idx, {
-            DEF: () => method(args)
+            DEF: () => method(args2)
           }),
-          GATE: () => gate(args)
+          GATE: () => gate(args2)
         },
         {
           ALT: EMPTY_ALT(),
-          GATE: () => !gate(args)
+          GATE: () => !gate(args2)
         }
       ]);
     } else {
-      return (args) => ctx.parser.atLeastOne(idx, {
-        DEF: () => method(args)
+      return (args2) => ctx.parser.atLeastOne(idx, {
+        DEF: () => method(args2)
       });
     }
   } else if (cardinality === "?") {
     const idx = ctx.optional++;
-    return (args) => ctx.parser.optional(idx, {
-      DEF: () => method(args),
-      GATE: gate ? () => gate(args) : void 0
+    return (args2) => ctx.parser.optional(idx, {
+      DEF: () => method(args2),
+      GATE: gate ? () => gate(args2) : void 0
     });
   } else {
     assertUnreachable(cardinality);
@@ -24592,9 +24592,9 @@ var DefaultTokenBuilder = class {
     return { diagnostics: this.popDiagnostics() };
   }
   popDiagnostics() {
-    const diagnostics = [...this.diagnostics];
+    const diagnostics2 = [...this.diagnostics];
     this.diagnostics = [];
-    return diagnostics;
+    return diagnostics2;
   }
   buildTerminalTokens(rules) {
     return rules.filter(isTerminalRule).filter((e) => !e.fragment).map((terminal) => this.buildTerminalToken(terminal)).toArray();
@@ -24832,11 +24832,11 @@ init_define_BUILD_INFO();
 // node_modules/vscode-languageserver-textdocument/lib/esm/main.js
 init_define_BUILD_INFO();
 var FullTextDocument2 = class _FullTextDocument {
-  constructor(uri, languageId, version, content2) {
+  constructor(uri, languageId, version, content) {
     this._uri = uri;
     this._languageId = languageId;
     this._version = version;
-    this._content = content2;
+    this._content = content;
     this._lineOffsets = void 0;
   }
   get uri() {
@@ -24953,8 +24953,8 @@ var FullTextDocument2 = class _FullTextDocument {
 };
 var TextDocument2;
 (function(TextDocument3) {
-  function create(uri, languageId, version, content2) {
-    return new FullTextDocument2(uri, languageId, version, content2);
+  function create(uri, languageId, version, content) {
+    return new FullTextDocument2(uri, languageId, version, content);
   }
   TextDocument3.create = create;
   function update(document, changes, version) {
@@ -25577,8 +25577,8 @@ var DefaultLangiumDocumentFactory = class {
     this.fileSystemProvider = services.workspace.FileSystemProvider;
   }
   async fromUri(uri, cancellationToken = cancellation_exports.CancellationToken.None) {
-    const content2 = await this.fileSystemProvider.readFile(uri);
-    return this.createAsync(uri, content2, cancellationToken);
+    const content = await this.fileSystemProvider.readFile(uri);
+    return this.createAsync(uri, content, cancellationToken);
   }
   fromTextDocument(textDocument, uri, token) {
     uri = uri ?? URI2.parse(textDocument.uri);
@@ -25595,28 +25595,28 @@ var DefaultLangiumDocumentFactory = class {
       return this.create(uri, text, token);
     }
   }
-  fromModel(model2, uri) {
-    return this.create(uri, { $model: model2 });
+  fromModel(model, uri) {
+    return this.create(uri, { $model: model });
   }
-  create(uri, content2, options) {
-    if (typeof content2 === "string") {
-      const parseResult = this.parse(uri, content2, options);
-      return this.createLangiumDocument(parseResult, uri, void 0, content2);
-    } else if ("$model" in content2) {
-      const parseResult = { value: content2.$model, parserErrors: [], lexerErrors: [] };
+  create(uri, content, options) {
+    if (typeof content === "string") {
+      const parseResult = this.parse(uri, content, options);
+      return this.createLangiumDocument(parseResult, uri, void 0, content);
+    } else if ("$model" in content) {
+      const parseResult = { value: content.$model, parserErrors: [], lexerErrors: [] };
       return this.createLangiumDocument(parseResult, uri);
     } else {
-      const parseResult = this.parse(uri, content2.getText(), options);
-      return this.createLangiumDocument(parseResult, uri, content2);
+      const parseResult = this.parse(uri, content.getText(), options);
+      return this.createLangiumDocument(parseResult, uri, content);
     }
   }
-  async createAsync(uri, content2, cancelToken) {
-    if (typeof content2 === "string") {
-      const parseResult = await this.parseAsync(uri, content2, cancelToken);
-      return this.createLangiumDocument(parseResult, uri, void 0, content2);
+  async createAsync(uri, content, cancelToken) {
+    if (typeof content === "string") {
+      const parseResult = await this.parseAsync(uri, content, cancelToken);
+      return this.createLangiumDocument(parseResult, uri, void 0, content);
     } else {
-      const parseResult = await this.parseAsync(uri, content2.getText(), cancelToken);
-      return this.createLangiumDocument(parseResult, uri, content2);
+      const parseResult = await this.parseAsync(uri, content.getText(), cancelToken);
+      return this.createLangiumDocument(parseResult, uri, content);
     }
   }
   /**
@@ -25999,11 +25999,11 @@ var DefaultLinker = class {
     if (nodeDescription.node) {
       return nodeDescription.node;
     }
-    const doc2 = this.langiumDocuments().getDocument(nodeDescription.documentUri);
-    if (!doc2) {
+    const doc = this.langiumDocuments().getDocument(nodeDescription.documentUri);
+    if (!doc) {
       return void 0;
     }
-    return this.astNodeLocator.getAstNode(doc2.parseResult.value, nodeDescription.path);
+    return this.astNodeLocator.getAstNode(doc.parseResult.value, nodeDescription.path);
   }
   createLinkingError(refInfo, targetDescription) {
     const document = findRootNode(refInfo.container).$document;
@@ -26095,9 +26095,9 @@ var DefaultReferences = class {
     if (!ref) {
       return void 0;
     }
-    const doc2 = this.documents.getDocument(ref.sourceUri);
-    if (doc2) {
-      return this.nodeLocator.getAstNode(doc2.parseResult.value, ref.sourcePath);
+    const doc = this.documents.getDocument(ref.sourceUri);
+    if (doc) {
+      return this.nodeLocator.getAstNode(doc.parseResult.value, ref.sourcePath);
     }
     return void 0;
   }
@@ -26130,12 +26130,12 @@ var DefaultReferences = class {
     for (const selfNode of selfNodes) {
       const nameNode = this.nameProvider.getNameNode(selfNode);
       if (nameNode) {
-        const doc2 = getDocument(selfNode);
+        const doc = getDocument(selfNode);
         const path = this.nodeLocator.getAstNodePath(selfNode);
         references.push({
-          sourceUri: doc2.uri,
+          sourceUri: doc.uri,
           sourcePath: path,
-          targetUri: doc2.uri,
+          targetUri: doc.uri,
           targetPath: path,
           segment: toDocumentSegment(nameNode),
           local: true
@@ -26780,9 +26780,9 @@ var DefaultJsonSerializer = class {
       this.currentDocument = void 0;
     }
   }
-  deserialize(content2, options) {
+  deserialize(content, options) {
     const deserializeOptions = options ?? {};
-    const root2 = JSON.parse(content2);
+    const root2 = JSON.parse(content);
     this.linkNode(root2, root2, deserializeOptions);
     return root2;
   }
@@ -27221,24 +27221,24 @@ var DefaultDocumentValidator = class {
   }
   async validateDocument(document, options = {}, cancelToken = cancellation_exports.CancellationToken.None) {
     const parseResult = document.parseResult;
-    const diagnostics = [];
+    const diagnostics2 = [];
     await interruptAndCheck(cancelToken);
     if (!options.categories || options.categories.includes("built-in")) {
-      this.processLexingErrors(parseResult, diagnostics, options);
-      if (options.stopAfterLexingErrors && diagnostics.some((d) => d.data?.code === DocumentValidator.LexingError)) {
-        return diagnostics;
+      this.processLexingErrors(parseResult, diagnostics2, options);
+      if (options.stopAfterLexingErrors && diagnostics2.some((d) => d.data?.code === DocumentValidator.LexingError)) {
+        return diagnostics2;
       }
-      this.processParsingErrors(parseResult, diagnostics, options);
-      if (options.stopAfterParsingErrors && diagnostics.some((d) => d.data?.code === DocumentValidator.ParsingError)) {
-        return diagnostics;
+      this.processParsingErrors(parseResult, diagnostics2, options);
+      if (options.stopAfterParsingErrors && diagnostics2.some((d) => d.data?.code === DocumentValidator.ParsingError)) {
+        return diagnostics2;
       }
-      this.processLinkingErrors(document, diagnostics, options);
-      if (options.stopAfterLinkingErrors && diagnostics.some((d) => d.data?.code === DocumentValidator.LinkingError)) {
-        return diagnostics;
+      this.processLinkingErrors(document, diagnostics2, options);
+      if (options.stopAfterLinkingErrors && diagnostics2.some((d) => d.data?.code === DocumentValidator.LinkingError)) {
+        return diagnostics2;
       }
     }
     try {
-      diagnostics.push(...await this.validateAst(parseResult.value, options, cancelToken));
+      diagnostics2.push(...await this.validateAst(parseResult.value, options, cancelToken));
     } catch (err) {
       if (isOperationCancelled(err)) {
         throw err;
@@ -27246,9 +27246,9 @@ var DefaultDocumentValidator = class {
       console.error("An error occurred during validation:", err);
     }
     await interruptAndCheck(cancelToken);
-    return diagnostics;
+    return diagnostics2;
   }
-  processLexingErrors(parseResult, diagnostics, _options) {
+  processLexingErrors(parseResult, diagnostics2, _options) {
     const lexerDiagnostics = [...parseResult.lexerErrors, ...parseResult.lexerReport?.diagnostics ?? []];
     for (const lexerDiagnostic of lexerDiagnostics) {
       const severity = lexerDiagnostic.severity ?? "error";
@@ -27268,10 +27268,10 @@ var DefaultDocumentValidator = class {
         data: toDiagnosticData(severity),
         source: this.getSource()
       };
-      diagnostics.push(diagnostic);
+      diagnostics2.push(diagnostic);
     }
   }
-  processParsingErrors(parseResult, diagnostics, _options) {
+  processParsingErrors(parseResult, diagnostics2, _options) {
     for (const parserError of parseResult.parserErrors) {
       let range = void 0;
       if (isNaN(parserError.token.startOffset)) {
@@ -27296,11 +27296,11 @@ var DefaultDocumentValidator = class {
           data: diagnosticData(DocumentValidator.ParsingError),
           source: this.getSource()
         };
-        diagnostics.push(diagnostic);
+        diagnostics2.push(diagnostic);
       }
     }
   }
-  processLinkingErrors(document, diagnostics, _options) {
+  processLinkingErrors(document, diagnostics2, _options) {
     for (const reference of document.references) {
       const linkingError = reference.error;
       if (linkingError) {
@@ -27316,7 +27316,7 @@ var DefaultDocumentValidator = class {
             refText: linkingError.info.reference.$refText
           }
         };
-        diagnostics.push(this.toDiagnostic("error", linkingError.message, info));
+        diagnostics2.push(this.toDiagnostic("error", linkingError.message, info));
       }
     }
   }
@@ -27472,7 +27472,7 @@ var DefaultAstNodeDescriptionProvider = class {
     this.nameProvider = services.references.NameProvider;
   }
   createDescription(node, name, document) {
-    const doc2 = document ?? getDocument(node);
+    const doc = document ?? getDocument(node);
     name ?? (name = this.nameProvider.getName(node));
     const path = this.astNodeLocator.getAstNodePath(node);
     if (!name) {
@@ -27488,7 +27488,7 @@ var DefaultAstNodeDescriptionProvider = class {
       },
       selectionSegment: toDocumentSegment(node.$cstNode),
       type: node.$type,
-      documentUri: doc2.uri,
+      documentUri: doc.uri,
       path
     };
   }
@@ -27705,8 +27705,8 @@ var DefaultDocumentBuilder = class {
     this.workspaceManager = () => services.workspace.WorkspaceManager;
     this.serviceRegistry = services.ServiceRegistry;
   }
-  async build(documents, options = {}, cancelToken = cancellation_exports.CancellationToken.None) {
-    for (const document of documents) {
+  async build(documents2, options = {}, cancelToken = cancellation_exports.CancellationToken.None) {
+    for (const document of documents2) {
       const key = document.uri.toString();
       if (document.state === DocumentState.Validated) {
         if (typeof options.validation === "boolean" && options.validation) {
@@ -27731,17 +27731,17 @@ var DefaultDocumentBuilder = class {
       }
     }
     this.currentState = DocumentState.Changed;
-    await this.emitUpdate(documents.map((e) => e.uri), []);
-    await this.buildDocuments(documents, options, cancelToken);
+    await this.emitUpdate(documents2.map((e) => e.uri), []);
+    await this.buildDocuments(documents2, options, cancelToken);
   }
   async update(changed, deleted, cancelToken = cancellation_exports.CancellationToken.None) {
     this.currentState = DocumentState.Changed;
     const deletedUris = [];
     for (const deletedUri of deleted) {
       const deletedDocs = this.langiumDocuments.deleteDocuments(deletedUri);
-      for (const doc2 of deletedDocs) {
-        deletedUris.push(doc2.uri);
-        this.cleanUpDeleted(doc2);
+      for (const doc of deletedDocs) {
+        deletedUris.push(doc.uri);
+        this.cleanUpDeleted(doc);
       }
     }
     const changedUris = (await Promise.all(changed.map((uri) => this.findChangedUris(uri)))).flat();
@@ -27755,12 +27755,12 @@ var DefaultDocumentBuilder = class {
       this.resetToState(changedDocument, DocumentState.Changed);
     }
     const allChangedUris = stream(changedUris).concat(deletedUris).map((uri) => uri.toString()).toSet();
-    this.langiumDocuments.all.filter((doc2) => !allChangedUris.has(doc2.uri.toString()) && this.shouldRelink(doc2, allChangedUris)).forEach((doc2) => this.resetToState(doc2, DocumentState.ComputedScopes));
+    this.langiumDocuments.all.filter((doc) => !allChangedUris.has(doc.uri.toString()) && this.shouldRelink(doc, allChangedUris)).forEach((doc) => this.resetToState(doc, DocumentState.ComputedScopes));
     await this.emitUpdate(changedUris, deletedUris);
     await interruptAndCheck(cancelToken);
-    const rebuildDocuments = this.sortDocuments(this.langiumDocuments.all.filter((doc2) => (
+    const rebuildDocuments = this.sortDocuments(this.langiumDocuments.all.filter((doc) => (
       // This includes those that were reported as changed and those that we selected for relinking
-      doc2.state < DocumentState.Validated || !this.buildState.get(doc2.uri.toString())?.completed || this.resultsAreIncomplete(doc2, this.updateBuildOptions)
+      doc.state < DocumentState.Validated || !this.buildState.get(doc.uri.toString())?.completed || this.resultsAreIncomplete(doc, this.updateBuildOptions)
     )).toArray());
     await this.buildDocuments(rebuildDocuments, this.updateBuildOptions, cancelToken);
   }
@@ -27801,24 +27801,24 @@ var DefaultDocumentBuilder = class {
    * This improves the responsiveness in large workspaces as users usually don't care about diagnostics
    * in files that are currently not opened in the editor.
    */
-  sortDocuments(documents) {
+  sortDocuments(documents2) {
     let left = 0;
-    let right = documents.length - 1;
+    let right = documents2.length - 1;
     while (left < right) {
-      while (left < documents.length && this.hasTextDocument(documents[left])) {
+      while (left < documents2.length && this.hasTextDocument(documents2[left])) {
         left++;
       }
-      while (right >= 0 && !this.hasTextDocument(documents[right])) {
+      while (right >= 0 && !this.hasTextDocument(documents2[right])) {
         right--;
       }
       if (left < right) {
-        [documents[left], documents[right]] = [documents[right], documents[left]];
+        [documents2[left], documents2[right]] = [documents2[right], documents2[left]];
       }
     }
-    return documents;
+    return documents2;
   }
-  hasTextDocument(doc2) {
-    return Boolean(this.textDocuments?.get(doc2.uri));
+  hasTextDocument(doc) {
+    return Boolean(this.textDocuments?.get(doc.uri));
   }
   /**
    * Check whether the given document should be relinked after changes were found in the given URIs.
@@ -27879,31 +27879,31 @@ var DefaultDocumentBuilder = class {
    * @param cancelToken A cancellation token that can be used to cancel the build.
    * @returns A promise that resolves when the build is done.
    */
-  async buildDocuments(documents, options, cancelToken) {
-    this.prepareBuild(documents, options);
-    await this.runCancelable(documents, DocumentState.Parsed, cancelToken, (doc2) => this.langiumDocumentFactory.update(doc2, cancelToken));
-    await this.runCancelable(documents, DocumentState.IndexedContent, cancelToken, (doc2) => this.indexManager.updateContent(doc2, cancelToken));
-    await this.runCancelable(documents, DocumentState.ComputedScopes, cancelToken, async (doc2) => {
-      const scopeComputation = this.serviceRegistry.getServices(doc2.uri).references.ScopeComputation;
-      doc2.localSymbols = await scopeComputation.collectLocalSymbols(doc2, cancelToken);
+  async buildDocuments(documents2, options, cancelToken) {
+    this.prepareBuild(documents2, options);
+    await this.runCancelable(documents2, DocumentState.Parsed, cancelToken, (doc) => this.langiumDocumentFactory.update(doc, cancelToken));
+    await this.runCancelable(documents2, DocumentState.IndexedContent, cancelToken, (doc) => this.indexManager.updateContent(doc, cancelToken));
+    await this.runCancelable(documents2, DocumentState.ComputedScopes, cancelToken, async (doc) => {
+      const scopeComputation = this.serviceRegistry.getServices(doc.uri).references.ScopeComputation;
+      doc.localSymbols = await scopeComputation.collectLocalSymbols(doc, cancelToken);
     });
-    const toBeLinked = documents.filter((doc2) => this.shouldLink(doc2));
-    await this.runCancelable(toBeLinked, DocumentState.Linked, cancelToken, (doc2) => {
-      const linker = this.serviceRegistry.getServices(doc2.uri).references.Linker;
-      return linker.link(doc2, cancelToken);
+    const toBeLinked = documents2.filter((doc) => this.shouldLink(doc));
+    await this.runCancelable(toBeLinked, DocumentState.Linked, cancelToken, (doc) => {
+      const linker = this.serviceRegistry.getServices(doc.uri).references.Linker;
+      return linker.link(doc, cancelToken);
     });
-    await this.runCancelable(toBeLinked, DocumentState.IndexedReferences, cancelToken, (doc2) => this.indexManager.updateReferences(doc2, cancelToken));
-    const toBeValidated = documents.filter((doc2) => {
-      if (this.shouldValidate(doc2)) {
+    await this.runCancelable(toBeLinked, DocumentState.IndexedReferences, cancelToken, (doc) => this.indexManager.updateReferences(doc, cancelToken));
+    const toBeValidated = documents2.filter((doc) => {
+      if (this.shouldValidate(doc)) {
         return true;
       } else {
-        this.markAsCompleted(doc2);
+        this.markAsCompleted(doc);
         return false;
       }
     });
-    await this.runCancelable(toBeValidated, DocumentState.Validated, cancelToken, async (doc2) => {
-      await this.validate(doc2, cancelToken);
-      this.markAsCompleted(doc2);
+    await this.runCancelable(toBeValidated, DocumentState.Validated, cancelToken, async (doc) => {
+      await this.validate(doc, cancelToken);
+      this.markAsCompleted(doc);
     });
   }
   markAsCompleted(document) {
@@ -27918,9 +27918,9 @@ var DefaultDocumentBuilder = class {
    * @param documents collection of documents to be built
    * @param options the {@link BuildOptions} to use
    */
-  prepareBuild(documents, options) {
-    for (const doc2 of documents) {
-      const key = doc2.uri.toString();
+  prepareBuild(documents2, options) {
+    for (const doc of documents2) {
+      const key = doc.uri.toString();
       const state = this.buildState.get(key);
       if (!state || state.completed) {
         this.buildState.set(key, {
@@ -27942,8 +27942,8 @@ var DefaultDocumentBuilder = class {
    * @returns A promise that resolves when all documents have been processed or the operation is canceled.
    * @throws Will throw `OperationCancelled` if the operation is canceled via a `CancellationToken`.
    */
-  async runCancelable(documents, targetState, cancelToken, callback) {
-    for (const document of documents) {
+  async runCancelable(documents2, targetState, cancelToken, callback) {
+    for (const document of documents2) {
       if (document.state < targetState) {
         await interruptAndCheck(cancelToken);
         await callback(document);
@@ -27951,7 +27951,7 @@ var DefaultDocumentBuilder = class {
         await this.notifyDocumentPhase(document, targetState, cancelToken);
       }
     }
-    const targetStateDocs = documents.filter((doc2) => doc2.state === targetState);
+    const targetStateDocs = documents2.filter((doc) => doc.state === targetState);
     await this.notifyBuildPhase(targetStateDocs, targetState, cancelToken);
     this.currentState = targetState;
   }
@@ -27993,11 +27993,11 @@ var DefaultDocumentBuilder = class {
       return Promise.reject(new import_vscode_languageserver_protocol.ResponseError(import_vscode_languageserver_protocol.LSPErrorCodes.RequestFailed, `Document state of ${uri.toString()} is ${DocumentState[document.state]}, requiring ${DocumentState[state]}, but workspace state is already ${DocumentState[this.currentState]}. Returning undefined.`));
     }
     return new Promise((resolve2, reject) => {
-      const buildDisposable = this.onDocumentPhase(state, (doc2) => {
-        if (UriUtils.equals(doc2.uri, uri)) {
+      const buildDisposable = this.onDocumentPhase(state, (doc) => {
+        if (UriUtils.equals(doc.uri, uri)) {
           buildDisposable.dispose();
           cancelDisposable.dispose();
-          resolve2(doc2.uri);
+          resolve2(doc.uri);
         }
       });
       const cancelDisposable = cancelToken.onCancellationRequested(() => {
@@ -28040,15 +28040,15 @@ var DefaultDocumentBuilder = class {
       }
     }
   }
-  async notifyBuildPhase(documents, state, cancelToken) {
-    if (documents.length === 0) {
+  async notifyBuildPhase(documents2, state, cancelToken) {
+    if (documents2.length === 0) {
       return;
     }
     const listeners = this.buildPhaseListeners.get(state);
     const listenersCopy = listeners.slice();
     for (const listener of listenersCopy) {
       await interruptAndCheck(cancelToken);
-      await listener(documents, cancelToken);
+      await listener(documents2, cancelToken);
     }
   }
   /**
@@ -28077,11 +28077,11 @@ var DefaultDocumentBuilder = class {
     const options = this.getBuildOptions(document);
     const validationOptions = typeof options.validation === "object" ? { ...options.validation } : {};
     validationOptions.categories = this.findMissingValidationCategories(document, options);
-    const diagnostics = await validator.validateDocument(document, validationOptions, cancelToken);
+    const diagnostics2 = await validator.validateDocument(document, validationOptions, cancelToken);
     if (document.diagnostics) {
-      document.diagnostics.push(...diagnostics);
+      document.diagnostics.push(...diagnostics2);
     } else {
-      document.diagnostics = diagnostics;
+      document.diagnostics = diagnostics2;
     }
     const state = this.buildState.get(document.uri.toString());
     if (state) {
@@ -28197,18 +28197,18 @@ var DefaultWorkspaceManager = class {
     return this.mutex.write((token) => this.initializeWorkspace(this.folders ?? [], token));
   }
   async initializeWorkspace(folders, cancelToken = cancellation_exports.CancellationToken.None) {
-    const documents = await this.performStartup(folders);
+    const documents2 = await this.performStartup(folders);
     await interruptAndCheck(cancelToken);
-    await this.documentBuilder.build(documents, this.initialBuildOptions, cancelToken);
+    await this.documentBuilder.build(documents2, this.initialBuildOptions, cancelToken);
   }
   /**
    * Performs the uninterruptable startup sequence of the workspace manager.
    * This methods loads all documents in the workspace and other documents and returns them.
    */
   async performStartup(folders) {
-    const documents = [];
+    const documents2 = [];
     const collector = (document) => {
-      documents.push(document);
+      documents2.push(document);
       if (!this.langiumDocuments.hasDocument(document.uri)) {
         this.langiumDocuments.addDocument(document);
       }
@@ -28219,7 +28219,7 @@ var DefaultWorkspaceManager = class {
     const uniqueUris = stream(uris).distinct((uri) => uri.toString()).filter((uri) => !this.langiumDocuments.hasDocument(uri));
     await this.loadWorkspaceDocuments(uniqueUris, collector);
     this._ready.resolve();
-    return documents;
+    return documents2;
   }
   async loadWorkspaceDocuments(uris, collector) {
     await Promise.all(uris.map(async (uri) => {
@@ -28249,8 +28249,8 @@ var DefaultWorkspaceManager = class {
    */
   async traverseFolder(folderPath, uris) {
     try {
-      const content2 = await this.fileSystemProvider.readDirectory(folderPath);
-      await Promise.all(content2.map(async (entry) => {
+      const content = await this.fileSystemProvider.readDirectory(folderPath);
+      await Promise.all(content.map(async (entry) => {
         if (this.shouldIncludeEntry(entry)) {
           if (entry.isDirectory) {
             await this.traverseFolder(entry.uri, uris);
@@ -28387,13 +28387,13 @@ function isJSDoc(node, options) {
   return Boolean(firstRegex?.exec(first2)) && Boolean(lastRegex?.exec(last));
 }
 function getLines(node) {
-  let content2 = "";
+  let content = "";
   if (typeof node === "string") {
-    content2 = node;
+    content = node;
   } else {
-    content2 = node.text;
+    content = node.text;
   }
-  const lines = content2.split(NEWLINE_REGEXP);
+  const lines = content.split(NEWLINE_REGEXP);
   return lines;
 }
 var tagRegex = /\s*(@([\p{L}][\p{L}\p{N}]*)?)/uy;
@@ -28686,20 +28686,20 @@ var JSDocCommentImpl = class {
   }
 };
 var JSDocTagImpl = class {
-  constructor(name, content2, inline, range) {
+  constructor(name, content, inline, range) {
     this.name = name;
-    this.content = content2;
+    this.content = content;
     this.inline = inline;
     this.range = range;
   }
   toString() {
     let text = `@${this.name}`;
-    const content2 = this.content.toString();
+    const content = this.content.toString();
     if (this.content.inlines.length === 1) {
-      text = `${text} ${content2}`;
+      text = `${text} ${content}`;
     } else if (this.content.inlines.length > 1) {
       text = `${text}
-${content2}`;
+${content}`;
     }
     if (this.inline) {
       return `{${text}}`;
@@ -28711,9 +28711,9 @@ ${content2}`;
     return options?.renderTag?.(this) ?? this.toMarkdownDefault(options);
   }
   toMarkdownDefault(options) {
-    const content2 = this.content.toMarkdown(options);
+    const content = this.content.toMarkdown(options);
     if (this.inline) {
-      const rendered = renderInlineTag(this.name, content2, options ?? {});
+      const rendered = renderInlineTag(this.name, content, options ?? {});
       if (typeof rendered === "string") {
         return rendered;
       }
@@ -28728,10 +28728,10 @@ ${content2}`;
     }
     let text = `${marker}@${this.name}${marker}`;
     if (this.content.inlines.length === 1) {
-      text = `${text} \u2014 ${content2}`;
+      text = `${text} \u2014 ${content}`;
     } else if (this.content.inlines.length > 1) {
       text = `${text}
-${content2}`;
+${content}`;
     }
     if (this.inline) {
       return `{${text}}`;
@@ -28740,29 +28740,29 @@ ${content2}`;
     }
   }
 };
-function renderInlineTag(tag, content2, options) {
+function renderInlineTag(tag, content, options) {
   if (tag === "linkplain" || tag === "linkcode" || tag === "link") {
-    const index = content2.indexOf(" ");
-    let display = content2;
+    const index = content.indexOf(" ");
+    let display = content;
     if (index > 0) {
-      const displayStart = skipWhitespace(content2, index);
-      display = content2.substring(displayStart);
-      content2 = content2.substring(0, index);
+      const displayStart = skipWhitespace(content, index);
+      display = content.substring(displayStart);
+      content = content.substring(0, index);
     }
     if (tag === "linkcode" || tag === "link" && options.link === "code") {
       display = `\`${display}\``;
     }
-    const renderedLink = options.renderLink?.(content2, display) ?? renderLinkDefault(content2, display);
+    const renderedLink = options.renderLink?.(content, display) ?? renderLinkDefault(content, display);
     return renderedLink;
   }
   return void 0;
 }
-function renderLinkDefault(content2, display) {
+function renderLinkDefault(content, display) {
   try {
-    URI2.parse(content2, true);
-    return `[${display}](${content2})`;
+    URI2.parse(content, true);
+    return `[${display}](${content})`;
   } catch {
-    return content2;
+    return content;
   }
 }
 var JSDocTextImpl = class {
@@ -30026,7 +30026,7 @@ var NodeFileSystem = {
   fileSystemProvider: () => new NodeFileSystemProvider()
 };
 
-// src/language/command-dsl-module.ts
+// src/frontend/frontend-dsl-module.ts
 init_define_BUILD_INFO();
 
 // node_modules/langium/lib/lsp/completion/completion-provider.js
@@ -30271,8 +30271,8 @@ function getAbstractElementParent(element) {
 }
 function featureMatches(feature, token) {
   if (isKeyword(feature)) {
-    const content2 = feature.value;
-    return content2 === token.tokenType.name;
+    const content = feature.value;
+    return content === token.tokenType.name;
   } else if (isRuleCall(feature)) {
     return ruleMatches(feature.rule.ref, token);
   } else if (isCrossReference(feature)) {
@@ -30692,8 +30692,8 @@ var DefaultCompletionProvider = class {
     return completionItem;
   }
   buildCompletionTextEdit(context, label, newText) {
-    const content2 = context.textDocument.getText();
-    const identifier = content2.substring(context.tokenOffset, context.offset);
+    const content = context.textDocument.getText();
+    const identifier = content.substring(context.tokenOffset, context.offset);
     if (this.fuzzyMatcher.match(identifier, label)) {
       const start = context.textDocument.positionAt(context.tokenOffset);
       const end = context.position;
@@ -31055,9 +31055,9 @@ var AstNodeHoverProvider = class {
         const contents = [];
         const targetNodes = this.references.findDeclarations(cstNode);
         for (const targetNode of targetNodes) {
-          const content2 = await this.getAstNodeHoverContent(targetNode);
-          if (typeof content2 === "string") {
-            contents.push(content2);
+          const content = await this.getAstNodeHoverContent(targetNode);
+          if (typeof content === "string") {
+            contents.push(content);
           }
         }
         if (contents.length > 0) {
@@ -31081,12 +31081,12 @@ var AstNodeHoverProvider = class {
       comment = findCommentNode(node.$cstNode, ["ML_COMMENT"])?.text;
     }
     if (comment && isJSDoc(comment)) {
-      const content2 = parseJSDoc(comment).toMarkdown();
-      if (content2) {
+      const content = parseJSDoc(comment).toMarkdown();
+      if (content) {
         return {
           contents: {
             kind: "markdown",
-            value: content2
+            value: content
           }
         };
       }
@@ -31100,9 +31100,9 @@ var MultilineCommentHoverProvider = class extends AstNodeHoverProvider {
     this.documentationProvider = services.documentation.DocumentationProvider;
   }
   getAstNodeHoverContent(node) {
-    const content2 = this.documentationProvider.getDocumentation(node);
-    if (content2) {
-      return content2;
+    const content = this.documentationProvider.getDocumentation(node);
+    if (content) {
+      return content;
     }
     return void 0;
   }
@@ -31489,9 +31489,9 @@ var DefaultRenameProvider = class {
   prepareRename(document, params, _cancelToken) {
     return this.renameNodeRange(document, params.position);
   }
-  renameNodeRange(doc2, position) {
-    const rootNode = doc2.parseResult.value.$cstNode;
-    const offset = doc2.textDocument.offsetAt(position);
+  renameNodeRange(doc, position) {
+    const rootNode = doc.parseResult.value.$cstNode;
+    const offset = doc.textDocument.offsetAt(position);
     if (rootNode) {
       const leafNode = findDeclarationNodeAtOffset(rootNode, offset, this.grammarConfig.nameRegexp);
       if (!leafNode) {
@@ -31932,934 +31932,1153 @@ function createDefaultSharedLSPModule(context) {
   };
 }
 
-// src/generated/module.ts
+// src/frontend/generated/module.ts
 init_define_BUILD_INFO();
 
-// src/generated/ast.ts
+// src/frontend/generated/ast.ts
 init_define_BUILD_INFO();
-var AbandonNote = {
-  $type: "AbandonNote",
-  text: "text"
-};
-function isAbandonNote(item) {
-  return reflection2.isInstance(item, AbandonNote.$type);
-}
-var Action2 = {
-  $type: "Action"
-};
-var ActorDef = {
-  $type: "ActorDef",
+var ActionComponent = {
+  $type: "ActionComponent",
+  mech: "mech",
+  members: "members",
   name: "name",
-  parent: "parent"
+  navArgs: "navArgs",
+  navTarget: "navTarget"
 };
-function isActorDef(item) {
-  return reflection2.isInstance(item, ActorDef.$type);
+function isActionComponent(item) {
+  return reflection2.isInstance(item, ActionComponent.$type);
 }
-var AggregateExpr = {
-  $type: "AggregateExpr",
+var ActionMember = {
+  $type: "ActionMember"
+};
+var Additive = {
+  $type: "Additive"
+};
+var Aggregate = {
+  $type: "Aggregate",
+  fn: "fn",
   path: "path"
 };
-function isAggregateExpr(item) {
-  return reflection2.isInstance(item, AggregateExpr.$type);
+function isAggregate(item) {
+  return reflection2.isInstance(item, Aggregate.$type);
 }
-var AnyOrderBlock = {
-  $type: "AnyOrderBlock",
-  branches: "branches"
+var AndExpr = {
+  $type: "AndExpr"
 };
-function isAnyOrderBlock(item) {
-  return reflection2.isInstance(item, AnyOrderBlock.$type);
-}
-var AnyOrderBranch = {
-  $type: "AnyOrderBranch",
-  items: "items"
+var Annotation = {
+  $type: "Annotation",
+  args: "args",
+  name: "name",
+  ns: "ns"
 };
-function isAnyOrderBranch(item) {
-  return reflection2.isInstance(item, AnyOrderBranch.$type);
-}
-var BareRead = {
-  $type: "BareRead",
-  alias: "alias",
-  entity: "entity"
-};
-function isBareRead(item) {
-  return reflection2.isInstance(item, BareRead.$type);
-}
-var BinaryBool = {
-  $type: "BinaryBool",
-  left: "left",
-  op: "op",
-  right: "right"
-};
-function isBinaryBool(item) {
-  return reflection2.isInstance(item, BinaryBool.$type);
-}
-var BinaryCondition = {
-  $type: "BinaryCondition",
-  left: "left",
-  op: "op",
-  right: "right"
-};
-function isBinaryCondition(item) {
-  return reflection2.isInstance(item, BinaryCondition.$type);
-}
-var BinaryExpr = {
-  $type: "BinaryExpr",
-  left: "left",
-  op: "op",
-  right: "right"
-};
-function isBinaryExpr(item) {
-  return reflection2.isInstance(item, BinaryExpr.$type);
-}
-var BoolExpr = {
-  $type: "BoolExpr"
-};
-var CalculateAction = {
-  $type: "CalculateAction",
-  condition: "condition",
-  expr: "expr",
-  target: "target"
-};
-function isCalculateAction(item) {
-  return reflection2.isInstance(item, CalculateAction.$type);
-}
-var CalendarDef = {
-  $type: "CalendarDef",
-  name: "name"
-};
-function isCalendarDef(item) {
-  return reflection2.isInstance(item, CalendarDef.$type);
-}
-var CommandDecl = {
-  $type: "CommandDecl"
-};
-var CompactDuration = {
-  $type: "CompactDuration",
-  literal: "literal"
-};
-function isCompactDuration(item) {
-  return reflection2.isInstance(item, CompactDuration.$type);
-}
-var Comparison = {
-  $type: "Comparison",
-  left: "left",
-  op: "op",
-  right: "right"
-};
-function isComparison(item) {
-  return reflection2.isInstance(item, Comparison.$type);
-}
-var ComparisonValue = {
-  $type: "ComparisonValue"
-};
-var Condition2 = {
-  $type: "Condition"
-};
-var Constraint = {
-  $type: "Constraint"
-};
-var CreateAction = {
-  $type: "CreateAction",
-  source: "source",
-  target: "target"
-};
-function isCreateAction(item) {
-  return reflection2.isInstance(item, CreateAction.$type);
-}
-var DomainDef = {
-  $type: "DomainDef",
-  name: "name"
-};
-function isDomainDef(item) {
-  return reflection2.isInstance(item, DomainDef.$type);
-}
-var Duration = {
-  $type: "Duration"
-};
-var DurationValue = {
-  $type: "DurationValue",
+var AnnotationArg = {
+  $type: "AnnotationArg",
+  name: "name",
   value: "value"
 };
-function isDurationValue(item) {
-  return reflection2.isInstance(item, DurationValue.$type);
-}
-var DuringConstraint = {
-  $type: "DuringConstraint",
-  calendar: "calendar"
+var ArgBinding = {
+  $type: "ArgBinding",
+  name: "name",
+  value: "value"
 };
-function isDuringConstraint(item) {
-  return reflection2.isInstance(item, DuringConstraint.$type);
-}
-var EitherBlock = {
-  $type: "EitherBlock",
-  branches: "branches"
+var Arith = {
+  $type: "Arith",
+  left: "left",
+  op: "op",
+  right: "right"
 };
-function isEitherBlock(item) {
-  return reflection2.isInstance(item, EitherBlock.$type);
+function isArith(item) {
+  return reflection2.isInstance(item, Arith.$type);
 }
-var EitherBranch = {
-  $type: "EitherBranch",
-  items: "items"
+var Atom = {
+  $type: "Atom"
 };
-function isEitherBranch(item) {
-  return reflection2.isInstance(item, EitherBranch.$type);
+var BadgeDelta = {
+  $type: "BadgeDelta",
+  text: "text"
+};
+function isBadgeDelta(item) {
+  return reflection2.isInstance(item, BadgeDelta.$type);
 }
-var Element = {
-  $type: "Element"
+var BannerDelta = {
+  $type: "BannerDelta",
+  text: "text"
 };
-var EntityDef = {
-  $type: "EntityDef",
-  fields: "fields",
+function isBannerDelta(item) {
+  return reflection2.isInstance(item, BannerDelta.$type);
+}
+var BannerHandler = {
+  $type: "BannerHandler",
+  text: "text"
+};
+function isBannerHandler(item) {
+  return reflection2.isInstance(item, BannerHandler.$type);
+}
+var Binary = {
+  $type: "Binary",
+  left: "left",
+  op: "op",
+  right: "right"
+};
+function isBinary(item) {
+  return reflection2.isInstance(item, Binary.$type);
+}
+var BizFlow = {
+  $type: "BizFlow",
   name: "name"
 };
-function isEntityDef(item) {
-  return reflection2.isInstance(item, EntityDef.$type);
-}
-var ExistsExpr = {
-  $type: "ExistsExpr",
-  collection: "collection",
-  condition: "condition",
-  negated: "negated"
+var BusinessOp = {
+  $type: "BusinessOp",
+  name: "name"
 };
-function isExistsExpr(item) {
-  return reflection2.isInstance(item, ExistsExpr.$type);
-}
-var Expression = {
-  $type: "Expression"
+var Call = {
+  $type: "Call",
+  args: "args",
+  name: "name"
 };
-var FieldDef = {
-  $type: "FieldDef",
-  collection: "collection",
+function isCall(item) {
+  return reflection2.isInstance(item, Call.$type);
+}
+var Cmp = {
+  $type: "Cmp",
+  left: "left",
+  op: "op",
+  right: "right"
+};
+function isCmp(item) {
+  return reflection2.isInstance(item, Cmp.$type);
+}
+var CollapseAttr = {
+  $type: "CollapseAttr",
+  value: "value"
+};
+var ConfirmClause = {
+  $type: "ConfirmClause",
+  kind: "kind",
+  text: "text"
+};
+function isConfirmClause(item) {
+  return reflection2.isInstance(item, ConfirmClause.$type);
+}
+var ContractDecl = {
+  $type: "ContractDecl",
+  path: "path",
+  techPath: "techPath"
+};
+var DataMember = {
+  $type: "DataMember"
+};
+var DeltaAction = {
+  $type: "DeltaAction"
+};
+var DerivedState = {
+  $type: "DerivedState",
+  expr: "expr",
+  name: "name"
+};
+function isDerivedState(item) {
+  return reflection2.isInstance(item, DerivedState.$type);
+}
+var DetailComponent = {
+  $type: "DetailComponent",
+  alias: "alias",
+  bind: "bind",
+  mech: "mech",
+  members: "members",
+  refreshable: "refreshable"
+};
+function isDetailComponent(item) {
+  return reflection2.isInstance(item, DetailComponent.$type);
+}
+var EventAction = {
+  $type: "EventAction"
+};
+var EventInvalidate = {
+  $type: "EventInvalidate",
+  targets: "targets"
+};
+function isEventInvalidate(item) {
+  return reflection2.isInstance(item, EventInvalidate.$type);
+}
+var EventNav = {
+  $type: "EventNav",
+  args: "args",
+  target: "target"
+};
+function isEventNav(item) {
+  return reflection2.isInstance(item, EventNav.$type);
+}
+var EventPerform = {
+  $type: "EventPerform",
+  target: "target"
+};
+function isEventPerform(item) {
+  return reflection2.isInstance(item, EventPerform.$type);
+}
+var EventSet = {
+  $type: "EventSet",
+  expr: "expr",
+  state: "state"
+};
+function isEventSet(item) {
+  return reflection2.isInstance(item, EventSet.$type);
+}
+var Experience = {
+  $type: "Experience",
+  audience: "audience",
+  delivery: "delivery",
+  entry: "entry",
+  members: "members",
+  name: "name"
+};
+function isExperience(item) {
+  return reflection2.isInstance(item, Experience.$type);
+}
+var ExperienceMember = {
+  $type: "ExperienceMember"
+};
+var Expr = {
+  $type: "Expr"
+};
+var ExtComponent = {
+  $type: "ExtComponent",
+  bind: "bind",
+  ext: "ext"
+};
+function isExtComponent(item) {
+  return reflection2.isInstance(item, ExtComponent.$type);
+}
+var ExtensionDecl = {
+  $type: "ExtensionDecl",
+  name: "name",
+  ns: "ns",
+  params: "params",
+  sites: "sites"
+};
+var ExtLit = {
+  $type: "ExtLit",
+  bool: "bool",
+  num: "num",
+  str: "str"
+};
+var ExtParam = {
+  $type: "ExtParam",
+  default: "default",
   name: "name",
   type: "type"
 };
-var FieldExpr = {
-  $type: "FieldExpr",
-  path: "path"
+var FieldRule = {
+  $type: "FieldRule"
 };
-function isFieldExpr(item) {
-  return reflection2.isInstance(item, FieldExpr.$type);
-}
-var FieldPath = {
-  $type: "FieldPath",
-  segments: "segments"
-};
-var FieldValue = {
-  $type: "FieldValue",
-  path: "path"
-};
-function isFieldValue(item) {
-  return reflection2.isInstance(item, FieldValue.$type);
-}
-var FlowDef = {
-  $type: "FlowDef",
-  actor: "actor",
-  items: "items",
+var FlowDecl = {
+  $type: "FlowDecl",
   name: "name",
-  note: "note"
+  realizes: "realizes",
+  steps: "steps"
 };
-function isFlowDef(item) {
-  return reflection2.isInstance(item, FlowDef.$type);
+function isFlowDecl(item) {
+  return reflection2.isInstance(item, FlowDecl.$type);
 }
-var FlowItem = {
-  $type: "FlowItem"
+var FormComponent = {
+  $type: "FormComponent",
+  alias: "alias",
+  bind: "bind",
+  mech: "mech",
+  members: "members"
 };
-var FlowStep = {
-  $type: "FlowStep",
-  name: "name",
-  optional: "optional",
-  repeat: "repeat",
-  source: "source",
+function isFormComponent(item) {
+  return reflection2.isInstance(item, FormComponent.$type);
+}
+var FormField = {
+  $type: "FormField",
+  field: "field",
+  rules: "rules"
+};
+function isFormField(item) {
+  return reflection2.isInstance(item, FormField.$type);
+}
+var FormMember = {
+  $type: "FormMember"
+};
+var FormRule = {
+  $type: "FormRule",
+  expr: "expr"
+};
+function isFormRule(item) {
+  return reflection2.isInstance(item, FormRule.$type);
+}
+var FormStep = {
+  $type: "FormStep",
+  fields: "fields",
+  name: "name"
+};
+function isFormStep(item) {
+  return reflection2.isInstance(item, FormStep.$type);
+}
+var HandlerAction = {
+  $type: "HandlerAction"
+};
+var HideDelta = {
+  $type: "HideDelta",
   target: "target"
 };
-function isFlowStep(item) {
-  return reflection2.isInstance(item, FlowStep.$type);
-}
-var GrantCommand = {
-  $type: "GrantCommand",
-  actor: "actor",
-  duration: "duration",
-  grantee: "grantee",
-  ownership: "ownership",
-  permission: "permission",
-  resource: "resource"
-};
-function isGrantCommand(item) {
-  return reflection2.isInstance(item, GrantCommand.$type);
-}
-var IfConstraint = {
-  $type: "IfConstraint",
-  condition: "condition"
-};
-function isIfConstraint(item) {
-  return reflection2.isInstance(item, IfConstraint.$type);
+function isHideDelta(item) {
+  return reflection2.isInstance(item, HideDelta.$type);
 }
 var ImportDecl = {
   $type: "ImportDecl",
   path: "path"
 };
-var IncludeStep = {
-  $type: "IncludeStep",
-  optional: "optional",
-  repeat: "repeat",
+var InlineErrorsHandler = {
+  $type: "InlineErrorsHandler",
+  kind: "kind"
+};
+function isInlineErrorsHandler(item) {
+  return reflection2.isInstance(item, InlineErrorsHandler.$type);
+}
+var InteractionTrigger = {
+  $type: "InteractionTrigger",
+  kind: "kind",
   target: "target"
 };
-function isIncludeStep(item) {
-  return reflection2.isInstance(item, IncludeStep.$type);
+function isInteractionTrigger(item) {
+  return reflection2.isInstance(item, InteractionTrigger.$type);
 }
-var KeywordOwnership = {
-  $type: "KeywordOwnership",
-  keyword: "keyword"
+var InvalidatesClause = {
+  $type: "InvalidatesClause",
+  targets: "targets"
 };
-function isKeywordOwnership(item) {
-  return reflection2.isInstance(item, KeywordOwnership.$type);
+function isInvalidatesClause(item) {
+  return reflection2.isInstance(item, InvalidatesClause.$type);
 }
-var LimitFilter = {
-  $type: "LimitFilter",
-  count: "count"
+var LifecycleTrigger = {
+  $type: "LifecycleTrigger",
+  kind: "kind"
 };
-function isLimitFilter(item) {
-  return reflection2.isInstance(item, LimitFilter.$type);
+function isLifecycleTrigger(item) {
+  return reflection2.isInstance(item, LifecycleTrigger.$type);
+}
+var ListComponent = {
+  $type: "ListComponent",
+  alias: "alias",
+  bind: "bind",
+  mech: "mech",
+  members: "members",
+  pagination: "pagination",
+  refreshable: "refreshable"
+};
+function isListComponent(item) {
+  return reflection2.isInstance(item, ListComponent.$type);
+}
+var Lit = {
+  $type: "Lit",
+  bool: "bool",
+  num: "num",
+  str: "str"
+};
+function isLit(item) {
+  return reflection2.isInstance(item, Lit.$type);
+}
+var LoadsClause = {
+  $type: "LoadsClause",
+  bind: "bind"
+};
+function isLoadsClause(item) {
+  return reflection2.isInstance(item, LoadsClause.$type);
+}
+var MaxRule = {
+  $type: "MaxRule",
+  value: "value"
+};
+function isMaxRule(item) {
+  return reflection2.isInstance(item, MaxRule.$type);
+}
+var MinRule = {
+  $type: "MinRule",
+  value: "value"
+};
+function isMinRule(item) {
+  return reflection2.isInstance(item, MinRule.$type);
 }
 var Model = {
   $type: "Model",
-  elements: "elements",
-  imports: "imports"
+  contract: "contract",
+  experiences: "experiences",
+  extensions: "extensions",
+  imports: "imports",
+  shared: "shared",
+  standalone: "standalone"
 };
-function isModel(item) {
-  return reflection2.isInstance(item, Model.$type);
-}
-var NumberExpr = {
-  $type: "NumberExpr",
-  value: "value"
+var Multiplicative = {
+  $type: "Multiplicative"
 };
-function isNumberExpr(item) {
-  return reflection2.isInstance(item, NumberExpr.$type);
-}
-var NumberValue = {
-  $type: "NumberValue",
-  value: "value"
-};
-function isNumberValue(item) {
-  return reflection2.isInstance(item, NumberValue.$type);
-}
-var OnSuccessBlock = {
-  $type: "OnSuccessBlock",
-  actions: "actions"
-};
-var OperationClause = {
-  $type: "OperationClause"
-};
-var OperationDecl = {
-  $type: "OperationDecl",
-  clauses: "clauses",
-  command: "command",
+var MutableState = {
+  $type: "MutableState",
+  init: "init",
   name: "name",
-  note: "note",
-  success: "success"
+  persisted: "persisted",
+  type: "type"
 };
-function isOperationDecl(item) {
-  return reflection2.isInstance(item, OperationDecl.$type);
+function isMutableState(item) {
+  return reflection2.isInstance(item, MutableState.$type);
 }
-var OrderByFilter = {
-  $type: "OrderByFilter",
-  direction: "direction",
-  field: "field"
+var NavDecl = {
+  $type: "NavDecl",
+  from: "from",
+  to: "to"
 };
-function isOrderByFilter(item) {
-  return reflection2.isInstance(item, OrderByFilter.$type);
+function isNavDecl(item) {
+  return reflection2.isInstance(item, NavDecl.$type);
 }
-var OutsideNote = {
-  $type: "OutsideNote",
-  text: "text"
-};
-function isOutsideNote(item) {
-  return reflection2.isInstance(item, OutsideNote.$type);
-}
-var Ownership = {
-  $type: "Ownership"
-};
-var PathRead = {
-  $type: "PathRead",
-  alias: "alias",
-  hops: "hops",
-  leaf: "leaf"
-};
-function isPathRead(item) {
-  return reflection2.isInstance(item, PathRead.$type);
-}
-var PerformAction = {
-  $type: "PerformAction",
+var NavHandler = {
+  $type: "NavHandler",
+  args: "args",
   target: "target"
 };
-function isPerformAction(item) {
-  return reflection2.isInstance(item, PerformAction.$type);
+function isNavHandler(item) {
+  return reflection2.isInstance(item, NavHandler.$type);
 }
-var ProcessDef = {
-  $type: "ProcessDef",
-  entity: "entity",
+var OrExpr = {
+  $type: "OrExpr"
+};
+var Path = {
+  $type: "Path",
+  segments: "segments"
+};
+function isPath(item) {
+  return reflection2.isInstance(item, Path.$type);
+}
+var PatternRule = {
+  $type: "PatternRule",
+  value: "value"
+};
+function isPatternRule(item) {
+  return reflection2.isInstance(item, PatternRule.$type);
+}
+var QueryBind = {
+  $type: "QueryBind",
+  args: "args",
+  op: "op"
+};
+var RefreshAction = {
+  $type: "RefreshAction",
+  targets: "targets"
+};
+function isRefreshAction(item) {
+  return reflection2.isInstance(item, RefreshAction.$type);
+}
+var Region = {
+  $type: "Region",
+  attrs: "attrs",
   items: "items",
-  name: "name",
-  note: "note"
+  name: "name"
 };
-function isProcessDef(item) {
-  return reflection2.isInstance(item, ProcessDef.$type);
+function isRegion(item) {
+  return reflection2.isInstance(item, Region.$type);
 }
-var ProcessItem = {
-  $type: "ProcessItem"
+var RegionAttr = {
+  $type: "RegionAttr"
 };
-var ReadEntry = {
-  $type: "ReadEntry"
+var RegionItem = {
+  $type: "RegionItem"
 };
-var RelationDef = {
-  $type: "RelationDef",
-  name: "name",
-  source: "source",
+var RequiredRule = {
+  $type: "RequiredRule",
+  kind: "kind"
+};
+function isRequiredRule(item) {
+  return reflection2.isInstance(item, RequiredRule.$type);
+}
+var ResultHandler = {
+  $type: "ResultHandler",
+  handler: "handler",
+  result: "result"
+};
+function isResultHandler(item) {
+  return reflection2.isInstance(item, ResultHandler.$type);
+}
+var RetryHandler = {
+  $type: "RetryHandler",
+  kind: "kind"
+};
+function isRetryHandler(item) {
+  return reflection2.isInstance(item, RetryHandler.$type);
+}
+var RevealDelta = {
+  $type: "RevealDelta",
   target: "target"
 };
-function isRelationDef(item) {
-  return reflection2.isInstance(item, RelationDef.$type);
+function isRevealDelta(item) {
+  return reflection2.isInstance(item, RevealDelta.$type);
 }
-var RelationOwnership = {
-  $type: "RelationOwnership",
-  relation: "relation"
-};
-function isRelationOwnership(item) {
-  return reflection2.isInstance(item, RelationOwnership.$type);
-}
-var RequiresConstraint = {
-  $type: "RequiresConstraint",
-  rules: "rules"
-};
-function isRequiresConstraint(item) {
-  return reflection2.isInstance(item, RequiresConstraint.$type);
-}
-var RevokeCommand = {
-  $type: "RevokeCommand",
-  actor: "actor",
-  grantee: "grantee",
-  ownership: "ownership",
-  permission: "permission",
-  resource: "resource"
-};
-function isRevokeCommand(item) {
-  return reflection2.isInstance(item, RevokeCommand.$type);
-}
-var RuleDef = {
-  $type: "RuleDef",
-  body: "body",
-  name: "name",
-  note: "note",
-  reads: "reads"
-};
-function isRuleDef(item) {
-  return reflection2.isInstance(item, RuleDef.$type);
-}
-var Schedule = {
-  $type: "Schedule",
-  time: "time",
-  unit: "unit"
-};
-function isSchedule(item) {
-  return reflection2.isInstance(item, Schedule.$type);
-}
-var SendAction = {
-  $type: "SendAction",
-  message: "message",
-  recipient: "recipient"
-};
-function isSendAction(item) {
-  return reflection2.isInstance(item, SendAction.$type);
-}
-var StageDef = {
-  $type: "StageDef",
-  actor: "actor",
-  flow: "flow",
-  name: "name",
-  target: "target"
-};
-function isStageDef(item) {
-  return reflection2.isInstance(item, StageDef.$type);
-}
-var StandardCommand = {
-  $type: "StandardCommand",
-  actor: "actor",
-  ownership: "ownership",
-  recipient: "recipient",
-  resource: "resource",
-  sourceOwnership: "sourceOwnership",
-  sourceResource: "sourceResource",
-  targetOwnership: "targetOwnership",
-  targetResource: "targetResource",
-  verb: "verb",
-  where: "where"
-};
-function isStandardCommand(item) {
-  return reflection2.isInstance(item, StandardCommand.$type);
-}
-var StringExpr = {
-  $type: "StringExpr",
+var RoleAttr = {
+  $type: "RoleAttr",
   value: "value"
 };
-function isStringExpr(item) {
-  return reflection2.isInstance(item, StringExpr.$type);
-}
-var StringValue2 = {
-  $type: "StringValue",
-  value: "value"
+var Screen = {
+  $type: "Screen",
+  members: "members",
+  name: "name",
+  params: "params",
+  persona: "persona",
+  title: "title"
 };
-function isStringValue(item) {
-  return reflection2.isInstance(item, StringValue2.$type);
+function isScreen(item) {
+  return reflection2.isInstance(item, Screen.$type);
 }
-var Subject = {
-  $type: "Subject"
+var ScreenMember = {
+  $type: "ScreenMember"
 };
-var UnitDuration = {
-  $type: "UnitDuration",
+var ScreenParam = {
+  $type: "ScreenParam",
+  name: "name"
+};
+var SetClause = {
+  $type: "SetClause",
+  expr: "expr",
+  state: "state"
+};
+function isSetClause(item) {
+  return reflection2.isInstance(item, SetClause.$type);
+}
+var ShapeField = {
+  $type: "ShapeField",
+  name: "name",
+  type: "type"
+};
+var SharedBlock = {
+  $type: "SharedBlock",
+  members: "members"
+};
+function isSharedBlock(item) {
+  return reflection2.isInstance(item, SharedBlock.$type);
+}
+var SharedMember = {
+  $type: "SharedMember"
+};
+var ShowClause = {
+  $type: "ShowClause",
+  fields: "fields"
+};
+function isShowClause(item) {
+  return reflection2.isInstance(item, ShowClause.$type);
+}
+var StateDecl = {
+  $type: "StateDecl"
+};
+function isStateDecl(item) {
+  return reflection2.isInstance(item, StateDecl.$type);
+}
+var TargetArg = {
+  $type: "TargetArg",
+  name: "name",
+  num: "num",
+  str: "str",
+  word: "word"
+};
+var TargetEscape = {
+  $type: "TargetEscape",
+  args: "args"
+};
+function isTargetEscape(item) {
+  return reflection2.isInstance(item, TargetEscape.$type);
+}
+var TimerTrigger = {
+  $type: "TimerTrigger",
+  kind: "kind",
   unit: "unit",
   value: "value"
 };
-function isUnitDuration(item) {
-  return reflection2.isInstance(item, UnitDuration.$type);
+function isTimerTrigger(item) {
+  return reflection2.isInstance(item, TimerTrigger.$type);
 }
-var VerbDef = {
-  $type: "VerbDef",
+var ToastHandler = {
+  $type: "ToastHandler",
+  retry: "retry",
+  text: "text"
+};
+function isToastHandler(item) {
+  return reflection2.isInstance(item, ToastHandler.$type);
+}
+var TypeDecl = {
+  $type: "TypeDecl",
+  fields: "fields",
   name: "name"
 };
-function isVerbDef(item) {
-  return reflection2.isInstance(item, VerbDef.$type);
+function isTypeDecl(item) {
+  return reflection2.isInstance(item, TypeDecl.$type);
 }
-var WhenConstraint = {
-  $type: "WhenConstraint",
-  condition: "condition"
+var UiEvent = {
+  $type: "UiEvent",
+  actions: "actions",
+  trigger: "trigger"
 };
-function isWhenConstraint(item) {
-  return reflection2.isInstance(item, WhenConstraint.$type);
+function isUiEvent(item) {
+  return reflection2.isInstance(item, UiEvent.$type);
 }
-var CommandDslAstReflection = class extends AbstractAstReflection {
+var UiTrigger = {
+  $type: "UiTrigger"
+};
+var UsesDecl = {
+  $type: "UsesDecl",
+  inputs: "inputs",
+  kind: "kind",
+  name: "name",
+  outList: "outList",
+  outputs: "outputs",
+  realizes: "realizes",
+  results: "results"
+};
+function isUsesDecl(item) {
+  return reflection2.isInstance(item, UsesDecl.$type);
+}
+var ValueComponent = {
+  $type: "ValueComponent",
+  alias: "alias",
+  bind: "bind",
+  mech: "mech"
+};
+function isValueComponent(item) {
+  return reflection2.isInstance(item, ValueComponent.$type);
+}
+var VisibleWhen = {
+  $type: "VisibleWhen",
+  expr: "expr"
+};
+function isVisibleWhen(item) {
+  return reflection2.isInstance(item, VisibleWhen.$type);
+}
+var WhenBlock = {
+  $type: "WhenBlock",
+  deltas: "deltas",
+  state: "state"
+};
+function isWhenBlock(item) {
+  return reflection2.isInstance(item, WhenBlock.$type);
+}
+var FrontendDslAstReflection = class extends AbstractAstReflection {
   types = {
-    AbandonNote: {
-      name: AbandonNote.$type,
+    ActionComponent: {
+      name: ActionComponent.$type,
+      properties: {
+        mech: {
+          name: ActionComponent.mech
+        },
+        members: {
+          name: ActionComponent.members,
+          defaultValue: []
+        },
+        name: {
+          name: ActionComponent.name
+        },
+        navArgs: {
+          name: ActionComponent.navArgs,
+          defaultValue: []
+        },
+        navTarget: {
+          name: ActionComponent.navTarget,
+          referenceType: Screen.$type
+        }
+      },
+      superTypes: [DataMember.$type, RegionItem.$type]
+    },
+    ActionMember: {
+      name: ActionMember.$type,
+      properties: {},
+      superTypes: []
+    },
+    Additive: {
+      name: Additive.$type,
+      properties: {},
+      superTypes: []
+    },
+    Aggregate: {
+      name: Aggregate.$type,
+      properties: {
+        fn: {
+          name: Aggregate.fn
+        },
+        path: {
+          name: Aggregate.path
+        }
+      },
+      superTypes: [Atom.$type]
+    },
+    AndExpr: {
+      name: AndExpr.$type,
+      properties: {},
+      superTypes: [OrExpr.$type]
+    },
+    Annotation: {
+      name: Annotation.$type,
+      properties: {
+        args: {
+          name: Annotation.args,
+          defaultValue: []
+        },
+        name: {
+          name: Annotation.name
+        },
+        ns: {
+          name: Annotation.ns
+        }
+      },
+      superTypes: []
+    },
+    AnnotationArg: {
+      name: AnnotationArg.$type,
+      properties: {
+        name: {
+          name: AnnotationArg.name
+        },
+        value: {
+          name: AnnotationArg.value
+        }
+      },
+      superTypes: []
+    },
+    ArgBinding: {
+      name: ArgBinding.$type,
+      properties: {
+        name: {
+          name: ArgBinding.name
+        },
+        value: {
+          name: ArgBinding.value
+        }
+      },
+      superTypes: []
+    },
+    Arith: {
+      name: Arith.$type,
+      properties: {
+        left: {
+          name: Arith.left
+        },
+        op: {
+          name: Arith.op
+        },
+        right: {
+          name: Arith.right
+        }
+      },
+      superTypes: [Additive.$type, Multiplicative.$type]
+    },
+    Atom: {
+      name: Atom.$type,
+      properties: {},
+      superTypes: [Multiplicative.$type]
+    },
+    BadgeDelta: {
+      name: BadgeDelta.$type,
       properties: {
         text: {
-          name: AbandonNote.text
+          name: BadgeDelta.text
         }
       },
-      superTypes: [FlowItem.$type]
+      superTypes: [DeltaAction.$type]
     },
-    Action: {
-      name: Action2.$type,
-      properties: {},
-      superTypes: []
+    BannerDelta: {
+      name: BannerDelta.$type,
+      properties: {
+        text: {
+          name: BannerDelta.text
+        }
+      },
+      superTypes: [DeltaAction.$type]
     },
-    ActorDef: {
-      name: ActorDef.$type,
+    BannerHandler: {
+      name: BannerHandler.$type,
+      properties: {
+        text: {
+          name: BannerHandler.text
+        }
+      },
+      superTypes: [HandlerAction.$type]
+    },
+    Binary: {
+      name: Binary.$type,
+      properties: {
+        left: {
+          name: Binary.left
+        },
+        op: {
+          name: Binary.op
+        },
+        right: {
+          name: Binary.right
+        }
+      },
+      superTypes: [AndExpr.$type, OrExpr.$type]
+    },
+    BizFlow: {
+      name: BizFlow.$type,
       properties: {
         name: {
-          name: ActorDef.name
-        },
-        parent: {
-          name: ActorDef.parent,
-          referenceType: ActorDef.$type
+          name: BizFlow.name
         }
       },
-      superTypes: [Element.$type, Subject.$type]
+      superTypes: []
     },
-    AggregateExpr: {
-      name: AggregateExpr.$type,
+    BusinessOp: {
+      name: BusinessOp.$type,
       properties: {
-        path: {
-          name: AggregateExpr.path
+        name: {
+          name: BusinessOp.name
         }
       },
-      superTypes: [Expression.$type]
+      superTypes: []
     },
-    AnyOrderBlock: {
-      name: AnyOrderBlock.$type,
+    Call: {
+      name: Call.$type,
       properties: {
-        branches: {
-          name: AnyOrderBlock.branches,
+        args: {
+          name: Call.args,
           defaultValue: []
-        }
-      },
-      superTypes: [ProcessItem.$type]
-    },
-    AnyOrderBranch: {
-      name: AnyOrderBranch.$type,
-      properties: {
-        items: {
-          name: AnyOrderBranch.items,
-          defaultValue: []
-        }
-      },
-      superTypes: []
-    },
-    BareRead: {
-      name: BareRead.$type,
-      properties: {
-        alias: {
-          name: BareRead.alias
         },
-        entity: {
-          name: BareRead.entity,
-          referenceType: EntityDef.$type
-        }
-      },
-      superTypes: [ReadEntry.$type]
-    },
-    BinaryBool: {
-      name: BinaryBool.$type,
-      properties: {
-        left: {
-          name: BinaryBool.left
-        },
-        op: {
-          name: BinaryBool.op
-        },
-        right: {
-          name: BinaryBool.right
-        }
-      },
-      superTypes: [BoolExpr.$type]
-    },
-    BinaryCondition: {
-      name: BinaryCondition.$type,
-      properties: {
-        left: {
-          name: BinaryCondition.left
-        },
-        op: {
-          name: BinaryCondition.op
-        },
-        right: {
-          name: BinaryCondition.right
-        }
-      },
-      superTypes: [Condition2.$type]
-    },
-    BinaryExpr: {
-      name: BinaryExpr.$type,
-      properties: {
-        left: {
-          name: BinaryExpr.left
-        },
-        op: {
-          name: BinaryExpr.op
-        },
-        right: {
-          name: BinaryExpr.right
-        }
-      },
-      superTypes: [Expression.$type]
-    },
-    BoolExpr: {
-      name: BoolExpr.$type,
-      properties: {},
-      superTypes: []
-    },
-    CalculateAction: {
-      name: CalculateAction.$type,
-      properties: {
-        condition: {
-          name: CalculateAction.condition
-        },
-        expr: {
-          name: CalculateAction.expr
-        },
-        target: {
-          name: CalculateAction.target
-        }
-      },
-      superTypes: [Action2.$type, OperationClause.$type]
-    },
-    CalendarDef: {
-      name: CalendarDef.$type,
-      properties: {
         name: {
-          name: CalendarDef.name
+          name: Call.name
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [Atom.$type]
     },
-    CommandDecl: {
-      name: CommandDecl.$type,
-      properties: {},
-      superTypes: []
-    },
-    CompactDuration: {
-      name: CompactDuration.$type,
-      properties: {
-        literal: {
-          name: CompactDuration.literal
-        }
-      },
-      superTypes: [Duration.$type]
-    },
-    Comparison: {
-      name: Comparison.$type,
+    Cmp: {
+      name: Cmp.$type,
       properties: {
         left: {
-          name: Comparison.left
+          name: Cmp.left
         },
         op: {
-          name: Comparison.op
+          name: Cmp.op
         },
         right: {
-          name: Comparison.right
+          name: Cmp.right
         }
       },
-      superTypes: [BoolExpr.$type, Condition2.$type]
+      superTypes: [AndExpr.$type]
     },
-    ComparisonValue: {
-      name: ComparisonValue.$type,
-      properties: {},
-      superTypes: []
-    },
-    Condition: {
-      name: Condition2.$type,
-      properties: {},
-      superTypes: []
-    },
-    Constraint: {
-      name: Constraint.$type,
-      properties: {},
-      superTypes: [OperationClause.$type]
-    },
-    CreateAction: {
-      name: CreateAction.$type,
-      properties: {
-        source: {
-          name: CreateAction.source,
-          referenceType: EntityDef.$type
-        },
-        target: {
-          name: CreateAction.target,
-          referenceType: EntityDef.$type
-        }
-      },
-      superTypes: [Action2.$type]
-    },
-    DomainDef: {
-      name: DomainDef.$type,
-      properties: {
-        name: {
-          name: DomainDef.name
-        }
-      },
-      superTypes: [Element.$type]
-    },
-    Duration: {
-      name: Duration.$type,
-      properties: {},
-      superTypes: []
-    },
-    DurationValue: {
-      name: DurationValue.$type,
+    CollapseAttr: {
+      name: CollapseAttr.$type,
       properties: {
         value: {
-          name: DurationValue.value
+          name: CollapseAttr.value
         }
       },
-      superTypes: [ComparisonValue.$type]
+      superTypes: [RegionAttr.$type]
     },
-    DuringConstraint: {
-      name: DuringConstraint.$type,
+    ConfirmClause: {
+      name: ConfirmClause.$type,
       properties: {
-        calendar: {
-          name: DuringConstraint.calendar,
-          referenceType: CalendarDef.$type
-        }
-      },
-      superTypes: [Constraint.$type]
-    },
-    EitherBlock: {
-      name: EitherBlock.$type,
-      properties: {
-        branches: {
-          name: EitherBlock.branches,
-          defaultValue: []
-        }
-      },
-      superTypes: [FlowItem.$type]
-    },
-    EitherBranch: {
-      name: EitherBranch.$type,
-      properties: {
-        items: {
-          name: EitherBranch.items,
-          defaultValue: []
-        }
-      },
-      superTypes: []
-    },
-    Element: {
-      name: Element.$type,
-      properties: {},
-      superTypes: []
-    },
-    EntityDef: {
-      name: EntityDef.$type,
-      properties: {
-        fields: {
-          name: EntityDef.fields,
-          defaultValue: []
+        kind: {
+          name: ConfirmClause.kind
         },
-        name: {
-          name: EntityDef.name
+        text: {
+          name: ConfirmClause.text
         }
       },
-      superTypes: [Element.$type, Subject.$type]
+      superTypes: [ActionMember.$type]
     },
-    ExistsExpr: {
-      name: ExistsExpr.$type,
-      properties: {
-        collection: {
-          name: ExistsExpr.collection
-        },
-        condition: {
-          name: ExistsExpr.condition
-        },
-        negated: {
-          name: ExistsExpr.negated,
-          defaultValue: false
-        }
-      },
-      superTypes: [BoolExpr.$type]
-    },
-    Expression: {
-      name: Expression.$type,
-      properties: {},
-      superTypes: []
-    },
-    FieldDef: {
-      name: FieldDef.$type,
-      properties: {
-        collection: {
-          name: FieldDef.collection,
-          defaultValue: false
-        },
-        name: {
-          name: FieldDef.name
-        },
-        type: {
-          name: FieldDef.type
-        }
-      },
-      superTypes: []
-    },
-    FieldExpr: {
-      name: FieldExpr.$type,
+    ContractDecl: {
+      name: ContractDecl.$type,
       properties: {
         path: {
-          name: FieldExpr.path
-        }
-      },
-      superTypes: [Expression.$type]
-    },
-    FieldPath: {
-      name: FieldPath.$type,
-      properties: {
-        segments: {
-          name: FieldPath.segments,
-          defaultValue: []
+          name: ContractDecl.path
+        },
+        techPath: {
+          name: ContractDecl.techPath
         }
       },
       superTypes: []
     },
-    FieldValue: {
-      name: FieldValue.$type,
-      properties: {
-        path: {
-          name: FieldValue.path
-        }
-      },
-      superTypes: [ComparisonValue.$type]
-    },
-    FlowDef: {
-      name: FlowDef.$type,
-      properties: {
-        actor: {
-          name: FlowDef.actor,
-          referenceType: ActorDef.$type
-        },
-        items: {
-          name: FlowDef.items,
-          defaultValue: []
-        },
-        name: {
-          name: FlowDef.name
-        },
-        note: {
-          name: FlowDef.note
-        }
-      },
-      superTypes: [Element.$type]
-    },
-    FlowItem: {
-      name: FlowItem.$type,
+    DataMember: {
+      name: DataMember.$type,
       properties: {},
       superTypes: []
     },
-    FlowStep: {
-      name: FlowStep.$type,
+    DeltaAction: {
+      name: DeltaAction.$type,
+      properties: {},
+      superTypes: []
+    },
+    DerivedState: {
+      name: DerivedState.$type,
       properties: {
+        expr: {
+          name: DerivedState.expr
+        },
         name: {
-          name: FlowStep.name
+          name: DerivedState.name
+        }
+      },
+      superTypes: [StateDecl.$type]
+    },
+    DetailComponent: {
+      name: DetailComponent.$type,
+      properties: {
+        alias: {
+          name: DetailComponent.alias
         },
-        optional: {
-          name: FlowStep.optional,
+        bind: {
+          name: DetailComponent.bind
+        },
+        mech: {
+          name: DetailComponent.mech
+        },
+        members: {
+          name: DetailComponent.members,
+          defaultValue: []
+        },
+        refreshable: {
+          name: DetailComponent.refreshable,
           defaultValue: false
-        },
-        repeat: {
-          name: FlowStep.repeat,
-          defaultValue: false
-        },
-        source: {
-          name: FlowStep.source,
-          referenceType: FlowStep.$type
+        }
+      },
+      superTypes: [RegionItem.$type]
+    },
+    EventAction: {
+      name: EventAction.$type,
+      properties: {},
+      superTypes: []
+    },
+    EventInvalidate: {
+      name: EventInvalidate.$type,
+      properties: {
+        targets: {
+          name: EventInvalidate.targets,
+          defaultValue: [],
+          referenceType: UsesDecl.$type
+        }
+      },
+      superTypes: [EventAction.$type]
+    },
+    EventNav: {
+      name: EventNav.$type,
+      properties: {
+        args: {
+          name: EventNav.args,
+          defaultValue: []
         },
         target: {
-          name: FlowStep.target,
-          referenceType: OperationDecl.$type
+          name: EventNav.target,
+          referenceType: Screen.$type
         }
       },
-      superTypes: [FlowItem.$type]
+      superTypes: [EventAction.$type]
     },
-    GrantCommand: {
-      name: GrantCommand.$type,
+    EventPerform: {
+      name: EventPerform.$type,
       properties: {
-        actor: {
-          name: GrantCommand.actor,
-          referenceType: ActorDef.$type
-        },
-        duration: {
-          name: GrantCommand.duration
-        },
-        grantee: {
-          name: GrantCommand.grantee,
-          referenceType: ActorDef.$type
-        },
-        ownership: {
-          name: GrantCommand.ownership
-        },
-        permission: {
-          name: GrantCommand.permission
-        },
-        resource: {
-          name: GrantCommand.resource,
-          referenceType: EntityDef.$type
+        target: {
+          name: EventPerform.target
         }
       },
-      superTypes: [CommandDecl.$type]
+      superTypes: [EventAction.$type]
     },
-    IfConstraint: {
-      name: IfConstraint.$type,
+    EventSet: {
+      name: EventSet.$type,
       properties: {
-        condition: {
-          name: IfConstraint.condition
+        expr: {
+          name: EventSet.expr
+        },
+        state: {
+          name: EventSet.state,
+          referenceType: StateDecl.$type
         }
       },
-      superTypes: [Constraint.$type]
+      superTypes: [EventAction.$type]
+    },
+    Experience: {
+      name: Experience.$type,
+      properties: {
+        audience: {
+          name: Experience.audience,
+          defaultValue: []
+        },
+        delivery: {
+          name: Experience.delivery
+        },
+        entry: {
+          name: Experience.entry,
+          referenceType: Screen.$type
+        },
+        members: {
+          name: Experience.members,
+          defaultValue: []
+        },
+        name: {
+          name: Experience.name
+        }
+      },
+      superTypes: []
+    },
+    ExperienceMember: {
+      name: ExperienceMember.$type,
+      properties: {},
+      superTypes: []
+    },
+    Expr: {
+      name: Expr.$type,
+      properties: {},
+      superTypes: [Atom.$type]
+    },
+    ExtComponent: {
+      name: ExtComponent.$type,
+      properties: {
+        bind: {
+          name: ExtComponent.bind
+        },
+        ext: {
+          name: ExtComponent.ext
+        }
+      },
+      superTypes: [RegionItem.$type]
+    },
+    ExtLit: {
+      name: ExtLit.$type,
+      properties: {
+        bool: {
+          name: ExtLit.bool
+        },
+        num: {
+          name: ExtLit.num
+        },
+        str: {
+          name: ExtLit.str
+        }
+      },
+      superTypes: []
+    },
+    ExtParam: {
+      name: ExtParam.$type,
+      properties: {
+        default: {
+          name: ExtParam.default
+        },
+        name: {
+          name: ExtParam.name
+        },
+        type: {
+          name: ExtParam.type
+        }
+      },
+      superTypes: []
+    },
+    ExtensionDecl: {
+      name: ExtensionDecl.$type,
+      properties: {
+        name: {
+          name: ExtensionDecl.name
+        },
+        ns: {
+          name: ExtensionDecl.ns
+        },
+        params: {
+          name: ExtensionDecl.params,
+          defaultValue: []
+        },
+        sites: {
+          name: ExtensionDecl.sites,
+          defaultValue: []
+        }
+      },
+      superTypes: []
+    },
+    FieldRule: {
+      name: FieldRule.$type,
+      properties: {},
+      superTypes: []
+    },
+    FlowDecl: {
+      name: FlowDecl.$type,
+      properties: {
+        name: {
+          name: FlowDecl.name
+        },
+        realizes: {
+          name: FlowDecl.realizes,
+          referenceType: BizFlow.$type
+        },
+        steps: {
+          name: FlowDecl.steps,
+          defaultValue: [],
+          referenceType: Screen.$type
+        }
+      },
+      superTypes: [ExperienceMember.$type]
+    },
+    FormComponent: {
+      name: FormComponent.$type,
+      properties: {
+        alias: {
+          name: FormComponent.alias
+        },
+        bind: {
+          name: FormComponent.bind
+        },
+        mech: {
+          name: FormComponent.mech
+        },
+        members: {
+          name: FormComponent.members,
+          defaultValue: []
+        }
+      },
+      superTypes: [RegionItem.$type]
+    },
+    FormField: {
+      name: FormField.$type,
+      properties: {
+        field: {
+          name: FormField.field,
+          referenceType: ShapeField.$type
+        },
+        rules: {
+          name: FormField.rules,
+          defaultValue: []
+        }
+      },
+      superTypes: [FormMember.$type]
+    },
+    FormMember: {
+      name: FormMember.$type,
+      properties: {},
+      superTypes: []
+    },
+    FormRule: {
+      name: FormRule.$type,
+      properties: {
+        expr: {
+          name: FormRule.expr
+        }
+      },
+      superTypes: [FormMember.$type]
+    },
+    FormStep: {
+      name: FormStep.$type,
+      properties: {
+        fields: {
+          name: FormStep.fields,
+          defaultValue: []
+        },
+        name: {
+          name: FormStep.name
+        }
+      },
+      superTypes: [FormMember.$type]
+    },
+    HandlerAction: {
+      name: HandlerAction.$type,
+      properties: {},
+      superTypes: []
+    },
+    HideDelta: {
+      name: HideDelta.$type,
+      properties: {
+        target: {
+          name: HideDelta.target
+        }
+      },
+      superTypes: [DeltaAction.$type]
     },
     ImportDecl: {
       name: ImportDecl.$type,
@@ -32870,426 +33089,580 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: []
     },
-    IncludeStep: {
-      name: IncludeStep.$type,
+    InlineErrorsHandler: {
+      name: InlineErrorsHandler.$type,
       properties: {
-        optional: {
-          name: IncludeStep.optional,
-          defaultValue: false
-        },
-        repeat: {
-          name: IncludeStep.repeat,
-          defaultValue: false
+        kind: {
+          name: InlineErrorsHandler.kind
+        }
+      },
+      superTypes: [HandlerAction.$type]
+    },
+    InteractionTrigger: {
+      name: InteractionTrigger.$type,
+      properties: {
+        kind: {
+          name: InteractionTrigger.kind
         },
         target: {
-          name: IncludeStep.target,
-          referenceType: FlowDef.$type
+          name: InteractionTrigger.target
         }
       },
-      superTypes: [FlowItem.$type]
+      superTypes: [UiTrigger.$type]
     },
-    KeywordOwnership: {
-      name: KeywordOwnership.$type,
+    InvalidatesClause: {
+      name: InvalidatesClause.$type,
       properties: {
-        keyword: {
-          name: KeywordOwnership.keyword
+        targets: {
+          name: InvalidatesClause.targets,
+          defaultValue: [],
+          referenceType: UsesDecl.$type
         }
       },
-      superTypes: [Ownership.$type]
+      superTypes: [ActionMember.$type]
     },
-    LimitFilter: {
-      name: LimitFilter.$type,
+    LifecycleTrigger: {
+      name: LifecycleTrigger.$type,
       properties: {
-        count: {
-          name: LimitFilter.count
+        kind: {
+          name: LifecycleTrigger.kind
         }
       },
-      superTypes: [OperationClause.$type]
+      superTypes: [UiTrigger.$type]
+    },
+    ListComponent: {
+      name: ListComponent.$type,
+      properties: {
+        alias: {
+          name: ListComponent.alias
+        },
+        bind: {
+          name: ListComponent.bind
+        },
+        mech: {
+          name: ListComponent.mech
+        },
+        members: {
+          name: ListComponent.members,
+          defaultValue: []
+        },
+        pagination: {
+          name: ListComponent.pagination
+        },
+        refreshable: {
+          name: ListComponent.refreshable,
+          defaultValue: false
+        }
+      },
+      superTypes: [RegionItem.$type]
+    },
+    Lit: {
+      name: Lit.$type,
+      properties: {
+        bool: {
+          name: Lit.bool
+        },
+        num: {
+          name: Lit.num
+        },
+        str: {
+          name: Lit.str
+        }
+      },
+      superTypes: [Atom.$type]
+    },
+    LoadsClause: {
+      name: LoadsClause.$type,
+      properties: {
+        bind: {
+          name: LoadsClause.bind
+        }
+      },
+      superTypes: [FormMember.$type]
+    },
+    MaxRule: {
+      name: MaxRule.$type,
+      properties: {
+        value: {
+          name: MaxRule.value
+        }
+      },
+      superTypes: [FieldRule.$type]
+    },
+    MinRule: {
+      name: MinRule.$type,
+      properties: {
+        value: {
+          name: MinRule.value
+        }
+      },
+      superTypes: [FieldRule.$type]
     },
     Model: {
       name: Model.$type,
       properties: {
-        elements: {
-          name: Model.elements,
+        contract: {
+          name: Model.contract
+        },
+        experiences: {
+          name: Model.experiences,
+          defaultValue: []
+        },
+        extensions: {
+          name: Model.extensions,
           defaultValue: []
         },
         imports: {
           name: Model.imports,
           defaultValue: []
-        }
-      },
-      superTypes: []
-    },
-    NumberExpr: {
-      name: NumberExpr.$type,
-      properties: {
-        value: {
-          name: NumberExpr.value
-        }
-      },
-      superTypes: [Expression.$type]
-    },
-    NumberValue: {
-      name: NumberValue.$type,
-      properties: {
-        value: {
-          name: NumberValue.value
-        }
-      },
-      superTypes: [ComparisonValue.$type]
-    },
-    OnSuccessBlock: {
-      name: OnSuccessBlock.$type,
-      properties: {
-        actions: {
-          name: OnSuccessBlock.actions,
-          defaultValue: []
-        }
-      },
-      superTypes: []
-    },
-    OperationClause: {
-      name: OperationClause.$type,
-      properties: {},
-      superTypes: []
-    },
-    OperationDecl: {
-      name: OperationDecl.$type,
-      properties: {
-        clauses: {
-          name: OperationDecl.clauses,
-          defaultValue: []
         },
-        command: {
-          name: OperationDecl.command
+        shared: {
+          name: Model.shared
+        },
+        standalone: {
+          name: Model.standalone,
+          defaultValue: false
+        }
+      },
+      superTypes: []
+    },
+    Multiplicative: {
+      name: Multiplicative.$type,
+      properties: {},
+      superTypes: [Additive.$type]
+    },
+    MutableState: {
+      name: MutableState.$type,
+      properties: {
+        init: {
+          name: MutableState.init
         },
         name: {
-          name: OperationDecl.name
+          name: MutableState.name
         },
-        note: {
-          name: OperationDecl.note
+        persisted: {
+          name: MutableState.persisted,
+          defaultValue: false
         },
-        success: {
-          name: OperationDecl.success
+        type: {
+          name: MutableState.type
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [StateDecl.$type]
     },
-    OrderByFilter: {
-      name: OrderByFilter.$type,
+    NavDecl: {
+      name: NavDecl.$type,
       properties: {
-        direction: {
-          name: OrderByFilter.direction
+        from: {
+          name: NavDecl.from,
+          referenceType: Screen.$type
         },
-        field: {
-          name: OrderByFilter.field
+        to: {
+          name: NavDecl.to,
+          referenceType: Screen.$type
         }
       },
-      superTypes: [OperationClause.$type]
+      superTypes: [ExperienceMember.$type]
     },
-    OutsideNote: {
-      name: OutsideNote.$type,
+    NavHandler: {
+      name: NavHandler.$type,
       properties: {
-        text: {
-          name: OutsideNote.text
+        args: {
+          name: NavHandler.args,
+          defaultValue: []
+        },
+        target: {
+          name: NavHandler.target,
+          referenceType: Screen.$type
         }
       },
-      superTypes: [FlowItem.$type]
+      superTypes: [HandlerAction.$type]
     },
-    Ownership: {
-      name: Ownership.$type,
+    OrExpr: {
+      name: OrExpr.$type,
       properties: {},
+      superTypes: [Expr.$type]
+    },
+    Path: {
+      name: Path.$type,
+      properties: {
+        segments: {
+          name: Path.segments,
+          defaultValue: []
+        }
+      },
+      superTypes: [Atom.$type]
+    },
+    PatternRule: {
+      name: PatternRule.$type,
+      properties: {
+        value: {
+          name: PatternRule.value
+        }
+      },
+      superTypes: [FieldRule.$type]
+    },
+    QueryBind: {
+      name: QueryBind.$type,
+      properties: {
+        args: {
+          name: QueryBind.args,
+          defaultValue: []
+        },
+        op: {
+          name: QueryBind.op,
+          referenceType: UsesDecl.$type
+        }
+      },
       superTypes: []
     },
-    PathRead: {
-      name: PathRead.$type,
+    RefreshAction: {
+      name: RefreshAction.$type,
       properties: {
-        alias: {
-          name: PathRead.alias
-        },
-        hops: {
-          name: PathRead.hops,
+        targets: {
+          name: RefreshAction.targets,
           defaultValue: [],
-          referenceType: RelationDef.$type
-        },
-        leaf: {
-          name: PathRead.leaf,
-          referenceType: EntityDef.$type
+          referenceType: UsesDecl.$type
         }
       },
-      superTypes: [ReadEntry.$type]
+      superTypes: [EventAction.$type]
     },
-    PerformAction: {
-      name: PerformAction.$type,
+    Region: {
+      name: Region.$type,
       properties: {
-        target: {
-          name: PerformAction.target,
-          referenceType: OperationDecl.$type
-        }
-      },
-      superTypes: [Action2.$type]
-    },
-    ProcessDef: {
-      name: ProcessDef.$type,
-      properties: {
-        entity: {
-          name: ProcessDef.entity,
-          referenceType: EntityDef.$type
+        attrs: {
+          name: Region.attrs,
+          defaultValue: []
         },
         items: {
-          name: ProcessDef.items,
+          name: Region.items,
           defaultValue: []
         },
         name: {
-          name: ProcessDef.name
-        },
-        note: {
-          name: ProcessDef.note
+          name: Region.name
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [RegionItem.$type, ScreenMember.$type]
     },
-    ProcessItem: {
-      name: ProcessItem.$type,
+    RegionAttr: {
+      name: RegionAttr.$type,
       properties: {},
       superTypes: []
     },
-    ReadEntry: {
-      name: ReadEntry.$type,
+    RegionItem: {
+      name: RegionItem.$type,
       properties: {},
       superTypes: []
     },
-    RelationDef: {
-      name: RelationDef.$type,
+    RequiredRule: {
+      name: RequiredRule.$type,
+      properties: {
+        kind: {
+          name: RequiredRule.kind
+        }
+      },
+      superTypes: [FieldRule.$type]
+    },
+    ResultHandler: {
+      name: ResultHandler.$type,
+      properties: {
+        handler: {
+          name: ResultHandler.handler
+        },
+        result: {
+          name: ResultHandler.result
+        }
+      },
+      superTypes: [ActionMember.$type, ExperienceMember.$type, FormMember.$type]
+    },
+    RetryHandler: {
+      name: RetryHandler.$type,
+      properties: {
+        kind: {
+          name: RetryHandler.kind
+        }
+      },
+      superTypes: [HandlerAction.$type]
+    },
+    RevealDelta: {
+      name: RevealDelta.$type,
+      properties: {
+        target: {
+          name: RevealDelta.target
+        }
+      },
+      superTypes: [DeltaAction.$type]
+    },
+    RoleAttr: {
+      name: RoleAttr.$type,
+      properties: {
+        value: {
+          name: RoleAttr.value
+        }
+      },
+      superTypes: [RegionAttr.$type]
+    },
+    Screen: {
+      name: Screen.$type,
+      properties: {
+        members: {
+          name: Screen.members,
+          defaultValue: []
+        },
+        name: {
+          name: Screen.name
+        },
+        params: {
+          name: Screen.params,
+          defaultValue: []
+        },
+        persona: {
+          name: Screen.persona
+        },
+        title: {
+          name: Screen.title
+        }
+      },
+      superTypes: [ExperienceMember.$type, SharedMember.$type]
+    },
+    ScreenMember: {
+      name: ScreenMember.$type,
+      properties: {},
+      superTypes: []
+    },
+    ScreenParam: {
+      name: ScreenParam.$type,
       properties: {
         name: {
-          name: RelationDef.name
-        },
-        source: {
-          name: RelationDef.source,
-          referenceType: Subject.$type
-        },
-        target: {
-          name: RelationDef.target,
-          referenceType: Subject.$type
+          name: ScreenParam.name
         }
       },
-      superTypes: [Element.$type]
+      superTypes: []
     },
-    RelationOwnership: {
-      name: RelationOwnership.$type,
+    SetClause: {
+      name: SetClause.$type,
       properties: {
-        relation: {
-          name: RelationOwnership.relation,
-          referenceType: RelationDef.$type
+        expr: {
+          name: SetClause.expr
+        },
+        state: {
+          name: SetClause.state,
+          referenceType: StateDecl.$type
         }
       },
-      superTypes: [Ownership.$type]
+      superTypes: [ActionMember.$type]
     },
-    RequiresConstraint: {
-      name: RequiresConstraint.$type,
+    ShapeField: {
+      name: ShapeField.$type,
       properties: {
-        rules: {
-          name: RequiresConstraint.rules,
+        name: {
+          name: ShapeField.name
+        },
+        type: {
+          name: ShapeField.type
+        }
+      },
+      superTypes: []
+    },
+    SharedBlock: {
+      name: SharedBlock.$type,
+      properties: {
+        members: {
+          name: SharedBlock.members,
+          defaultValue: []
+        }
+      },
+      superTypes: []
+    },
+    SharedMember: {
+      name: SharedMember.$type,
+      properties: {},
+      superTypes: []
+    },
+    ShowClause: {
+      name: ShowClause.$type,
+      properties: {
+        fields: {
+          name: ShowClause.fields,
           defaultValue: [],
-          referenceType: RuleDef.$type
+          referenceType: ShapeField.$type
         }
       },
-      superTypes: [Constraint.$type]
+      superTypes: [DataMember.$type]
     },
-    RevokeCommand: {
-      name: RevokeCommand.$type,
-      properties: {
-        actor: {
-          name: RevokeCommand.actor,
-          referenceType: ActorDef.$type
-        },
-        grantee: {
-          name: RevokeCommand.grantee,
-          referenceType: ActorDef.$type
-        },
-        ownership: {
-          name: RevokeCommand.ownership
-        },
-        permission: {
-          name: RevokeCommand.permission
-        },
-        resource: {
-          name: RevokeCommand.resource,
-          referenceType: EntityDef.$type
-        }
-      },
-      superTypes: [CommandDecl.$type]
+    StateDecl: {
+      name: StateDecl.$type,
+      properties: {},
+      superTypes: [ExperienceMember.$type, ScreenMember.$type]
     },
-    RuleDef: {
-      name: RuleDef.$type,
+    TargetArg: {
+      name: TargetArg.$type,
       properties: {
-        body: {
-          name: RuleDef.body
-        },
         name: {
-          name: RuleDef.name
+          name: TargetArg.name
         },
-        note: {
-          name: RuleDef.note
+        num: {
+          name: TargetArg.num
         },
-        reads: {
-          name: RuleDef.reads,
+        str: {
+          name: TargetArg.str
+        },
+        word: {
+          name: TargetArg.word
+        }
+      },
+      superTypes: []
+    },
+    TargetEscape: {
+      name: TargetEscape.$type,
+      properties: {
+        args: {
+          name: TargetEscape.args,
           defaultValue: []
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [RegionItem.$type]
     },
-    Schedule: {
-      name: Schedule.$type,
+    TimerTrigger: {
+      name: TimerTrigger.$type,
       properties: {
-        time: {
-          name: Schedule.time
+        kind: {
+          name: TimerTrigger.kind
         },
         unit: {
-          name: Schedule.unit
+          name: TimerTrigger.unit
+        },
+        value: {
+          name: TimerTrigger.value
         }
       },
-      superTypes: [OperationClause.$type]
+      superTypes: [UiTrigger.$type]
     },
-    SendAction: {
-      name: SendAction.$type,
+    ToastHandler: {
+      name: ToastHandler.$type,
       properties: {
-        message: {
-          name: SendAction.message
+        retry: {
+          name: ToastHandler.retry,
+          defaultValue: false
         },
-        recipient: {
-          name: SendAction.recipient
+        text: {
+          name: ToastHandler.text
         }
       },
-      superTypes: [Action2.$type]
+      superTypes: [HandlerAction.$type]
     },
-    StageDef: {
-      name: StageDef.$type,
+    TypeDecl: {
+      name: TypeDecl.$type,
       properties: {
-        actor: {
-          name: StageDef.actor,
-          referenceType: ActorDef.$type
-        },
-        flow: {
-          name: StageDef.flow,
-          referenceType: FlowDef.$type
+        fields: {
+          name: TypeDecl.fields,
+          defaultValue: []
         },
         name: {
-          name: StageDef.name
-        },
-        target: {
-          name: StageDef.target,
-          referenceType: OperationDecl.$type
+          name: TypeDecl.name
         }
       },
-      superTypes: [ProcessItem.$type]
+      superTypes: [ExperienceMember.$type, SharedMember.$type]
     },
-    StandardCommand: {
-      name: StandardCommand.$type,
+    UiEvent: {
+      name: UiEvent.$type,
       properties: {
-        actor: {
-          name: StandardCommand.actor,
-          referenceType: ActorDef.$type
+        actions: {
+          name: UiEvent.actions,
+          defaultValue: []
         },
-        ownership: {
-          name: StandardCommand.ownership
-        },
-        recipient: {
-          name: StandardCommand.recipient,
-          referenceType: ActorDef.$type
-        },
-        resource: {
-          name: StandardCommand.resource,
-          referenceType: EntityDef.$type
-        },
-        sourceOwnership: {
-          name: StandardCommand.sourceOwnership
-        },
-        sourceResource: {
-          name: StandardCommand.sourceResource,
-          referenceType: EntityDef.$type
-        },
-        targetOwnership: {
-          name: StandardCommand.targetOwnership
-        },
-        targetResource: {
-          name: StandardCommand.targetResource,
-          referenceType: EntityDef.$type
-        },
-        verb: {
-          name: StandardCommand.verb
-        },
-        where: {
-          name: StandardCommand.where
+        trigger: {
+          name: UiEvent.trigger
         }
       },
-      superTypes: [CommandDecl.$type]
+      superTypes: [DataMember.$type, ScreenMember.$type]
     },
-    StringExpr: {
-      name: StringExpr.$type,
-      properties: {
-        value: {
-          name: StringExpr.value
-        }
-      },
-      superTypes: [Expression.$type]
-    },
-    StringValue: {
-      name: StringValue2.$type,
-      properties: {
-        value: {
-          name: StringValue2.value
-        }
-      },
-      superTypes: [ComparisonValue.$type]
-    },
-    Subject: {
-      name: Subject.$type,
+    UiTrigger: {
+      name: UiTrigger.$type,
       properties: {},
       superTypes: []
     },
-    UnitDuration: {
-      name: UnitDuration.$type,
+    UsesDecl: {
+      name: UsesDecl.$type,
       properties: {
-        unit: {
-          name: UnitDuration.unit
+        inputs: {
+          name: UsesDecl.inputs,
+          defaultValue: []
         },
-        value: {
-          name: UnitDuration.value
-        }
-      },
-      superTypes: [Duration.$type]
-    },
-    VerbDef: {
-      name: VerbDef.$type,
-      properties: {
+        kind: {
+          name: UsesDecl.kind
+        },
         name: {
-          name: VerbDef.name
+          name: UsesDecl.name
+        },
+        outList: {
+          name: UsesDecl.outList,
+          defaultValue: false
+        },
+        outputs: {
+          name: UsesDecl.outputs,
+          defaultValue: []
+        },
+        realizes: {
+          name: UsesDecl.realizes,
+          referenceType: BusinessOp.$type
+        },
+        results: {
+          name: UsesDecl.results,
+          defaultValue: []
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [ExperienceMember.$type, SharedMember.$type]
     },
-    WhenConstraint: {
-      name: WhenConstraint.$type,
+    ValueComponent: {
+      name: ValueComponent.$type,
       properties: {
-        condition: {
-          name: WhenConstraint.condition
+        alias: {
+          name: ValueComponent.alias
+        },
+        bind: {
+          name: ValueComponent.bind
+        },
+        mech: {
+          name: ValueComponent.mech
         }
       },
-      superTypes: [Constraint.$type]
+      superTypes: [RegionItem.$type]
+    },
+    VisibleWhen: {
+      name: VisibleWhen.$type,
+      properties: {
+        expr: {
+          name: VisibleWhen.expr
+        }
+      },
+      superTypes: [ActionMember.$type]
+    },
+    WhenBlock: {
+      name: WhenBlock.$type,
+      properties: {
+        deltas: {
+          name: WhenBlock.deltas,
+          defaultValue: []
+        },
+        state: {
+          name: WhenBlock.state
+        }
+      },
+      superTypes: [DataMember.$type, ExperienceMember.$type, ScreenMember.$type]
     }
   };
 };
-var reflection2 = new CommandDslAstReflection();
+var reflection2 = new FrontendDslAstReflection();
 
-// src/generated/grammar.ts
+// src/frontend/generated/grammar.ts
 init_define_BUILD_INFO();
-var loadedCommandDslGrammar;
-var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGrammar = loadGrammarFromJson(`{
+var loadedFrontendDslGrammar;
+var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGrammar = loadGrammarFromJson(`{
   "$type": "Grammar",
   "isDeclared": true,
-  "name": "CommandDsl",
+  "name": "FrontendDsl",
+  "imports": [],
   "rules": [
     {
       "$type": "ParserRule",
@@ -33299,21 +33672,35 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
         "$type": "Group",
         "elements": [
           {
-            "$type": "Assignment",
-            "feature": "imports",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@1"
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "standalone",
+                "operator": "?=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "standalone"
+                }
               },
-              "arguments": []
-            },
-            "cardinality": "*"
+              {
+                "$type": "Assignment",
+                "feature": "contract",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@1"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
           },
           {
             "$type": "Assignment",
-            "feature": "elements",
+            "feature": "imports",
             "operator": "+=",
             "terminal": {
               "$type": "RuleCall",
@@ -33323,9 +33710,98 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "arguments": []
             },
             "cardinality": "*"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "extensions",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@3"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "shared",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@11"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "experiences",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@17"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
           }
         ]
       },
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ContractDecl",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "contract"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "path",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@69"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "tech"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "techPath",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
       "fragment": false,
       "parameters": []
     },
@@ -33346,108 +33822,42 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
+                "$ref": "#/rules@69"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ExtensionDecl",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "extension"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "ns",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
                 "$ref": "#/rules@68"
               },
               "arguments": []
             }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "Element",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@4"
-            },
-            "arguments": []
           },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@5"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@6"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@8"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@9"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@18"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@28"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@3"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@36"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@45"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "VerbDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
           {
             "$type": "Keyword",
-            "value": "verb"
+            "value": "."
           },
           {
             "$type": "Assignment",
@@ -33456,252 +33866,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "DomainDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "domain"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "ActorDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "actor"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "extends"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "parent",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@5"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "CalendarDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "calendar"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@7"
-              },
-              "arguments": []
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "KebabName",
-      "dataType": "string",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@67"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@66"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "RelationDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "relation"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "of"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "source",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/types@0"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "with"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "target",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/types@0"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "EntityDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "entity"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
@@ -33711,13 +33876,51 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "value": "{"
           },
           {
+            "$type": "Keyword",
+            "value": "on"
+          },
+          {
             "$type": "Assignment",
-            "feature": "fields",
+            "feature": "sites",
             "operator": "+=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@10"
+                "$ref": "#/rules@4"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": ","
+              },
+              {
+                "$type": "Assignment",
+                "feature": "sites",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@4"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "params",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@5"
               },
               "arguments": []
             },
@@ -33735,10 +33938,51 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "FieldDef",
+      "name": "ExtSite",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "experience"
+          },
+          {
+            "$type": "Keyword",
+            "value": "screen"
+          },
+          {
+            "$type": "Keyword",
+            "value": "region"
+          },
+          {
+            "$type": "Keyword",
+            "value": "component"
+          },
+          {
+            "$type": "Keyword",
+            "value": "action"
+          },
+          {
+            "$type": "Keyword",
+            "value": "field"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ExtParam",
       "definition": {
         "$type": "Group",
         "elements": [
+          {
+            "$type": "Keyword",
+            "value": "arg"
+          },
           {
             "$type": "Assignment",
             "feature": "name",
@@ -33746,7 +33990,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
@@ -33754,25 +33998,6 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "Keyword",
             "value": ":"
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Assignment",
-                "feature": "collection",
-                "operator": "?=",
-                "terminal": {
-                  "$type": "Keyword",
-                  "value": "list"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "of"
-              }
-            ],
-            "cardinality": "?"
           },
           {
             "$type": "Assignment",
@@ -33781,9 +34006,85 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@68"
               },
               "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "default",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@6"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ExtLit",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "str",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@69"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "num",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@70"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bool",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "Keyword",
+                  "value": "true"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "false"
+                }
+              ]
             }
           }
         ]
@@ -33794,105 +34095,40 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "CommandDecl",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@13"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@14"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@12"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "StandardCommand",
+      "name": "Annotation",
       "definition": {
         "$type": "Group",
         "elements": [
           {
-            "$type": "Assignment",
-            "feature": "actor",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@5"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
+            "$type": "Keyword",
+            "value": "@"
           },
           {
             "$type": "Assignment",
-            "feature": "verb",
+            "feature": "ns",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@16"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
           },
           {
+            "$type": "Keyword",
+            "value": "."
+          },
+          {
             "$type": "Assignment",
-            "feature": "ownership",
+            "feature": "name",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@68"
               },
               "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "resource",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@9"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
             }
           },
           {
@@ -33900,505 +34136,54 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "elements": [
               {
                 "$type": "Keyword",
-                "value": "on"
+                "value": "("
               },
               {
-                "$type": "Assignment",
-                "feature": "targetOwnership",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@17"
-                  },
-                  "arguments": []
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "targetResource",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@9"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ],
-            "cardinality": "?"
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "from"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "sourceOwnership",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@17"
-                  },
-                  "arguments": []
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "sourceResource",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@9"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ],
-            "cardinality": "?"
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "for"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "recipient",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@5"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ],
-            "cardinality": "?"
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "where"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "where",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@41"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "GrantCommand",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Assignment",
-            "feature": "actor",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@5"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "grants"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "permission",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@15"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "ownership",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@17"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "resource",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@9"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "to"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "grantee",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@5"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "for"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "duration",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@59"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "RevokeCommand",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Assignment",
-            "feature": "actor",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@5"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "revokes"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "permission",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@15"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "ownership",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@17"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "resource",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@9"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "from"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "grantee",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@5"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "Permission",
-      "dataType": "string",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "read"
-          },
-          {
-            "$type": "Keyword",
-            "value": "write"
-          },
-          {
-            "$type": "Keyword",
-            "value": "update"
-          },
-          {
-            "$type": "Keyword",
-            "value": "delete"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "Verb",
-      "dataType": "string",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@67"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Keyword",
-            "value": "reads"
-          },
-          {
-            "$type": "Keyword",
-            "value": "lists"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "Ownership",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "KeywordOwnership"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "keyword",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Alternatives",
-                  "elements": [
-                    {
-                      "$type": "Keyword",
-                      "value": "own"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "any"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "all"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "public"
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "args",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@8"
+                      },
+                      "arguments": []
                     }
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "RelationOwnership"
-                }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "args",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@8"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
+                  }
+                ],
+                "cardinality": "?"
               },
               {
-                "$type": "Assignment",
-                "feature": "relation",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@8"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@62"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
+                "$type": "Keyword",
+                "value": ")"
               }
-            ]
+            ],
+            "cardinality": "?"
           }
         ]
       },
@@ -34408,7 +34193,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "OperationDecl",
+      "name": "AnnotationArg",
       "definition": {
         "$type": "Group",
         "elements": [
@@ -34419,7 +34204,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
@@ -34430,63 +34215,15 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           },
           {
             "$type": "Assignment",
-            "feature": "command",
+            "feature": "value",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@11"
+                "$ref": "#/rules@6"
               },
               "arguments": []
             }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "note"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "note",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@69"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "?"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "clauses",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@19"
-              },
-              "arguments": []
-            },
-            "cardinality": "*"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "success",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@22"
-              },
-              "arguments": []
-            },
-            "cardinality": "?"
           }
         ]
       },
@@ -34496,262 +34233,31 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "OperationClause",
+      "name": "TargetEscape",
       "definition": {
-        "$type": "Alternatives",
+        "$type": "Group",
         "elements": [
           {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@20"
-            },
-            "arguments": []
+            "$type": "Keyword",
+            "value": "@target"
           },
           {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@21"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@25"
-            },
-            "arguments": []
+            "$type": "Keyword",
+            "value": "("
           },
           {
             "$type": "Group",
             "elements": [
               {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "OrderByFilter"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "order"
-              },
-              {
-                "$type": "Keyword",
-                "value": "by"
-              },
-              {
                 "$type": "Assignment",
-                "feature": "field",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@58"
-                  },
-                  "arguments": []
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "direction",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Alternatives",
-                  "elements": [
-                    {
-                      "$type": "Keyword",
-                      "value": "ascending"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "descending"
-                    }
-                  ]
-                },
-                "cardinality": "?"
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "LimitFilter"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "limit"
-              },
-              {
-                "$type": "Keyword",
-                "value": "to"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "count",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@65"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "Constraint",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "DuringConstraint"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "only"
-              },
-              {
-                "$type": "Keyword",
-                "value": "during"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "calendar",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@6"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@7"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "IfConstraint"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "only"
-              },
-              {
-                "$type": "Keyword",
-                "value": "if"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "condition",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@52"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "WhenConstraint"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "only"
-              },
-              {
-                "$type": "Keyword",
-                "value": "when"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "condition",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@41"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "RequiresConstraint"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "requires"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "rules",
+                "feature": "args",
                 "operator": "+=",
                 "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@45"
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@10"
                   },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
+                  "arguments": []
                 }
               },
               {
@@ -34763,26 +34269,98 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   },
                   {
                     "$type": "Assignment",
-                    "feature": "rules",
+                    "feature": "args",
                     "operator": "+=",
                     "terminal": {
-                      "$type": "CrossReference",
-                      "type": {
-                        "$ref": "#/rules@45"
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@10"
                       },
-                      "terminal": {
-                        "$type": "RuleCall",
-                        "rule": {
-                          "$ref": "#/rules@67"
-                        },
-                        "arguments": []
-                      },
-                      "deprecatedSyntax": false,
-                      "isMulti": false
+                      "arguments": []
                     }
                   }
                 ],
                 "cardinality": "*"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": ")"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "TargetArg",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "name",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "str",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "num",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@70"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "word",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
               }
             ]
           }
@@ -34794,108 +34372,34 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "Schedule",
+      "name": "SharedBlock",
       "definition": {
         "$type": "Group",
         "elements": [
           {
             "$type": "Keyword",
-            "value": "schedule:"
+            "value": "shared"
           },
           {
             "$type": "Keyword",
-            "value": "every"
+            "value": "{"
           },
           {
             "$type": "Assignment",
-            "feature": "unit",
-            "operator": "=",
-            "terminal": {
-              "$type": "Alternatives",
-              "elements": [
-                {
-                  "$type": "Keyword",
-                  "value": "day"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "week"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "month"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "hour"
-                }
-              ]
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "at"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "time",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@63"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "OnSuccessBlock",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "on success do"
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@60"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Assignment",
-            "feature": "actions",
+            "feature": "members",
             "operator": "+=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@23"
+                "$ref": "#/rules@12"
               },
               "arguments": []
             },
-            "cardinality": "+"
+            "cardinality": "*"
           },
           {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@61"
-            },
-            "arguments": []
+            "$type": "Keyword",
+            "value": "}"
           }
         ]
       },
@@ -34905,28 +34409,21 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "Action",
+      "name": "SharedMember",
       "definition": {
         "$type": "Alternatives",
         "elements": [
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@25"
+              "$ref": "#/rules@14"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@26"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@27"
+              "$ref": "#/rules@13"
             },
             "arguments": []
           },
@@ -34945,228 +34442,13 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "PerformAction",
+      "name": "TypeDecl",
       "definition": {
         "$type": "Group",
         "elements": [
           {
             "$type": "Keyword",
-            "value": "perform"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "target",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@18"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "CalculateAction",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "calculate"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "target",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@58"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "="
-          },
-          {
-            "$type": "Assignment",
-            "feature": "expr",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@54"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Alternatives",
-                "elements": [
-                  {
-                    "$type": "Keyword",
-                    "value": "if"
-                  },
-                  {
-                    "$type": "Keyword",
-                    "value": "when"
-                  }
-                ]
-              },
-              {
-                "$type": "Assignment",
-                "feature": "condition",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@41"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "SendAction",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "send"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "message",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "to"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "recipient",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@58"
-              },
-              "arguments": []
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "CreateAction",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "create"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "target",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@9"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "from"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "source",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@9"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "FlowDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "flow"
+            "value": "type"
           },
           {
             "$type": "Assignment",
@@ -35175,985 +34457,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "for"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "actor",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@5"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@60"
-                },
-                "arguments": []
-              },
-              {
-                "$type": "Group",
-                "elements": [
-                  {
-                    "$type": "Keyword",
-                    "value": "note"
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "note",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@69"
-                      },
-                      "arguments": []
-                    }
-                  }
-                ],
-                "cardinality": "?"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "items",
-                "operator": "+=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@29"
-                  },
-                  "arguments": []
-                },
-                "cardinality": "+"
-              },
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@61"
-                },
-                "arguments": []
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "FlowItem",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@30"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@31"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@32"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@34"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@33"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "FlowStep",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "step"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": ":"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "target",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@18"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "optional",
-            "operator": "?=",
-            "terminal": {
-              "$type": "Keyword",
-              "value": "optional"
-            },
-            "cardinality": "?"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "repeat",
-            "operator": "?=",
-            "terminal": {
-              "$type": "Keyword",
-              "value": "repeat"
-            },
-            "cardinality": "?"
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "using"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "source",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@30"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "IncludeStep",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "include"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "target",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@28"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@67"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "optional",
-            "operator": "?=",
-            "terminal": {
-              "$type": "Keyword",
-              "value": "optional"
-            },
-            "cardinality": "?"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "repeat",
-            "operator": "?=",
-            "terminal": {
-              "$type": "Keyword",
-              "value": "repeat"
-            },
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "OutsideNote",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "outside"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "text",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@70"
-              },
-              "arguments": []
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "AbandonNote",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "abandon"
-          },
-          {
-            "$type": "Keyword",
-            "value": "anytime"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "text",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@70"
-              },
-              "arguments": []
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "EitherBlock",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "either"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "branches",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@35"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "or"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "branches",
-                "operator": "+=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@35"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "*"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "EitherBranch",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@60"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Assignment",
-            "feature": "items",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@29"
-              },
-              "arguments": []
-            },
-            "cardinality": "+"
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@61"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "ProcessDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "process"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "of"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "entity",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@9"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ],
-            "cardinality": "?"
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@60"
-                },
-                "arguments": []
-              },
-              {
-                "$type": "Group",
-                "elements": [
-                  {
-                    "$type": "Keyword",
-                    "value": "note"
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "note",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@69"
-                      },
-                      "arguments": []
-                    }
-                  }
-                ],
-                "cardinality": "?"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "items",
-                "operator": "+=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@37"
-                  },
-                  "arguments": []
-                },
-                "cardinality": "+"
-              },
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@61"
-                },
-                "arguments": []
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "ProcessItem",
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@38"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@39"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "StageDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "stage"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": ":"
-          },
-          {
-            "$type": "Alternatives",
-            "elements": [
-              {
-                "$type": "Group",
-                "elements": [
-                  {
-                    "$type": "Keyword",
-                    "value": "flow"
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "flow",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "CrossReference",
-                      "type": {
-                        "$ref": "#/rules@28"
-                      },
-                      "terminal": {
-                        "$type": "RuleCall",
-                        "rule": {
-                          "$ref": "#/rules@67"
-                        },
-                        "arguments": []
-                      },
-                      "deprecatedSyntax": false,
-                      "isMulti": false
-                    }
-                  },
-                  {
-                    "$type": "Keyword",
-                    "value": "by"
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "actor",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "CrossReference",
-                      "type": {
-                        "$ref": "#/rules@5"
-                      },
-                      "terminal": {
-                        "$type": "RuleCall",
-                        "rule": {
-                          "$ref": "#/rules@67"
-                        },
-                        "arguments": []
-                      },
-                      "deprecatedSyntax": false,
-                      "isMulti": false
-                    }
-                  }
-                ]
-              },
-              {
-                "$type": "Assignment",
-                "feature": "target",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@18"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "AnyOrderBlock",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "any"
-          },
-          {
-            "$type": "Keyword",
-            "value": "order"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "branches",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@40"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "and"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "branches",
-                "operator": "+=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@40"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "*"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "AnyOrderBranch",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@60"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Assignment",
-            "feature": "items",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@37"
-              },
-              "arguments": []
-            },
-            "cardinality": "+"
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@61"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "Condition",
-      "definition": {
-        "$type": "RuleCall",
-        "rule": {
-          "$ref": "#/rules@42"
-        },
-        "arguments": []
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "OrCondition",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "Condition"
-      },
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@43"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "BinaryCondition"
-                },
-                "feature": "left",
-                "operator": "="
-              },
-              {
-                "$type": "Assignment",
-                "feature": "op",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Keyword",
-                  "value": "or"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "right",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@43"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "*"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "AndCondition",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "Condition"
-      },
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@44"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "BinaryCondition"
-                },
-                "feature": "left",
-                "operator": "="
-              },
-              {
-                "$type": "Assignment",
-                "feature": "op",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Keyword",
-                  "value": "and"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "right",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@44"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "*"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "PrimaryCondition",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "Condition"
-      },
-      "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "("
-              },
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@41"
-                },
-                "arguments": []
-              },
-              {
-                "$type": "Keyword",
-                "value": ")"
-              }
-            ]
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@52"
-            },
-            "arguments": []
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "RuleDef",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "rule"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
@@ -36166,17 +34470,13 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "$type": "Group",
             "elements": [
               {
-                "$type": "Keyword",
-                "value": "reads"
-              },
-              {
                 "$type": "Assignment",
-                "feature": "reads",
+                "feature": "fields",
                 "operator": "+=",
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@15"
                   },
                   "arguments": []
                 }
@@ -36190,56 +34490,18 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   },
                   {
                     "$type": "Assignment",
-                    "feature": "reads",
+                    "feature": "fields",
                     "operator": "+=",
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@46"
+                        "$ref": "#/rules@15"
                       },
                       "arguments": []
                     }
                   }
                 ],
                 "cardinality": "*"
-              }
-            ],
-            "cardinality": "?"
-          },
-          {
-            "$type": "Keyword",
-            "value": "satisfies"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "body",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@47"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "note"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "note",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@69"
-                  },
-                  "arguments": []
-                }
               }
             ],
             "cardinality": "?"
@@ -36256,137 +34518,826 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "ReadEntry",
+      "name": "UsesDecl",
       "definition": {
-        "$type": "Alternatives",
+        "$type": "Group",
         "elements": [
+          {
+            "$type": "Keyword",
+            "value": "uses"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "kind",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "Keyword",
+                  "value": "command"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "query"
+                }
+              ]
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
           {
             "$type": "Group",
             "elements": [
               {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "BareRead"
-                }
+                "$type": "Keyword",
+                "value": "realizes"
               },
               {
                 "$type": "Assignment",
-                "feature": "entity",
+                "feature": "realizes",
                 "operator": "=",
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@9"
+                    "$ref": "#/interfaces@0"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@68"
                     },
                     "arguments": []
                   },
                   "deprecatedSyntax": false,
                   "isMulti": false
                 }
-              },
-              {
-                "$type": "Group",
-                "elements": [
-                  {
-                    "$type": "Keyword",
-                    "value": "as"
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "alias",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@67"
-                      },
-                      "arguments": []
-                    }
-                  }
-                ],
-                "cardinality": "?"
               }
-            ]
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
           },
           {
             "$type": "Group",
             "elements": [
               {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "PathRead"
-                }
+                "$type": "Keyword",
+                "value": "in"
+              },
+              {
+                "$type": "Keyword",
+                "value": "{"
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "inputs",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@15"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "inputs",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@15"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
+                  }
+                ],
+                "cardinality": "?"
+              },
+              {
+                "$type": "Keyword",
+                "value": "}"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "out"
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "outList",
+                    "operator": "?=",
+                    "terminal": {
+                      "$type": "Keyword",
+                      "value": "list"
+                    }
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": "of"
+                  }
+                ],
+                "cardinality": "?"
+              },
+              {
+                "$type": "Keyword",
+                "value": "{"
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "outputs",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@15"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "outputs",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@15"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
+                  }
+                ],
+                "cardinality": "?"
+              },
+              {
+                "$type": "Keyword",
+                "value": "}"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "results"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
               },
               {
                 "$type": "Assignment",
-                "feature": "hops",
+                "feature": "results",
                 "operator": "+=",
                 "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@8"
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@16"
                   },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@62"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                },
-                "cardinality": "+"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "leaf",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@9"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@67"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                },
-                "cardinality": "?"
+                  "arguments": []
+                }
               },
               {
                 "$type": "Group",
                 "elements": [
                   {
                     "$type": "Keyword",
-                    "value": "as"
+                    "value": "|"
                   },
                   {
                     "$type": "Assignment",
-                    "feature": "alias",
-                    "operator": "=",
+                    "feature": "results",
+                    "operator": "+=",
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@67"
+                        "$ref": "#/rules@16"
                       },
                       "arguments": []
                     }
                   }
                 ],
+                "cardinality": "*"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ShapeField",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "type",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ResultName",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "Success"
+          },
+          {
+            "$type": "Keyword",
+            "value": "NotAuthenticated"
+          },
+          {
+            "$type": "Keyword",
+            "value": "NotAuthorized"
+          },
+          {
+            "$type": "Keyword",
+            "value": "NotValid"
+          },
+          {
+            "$type": "Keyword",
+            "value": "NotProcessable"
+          },
+          {
+            "$type": "Keyword",
+            "value": "ServerError"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Experience",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "experience"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "audience"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "audience",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "audience",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@68"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ],
+                "cardinality": "*"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "delivery"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "delivery",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "offline-first"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "remote-only"
+                    }
+                  ]
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "entry"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "entry",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@24"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "members",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@18"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ExperienceMember",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@14"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@13"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@19"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@21"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@24"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@54"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@53"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@51"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ResultHandler",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "on"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "result",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@16"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "handler",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@20"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "HandlerAction",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "NavHandler"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "->"
+              },
+              {
+                "$type": "Keyword",
+                "value": "screen"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "target",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@24"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "("
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Assignment",
+                        "feature": "args",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@32"
+                          },
+                          "arguments": []
+                        }
+                      },
+                      {
+                        "$type": "Group",
+                        "elements": [
+                          {
+                            "$type": "Keyword",
+                            "value": ","
+                          },
+                          {
+                            "$type": "Assignment",
+                            "feature": "args",
+                            "operator": "+=",
+                            "terminal": {
+                              "$type": "RuleCall",
+                              "rule": {
+                                "$ref": "#/rules@32"
+                              },
+                              "arguments": []
+                            }
+                          }
+                        ],
+                        "cardinality": "*"
+                      }
+                    ],
+                    "cardinality": "?"
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": ")"
+                  }
+                ],
                 "cardinality": "?"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "ToastHandler"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "toast"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "retry",
+                "operator": "?=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "retry"
+                },
+                "cardinality": "?"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "BannerHandler"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "banner"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "InlineErrorsHandler"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "kind",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "inline-errors"
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "RetryHandler"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "kind",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "retry"
+                }
               }
             ]
           }
@@ -36398,146 +35349,178 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "BoolExpr",
-      "definition": {
-        "$type": "RuleCall",
-        "rule": {
-          "$ref": "#/rules@48"
-        },
-        "arguments": []
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "OrBool",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "BoolExpr"
-      },
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@49"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "BinaryBool"
-                },
-                "feature": "left",
-                "operator": "="
-              },
-              {
-                "$type": "Assignment",
-                "feature": "op",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Keyword",
-                  "value": "or"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "right",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@49"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "*"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "AndBool",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "BoolExpr"
-      },
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@50"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "BinaryBool"
-                },
-                "feature": "left",
-                "operator": "="
-              },
-              {
-                "$type": "Assignment",
-                "feature": "op",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Keyword",
-                  "value": "and"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "right",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@50"
-                  },
-                  "arguments": []
-                }
-              }
-            ],
-            "cardinality": "*"
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "PrimaryBool",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "BoolExpr"
-      },
+      "name": "StateDecl",
       "definition": {
         "$type": "Alternatives",
         "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@22"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@23"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "MutableState",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "persisted",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "persisted"
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "state"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "type",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "init",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@57"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "DerivedState",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "derived"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
+          },
+          {
+            "$type": "Assignment",
+            "feature": "expr",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@57"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Screen",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "screen"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
           {
             "$type": "Group",
             "elements": [
@@ -36546,17 +35529,139 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "value": "("
               },
               {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@47"
-                },
-                "arguments": []
+                "$type": "Assignment",
+                "feature": "params",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@25"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "params",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@25"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ],
+                "cardinality": "*"
               },
               {
                 "$type": "Keyword",
                 "value": ")"
               }
-            ]
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "title",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@69"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "for"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "persona",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "members",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@26"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ScreenParam",
+      "definition": {
+        "$type": "Assignment",
+        "feature": "name",
+        "operator": "=",
+        "terminal": {
+          "$type": "RuleCall",
+          "rule": {
+            "$ref": "#/rules@68"
+          },
+          "arguments": []
+        }
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ScreenMember",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@27"
+            },
+            "arguments": []
           },
           {
             "$type": "RuleCall",
@@ -36568,7 +35673,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@52"
+              "$ref": "#/rules@48"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@21"
             },
             "arguments": []
           }
@@ -36580,51 +35692,100 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "ExistsExpr",
+      "name": "Region",
       "definition": {
         "$type": "Group",
         "elements": [
           {
+            "$type": "Keyword",
+            "value": "region"
+          },
+          {
             "$type": "Assignment",
-            "feature": "negated",
-            "operator": "?=",
+            "feature": "name",
+            "operator": "=",
             "terminal": {
-              "$type": "Keyword",
-              "value": "not"
-            },
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "("
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "attrs",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@28"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "attrs",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@28"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
+                  }
+                ],
+                "cardinality": "?"
+              },
+              {
+                "$type": "Keyword",
+                "value": ")"
+              }
+            ],
             "cardinality": "?"
           },
           {
             "$type": "Keyword",
-            "value": "exists"
+            "value": "{"
           },
           {
             "$type": "Assignment",
-            "feature": "collection",
-            "operator": "=",
+            "feature": "items",
+            "operator": "+=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@29"
               },
               "arguments": []
-            }
+            },
+            "cardinality": "*"
           },
           {
             "$type": "Keyword",
-            "value": "where"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "condition",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@41"
-              },
-              "arguments": []
-            }
+            "value": "}"
           }
         ]
       },
@@ -36634,77 +35795,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "Comparison",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Assignment",
-            "feature": "left",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@58"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "op",
-            "operator": "=",
-            "terminal": {
-              "$type": "Alternatives",
-              "elements": [
-                {
-                  "$type": "Keyword",
-                  "value": "="
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "!="
-                },
-                {
-                  "$type": "Keyword",
-                  "value": ">"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "<"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": ">="
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "<="
-                }
-              ]
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "right",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@53"
-              },
-              "arguments": []
-            }
-          }
-        ]
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "ComparisonValue",
+      "name": "RegionAttr",
       "definition": {
         "$type": "Alternatives",
         "elements": [
@@ -36715,12 +35806,2303 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "$type": "Action",
                 "inferredType": {
                   "$type": "InferredType",
-                  "name": "StringValue"
+                  "name": "RoleAttr"
                 }
+              },
+              {
+                "$type": "Keyword",
+                "value": "role"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
               },
               {
                 "$type": "Assignment",
                 "feature": "value",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "primary"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "focus"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "supplementary"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "navigation"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "statusbar"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "CollapseAttr"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "collapse-when"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "value",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "compact"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "RegionItem",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@27"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@33"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@34"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@35"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@38"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@45"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@47"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@9"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Mechanic",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "cache"
+          },
+          {
+            "$type": "Keyword",
+            "value": "queue"
+          },
+          {
+            "$type": "Keyword",
+            "value": "remote"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "QueryBind",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "op",
+            "operator": "=",
+            "terminal": {
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@14"
+              },
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@68"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false,
+              "isMulti": false
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "("
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "args",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@32"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "args",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@32"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
+                  }
+                ],
+                "cardinality": "?"
+              },
+              {
+                "$type": "Keyword",
+                "value": ")"
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ArgBinding",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "name",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "value",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@57"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ListComponent",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "list"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@31"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "as"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "alias",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "mech",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@30"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "refreshable",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "refreshable"
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "paginated"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "pagination",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "infinite"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "pager"
+                    }
+                  ]
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "{"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "members",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@36"
+                  },
+                  "arguments": []
+                },
+                "cardinality": "*"
+              },
+              {
+                "$type": "Keyword",
+                "value": "}"
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "DetailComponent",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "detail"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@31"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "as"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "alias",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "mech",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@30"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "refreshable",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "refreshable"
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "{"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "members",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@36"
+                  },
+                  "arguments": []
+                },
+                "cardinality": "*"
+              },
+              {
+                "$type": "Keyword",
+                "value": "}"
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ValueComponent",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "value"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@31"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "as"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "alias",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "mech",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@30"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "DataMember",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@37"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@51"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@48"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@45"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ShowClause",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "show"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "fields",
+            "operator": "+=",
+            "terminal": {
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@15"
+              },
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@68"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false,
+              "isMulti": false
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": ","
+              },
+              {
+                "$type": "Assignment",
+                "feature": "fields",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@15"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ],
+            "cardinality": "*"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "FormComponent",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "form"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@31"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "as"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "alias",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "mech",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@30"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "members",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@39"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "FormMember",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@40"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@41"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@43"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@44"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@19"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "LoadsClause",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "loads"
+          },
+          {
+            "$type": "Keyword",
+            "value": "query"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@31"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "FormField",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "field"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "field",
+            "operator": "=",
+            "terminal": {
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@15"
+              },
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@68"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false,
+              "isMulti": false
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "{"
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "rules",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@42"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "rules",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@42"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
+                  }
+                ],
+                "cardinality": "?"
+              },
+              {
+                "$type": "Keyword",
+                "value": "}"
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "FieldRule",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "RequiredRule"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "kind",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "required"
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "MaxRule"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "max"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "value",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@70"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "MinRule"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "min"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "value",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@70"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PatternRule"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "pattern"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "value",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "FormStep",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "step"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "fields",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@41"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "FormRule",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "rule"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "expr",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@57"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ActionComponent",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "action"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "mech",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@30"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "->"
+              },
+              {
+                "$type": "Keyword",
+                "value": "screen"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "navTarget",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@24"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "("
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Assignment",
+                        "feature": "navArgs",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@32"
+                          },
+                          "arguments": []
+                        }
+                      },
+                      {
+                        "$type": "Group",
+                        "elements": [
+                          {
+                            "$type": "Keyword",
+                            "value": ","
+                          },
+                          {
+                            "$type": "Assignment",
+                            "feature": "navArgs",
+                            "operator": "+=",
+                            "terminal": {
+                              "$type": "RuleCall",
+                              "rule": {
+                                "$ref": "#/rules@32"
+                              },
+                              "arguments": []
+                            }
+                          }
+                        ],
+                        "cardinality": "*"
+                      }
+                    ],
+                    "cardinality": "?"
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": ")"
+                  }
+                ],
+                "cardinality": "?"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "{"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "members",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@46"
+                  },
+                  "arguments": []
+                },
+                "cardinality": "*"
+              },
+              {
+                "$type": "Keyword",
+                "value": "}"
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ActionMember",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "VisibleWhen"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "visible-when"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "expr",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@57"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "ConfirmClause"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "kind",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "confirm"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                },
+                "cardinality": "?"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "InvalidatesClause"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "invalidates"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Keyword",
+                "value": "["
+              },
+              {
+                "$type": "Assignment",
+                "feature": "targets",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@14"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "targets",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "CrossReference",
+                      "type": {
+                        "$ref": "#/rules@14"
+                      },
+                      "terminal": {
+                        "$type": "RuleCall",
+                        "rule": {
+                          "$ref": "#/rules@68"
+                        },
+                        "arguments": []
+                      },
+                      "deprecatedSyntax": false,
+                      "isMulti": false
+                    }
+                  }
+                ],
+                "cardinality": "*"
+              },
+              {
+                "$type": "Keyword",
+                "value": "]"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "SetClause"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "set"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "state",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@21"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "expr",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@57"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@19"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ExtComponent",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "ext",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@7"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@31"
+              },
+              "arguments": []
+            },
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "UiEvent",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "on"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "trigger",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@49"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "{"
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "actions",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@50"
+                      },
+                      "arguments": []
+                    },
+                    "cardinality": "+"
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": "}"
+                  }
+                ]
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "->"
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "actions",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@50"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "UiTrigger",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "LifecycleTrigger"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "kind",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "enter"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "leave"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "InteractionTrigger"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "kind",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "activate"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "secondary"
+                    }
+                  ]
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "("
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "target",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@68"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": ")"
+                  }
+                ],
+                "cardinality": "?"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "TimerTrigger"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "kind",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "timer"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "interval"
+                    }
+                  ]
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "("
+              },
+              {
+                "$type": "Assignment",
+                "feature": "value",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@70"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "unit",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "ms"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "s"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "m"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "h"
+                    }
+                  ]
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": ")"
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "EventAction",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "RefreshAction"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "refresh"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "targets",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@14"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "targets",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "CrossReference",
+                      "type": {
+                        "$ref": "#/rules@14"
+                      },
+                      "terminal": {
+                        "$type": "RuleCall",
+                        "rule": {
+                          "$ref": "#/rules@68"
+                        },
+                        "arguments": []
+                      },
+                      "deprecatedSyntax": false,
+                      "isMulti": false
+                    }
+                  }
+                ],
+                "cardinality": "*"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "EventNav"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "screen"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "target",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@24"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "("
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Assignment",
+                        "feature": "args",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@32"
+                          },
+                          "arguments": []
+                        }
+                      },
+                      {
+                        "$type": "Group",
+                        "elements": [
+                          {
+                            "$type": "Keyword",
+                            "value": ","
+                          },
+                          {
+                            "$type": "Assignment",
+                            "feature": "args",
+                            "operator": "+=",
+                            "terminal": {
+                              "$type": "RuleCall",
+                              "rule": {
+                                "$ref": "#/rules@32"
+                              },
+                              "arguments": []
+                            }
+                          }
+                        ],
+                        "cardinality": "*"
+                      }
+                    ],
+                    "cardinality": "?"
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": ")"
+                  }
+                ],
+                "cardinality": "?"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "EventSet"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "set"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "state",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@21"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "expr",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@57"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "EventInvalidate"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "invalidates"
+              },
+              {
+                "$type": "Keyword",
+                "value": ":"
+              },
+              {
+                "$type": "Keyword",
+                "value": "["
+              },
+              {
+                "$type": "Assignment",
+                "feature": "targets",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@14"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "targets",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "CrossReference",
+                      "type": {
+                        "$ref": "#/rules@14"
+                      },
+                      "terminal": {
+                        "$type": "RuleCall",
+                        "rule": {
+                          "$ref": "#/rules@68"
+                        },
+                        "arguments": []
+                      },
+                      "deprecatedSyntax": false,
+                      "isMulti": false
+                    }
+                  }
+                ],
+                "cardinality": "*"
+              },
+              {
+                "$type": "Keyword",
+                "value": "]"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "EventPerform"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "action"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "target",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "WhenBlock",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "when"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "state",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "Keyword",
+                  "value": "offline"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "syncing"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "SyncFailed"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "SyncConflict"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "empty"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "loading"
+                }
+              ]
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "deltas",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@52"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "DeltaAction",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "BannerDelta"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "banner"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "BadgeDelta"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "badge"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@69"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "HideDelta"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "hide"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "target",
                 "operator": "=",
                 "terminal": {
                   "$type": "RuleCall",
@@ -36739,65 +38121,21 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "$type": "Action",
                 "inferredType": {
                   "$type": "InferredType",
-                  "name": "DurationValue"
+                  "name": "RevealDelta"
                 }
               },
               {
+                "$type": "Keyword",
+                "value": "reveal"
+              },
+              {
                 "$type": "Assignment",
-                "feature": "value",
+                "feature": "target",
                 "operator": "=",
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@59"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "NumberValue"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "value",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@65"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "FieldValue"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "path",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@58"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -36812,11 +38150,217 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "Expression",
+      "name": "NavDecl",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "nav"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "from",
+            "operator": "=",
+            "terminal": {
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@24"
+              },
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@68"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false,
+              "isMulti": false
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "->"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "to",
+            "operator": "=",
+            "terminal": {
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@24"
+              },
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@68"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false,
+              "isMulti": false
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "FlowDecl",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "flow"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "realizes"
+              },
+              {
+                "$type": "Keyword",
+                "value": "flow"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "realizes",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/interfaces@1"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
+          },
+          {
+            "$type": "Keyword",
+            "value": "["
+          },
+          {
+            "$type": "Assignment",
+            "feature": "steps",
+            "operator": "+=",
+            "terminal": {
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@24"
+              },
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@68"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false,
+              "isMulti": false
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "->"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "steps",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@24"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@68"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ],
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "]"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "TerminalRule",
+      "hidden": true,
+      "name": "WS",
+      "definition": {
+        "$type": "RegexToken",
+        "regex": "/\\\\s+/",
+        "parenthesized": false
+      },
+      "fragment": false
+    },
+    {
+      "$type": "TerminalRule",
+      "hidden": true,
+      "name": "SL_COMMENT",
+      "definition": {
+        "$type": "RegexToken",
+        "regex": "/#[^\\\\n]*/",
+        "parenthesized": false
+      },
+      "fragment": false
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Expr",
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@55"
+          "$ref": "#/rules@58"
         },
         "arguments": []
       },
@@ -36826,18 +38370,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "Additive",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "Expression"
-      },
+      "name": "OrExpr",
       "definition": {
         "$type": "Group",
         "elements": [
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@56"
+              "$ref": "#/rules@59"
             },
             "arguments": []
           },
@@ -36848,7 +38388,193 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "$type": "Action",
                 "inferredType": {
                   "$type": "InferredType",
-                  "name": "BinaryExpr"
+                  "name": "Binary"
+                },
+                "feature": "left",
+                "operator": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "or"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "right",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@59"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "AndExpr",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@60"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "Binary"
+                },
+                "feature": "left",
+                "operator": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "and"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "right",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@60"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Cmp",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "left",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@61"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "="
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "!="
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": ">"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "<"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": ">="
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "<="
+                    }
+                  ]
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "right",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@61"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Additive",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@62"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "Arith"
                 },
                 "feature": "left",
                 "operator": "="
@@ -36878,7 +38604,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@56"
+                    "$ref": "#/rules@62"
                   },
                   "arguments": []
                 }
@@ -36895,17 +38621,13 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     {
       "$type": "ParserRule",
       "name": "Multiplicative",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "Expression"
-      },
       "definition": {
         "$type": "Group",
         "elements": [
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@57"
+              "$ref": "#/rules@63"
             },
             "arguments": []
           },
@@ -36916,7 +38638,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "$type": "Action",
                 "inferredType": {
                   "$type": "InferredType",
-                  "name": "BinaryExpr"
+                  "name": "Arith"
                 },
                 "feature": "left",
                 "operator": "="
@@ -36946,7 +38668,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@63"
                   },
                   "arguments": []
                 }
@@ -36962,11 +38684,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "Primary",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "Expression"
-      },
+      "name": "Atom",
       "definition": {
         "$type": "Alternatives",
         "elements": [
@@ -36980,7 +38698,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@54"
+                  "$ref": "#/rules@57"
                 },
                 "arguments": []
               },
@@ -36991,108 +38709,32 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             ]
           },
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "NumberExpr"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "value",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@65"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@64"
+            },
+            "arguments": []
           },
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "StringExpr"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "value",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@68"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@65"
+            },
+            "arguments": []
           },
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "AggregateExpr"
-                }
-              },
-              {
-                "$type": "Keyword",
-                "value": "sum"
-              },
-              {
-                "$type": "Keyword",
-                "value": "of"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "path",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@58"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@67"
+            },
+            "arguments": []
           },
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "FieldExpr"
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "path",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@58"
-                  },
-                  "arguments": []
-                }
-              }
-            ]
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@66"
+            },
+            "arguments": []
           }
         ]
       },
@@ -37102,7 +38744,116 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "FieldPath",
+      "name": "Aggregate",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "fn",
+            "operator": "=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "sum"
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "of"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "path",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@66"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Call",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "("
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "args",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@57"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "args",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@57"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ],
+                "cardinality": "*"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": ")"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Path",
       "definition": {
         "$type": "Group",
         "elements": [
@@ -37113,7 +38864,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
@@ -37132,7 +38883,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@67"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -37148,91 +38899,51 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "ParserRule",
-      "name": "Duration",
+      "name": "Lit",
       "definition": {
         "$type": "Alternatives",
         "elements": [
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "UnitDuration"
-                }
+            "$type": "Assignment",
+            "feature": "num",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@70"
               },
-              {
-                "$type": "Assignment",
-                "feature": "value",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@65"
-                  },
-                  "arguments": []
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "unit",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Alternatives",
-                  "elements": [
-                    {
-                      "$type": "Keyword",
-                      "value": "hour"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "hours"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "minute"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "minutes"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "day"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "days"
-                    }
-                  ]
-                }
-              }
-            ]
+              "arguments": []
+            }
           },
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "CompactDuration"
-                }
+            "$type": "Assignment",
+            "feature": "str",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@69"
               },
-              {
-                "$type": "Assignment",
-                "feature": "literal",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@64"
-                  },
-                  "arguments": []
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "bool",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "Keyword",
+                  "value": "true"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "false"
                 }
-              }
-            ]
+              ]
+            }
           }
         ]
       },
@@ -37242,38 +38953,10 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "TerminalRule",
-      "name": "INDENT",
-      "definition": {
-        "$type": "CharacterRange",
-        "left": {
-          "$type": "Keyword",
-          "value": "synthetic:indent"
-        },
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "DEDENT",
-      "definition": {
-        "$type": "CharacterRange",
-        "left": {
-          "$type": "Keyword",
-          "value": "synthetic:dedent"
-        },
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "REL_REF",
+      "name": "ID",
       "definition": {
         "$type": "RegexToken",
-        "regex": "/[a-zA-Z_][a-zA-Z0-9_]*'s/",
+        "regex": "/[A-Za-z_][\\\\w]*/",
         "parenthesized": false
       },
       "fragment": false,
@@ -37281,21 +38964,10 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
     },
     {
       "$type": "TerminalRule",
-      "name": "TIME",
+      "name": "STRING",
       "definition": {
         "$type": "RegexToken",
-        "regex": "/\\\\d{1,2}:\\\\d{2}/",
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "COMPACT_DURATION",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/\\\\d+[hmd]/",
+        "regex": "/\\"[^\\"]*\\"|'[^']*'/",
         "parenthesized": false
       },
       "fragment": false,
@@ -37315,1909 +38987,104 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
       },
       "fragment": false,
       "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "KEBAB_ID",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/[a-zA-Z_][a-zA-Z0-9_]*(-[a-zA-Z0-9_]+)+/",
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "ID",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/[a-zA-Z_][a-zA-Z0-9_]*/",
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "STRING",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/'[^'\\\\n]*'/",
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "DOC_TEXT",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/\\"\\"\\"[\\\\s\\\\S]*?\\"\\"\\"/",
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "name": "TEXT",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/\\"[^\\"\\\\n]*\\"/",
-        "parenthesized": false
-      },
-      "fragment": false,
-      "hidden": false
-    },
-    {
-      "$type": "TerminalRule",
-      "hidden": true,
-      "name": "WS",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/[ \\\\t]+/",
-        "parenthesized": false
-      },
-      "fragment": false
-    },
-    {
-      "$type": "TerminalRule",
-      "hidden": true,
-      "name": "NL",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/[\\\\r\\\\n]+/",
-        "parenthesized": false
-      },
-      "fragment": false
-    },
-    {
-      "$type": "TerminalRule",
-      "hidden": true,
-      "name": "SL_COMMENT",
-      "definition": {
-        "$type": "RegexToken",
-        "regex": "/#[^\\\\n\\\\r]*/",
-        "parenthesized": false
-      },
-      "fragment": false
     }
   ],
-  "types": [
+  "interfaces": [
     {
-      "$type": "Type",
-      "name": "Subject",
-      "type": {
-        "$type": "UnionType",
-        "types": [
-          {
+      "$type": "Interface",
+      "name": "BusinessOp",
+      "attributes": [
+        {
+          "$type": "TypeAttribute",
+          "name": "name",
+          "type": {
             "$type": "SimpleType",
-            "typeRef": {
-              "$ref": "#/rules@5"
-            }
+            "primitiveType": "string"
           },
-          {
+          "isOptional": false
+        }
+      ],
+      "superTypes": []
+    },
+    {
+      "$type": "Interface",
+      "name": "BizFlow",
+      "attributes": [
+        {
+          "$type": "TypeAttribute",
+          "name": "name",
+          "type": {
             "$type": "SimpleType",
-            "typeRef": {
-              "$ref": "#/rules@9"
-            }
-          }
-        ]
-      }
+            "primitiveType": "string"
+          },
+          "isOptional": false
+        }
+      ],
+      "superTypes": []
     }
   ],
-  "imports": [],
-  "interfaces": []
+  "types": []
 }`));
 
-// src/generated/module.ts
-var CommandDslLanguageMetaData = {
-  languageId: "command-dsl",
-  fileExtensions: [".cdsl"],
+// src/frontend/generated/module.ts
+var FrontendDslLanguageMetaData = {
+  languageId: "frontend-dsl",
+  fileExtensions: [".fcdsl"],
   caseInsensitive: false,
   mode: "development"
 };
-var CommandDslParserConfig = {
+var FrontendDslParserConfig = {
   maxLookahead: 3
 };
-var CommandDslGeneratedSharedModule = {
-  AstReflection: () => new CommandDslAstReflection()
+var FrontendDslGeneratedSharedModule = {
+  AstReflection: () => new FrontendDslAstReflection()
 };
-var CommandDslGeneratedModule = {
-  Grammar: () => CommandDslGrammar(),
-  LanguageMetaData: () => CommandDslLanguageMetaData,
+var FrontendDslGeneratedModule = {
+  Grammar: () => FrontendDslGrammar(),
+  LanguageMetaData: () => FrontendDslLanguageMetaData,
   parser: {
-    ParserConfig: () => CommandDslParserConfig
+    ParserConfig: () => FrontendDslParserConfig
   }
 };
 
-// src/language/validation.ts
+// src/frontend/frontend-dsl-document-builder.ts
 init_define_BUILD_INFO();
 
-// src/language/imports.ts
+// src/frontend/frontend-imports.ts
 init_define_BUILD_INFO();
 function isAbsoluteImportPath(path) {
   return path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path);
 }
 function resolveImportUri(docUri, path) {
   if (!path.trim()) return void 0;
-  if (isAbsoluteImportPath(path)) {
-    return URI2.file(path);
-  }
+  if (isAbsoluteImportPath(path)) return URI2.file(path);
   return UriUtils.resolvePath(UriUtils.dirname(docUri), path);
 }
-function directImportUris(model2, docUri) {
-  const uris = /* @__PURE__ */ new Set([docUri.toString()]);
-  for (const imp of model2.imports ?? []) {
-    const uri = resolveImportUri(docUri, imp.path);
-    if (uri) uris.add(uri.toString());
-  }
-  return uris;
-}
-function visibleModels(model2, documents) {
-  const doc2 = model2.$document;
-  if (!doc2 || (model2.imports ?? []).length === 0) return [model2];
-  const result = [model2];
-  const seen = /* @__PURE__ */ new Set([doc2.uri.toString()]);
-  for (const imp of model2.imports) {
-    const uri = resolveImportUri(doc2.uri, imp.path);
+function visibleModels(model, documents2) {
+  const doc = model.$document;
+  if (!doc || (model.imports ?? []).length === 0) return [model];
+  const result = [model];
+  const seen = /* @__PURE__ */ new Set([doc.uri.toString()]);
+  for (const imp of model.imports) {
+    const uri = resolveImportUri(doc.uri, imp.path);
     if (!uri || seen.has(uri.toString())) continue;
     seen.add(uri.toString());
-    const imported = documents.getDocument(uri);
+    const imported = documents2.getDocument(uri);
     if (imported) result.push(imported.parseResult.value);
   }
   return result;
 }
-function reverseImporterModels(model2, documents) {
-  const doc2 = model2.$document;
-  if (!doc2) return [];
-  const thisUri = doc2.uri.toString();
-  const out = [];
-  for (const other of documents.all) {
-    if (other.uri.toString() === thisUri) continue;
-    const m = other.parseResult.value;
-    if ((m.imports ?? []).some((imp) => resolveImportUri(other.uri, imp.path)?.toString() === thisUri)) {
-      out.push({ uri: other.uri.toString(), model: m });
-    }
-  }
-  return out.sort((a2, b) => a2.uri.localeCompare(b.uri)).map((o) => o.model);
-}
 
-// src/language/model-index.ts
-init_define_BUILD_INFO();
-function modelsOf(input) {
-  return Array.isArray(input) ? input : [input];
-}
-function elementsOf(input) {
-  return modelsOf(input).flatMap((m) => m.elements);
-}
-var PRIMITIVE_TYPES = /* @__PURE__ */ new Set([
-  "String",
-  "Decimal",
-  "Int",
-  "Integer",
-  "Number",
-  "Boolean",
-  "Bool",
-  "Date",
-  "DateTime",
-  "Time",
-  "Duration"
-]);
-var NUMERIC_TYPES = /* @__PURE__ */ new Set(["Decimal", "Int", "Integer", "Number"]);
-var IMPLICIT_OWNER = "owner";
-function indexModel(input) {
-  const entities = /* @__PURE__ */ new Map();
-  const actors = /* @__PURE__ */ new Map();
-  for (const el of elementsOf(input)) {
-    if (isEntityDef(el) && el.name) entities.set(el.name, el);
-    else if (isActorDef(el) && el.name) actors.set(el.name, el);
-  }
-  return { entities, actors };
-}
-function contextEntity(node) {
-  if (!node) return void 0;
-  const ex = ast_utils_exports.getContainerOfType(node, isExistsExpr);
-  if (ex) {
-    const rule = ast_utils_exports.getContainerOfType(ex, isRuleDef);
-    const entityName = rule ? readEntryEntityForAlias(rule, ex.collection) : void 0;
-    return entityName ? entityForName(node, entityName) : void 0;
-  }
-  const cmd = ast_utils_exports.getContainerOfType(node, isStandardCommand);
-  if (cmd) return cmd.resource?.ref;
-  const op = ast_utils_exports.getContainerOfType(node, isOperationDecl);
-  if (op && isStandardCommand(op.command)) return op.command.resource?.ref;
-  return void 0;
-}
-function readEntryResolvedType(r) {
-  if (isBareRead(r)) {
-    return r.entity?.ref?.name ?? r.entity?.$refText;
-  }
-  if (isPathRead(r)) {
-    if (r.leaf) return r.leaf.ref?.name ?? r.leaf.$refText;
-    const last = r.hops?.[r.hops.length - 1];
-    return last?.ref?.target?.ref?.name ?? last?.ref?.target?.$refText;
-  }
-  return void 0;
-}
-function readEntryEntityForAlias(rule, alias) {
-  for (const r of rule.reads ?? []) {
-    if (r.alias === alias) return readEntryResolvedType(r);
-  }
-  return void 0;
-}
-function entityForName(node, name) {
-  const model2 = ast_utils_exports.getContainerOfType(node, isModel);
-  if (!model2) return void 0;
-  return indexModel(model2).entities.get(name);
-}
-function actorAncestors(actor) {
-  const chain = [];
-  const seen = /* @__PURE__ */ new Set([actor]);
-  let current = actor.parent?.ref;
-  while (current && !seen.has(current)) {
-    chain.push(current);
-    seen.add(current);
-    current = current.parent?.ref;
-  }
-  return chain;
-}
-function computeDomains(input) {
-  const result = /* @__PURE__ */ new Map();
-  for (const model2 of modelsOf(input)) {
-    let current;
-    for (const el of model2.elements) {
-      if (isDomainDef(el)) {
-        current = el.name;
-      } else if (current) {
-        result.set(el, current);
-      }
-    }
-  }
-  return result;
-}
-function ownershipKey(o) {
-  if (!o) return "any";
-  if (isKeywordOwnership(o)) return o.keyword;
-  if (isRelationOwnership(o)) return o.relation.$refText.replace(/'s$/, "");
-  return "any";
-}
-function commandSignature(actor, verb, ownership, resource) {
-  return `${actor}|${verb}|${ownership}|${resource}`;
-}
-function sentenceSignature(cmd) {
-  const actor = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
-  const resource = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
-  if (!actor || !resource || !cmd.verb) return void 0;
-  return commandSignature(actor, cmd.verb, ownershipKey(cmd.ownership), resource);
-}
-function operationSignature(op) {
-  return isStandardCommand(op.command) ? sentenceSignature(op.command) : void 0;
-}
-function catalogSignatures(input) {
-  const map2 = /* @__PURE__ */ new Map();
-  for (const el of elementsOf(input)) {
-    if (!isOperationDecl(el)) continue;
-    const sig = operationSignature(el);
-    if (sig) map2.set(sig, el);
-  }
-  return map2;
-}
-function flowItemsDeep(flow) {
-  const out = [];
-  const walk = (items) => {
-    for (const item of items) {
-      out.push(item);
-      if (isEitherBlock(item)) {
-        for (const branch of item.branches) walk(branch.items);
-      }
-    }
-  };
-  walk(flow.items ?? []);
-  return out;
-}
-function performClosure(op) {
-  const out = /* @__PURE__ */ new Set();
-  const visit = (o) => {
-    for (const action of o.success?.actions ?? []) {
-      if (isPerformAction(action) && action.target?.ref && !out.has(action.target.ref)) {
-        out.add(action.target.ref);
-        visit(action.target.ref);
-      }
-    }
-  };
-  visit(op);
-  return out;
-}
-function stepOperation(step) {
-  return step.target?.ref;
-}
-function stepActor(step) {
-  return stepOperation(step)?.command?.actor?.ref;
-}
-function stepSignature(step) {
-  const target = stepOperation(step);
-  return target ? operationSignature(target) : void 0;
-}
-var READ_VERBS = /* @__PURE__ */ new Set(["reads", "lists"]);
-function operationKind(op) {
-  return isStandardCommand(op.command) && READ_VERBS.has(op.command.verb) ? "query" : "command";
-}
-function isQueryOp(op) {
-  return operationKind(op) === "query";
-}
-function computeCoverage(input) {
-  const sigs = catalogSignatures(input);
-  const flows = elementsOf(input).filter(isFlowDef);
-  const covered = /* @__PURE__ */ new Map();
-  const includedFlows = /* @__PURE__ */ new Set();
-  const scheduledSigs = /* @__PURE__ */ new Set();
-  for (const [sig, op] of sigs) {
-    if (op.clauses.some(isSchedule)) scheduledSigs.add(sig);
-  }
-  const record = (sig, via) => {
-    const list = covered.get(sig) ?? [];
-    list.push(via);
-    covered.set(sig, list);
-  };
-  const directSigs = (flow) => {
-    const set = /* @__PURE__ */ new Set();
-    for (const item of flowItemsDeep(flow)) {
-      if (!isFlowStep(item)) continue;
-      const sig = stepSignature(item);
-      if (sig && sigs.has(sig)) set.add(sig);
-      const op = stepOperation(item);
-      if (!op) continue;
-      for (const t of performClosure(op)) {
-        const tSig = operationSignature(t);
-        if (tSig && sigs.has(tSig)) set.add(tSig);
-      }
-    }
-    return set;
-  };
-  const allSigs = (flow, path) => {
-    const set = directSigs(flow);
-    if (path.has(flow)) return set;
-    path.add(flow);
-    for (const item of flowItemsDeep(flow)) {
-      if (isIncludeStep(item) && item.target?.ref) {
-        for (const s of allSigs(item.target.ref, path)) set.add(s);
-      }
-    }
-    path.delete(flow);
-    return set;
-  };
-  for (const flow of flows) {
-    for (const item of flowItemsDeep(flow)) {
-      if (isFlowStep(item)) {
-        const sig = stepSignature(item);
-        if (sig && sigs.has(sig)) record(sig, { flow, kind: "step", step: item });
-        const op = stepOperation(item);
-        if (!op) continue;
-        for (const t of performClosure(op)) {
-          const tSig = operationSignature(t);
-          if (tSig && sigs.has(tSig)) record(tSig, { flow, kind: "perform", step: item });
-        }
-      } else if (isIncludeStep(item) && item.target?.ref) {
-        includedFlows.add(item.target.ref);
-        for (const s of allSigs(item.target.ref, /* @__PURE__ */ new Set([flow]))) {
-          record(s, { flow, kind: "include", throughFlow: item.target.ref });
-        }
-      }
-    }
-  }
-  const hasMutation = (flow, path) => {
-    if (path.has(flow)) return false;
-    path.add(flow);
-    for (const item of flowItemsDeep(flow)) {
-      if (isFlowStep(item)) {
-        const sig = stepSignature(item);
-        const verb = sig?.split("|")[1];
-        if (verb && !READ_VERBS.has(verb)) return true;
-      } else if (isIncludeStep(item) && item.target?.ref) {
-        if (hasMutation(item.target.ref, path)) return true;
-      }
-    }
-    return false;
-  };
-  const commandlessRootFlows = flows.filter((f) => !includedFlows.has(f) && !hasMutation(f, /* @__PURE__ */ new Set()));
-  return { covered, commandlessRootFlows, includedFlows, scheduledSigs };
-}
-function findField(entity, name) {
-  return entity.fields.find((f) => f.name === name);
-}
-function resolveSegments(segments, index, ctx) {
-  const res = {
-    traversedCollection: false
-  };
-  if (segments.length === 0) return res;
-  let cursor;
-  const s0 = segments[0];
-  if (index.entities.has(s0)) {
-    cursor = { kind: "entity", entity: index.entities.get(s0) };
-    res.finalKind = "entity";
-  } else if (index.actors.has(s0)) {
-    cursor = { kind: "actorish" };
-    res.finalKind = "actor";
-  } else if (ctx && (findField(ctx, s0) || s0 === IMPLICIT_OWNER)) {
-    const f = findField(ctx, s0);
-    if (f) {
-      res.finalKind = "field";
-      res.finalField = f;
-      if (f.collection) res.traversedCollection = true;
-      cursor = PRIMITIVE_TYPES.has(f.type) ? { kind: "primitive", type: f.type } : index.entities.has(f.type) ? { kind: "entity", entity: index.entities.get(f.type) } : { kind: "unknown" };
-    } else {
-      res.finalKind = "owner";
-      cursor = { kind: "actorish" };
-    }
-  } else {
-    const ctxNote = ctx ? ` ('${ctx.name}' alan\u0131, entity veya akt\xF6r bekleniyor)` : " (entity veya akt\xF6r bekleniyor)";
-    res.error = { index: 0, message: `'${s0}' \xE7\xF6z\xFClemedi${ctxNote}` };
-    return res;
-  }
-  for (let i = 1; i < segments.length; i++) {
-    const s = segments[i];
-    switch (cursor.kind) {
-      case "entity": {
-        const entity = cursor.entity;
-        const f = findField(entity, s);
-        if (f) {
-          res.finalKind = "field";
-          res.finalField = f;
-          if (f.collection) res.traversedCollection = true;
-          cursor = PRIMITIVE_TYPES.has(f.type) ? { kind: "primitive", type: f.type } : index.entities.has(f.type) ? { kind: "entity", entity: index.entities.get(f.type) } : { kind: "unknown" };
-        } else if (s === IMPLICIT_OWNER) {
-          res.finalKind = "owner";
-          res.finalField = void 0;
-          cursor = { kind: "actorish" };
-        } else {
-          res.error = { index: i, message: `'${entity.name}' \xFCzerinde '${s}' alan\u0131 yok` };
-          return res;
-        }
-        break;
-      }
-      case "actorish":
-        res.finalKind = "actor-attr";
-        res.finalField = void 0;
-        cursor = { kind: "attr-done" };
-        break;
-      case "attr-done":
-        res.error = { index: i, message: "Akt\xF6r niteli\u011Finden sonra zincir devam edemez" };
-        return res;
-      case "primitive":
-        res.error = { index: i, message: `'${cursor.type}' tipli alan alt alan i\xE7ermez` };
-        return res;
-      case "unknown":
-        res.finalKind = "unknown-type";
-        res.finalField = void 0;
-        return res;
-    }
-  }
-  if (cursor.kind === "entity") res.cursorEntity = cursor.entity;
-  if (cursor.kind === "actorish") res.cursorActorish = true;
-  return res;
-}
-function resolveFieldPath(path, input) {
-  const ctx = contextEntity(path);
-  const ex = ast_utils_exports.getContainerOfType(path, isExistsExpr);
-  let segments = path.segments;
-  if (ex && ctx && segments.length > 0 && segments[0] === ex.collection) {
-    segments = [ctx.name, ...segments.slice(1)];
-  }
-  return resolveSegments(segments, indexModel(input), ctx);
-}
-function processItemsDeep(p) {
-  const out = [];
-  const walk = (items) => {
-    for (const item of items) {
-      out.push(item);
-      if (isAnyOrderBlock(item)) {
-        for (const branch of item.branches) walk(branch.items);
-      }
-    }
-  };
-  walk(p.items ?? []);
-  return out;
-}
-function processLevels(p) {
-  const levels = [];
-  const collectStages = (items) => items.flatMap((i) => isStageDef(i) ? [i] : collectStages(i.branches.flatMap((b) => b.items)));
-  for (const item of p.items ?? []) {
-    if (isStageDef(item)) levels.push({ stages: [item], parallel: false });
-    else levels.push({ stages: collectStages(item.branches.flatMap((b) => b.items)), parallel: true });
-  }
-  return levels;
-}
-function stageActor(stage) {
-  if (stage.flow?.ref) return stage.flow.ref.actor?.ref;
-  return stage.target?.ref?.command?.actor?.ref;
-}
-function stageOperation(stage) {
-  return stage.target?.ref;
-}
-function processStagedFlows(input) {
-  const staged = /* @__PURE__ */ new Map();
-  const closure2 = /* @__PURE__ */ new Set();
-  const includeClosure = (flow) => {
-    if (closure2.has(flow)) return;
-    closure2.add(flow);
-    for (const item of flowItemsDeep(flow)) {
-      if (isIncludeStep(item) && item.target?.ref) includeClosure(item.target.ref);
-    }
-  };
-  for (const el of elementsOf(input)) {
-    if (!isProcessDef(el)) continue;
-    for (const item of processItemsDeep(el)) {
-      if (!isStageDef(item) || !item.flow?.ref) continue;
-      const flow = item.flow.ref;
-      const list = staged.get(flow) ?? [];
-      list.push(el);
-      staged.set(flow, list);
-      includeClosure(flow);
-    }
-  }
-  return { staged, closure: closure2 };
-}
-function stageUnits(stage) {
-  const out = [];
-  const walkFlow = (flow, path) => {
-    if (path.has(flow)) return;
-    path.add(flow);
-    for (const item of flowItemsDeep(flow)) {
-      if (isFlowStep(item) && item.target?.ref) out.push({ op: item.target.ref });
-      else if (isIncludeStep(item) && item.target?.ref) walkFlow(item.target.ref, path);
-    }
-    path.delete(flow);
-  };
-  if (stage.flow?.ref) {
-    walkFlow(stage.flow.ref, /* @__PURE__ */ new Set());
-  } else if (stage.target?.ref) {
-    out.push({ op: stage.target.ref });
-  }
-  return out;
-}
-function equalityComparisons(cond) {
-  if (!cond) return [];
-  const out = [];
-  let hasOr = false;
-  const walk = (c) => {
-    if (isBinaryCondition(c)) {
-      if (c.op === "or") {
-        hasOr = true;
-        return;
-      }
-      walk(c.left);
-      walk(c.right);
-    } else if (isComparison(c)) {
-      if (c.op === "=" && isStringValue(c.right)) {
-        out.push({ path: c.left, value: c.right.value.replace(/^'|'$/g, "") });
-      }
-    }
-  };
-  walk(cond);
-  return hasOr ? [] : out;
-}
-function entityField(path, ctx, entities) {
-  const segs = path.segments;
-  if (segs.length === 1 && ctx) return { entity: ctx, field: segs[0] };
-  if (segs.length === 2) {
-    const e = entities.get(segs[0]);
-    if (e) return { entity: e, field: segs[1] };
-  }
-  return void 0;
-}
-function operationWhere(op) {
-  return isStandardCommand(op.command) ? op.command.where ?? void 0 : void 0;
-}
-function deriveStateChain(p, input) {
-  const root2 = p.entity?.ref;
-  if (!root2) return void 0;
-  const { entities } = indexModel(input);
-  const axis = /* @__PURE__ */ new Set([root2]);
-  const axisList = [root2];
-  const chainProd = /* @__PURE__ */ new Map();
-  const prodOf = (m, e) => {
-    const p0 = m.get(e) ?? { unknownAll: false, known: /* @__PURE__ */ new Map() };
-    m.set(e, p0);
-    return p0;
-  };
-  const knownCalcs = (op) => {
-    const sets = [op, ...performClosure(op)];
-    return sets.flatMap((o) => [
-      ...o.clauses.filter(isCalculateAction),
-      ...(o.success?.actions ?? []).filter(isCalculateAction)
-    ]);
-  };
-  const stages = [];
-  for (const level of processLevels(p)) {
-    const levelProds = [];
-    for (const stage of level.stages) {
-      const info = { stage, expects: [], produces: [] };
-      const overlay = /* @__PURE__ */ new Map();
-      const lookup = (e) => {
-        const a2 = chainProd.get(e);
-        const b = overlay.get(e);
-        const known = /* @__PURE__ */ new Map();
-        for (const src of [a2, b]) {
-          for (const [f, vs] of src?.known ?? []) {
-            const set = known.get(f) ?? /* @__PURE__ */ new Set();
-            for (const v of vs) set.add(v);
-            known.set(f, set);
-          }
-        }
-        return {
-          known,
-          unknownAll: (a2?.unknownAll ?? false) || (b?.unknownAll ?? false),
-          touched: a2 !== void 0 || b !== void 0
-        };
-      };
-      for (const unit of stageUnits(stage)) {
-        const op = unit.op;
-        const cmd = isStandardCommand(op.command) ? op.command : void 0;
-        const ctx = cmd?.resource?.ref;
-        for (const { path, value } of equalityComparisons(operationWhere(op))) {
-          const ef = entityField(path, ctx, entities);
-          if (!ef || !axis.has(ef.entity)) continue;
-          const view = lookup(ef.entity);
-          const knownVals = view.known.get(ef.field);
-          let status;
-          if (knownVals) status = knownVals.has(value) ? "ok" : view.unknownAll ? "unknown" : "conflict";
-          else if (view.unknownAll) status = "unknown";
-          else if (!view.touched) status = "missing";
-          else status = "unknown";
-          const exp = {
-            entity: ef.entity,
-            field: ef.field,
-            value,
-            status,
-            knownValues: status === "conflict" ? [...knownVals].sort() : void 0
-          };
-          if (status === "ok" && !chainProd.get(ef.entity)?.known.get(ef.field)?.has(value)) {
-            exp.internal = true;
-            for (const pr of info.produces) {
-              if (!pr.unknown && pr.entity === ef.entity && pr.field === ef.field && pr.value === value) {
-                pr.intermediate = true;
-              }
-            }
-          }
-          info.expects.push(exp);
-        }
-        if (!cmd || isQueryOp(op)) continue;
-        const resource = cmd.resource?.ref;
-        if (cmd.verb === "creates" && resource && !axis.has(resource)) {
-          const src = cmd.sourceResource?.ref;
-          const tgt = cmd.targetResource?.ref;
-          if (src && axis.has(src) || tgt && axis.has(tgt)) {
-            axis.add(resource);
-            axisList.push(resource);
-          }
-        }
-        const calcs = knownCalcs(op).map((c) => ({ c, ef: entityField(c.target, ctx, entities) })).filter((x) => x.ef !== void 0 && axis.has(x.ef.entity) && isStringExpr(x.c.expr));
-        const touchedKnown = /* @__PURE__ */ new Set();
-        for (const { c, ef } of calcs) {
-          const value = c.expr.value.replace(/^'|'$/g, "");
-          const prod = prodOf(overlay, ef.entity);
-          const set = prod.known.get(ef.field) ?? /* @__PURE__ */ new Set();
-          set.add(value);
-          prod.known.set(ef.field, set);
-          touchedKnown.add(ef.entity);
-          info.produces.push({ entity: ef.entity, field: ef.field, value, unknown: false });
-        }
-        if (resource && axis.has(resource) && !READ_VERBS.has(cmd.verb) && !touchedKnown.has(resource)) {
-          prodOf(overlay, resource).unknownAll = true;
-          info.produces.push({ entity: resource, unknown: true });
-        }
-      }
-      for (const [e, prod] of overlay) levelProds.push({ entity: e, prod });
-      stages.push(info);
-    }
-    for (const { entity, prod } of levelProds) {
-      const target = prodOf(chainProd, entity);
-      if (prod.unknownAll) target.unknownAll = true;
-      for (const [f, vs] of prod.known) {
-        const set = target.known.get(f) ?? /* @__PURE__ */ new Set();
-        for (const v of vs) set.add(v);
-        target.known.set(f, set);
-      }
-    }
-  }
-  return { axis: axisList, stages };
-}
-
-// src/language/validation.ts
-var KNOWN_VERBS = [
-  "creates",
-  "reads",
-  "lists",
-  "updates",
-  "deletes",
-  "cancels",
-  "approves",
-  "rejects",
-  "calculates"
-];
-function registerValidationChecks(services) {
-  const registry = services.validation.ValidationRegistry;
-  const validator = services.validation.CommandDslValidator;
-  const checks = {
-    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules],
-    OperationDecl: [validator.checkOperationClauses, validator.checkNote, validator.checkRequires],
-    ImportDecl: validator.checkImport,
-    EntityDef: validator.checkEntityFields,
-    StandardCommand: validator.checkStandardCommand,
-    Schedule: validator.checkScheduleOnlySystem,
-    RelationOwnership: validator.checkRelationActorMatch,
-    FieldPath: validator.checkFieldPathResolves,
-    CalculateAction: validator.checkCalculateTarget,
-    AggregateExpr: validator.checkAggregate,
-    Comparison: validator.checkComparison,
-    SendAction: validator.checkSendRecipient,
-    ActorDef: validator.checkActorHierarchy,
-    PerformAction: validator.checkPerform,
-    FlowDef: [validator.checkFlowBody, validator.checkNote],
-    FlowStep: validator.checkFlowStep,
-    IncludeStep: validator.checkInclude,
-    EitherBlock: validator.checkEither,
-    AbandonNote: validator.checkAbandon,
-    ProcessDef: [validator.checkProcessBody, validator.checkNote],
-    RuleDef: [validator.checkNote, validator.checkRuleReads],
-    StageDef: validator.checkStage,
-    AnyOrderBlock: validator.checkAnyOrder,
-    StringExpr: validator.checkStringExpr
-  };
-  registry.register(checks, validator);
-}
-function actorCompatible(actor, flowActor) {
-  if (actor.name === "System") return true;
-  return actor === flowActor || actorAncestors(flowActor).includes(actor);
-}
-function collectExists(body) {
-  if (!body) return [];
-  if (isExistsExpr(body)) return [body];
-  if (isBinaryBool(body)) return [...collectExists(body.left), ...collectExists(body.right)];
-  return [];
-}
-function collectOuterComparisons(body) {
-  if (!body) return [];
-  if (isComparison(body)) return [body];
-  if (isBinaryBool(body)) return [...collectOuterComparisons(body.left), ...collectOuterComparisons(body.right)];
-  return [];
-}
-var CommandDslValidator = class {
-  documents;
-  /** EmptyFileSystem (playground/test) — import dosyadan YÜKLENEMEZ; I1 mesajı buna göre seçilir */
-  noFileSystem;
-  constructor(services) {
-    this.documents = services.shared.workspace.LangiumDocuments;
-    this.noFileSystem = services.shared.workspace.FileSystemProvider instanceof EmptyFileSystemProvider;
-  }
-  /** Görünürlük kümesi (D10): bu model + doğrudan import ettikleri */
-  visible(model2) {
-    return visibleModels(model2, this.documents);
-  }
-  /**
-   * I1-I4: import bildirimi denetimleri (D10).
-   * Döngüsel import bilinçli olarak DİAGNOSTİKSİZDİR: karşılıklı import,
-   * explicit-import modelinde iki dosyanın birbirini görmesi demektir ve
-   * meşrudur (ADR-0002).
-   */
-  checkImport(imp, accept) {
-    const doc2 = ast_utils_exports.getDocument(imp);
-    const uri = resolveImportUri(doc2.uri, imp.path);
-    if (!uri) {
-      accept("error", `Ge\xE7ersiz import path: '${imp.path}'`, { node: imp, property: "path" });
-      return;
-    }
-    if (uri.toString() === doc2.uri.toString()) {
-      accept("warning", "Dosya kendini import ediyor \u2014 etkisiz bildirim", { node: imp, property: "path" });
-      return;
-    }
-    if (isAbsoluteImportPath(imp.path)) {
-      accept(
-        "warning",
-        "Mutlak path \xE7al\u0131\u015F\u0131r ama ta\u015F\u0131nabilirli\u011Fi bozar (makineye \xF6zg\xFCd\xFCr); g\xF6reli path tercih edin",
-        { node: imp, property: "path" }
-      );
-    }
-    const model2 = imp.$container;
-    const first2 = model2.imports.find((other) => resolveImportUri(doc2.uri, other.path)?.toString() === uri.toString());
-    if (first2 && first2 !== imp) {
-      accept("warning", `Yinelenen import: '${imp.path}' zaten import edilmi\u015F`, { node: imp, property: "path" });
-    }
-    if (!this.documents.getDocument(uri)) {
-      if (this.noFileSystem) {
-        accept(
-          "warning",
-          `Bu ortamda (playground/tek belge) \xE7oklu dosya desteklenmez: '${imp.path}' y\xFCklenemedi, i\xE7indeki semboller g\xF6r\xFCnmez \u2014 CLI/edit\xF6r ortam\u0131nda \xE7\xF6z\xFCl\xFCr`,
-          { node: imp, property: "path" }
-        );
-      } else {
-        accept("error", `Import edilen dosya bulunamad\u0131: '${imp.path}'`, { node: imp, property: "path" });
-      }
-    }
-  }
-  /**
-   * Aktör, entity, takvim, ilişki, domain adları tür içinde benzersiz olmalı.
-   * Kanonik adlar (komut, sorgu, akış) TEK küresel isim uzayını paylaşır
-   * (ADR-0001): referans belirsizliği ve slug çakışması baştan engellenir.
-   * D10: denetim GÖRÜNÜRLÜK KÜMESİNE genişler — import edilen dosyaların
-   * adları ön-yüklenir, çakışma yalnız BU dokümanın düğümünde raporlanır.
-   * Import yoksa iki dosya aynı adı serbestçe kullanabilir (izolasyon).
-   */
-  checkUniqueNames(model2, accept) {
-    const seen = /* @__PURE__ */ new Set();
-    const canonical = /* @__PURE__ */ new Map();
-    const importedOrigin = /* @__PURE__ */ new Map();
-    for (const imported of this.visible(model2).slice(1)) {
-      const origin = UriUtils.basename(ast_utils_exports.getDocument(imported).uri);
-      for (const el of imported.elements) {
-        const name = el.name;
-        if (!name) continue;
-        if (isOperationDecl(el) || isFlowDef(el) || isProcessDef(el) || isRuleDef(el)) {
-          const kind = isOperationDecl(el) ? "i\u015Flem" : isFlowDef(el) ? "ak\u0131\u015F" : isProcessDef(el) ? "s\xFCre\xE7" : "kural";
-          if (!canonical.has(name)) canonical.set(name, kind);
-          importedOrigin.set(name, origin);
-        } else {
-          let kind;
-          if (isActorDef(el)) kind = "akt\xF6r";
-          else if (isEntityDef(el)) kind = "entity";
-          else if (isCalendarDef(el)) kind = "takvim";
-          else if (isRelationDef(el)) kind = "ili\u015Fki";
-          else if (isDomainDef(el)) kind = "domain";
-          else if (isVerbDef(el)) kind = "fiil";
-          if (!kind) continue;
-          seen.add(`${kind}:${name}`);
-          importedOrigin.set(`${kind}:${name}`, origin);
-        }
-      }
-    }
-    for (const el of model2.elements) {
-      let kind;
-      let shared2 = false;
-      if (isActorDef(el)) kind = "akt\xF6r";
-      else if (isEntityDef(el)) kind = "entity";
-      else if (isCalendarDef(el)) kind = "takvim";
-      else if (isRelationDef(el)) kind = "ili\u015Fki";
-      else if (isDomainDef(el)) kind = "domain";
-      else if (isVerbDef(el)) kind = "fiil";
-      else if (isOperationDecl(el)) {
-        kind = "i\u015Flem";
-        shared2 = true;
-      } else if (isFlowDef(el)) {
-        kind = "ak\u0131\u015F";
-        shared2 = true;
-      } else if (isProcessDef(el)) {
-        kind = "s\xFCre\xE7";
-        shared2 = true;
-      } else if (isRuleDef(el)) {
-        kind = "kural";
-        shared2 = true;
-      }
-      if (!kind || !el.name) continue;
-      const name = el.name;
-      if (shared2) {
-        const prev = canonical.get(name);
-        if (prev !== void 0) {
-          const origin = importedOrigin.get(name);
-          const where = origin ? ` ('${origin}' i\xE7inde)` : "";
-          accept(
-            "error",
-            prev === kind ? `Yinelenen ${kind} tan\u0131m\u0131: '${name}'${where}` : `Yinelenen ad: '${name}' (${prev} olarak da tan\u0131ml\u0131${where}) \u2014 i\u015Flem, ak\u0131\u015F ve s\xFCre\xE7 adlar\u0131 tek isim uzay\u0131n\u0131 payla\u015F\u0131r`,
-            { node: el, property: "name" }
-          );
-        } else {
-          canonical.set(name, kind);
-        }
-      } else {
-        const key = `${kind}:${name}`;
-        if (seen.has(key)) {
-          const origin = importedOrigin.get(key);
-          accept(
-            "error",
-            `Yinelenen ${kind} tan\u0131m\u0131: '${name}'${origin ? ` ('${origin}' i\xE7inde de tan\u0131ml\u0131)` : ""}`,
-            { node: el, property: "name" }
-          );
-        } else {
-          seen.add(key);
-        }
-      }
-    }
-  }
-  /**
-   * T5 — D12'nin v3.0 hâli: işlem kimliği 4'lü imzadır (aktör|fiil|
-   * sahiplik|kaynak); aynı imza İKİNCİ KEZ bildirilemez (çelişen yeniden
-   * bildirim — doğrulayıcı ile üretici farklı bildirimleri esas alabilirdi,
-   * split-brain). where/from/on/for öbekleri imzaya girmez. v3.0'da tek
-   * bildirim biçimi kaldığından eski "türler-arası birleşim" kategorileri
-   * (standalone+blok, standalone+Query) konusuz kaldı — denetim yalın
-   * imza-tekilliğidir. ID benzersizliğini checkUniqueNames ayrıca denetler.
-   * D10: imza kümesi görünürlük üzerinden ön-yüklenir; hata yalnız BU
-   * dokümanın düğümünde raporlanır.
-   */
-  checkDuplicateDeclarations(model2, accept) {
-    const seen = /* @__PURE__ */ new Map();
-    for (const imported of this.visible(model2).slice(1)) {
-      const origin = UriUtils.basename(ast_utils_exports.getDocument(imported).uri);
-      for (const el of imported.elements) {
-        if (!isOperationDecl(el)) continue;
-        const sig = operationSignature(el);
-        if (sig && !seen.has(sig)) seen.set(sig, `'${origin}' i\xE7inde`);
-      }
-    }
-    for (const el of model2.elements) {
-      if (!isOperationDecl(el)) continue;
-      const sig = operationSignature(el);
-      if (!sig) continue;
-      const prev = seen.get(sig);
-      if (prev !== void 0) {
-        accept(
-          "error",
-          `\xC7eli\u015Fen yeniden bildirim: '${sig.replace(/\|/g, " ")}' imzas\u0131 ${prev} zaten bildirilmi\u015F \u2014 i\u015Flem kimli\u011Fi 4'l\xFC imzad\u0131r, ID yaln\u0131z tutama\xE7t\u0131r; where/from gibi \xF6bekler imzaya girmez (T5/D12)`,
-          { node: el, property: "name" }
-        );
-      } else {
-        seen.set(sig, "bu dosyada");
-      }
-    }
-  }
-  /** ADR-0033 K9: hiç `requires` edilmeyen rule → info (kasıtlı-ileride olabilir; gate değil). */
-  checkUnusedRules(model2, accept) {
-    const referenced = /* @__PURE__ */ new Set();
-    for (const m of this.visible(model2)) {
-      for (const el of m.elements) {
-        if (!isOperationDecl(el)) continue;
-        for (const cl of el.clauses) {
-          if (!isRequiresConstraint(cl)) continue;
-          for (const rr of cl.rules) {
-            const n = rr?.ref?.name ?? rr?.$refText;
-            if (n) referenced.add(n);
-          }
-        }
-      }
-    }
-    for (const el of model2.elements) {
-      if (!isRuleDef(el) || !el.name) continue;
-      if (!referenced.has(el.name)) {
-        accept(
-          "info",
-          `Kullan\u0131lmayan rule: '${el.name}' hi\xE7bir i\u015Flem taraf\u0131ndan 'requires' edilmiyor.`,
-          { node: el, property: "name" }
-        );
-      }
-    }
-  }
-  /** ADR-0033 K9: RuleDef-yerel reads denetimi. Kök=op aktörü/kaynağı denetimi
-   *  T-3.3'te (çağrı-yerine bağlı). Burada: zincir-bitişik + alias-on-collision + exists-coll. */
-  checkRuleReads(rule, accept) {
-    const aliasByType = /* @__PURE__ */ new Map();
-    for (const r of rule.reads ?? []) {
-      if (isPathRead(r)) {
-        const hops = r.hops ?? [];
-        for (let i = 1; i < hops.length; i++) {
-          const prevTarget = hops[i - 1]?.ref?.target?.ref?.name ?? hops[i - 1]?.ref?.target?.$refText;
-          const curSource = hops[i]?.ref?.source?.ref?.name ?? hops[i]?.ref?.source?.$refText;
-          if (prevTarget && curSource && prevTarget !== curSource) {
-            accept(
-              "error",
-              `Rule '${rule.name}': reads relation-path kopuk \u2014 '${hops[i - 1]?.$refText}' hedefi (${prevTarget}) ile '${hops[i]?.$refText}' kayna\u011F\u0131 (${curSource}) biti\u015Fik de\u011Fil.`,
-              { node: r, property: "hops" }
-            );
-          }
-        }
-      }
-      const resolvedType = readEntryResolvedType(r);
-      if (resolvedType) aliasByType.set(resolvedType, (aliasByType.get(resolvedType) ?? 0) + 1);
-    }
-    for (const r of rule.reads ?? []) {
-      const t = readEntryResolvedType(r);
-      const alias = isBareRead(r) ? r.alias : isPathRead(r) ? r.alias : void 0;
-      if (t && (aliasByType.get(t) ?? 0) >= 2 && !alias) {
-        accept(
-          "error",
-          `Rule '${rule.name}': ayn\u0131 tipe ('${t}') \u22652 reads yolu \u2014 'as <alias>' zorunlu (ADR-0031 emsali).`,
-          { node: r, property: isPathRead(r) ? "hops" : "entity" }
-        );
-      }
-    }
-    const aliases = /* @__PURE__ */ new Set();
-    for (const r of rule.reads ?? []) {
-      const a2 = r.alias;
-      if (a2) aliases.add(a2);
-    }
-    for (const ex of collectExists(rule.body)) {
-      if (!aliases.has(ex.collection)) {
-        accept(
-          "error",
-          `Rule '${rule.name}': exists '${ex.collection}' bir reads-alias'\u0131na \xE7\xF6z\xFClm\xFCyor \u2014 'reads \u2026 as ${ex.collection}' bildirilmeli.`,
-          { node: ex, property: "collection" }
-        );
-      }
-    }
-  }
-  /**
-   * ADR-0033 K9: `requires` çağrı-yeri denetimi (rule op-bağlamlı template —
-   * Karar 1; kökler çağrı yerinde bağlanır → uyum RuleDef'te değil, OP'ta).
-   * (a) komut-only: sorguda `requires` yasak (named-result-filter ertelendi).
-   * (b) rule-op uyum: op'un aktörü/kaynağı çağrı-bağlamıdır —
-   *     (b1) her reads-path kök relation'ının source'u = op aktörü ya da kaynağı;
-   *     (b2) gövdenin DIŞ (exists-dışı) örtük-kaynak skaler alanları op kaynağı
-   *          entity'sinde çözülmeli (reads-alias köklü ve exists iç-where alanları HARİÇ).
-   */
-  checkRequires(op, accept) {
-    const requiresClauses = op.clauses.filter(isRequiresConstraint);
-    if (requiresClauses.length === 0) return;
-    if (operationKind(op) === "query") {
-      for (const cl of requiresClauses) {
-        accept(
-          "error",
-          `'requires' yaln\u0131z komutlarda kullan\u0131labilir \u2014 '${op.name}' bir sorgu (sorgu named-result-filter ertelendi).`,
-          { node: cl, property: "rules" }
-        );
-      }
-      return;
-    }
-    const cmd = op.command;
-    if (!isStandardCommand(cmd)) return;
-    const opResourceEntity = cmd.resource?.ref;
-    const opResource = opResourceEntity?.name ?? cmd.resource?.$refText;
-    const opActor = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
-    const model2 = ast_utils_exports.getContainerOfType(op, isModel);
-    const index = model2 ? indexModel(this.visible(model2)) : void 0;
-    for (const cl of requiresClauses) {
-      for (const rr of cl.rules) {
-        const rule = rr?.ref;
-        if (!rule) continue;
-        for (const rd of rule.reads ?? []) {
-          if (!isPathRead(rd)) continue;
-          const rootSource = rd.hops?.[0]?.ref?.source?.ref?.name ?? rd.hops?.[0]?.ref?.source?.$refText;
-          if (rootSource && rootSource !== opActor && rootSource !== opResource) {
-            accept(
-              "error",
-              `'${op.name}' requires '${rule.name}': reads k\xF6k relation kayna\u011F\u0131 ('${rootSource}') op'un akt\xF6r\xFC ('${opActor}') veya kayna\u011F\u0131 ('${opResource}') de\u011Fil \u2014 ba\u011Flam uyumsuz.`,
-              { node: cl, property: "rules" }
-            );
-          }
-        }
-        if (index && opResourceEntity) {
-          const aliases = /* @__PURE__ */ new Set();
-          for (const rd of rule.reads ?? []) {
-            const a2 = rd.alias;
-            if (a2) aliases.add(a2);
-          }
-          const paths = [];
-          for (const cmp of collectOuterComparisons(rule.body)) {
-            if (cmp.left) paths.push(cmp.left);
-            if (isFieldValue(cmp.right) && cmp.right.path) paths.push(cmp.right.path);
-          }
-          for (const p of paths) {
-            const segs = p.segments ?? [];
-            if (segs.length === 0) continue;
-            if (aliases.has(segs[0])) continue;
-            const res = resolveSegments(segs, index, opResourceEntity);
-            if (res.error) {
-              accept(
-                "error",
-                `'${op.name}' requires '${rule.name}': g\xF6vde alan\u0131 '${segs.join(".")}' op kayna\u011F\u0131nda ('${opResource}') yok \u2014 ba\u011Flam uyumsuz.`,
-                { node: cl, property: "rules" }
-              );
-            }
-          }
-        }
-      }
-    }
-  }
-  /** ADR-0005: not tanımlı ama boş → uyarı. İçerik aksi halde doğrulanmaz. */
-  checkNote(node, accept) {
-    if (node.note !== void 0 && node.note.trim() === "") {
-      accept(
-        "warning",
-        'Bo\u015F not: silin ya da i\xE7erik yaz\u0131n (note """...""").',
-        { node, property: "note" }
-      );
-    }
-  }
-  /**
-   * T1-T3 — tür-uygunluk (D15): tek cümlecik bloğu kararının bedeli olan
-   * denetimler. Tür fiilden türetilir (reads/lists → sorgu).
-   * T1: sorguda only during / only if / schedule / calculate / on success
-   *     yazılamaz ('only when' SERBEST — sorguda sonuç filtresidir).
-   * T2: komutta order by / limit to yazılamaz.
-   * T3: sorgu cümlesi on/from/for/where öbeği almaz (filtre 'only when').
-   */
-  checkOperationClauses(op, accept) {
-    const kind = operationKind(op);
-    if (kind === "query") {
-      for (const clause of op.clauses) {
-        if (isDuringConstraint(clause) || isCalculateAction(clause) || isSchedule(clause) || clause.$type === "IfConstraint") {
-          accept(
-            "error",
-            `Sorguda bu c\xFCmlecik kullan\u0131lamaz \u2014 sorgular sistemi de\u011Fi\u015Ftirmez; sonu\xE7 filtresi i\xE7in 'only when' kullan\u0131n (T1)`,
-            { node: clause }
-          );
-        }
-      }
-      if (op.success) {
-        accept(
-          "error",
-          `Sorguda 'on success do' kullan\u0131lamaz \u2014 sorgular yan etki \xFCretmez (T1)`,
-          { node: op.success }
-        );
-      }
-      const cmd = op.command;
-      if (isStandardCommand(cmd)) {
-        if (cmd.targetResource || cmd.sourceResource || cmd.recipient || cmd.where) {
-          accept(
-            "error",
-            `Sorgu c\xFCmlesi on/from/for/where \xF6be\u011Fi almaz \u2014 sonu\xE7 filtresi 'only when' c\xFCmleci\u011Fidir (T3)`,
-            { node: cmd }
-          );
-        }
-      }
-    } else {
-      for (const clause of op.clauses) {
-        if (isOrderByFilter(clause) || isLimitFilter(clause)) {
-          accept(
-            "error",
-            `Komutta 'order by' / 'limit to' kullan\u0131lamaz \u2014 bunlar sorgu (reads/lists) filtreleridir (T2)`,
-            { node: clause }
-          );
-        }
-      }
-    }
-  }
-  /**
-   * F6: kapsama raporu (info — akışlar komutları ZORLAMAZ, §5.5).
-   * Yalnız modelde en az bir akış varken çalışır: akış katmanı hiç
-   * kullanılmıyorsa bayatlama raporu anlamsızdır (gating kararı).
-   * Perform-türevi kapsama sayılır (F10 ile tutarlılık: F10 perform
-   * zincirindeki komutun akışa açıkça yazılmasını zaten redundant sayar).
-   * schedule: kuralı taşıyan komutlar muaftır — zamanlanmış iş doğası
-   * gereği kullanıcı akışında geçmez (COVERAGE.md'de ayrı bölümde görünür).
-   * Aynı hesap generator'da COVERAGE.md / coverage.json'a yazılır.
-   */
-  checkCoverage(model2, accept) {
-    const union = /* @__PURE__ */ new Map();
-    const add = (m) => {
-      const key = m.$document?.uri.toString() ?? `anon:${union.size}`;
-      if (!union.has(key)) union.set(key, m);
-    };
-    for (const m of this.visible(model2)) add(m);
-    for (const importer of reverseImporterModels(model2, this.documents)) {
-      for (const m of visibleModels(importer, this.documents)) add(m);
-    }
-    const vis = [...union.values()];
-    if (!vis.some((m) => m.elements.some(isFlowDef))) return;
-    const cov = computeCoverage(vis);
-    for (const [sig, op] of catalogSignatures(model2)) {
-      if (cov.covered.has(sig)) continue;
-      if (cov.scheduledSigs.has(sig)) continue;
-      const kind = operationKind(op) === "query" ? "sorgu" : "komut";
-      accept(
-        "info",
-        `Hi\xE7bir ak\u0131\u015Fta ge\xE7miyor: bu ${kind} kapsama raporunda (F6) kapsanmad\u0131 olarak listelenecek \u2014 ak\u0131\u015Flar komutlar\u0131 zorlamaz, bu bilgi ama\xE7l\u0131d\u0131r`,
-        { node: op, property: "name" }
-      );
-    }
-    for (const flow of cov.commandlessRootFlows) {
-      if (flow.$container !== model2) continue;
-      accept(
-        "info",
-        `Ak\u0131\u015Fta hi\xE7 komut ad\u0131m\u0131 yok: '${flow.name}' yaln\u0131z sorgu/kenar \xF6\u011Felerinden olu\u015Fuyor (F6) \u2014 huni bir d\xF6n\xFC\u015F\xFCm (yazma) ad\u0131m\u0131yla bitmiyor`,
-        { node: flow, property: "name" }
-      );
-    }
-    if (vis.some((m) => m.elements.some(isProcessDef))) {
-      const pc = processStagedFlows(vis);
-      for (const el of model2.elements) {
-        if (!isFlowDef(el) || pc.closure.has(el)) continue;
-        accept(
-          "info",
-          `Hi\xE7bir s\xFCrecin etab\u0131 de\u011Fil: '${el.name}' ak\u0131\u015F\u0131 s\xFCre\xE7 kapsamas\u0131nda a\xE7\u0131kta (P8) \u2014 s\xFCre\xE7ler ak\u0131\u015Flar\u0131 zorlamaz, bu bilgi ama\xE7l\u0131d\u0131r`,
-          { node: el, property: "name" }
-        );
-      }
-    }
-  }
-  /** Alan tipleri primitive ya da bildirilmiş entity olmalı; alan adları benzersiz olmalı */
-  checkEntityFields(entity, accept) {
-    const model2 = ast_utils_exports.getContainerOfType(entity, isModel);
-    const index = indexModel(this.visible(model2));
-    const names = /* @__PURE__ */ new Set();
-    for (const field of entity.fields) {
-      if (names.has(field.name)) {
-        accept("error", `Yinelenen alan: '${field.name}'`, { node: field, property: "name" });
-      }
-      names.add(field.name);
-      if (field.name === "owner") {
-        accept("warning", `'owner' \xF6rt\xFCk aland\u0131r (her kayna\u011F\u0131n sahibi vard\u0131r, \xA72.2); yeniden bildirilmesi gerekmez`, { node: field, property: "name" });
-      }
-      if (!PRIMITIVE_TYPES.has(field.type) && !index.entities.has(field.type)) {
-        accept("error", `Bilinmeyen tip: '${field.type}' (primitive veya bildirilmi\u015F entity olmal\u0131)`, { node: field, property: "type" });
-      }
-    }
-  }
-  /**
-   * Fiil whitelist uyarısı + salt okunur fiiller için Query: önerisi (§3.4).
-   * D13: `verb <ad>` ile bildirilen fiiller (görünürlük kümesi dahil)
-   * bilinen sayılır — alan fiilleri kalıcı uyarı taşımaz, typo koruması
-   * bildirilmemiş fiillerde sürer.
-   */
-  checkStandardCommand(cmd, accept) {
-    if (cmd.verb && !KNOWN_VERBS.includes(cmd.verb)) {
-      const model2 = ast_utils_exports.getContainerOfType(cmd, isModel);
-      const declared = model2 && this.visible(model2).some((m) => m.elements.some((el) => isVerbDef(el) && el.name === cmd.verb));
-      if (!declared) {
-        accept(
-          "warning",
-          `Bilinmeyen fiil: '${cmd.verb}' \u2014 \xFCretici varsay\u0131lan e\u015Flemeye d\xFC\u015Fer (POST /:id/<fiil-k\xF6k\xFC>); \xF6zel HTTP e\u015Flemesi isteniyorsa bilinen fiilleri kullan\u0131n (${KNOWN_VERBS.join(", ")}) ya da fiili bildirin: verb ${cmd.verb} (D13)`,
-          { node: cmd, property: "verb" }
-        );
-      }
-    }
-  }
-  /** D2: schedule yalnız System aktörlü komutlarda kullanılabilir */
-  checkScheduleOnlySystem(schedule, accept) {
-    const op = schedule.$container;
-    const cmd = op.command;
-    const actorName = isStandardCommand(cmd) || isGrantCommand(cmd) || isRevokeCommand(cmd) ? cmd.actor?.ref?.name ?? cmd.actor?.$refText : void 0;
-    if (actorName !== "System") {
-      accept(
-        "error",
-        `'schedule:' yaln\u0131z System akt\xF6rl\xFC komutlarda kullan\u0131labilir (akt\xF6r: '${actorName ?? "?"}')`,
-        { node: schedule }
-      );
-    }
-  }
-  /** İlişki sahipliği komut aktörüyle uyumlu olmalı (managedBranch's → BranchManager) */
-  checkRelationActorMatch(ownership, accept) {
-    const relation = ownership.relation?.ref;
-    if (!relation) return;
-    const source = relation.source?.ref;
-    if (!source || !isActorDef(source)) return;
-    const holder = ast_utils_exports.getContainerOfType(ownership, isStandardCommand) ?? ast_utils_exports.getContainerOfType(ownership, isGrantCommand) ?? ast_utils_exports.getContainerOfType(ownership, isRevokeCommand);
-    const actor = holder?.actor?.ref;
-    if (actor && actor !== source) {
-      accept(
-        "warning",
-        `'${relation.name}' ili\u015Fkisi '${source.name}' akt\xF6r\xFC i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}'`,
-        { node: ownership }
-      );
-    }
-  }
-  /** Tüm alan zincirleri entity modeline karşı çözülmeli */
-  checkFieldPathResolves(path, accept) {
-    const model2 = ast_utils_exports.getContainerOfType(path, isModel);
-    if (!model2) return;
-    const inRule = ast_utils_exports.getContainerOfType(path, isRuleDef);
-    if (inRule && contextEntity(path) === void 0) return;
-    const res = resolveFieldPath(path, this.visible(model2));
-    if (res.error) {
-      accept("error", res.error.message, { node: path });
-    }
-  }
-  /** calculate hedefi bildirilmiş bir alan olmalı */
-  checkCalculateTarget(action, accept) {
-    const model2 = ast_utils_exports.getContainerOfType(action, isModel);
-    if (!model2 || !action.target) return;
-    const res = resolveFieldPath(action.target, this.visible(model2));
-    if (!res.error && res.finalKind !== "field" && res.finalKind !== "unknown-type") {
-      accept(
-        "error",
-        `calculate hedefi bir entity alan\u0131 olmal\u0131 (\xF6rn. Refund.amount); '${action.target.segments.join(".")}' bir ${res.finalKind === "entity" ? "entity" : "alan de\u011Fil"}`,
-        { node: action, property: "target" }
-      );
-    }
-  }
-  /** sum of: koleksiyon (list of) geçişi + sayısal uç alan gerektirir */
-  checkAggregate(expr, accept) {
-    const model2 = ast_utils_exports.getContainerOfType(expr, isModel);
-    if (!model2 || !expr.path) return;
-    const res = resolveFieldPath(expr.path, this.visible(model2));
-    if (res.error) return;
-    if (!res.traversedCollection) {
-      accept(
-        "error",
-        `'sum of' bir koleksiyon (list of ...) \xFCzerinden ge\xE7meli: '${expr.path.segments.join(".")}' koleksiyon i\xE7ermiyor`,
-        { node: expr, property: "path" }
-      );
-    } else if (res.finalField && !NUMERIC_TYPES.has(res.finalField.type)) {
-      accept(
-        "error",
-        `'sum of' say\u0131sal bir alanla bitmeli; '${res.finalField.name}' alan\u0131n\u0131n tipi ${res.finalField.type}`,
-        { node: expr, property: "path" }
-      );
-    }
-  }
-  /** Karşılaştırmanın sol tarafı bir alan/nitelikle bitmeli */
-  checkComparison(cmp, accept) {
-    const model2 = ast_utils_exports.getContainerOfType(cmp, isModel);
-    if (!model2 || !cmp.left) return;
-    const res = resolveFieldPath(cmp.left, this.visible(model2));
-    if (!res.error && (res.finalKind === "entity" || res.finalKind === "actor")) {
-      accept(
-        "warning",
-        `Kar\u015F\u0131la\u015Ft\u0131rma bir alanla bitmeli; '${cmp.left.segments.join(".")}' bir ${res.finalKind === "entity" ? "entity" : "akt\xF6r"}`,
-        { node: cmp, property: "left" }
-      );
-    }
-  }
-  /** Aktör genelleştirmesi döngü içeremez (A extends B extends A) */
-  checkActorHierarchy(actor, accept) {
-    if (!actor.parent) return;
-    const seen = /* @__PURE__ */ new Set([actor]);
-    let current = actor.parent.ref;
-    while (current) {
-      if (seen.has(current)) {
-        const chain = [...seen].map((a2) => a2.name).concat(current.name).join(" \u2192 ");
-        accept(
-          "error",
-          `Akt\xF6r genelle\u015Ftirmesi d\xF6ng\xFC i\xE7eriyor: ${chain}`,
-          { node: actor, property: "parent" }
-        );
-        return;
-      }
-      seen.add(current);
-      current = current.parent?.ref;
-    }
-  }
-  /** perform kendine işaret edemez; perform zinciri döngü içeremez */
-  checkPerform(action, accept) {
-    const target = action.target?.ref;
-    if (!target) return;
-    if (operationKind(target) === "query") {
-      accept(
-        "error",
-        `perform hedefi sorgu olamaz: '${target.name}' bir okuma i\u015Flemidir (reads/lists) \u2014 ba\u015Far\u0131 zinciri yaln\u0131z komut tetikler (T4)`,
-        { node: action, property: "target" }
-      );
-      return;
-    }
-    const owner = ast_utils_exports.getContainerOfType(action, isOperationDecl);
-    if (!owner) return;
-    if (target === owner) {
-      accept(
-        "error",
-        `Komut kendini perform edemez ('${target.name}')`,
-        { node: action, property: "target" }
-      );
-      return;
-    }
-    const inPath2 = /* @__PURE__ */ new Set([owner]);
-    const findCycle = (o) => {
-      if (inPath2.has(o)) return o;
-      inPath2.add(o);
-      for (const a2 of o.success?.actions ?? []) {
-        if (isPerformAction(a2) && a2.target?.ref) {
-          const hit2 = findCycle(a2.target.ref);
-          if (hit2) return hit2;
-        }
-      }
-      inPath2.delete(o);
-      return void 0;
-    };
-    const hit = findCycle(target);
-    if (hit) {
-      accept(
-        "error",
-        `perform zinciri d\xF6ng\xFC i\xE7eriyor: '${owner.name ?? "?"}' \u2192 ... \u2192 '${hit.name ?? "?"}'`,
-        { node: action, property: "target" }
-      );
-    }
-  }
-  /**
-   * Akış gövdesi denetimleri (Katman 3, docs/flow-research.md §6):
-   * F5 boş gövde, F2 adım adı benzersizliği (either dalları dahil),
-   * abandon tekliği, F8 sistem teması, F10 perform-redundansı.
-   */
-  checkFlowBody(flow, accept) {
-    const items = flow.items ?? [];
-    if (items.length === 0) {
-      accept("error", `Ak\u0131\u015F g\xF6vdesi bo\u015F: '${flow.name}' en az bir \xF6\u011Fe i\xE7ermeli`, { node: flow, property: "name" });
-      return;
-    }
-    const deep = flowItemsDeep(flow);
-    const stepNames = /* @__PURE__ */ new Set();
-    for (const item of deep) {
-      if (!isFlowStep(item) || !item.name) continue;
-      if (stepNames.has(item.name)) {
-        accept("error", `Yinelenen ad\u0131m ad\u0131: '${item.name}' (ad\u0131m adlar\u0131 ak\u0131\u015F i\xE7inde benzersiz olmal\u0131)`, { node: item, property: "name" });
-      } else {
-        stepNames.add(item.name);
-      }
-    }
-    const abandons = deep.filter((it) => it.$type === "AbandonNote");
-    for (const extra of abandons.slice(1)) {
-      accept("error", `'abandon' ak\u0131\u015F ba\u015F\u0131na en fazla bir kez bildirilebilir`, { node: extra });
-    }
-    const hasSystemStep = deep.some((it) => isFlowStep(it) || isIncludeStep(it));
-    if (!hasSystemStep) {
-      accept("warning", `Ak\u0131\u015Fta hi\xE7 sistem ad\u0131m\u0131 yok: '${flow.name}' yaln\u0131z kenar notlar\u0131ndan olu\u015Fuyor \u2014 sistemle temas etmiyor`, { node: flow, property: "name" });
-    }
-    const triggered = /* @__PURE__ */ new Set();
-    for (const item of deep) {
-      if (!isFlowStep(item)) continue;
-      const op = stepOperation(item);
-      if (!op) continue;
-      if (stepActor(item)?.name === "System" && triggered.has(op)) {
-        accept("info", `Bu System ad\u0131m\u0131 \xF6nceki ad\u0131mlar\u0131n perform zincirinde zaten otomatik tetikleniyor ('${op.name}') \u2014 diagramda t\xFCretilmi\u015F aksiyon olarak g\xF6r\xFCnecek`, { node: item });
-      }
-      for (const t of performClosure(op)) triggered.add(t);
-    }
-  }
-  /**
-   * Adım denetimleri (v3.0 D16: adım yalnız ID referansıdır — F1/F11
-   * emekli, gönderge çözümü linker'dadır):
-   * D11 — U1-U3 using denetimleri; F3: adım aktörü = akış aktörü, D7
-   * atası veya System.
-   */
-  checkFlowStep(step, accept) {
-    const flow = ast_utils_exports.getContainerOfType(step, isFlowDef);
-    if (!flow) return;
-    const usingTarget = step.source?.ref;
-    if (usingTarget) {
-      if (usingTarget === step) {
-        accept("error", `Ad\u0131m kendinden veri alamaz: 'using ${step.name}' kendine i\u015Faret ediyor`, { node: step, property: "source" });
-      } else {
-        const steps = flowItemsDeep(flow).filter(isFlowStep);
-        if (steps.indexOf(usingTarget) > steps.indexOf(step)) {
-          accept(
-            "error",
-            `'using' hedefi daha \xF6nce bildirilmi\u015F olmal\u0131: '${usingTarget.name}', '${step.name}' ad\u0131m\u0131ndan sonra geliyor`,
-            { node: step, property: "source" }
-          );
-        }
-        const targetSig = stepSignature(usingTarget);
-        const stepSig = stepSignature(step);
-        if (targetSig && stepSig) {
-          const targetRes = targetSig.split("|")[3];
-          const stepRes = stepSig.split("|")[3];
-          if (targetRes !== stepRes) {
-            accept(
-              "warning",
-              `'using' hedefi '${usingTarget.name}' bir ${targetRes} \xFCretiyor, bu ad\u0131m ${stepRes} bekliyor \u2014 id zincirleme muhtemelen yanl\u0131\u015F kay\u0131t ta\u015F\u0131yacak`,
-              { node: step, property: "source" }
-            );
-          }
-        }
-        const targetBranch = ast_utils_exports.getContainerOfType(usingTarget, isEitherBranch);
-        if (targetBranch) {
-          let insideSameBranch = false;
-          let container = step.$container;
-          while (container) {
-            if (container === targetBranch) {
-              insideSameBranch = true;
-              break;
-            }
-            container = container.$container;
-          }
-          if (!insideSameBranch) {
-            accept(
-              "warning",
-              `'using' hedefi '${usingTarget.name}' bir 'either' dal\u0131nda \u2014 her ko\u015Fumda ko\u015Fmayabilir; sonu\xE7 yoksa E2E'de bo\u015F id ge\xE7er`,
-              { node: step, property: "source" }
-            );
-          }
-        }
-      }
-    }
-    const flowActor = flow.actor?.ref;
-    const actor = stepActor(step);
-    if (!flowActor || !actor) return;
-    if (!actorCompatible(actor, flowActor)) {
-      accept(
-        "error",
-        `Ad\u0131m akt\xF6r\xFC '${actor.name}', ak\u0131\u015F akt\xF6r\xFC '${flowActor.name}' ile uyumsuz (ak\u0131\u015F akt\xF6r\xFC, bir atas\u0131 veya System olmal\u0131)`,
-        { node: step }
-      );
-    }
-  }
-  /**
-   * F3-include: dahil edilen akışın aktörü, dahil edenin aynısı veya atası.
-   * F4: include zinciri döngüsüz (perform DFS'i deseni — path-takipli).
-   */
-  checkInclude(inc, accept) {
-    const target = inc.target?.ref;
-    if (!target) return;
-    const flow = ast_utils_exports.getContainerOfType(inc, isFlowDef);
-    if (!flow) return;
-    const flowActor = flow.actor?.ref;
-    const targetActor = target.actor?.ref;
-    if (flowActor && targetActor && targetActor !== flowActor && !actorAncestors(flowActor).includes(targetActor)) {
-      accept(
-        "error",
-        `Include edilen ak\u0131\u015F\u0131n akt\xF6r\xFC '${targetActor.name}', bu ak\u0131\u015F\u0131n akt\xF6r\xFC '${flowActor.name}' ile uyumsuz (ayn\u0131 veya atas\u0131 olmal\u0131)`,
-        { node: inc, property: "target" }
-      );
-    }
-    const inPath2 = /* @__PURE__ */ new Set([flow]);
-    const findCycle = (f) => {
-      if (inPath2.has(f)) return f;
-      inPath2.add(f);
-      for (const item of flowItemsDeep(f)) {
-        if (isIncludeStep(item) && item.target?.ref) {
-          const hit2 = findCycle(item.target.ref);
-          if (hit2) return hit2;
-        }
-      }
-      inPath2.delete(f);
-      return void 0;
-    };
-    const hit = findCycle(target);
-    if (hit) {
-      accept(
-        "error",
-        `include zinciri d\xF6ng\xFC i\xE7eriyor: '${flow.name}' \u2192 ... \u2192 '${hit.name}'`,
-        { node: inc, property: "target" }
-      );
-    }
-  }
-  /** F5: either en az iki dal içermeli */
-  checkEither(block2, accept) {
-    if (block2.branches.length < 2) {
-      accept("error", `'either' en az iki dal i\xE7ermeli ('or' ile ayr\u0131l\u0131r)`, { node: block2 });
-    }
-  }
-  /** abandon akış düzeyindedir; either dalı içinde anlamı yoktur */
-  checkAbandon(note, accept) {
-    if (isEitherBranch(note.$container)) {
-      accept("error", `'abandon' ak\u0131\u015F d\xFCzeyindedir; 'either' dal\u0131 i\xE7inde kullan\u0131lamaz`, { node: note });
-    }
-  }
-  // -----------------------------------------------------------------------
-  // Süreç kuralları — Katman 4 (P1-P9, V2 §7.3, ADR-0003).
-  // P3 (process içinde process) grammar düzeyinde imkânsızdır: etap
-  // göndergeleri FlowDef/Operation havuzlarındadır. P1'in isimli yarısı
-  // linker error'udur (ek iş yok); cümle yarısı F1/F11 mekanizmasını
-  // paylaşır (checkSentenceAgainstCatalog).
-  // -----------------------------------------------------------------------
-  /**
-   * Süreç gövdesi denetimleri: P5 (en az iki etap: error — F5 boş-gövde
-   * emsali; tüm etaplar aynı aktörde: info), P2 (etap adları process içinde
-   * benzersiz, any order dalları dahil), P4 (of bildirilmişse durum zinciri
-   * — deriveStateChain'in missing/conflict beklentileri; unknown SUSAR,
-   * muhafazakârlık gerekçesi model-index'te).
-   */
-  checkProcessBody(p, accept) {
-    const stages = processItemsDeep(p).filter(isStageDef);
-    if (stages.length === 0) {
-      accept("error", `S\xFCre\xE7 g\xF6vdesi bo\u015F: '${p.name}' en az iki etap i\xE7ermeli`, { node: p, property: "name" });
-      return;
-    }
-    if (stages.length === 1) {
-      accept("error", `S\xFCre\xE7 en az iki etap i\xE7ermeli: '${p.name}' tek etapl\u0131 \u2014 tek etab\u0131n s\xFCreci olmaz (P5)`, { node: p, property: "name" });
-    }
-    const names = /* @__PURE__ */ new Set();
-    for (const stage of stages) {
-      if (!stage.name) continue;
-      if (names.has(stage.name)) {
-        accept("error", `Yinelenen etap ad\u0131: '${stage.name}' (etap adlar\u0131 s\xFCre\xE7 i\xE7inde benzersiz olmal\u0131, any order dallar\u0131 dahil)`, { node: stage, property: "name" });
-      } else {
-        names.add(stage.name);
-      }
-    }
-    const actors = stages.map(stageActor);
-    if (stages.length >= 2 && actors.every((a2) => a2 !== void 0) && new Set(actors).size === 1) {
-      accept(
-        "info",
-        `T\xFCm etaplar ayn\u0131 akt\xF6rde ('${actors[0].name}') \u2014 bu bir flow mu olmal\u0131yd\u0131? S\xFCre\xE7 katman\u0131 akt\xF6rler-aras\u0131 el de\u011Fi\u015Ftirme (handoff) i\xE7indir (P5)`,
-        { node: p, property: "name" }
-      );
-    }
-    const model2 = ast_utils_exports.getContainerOfType(p, isModel);
-    if (!model2) return;
-    const chain = deriveStateChain(p, this.visible(model2));
-    for (const info of chain?.stages ?? []) {
-      for (const exp of info.expects) {
-        if (exp.status === "missing") {
-          accept(
-            "warning",
-            `Etab\u0131n bekledi\u011Fi durum \xFCretilmemi\u015F: '${info.stage.name}' etab\u0131 ${exp.entity.name}.${exp.field} = '${exp.value}' bekliyor ama \xF6nceki etaplar ${exp.entity.name} \xFCzerinde hi\xE7bir durum \xFCretmiyor (P4)`,
-            { node: info.stage, property: "name" }
-          );
-        } else if (exp.status === "conflict") {
-          accept(
-            "warning",
-            `Durum zinciri \xE7eli\u015Fkisi: '${info.stage.name}' etab\u0131 ${exp.entity.name}.${exp.field} = '${exp.value}' bekliyor ama \xF6nceki etaplar\u0131n bilinen \xFCretimleri: ${exp.knownValues.map((v) => `'${v}'`).join(", ")} (P4)`,
-            { node: info.stage, property: "name" }
-          );
-        }
-      }
-    }
-  }
-  /**
-   * Etap denetimleri (v3.0 D16: etap yalnız ID/flow referansıdır): P6 (by
-   * aktörü = akışın for aktörü, TAM eşleşme — D7 ata esnemesi BİLİNÇLİ yok:
-   * ata yazmak yanıltıcı handoff anlatır), P7 (schedule'lı komut etap
-   * olamaz — zamanlanmış işler süreç dışıdır, D2/K8 muafiyet emsali).
-   */
-  checkStage(stage, accept) {
-    const flow = stage.flow?.ref;
-    const byActor = stage.actor?.ref;
-    const flowActor = flow?.actor?.ref;
-    if (flow && byActor && flowActor && byActor !== flowActor) {
-      accept(
-        "error",
-        `'by' akt\xF6r\xFC ak\u0131\u015F\u0131n 'for' akt\xF6r\xFCyle e\u015Fle\u015Fmeli: etap '${stage.name}' by '${byActor.name}' diyor, ak\u0131\u015F '${flow.name}' for '${flowActor.name}' (P6 \u2014 ata-akt\xF6r esnemesi yoktur, handoff ger\xE7ek akt\xF6r\xFC g\xF6stermeli)`,
-        { node: stage, property: "actor" }
-      );
-    }
-    const op = stageOperation(stage);
-    if (op?.clauses.some(isSchedule)) {
-      accept(
-        "warning",
-        `Zamanlanm\u0131\u015F komut s\xFCre\xE7 etab\u0131 olamaz: '${op.name}' schedule kural\u0131 ta\u015F\u0131yor \u2014 zamanlanm\u0131\u015F i\u015Fler hi\xE7bir etaba ait de\u011Fildir, s\xFCre\xE7 d\u0131\u015F\u0131d\u0131r (P7)`,
-        { node: stage, property: "name" }
-      );
-    }
-  }
-  /** P9: any order en az iki dal; iç içe any order yok (v1 düz) */
-  checkAnyOrder(block2, accept) {
-    if (block2.branches.length < 2) {
-      accept("error", `'any order' en az iki dal i\xE7ermeli ('and' ile ayr\u0131l\u0131r) \u2014 tek dal\u0131n s\u0131ra-ba\u011F\u0131ms\u0131zl\u0131\u011F\u0131 anlams\u0131z (P9)`, { node: block2 });
-    }
-    if (isAnyOrderBranch(block2.$container)) {
-      accept("error", `\u0130\xE7 i\xE7e 'any order' desteklenmez (v1 d\xFCz hiyerar\u015Fi; derinlik ihtiyac\u0131 kan\u0131tlanmadan a\xE7\u0131lmaz) (P9)`, { node: block2 });
-    }
-  }
-  /**
-   * StringExpr (v2.4): yalnız calculate atamasının TAMAMI olabilir —
-   * aritmetiğe giremez; sayısal tipli alana atanamaz. Durum geçişi
-   * atamalarının (P4 temeli) dar kapısı.
-   */
-  checkStringExpr(expr, accept) {
-    if (isBinaryExpr(expr.$container)) {
-      accept("error", `String literal aritmeti\u011Fe giremez: '${expr.value}' yaln\u0131z ataman\u0131n tamam\u0131 olabilir (calculate X.alan = '...')`, { node: expr });
-      return;
-    }
-    const calc = ast_utils_exports.getContainerOfType(expr, isCalculateAction);
-    const model2 = ast_utils_exports.getContainerOfType(expr, isModel);
-    if (!calc || !model2 || calc.expr !== expr || !calc.target) return;
-    const res = resolveFieldPath(calc.target, this.visible(model2));
-    if (res.finalField && NUMERIC_TYPES.has(res.finalField.type)) {
-      accept(
-        "error",
-        `Say\u0131sal alana string atanamaz: '${calc.target.segments.join(".")}' alan\u0131n\u0131n tipi ${res.finalField.type}`,
-        { node: expr }
-      );
-    }
-  }
-  /** send alıcısı aktör, owner veya aktör niteliği olmalı */
-  checkSendRecipient(action, accept) {
-    const model2 = ast_utils_exports.getContainerOfType(action, isModel);
-    if (!model2 || !action.recipient) return;
-    const res = resolveFieldPath(action.recipient, this.visible(model2));
-    if (!res.error && res.finalKind === "entity") {
-      accept(
-        "warning",
-        `send al\u0131c\u0131s\u0131 bir akt\xF6r ya da sahip olmal\u0131 (\xF6rn. Order.owner, System.admin); '${action.recipient.segments.join(".")}' bir entity`,
-        { node: action, property: "recipient" }
-      );
-    }
-  }
-};
-
-// src/language/completion.ts
-init_define_BUILD_INFO();
-var CommandDslCompletionProvider = class extends DefaultCompletionProvider {
-  reflection;
-  documents;
-  constructor(services) {
-    super(services);
-    this.reflection = services.shared.AstReflection;
-    this.documents = services.shared.workspace.LangiumDocuments;
-  }
-  completionOptions = {
-    triggerCharacters: ["."]
-  };
-  async getCompletion(document, params) {
-    const list = await super.getCompletion(document, params);
-    if (list) {
-      const seen = /* @__PURE__ */ new Set();
-      list.items = list.items.filter((item) => {
-        const key = `${item.kind ?? 0}:${item.label}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    }
-    return list;
-  }
-  completionFor(context, next, acceptor) {
-    const assignment = ast_utils_exports.getContainerOfType(next.feature, ast_exports.isAssignment);
-    const parserRule = ast_utils_exports.getContainerOfType(next.feature, ast_exports.isParserRule);
-    if (parserRule?.name === "Verb" && ast_exports.isRuleCall(next.feature)) {
-      this.suggestVerbs(context, acceptor, false);
-      return;
-    }
-    if (ast_exports.isKeyword(next.feature) && next.feature.value === ":" && parserRule?.name === "OperationDecl" && this.isVerbPositionLine(context)) {
-      this.suggestVerbs(context, acceptor, true);
-      return;
-    }
-    if (assignment?.feature === "segments") {
-      this.completeFieldPath(context, acceptor);
-      return;
-    }
-    if (ast_exports.isCrossReference(next.feature) && context.node && assignment) {
-      const container = this.findContainerWithProperty(context.node, assignment.feature);
-      if (container && container !== context.node) {
-        return super.completionFor({ ...context, node: container }, next, acceptor);
-      }
-    }
-    return super.completionFor(context, next, acceptor);
-  }
-  /** İmlecin satırı '<Ad>: <Sözcük> [kısmi]' biçiminde mi? (fiil pozisyonu) */
-  isVerbPositionLine(context) {
-    const text = context.textDocument.getText();
-    const lineStart = text.lastIndexOf("\n", context.offset - 1) + 1;
-    return /^\s*\w+:\s*\w+\s+\w*$/.test(text.slice(lineStart, context.offset));
-  }
-  suggestVerbs(context, acceptor, includeKeywordVerbs) {
-    const verbs = includeKeywordVerbs ? [...KNOWN_VERBS, "grants", "revokes"] : KNOWN_VERBS;
-    for (const verb of verbs) {
-      if (!includeKeywordVerbs && (verb === "reads" || verb === "lists")) continue;
-      acceptor(context, {
-        label: verb,
-        kind: CompletionItemKind.Function,
-        detail: "fiil",
-        sortText: "1" + verb
-      });
-    }
-    const model2 = context.document.parseResult.value;
-    for (const m of visibleModels(model2, this.documents)) {
-      for (const el of m.elements) {
-        if (isVerbDef(el) && el.name) {
-          acceptor(context, {
-            label: el.name,
-            kind: CompletionItemKind.Function,
-            detail: "bildirilen fiil (D13)",
-            sortText: "1" + el.name
-          });
-        }
-      }
-    }
-  }
-  findContainerWithProperty(node, property2) {
-    let current = node;
-    while (current) {
-      const meta = this.reflection.getTypeMetaData(current.$type);
-      if (property2 in meta.properties) return current;
-      current = current.$container;
-    }
-    return void 0;
-  }
-  completeFieldPath(context, acceptor) {
-    const model2 = context.document.parseResult.value;
-    const index = indexModel(visibleModels(model2, this.documents));
-    const text = context.textDocument.getText();
-    let start = context.offset;
-    while (start > 0 && /[A-Za-z0-9_.]/.test(text.charAt(start - 1))) start--;
-    const raw = text.slice(start, context.offset);
-    const parts = raw.split(".");
-    const prefix = parts.slice(0, -1).filter((p) => p.length > 0);
-    const ctx = contextEntity(context.node);
-    if (prefix.length === 0) {
-      if (ctx) {
-        for (const field of ctx.fields) {
-          acceptor(context, {
-            label: field.name,
-            kind: CompletionItemKind.Field,
-            detail: `${ctx.name}.${field.name}: ${field.collection ? "list of " : ""}${field.type}`,
-            sortText: "0" + field.name
-          });
-        }
-        acceptor(context, {
-          label: IMPLICIT_OWNER,
-          kind: CompletionItemKind.Field,
-          detail: `${ctx.name} sahibi (\xF6rt\xFCk alan)`,
-          sortText: "0" + IMPLICIT_OWNER
-        });
-      }
-      for (const [name] of index.entities) {
-        acceptor(context, {
-          label: name,
-          kind: CompletionItemKind.Class,
-          detail: "entity",
-          sortText: "1" + name
-        });
-      }
-      for (const [name] of index.actors) {
-        acceptor(context, {
-          label: name,
-          kind: CompletionItemKind.Interface,
-          detail: "akt\xF6r",
-          sortText: "2" + name
-        });
-      }
-      return;
-    }
-    const res = resolveSegments(prefix, index, ctx);
-    if (res.error) return;
-    if (res.cursorEntity) {
-      for (const field of res.cursorEntity.fields) {
-        acceptor(context, {
-          label: field.name,
-          kind: CompletionItemKind.Field,
-          detail: `${res.cursorEntity.name}.${field.name}: ${field.collection ? "list of " : ""}${field.type}`,
-          sortText: "0" + field.name
-        });
-      }
-      acceptor(context, {
-        label: IMPLICIT_OWNER,
-        kind: CompletionItemKind.Field,
-        detail: `${res.cursorEntity.name} sahibi (\xF6rt\xFCk alan)`,
-        sortText: "1" + IMPLICIT_OWNER
-      });
-    }
-  }
-};
-
-// src/language/command-dsl-scope.ts
-init_define_BUILD_INFO();
-var CommandDslScopeProvider = class extends DefaultScopeProvider {
-  importScopeCache;
-  constructor(services) {
-    super(services);
-    this.importScopeCache = new DocumentCache(services.shared);
-  }
-  getScope(context) {
-    if (isFlowStep(context.container) && context.property === "source") {
-      const flow = ast_utils_exports.getContainerOfType(context.container, isFlowDef);
-      if (!flow) return EMPTY_SCOPE;
-      return this.createScopeForNodes(flowItemsDeep(flow).filter(isFlowStep));
-    }
-    return super.getScope(context);
-  }
-  getGlobalScope(referenceType, context) {
-    const document = ast_utils_exports.getDocument(context.container);
-    return this.importScopeCache.get(document.uri, referenceType, () => {
-      const model2 = document.parseResult.value;
-      const uris = directImportUris(model2, document.uri);
-      return new MapScope(this.indexManager.allElements(referenceType, uris));
-    });
-  }
-};
-
-// src/language/command-dsl-document-builder.ts
-init_define_BUILD_INFO();
-var CommandDslDocumentBuilder = class extends DefaultDocumentBuilder {
-  /**
-   * Ters-yön F6 tazelemesi: değişen dokümanın DOĞRUDAN import HEDEFLERİ de
-   * yeniden doğrulanır — akış dosyası düzenlenince, onun import ettiği
-   * katalogların F6 birleşik kapsaması (checkCoverage'daki ters-yön)
-   * editörde bayat kalmasın. Tek hop yeterlidir: F6 birleşimi yalnız
-   * doğrudan importer'ların görünürlüğünü okur. İlk yükleme sırasından
-   * doğan bayatlık bilinen sınırlamadır (checkCoverage yorumuna bakın).
-   */
+// src/frontend/frontend-dsl-document-builder.ts
+var FrontendDslDocumentBuilder = class extends DefaultDocumentBuilder {
   async update(changed, deleted, cancelToken) {
     const extra = [];
     const seen = new Set(changed.map((u) => u.toString()));
     for (const uri of changed) {
-      const doc2 = this.langiumDocuments.getDocument(uri);
-      if (!doc2) continue;
-      const model2 = doc2.parseResult.value;
-      for (const imp of model2.imports ?? []) {
+      const doc = this.langiumDocuments.getDocument(uri);
+      if (!doc) continue;
+      const model = doc.parseResult.value;
+      for (const imp of model.imports ?? []) {
         const target = resolveImportUri(uri, imp.path);
         if (target && !seen.has(target.toString()) && this.langiumDocuments.getDocument(target)) {
           seen.add(target.toString());
@@ -39227,21 +39094,21 @@ var CommandDslDocumentBuilder = class extends DefaultDocumentBuilder {
     }
     return super.update([...changed, ...extra], deleted, cancelToken);
   }
-  async buildDocuments(documents, options, cancelToken) {
-    const expanded = await this.collectImportClosure(documents, cancelToken);
+  async buildDocuments(documents2, options, cancelToken) {
+    const expanded = await this.collectImportClosure(documents2, cancelToken);
     return super.buildDocuments(expanded, options, cancelToken);
   }
-  async collectImportClosure(documents, cancelToken) {
-    const queue = [...documents];
-    const seen = new Set(documents.map((d) => d.uri.toString()));
+  async collectImportClosure(documents2, cancelToken) {
+    const queue = [...documents2];
+    const seen = new Set(documents2.map((d) => d.uri.toString()));
     for (let i = 0; i < queue.length; i++) {
-      const doc2 = queue[i];
-      if (doc2.state < DocumentState.Parsed) {
-        await this.langiumDocumentFactory.update(doc2, cancelToken);
+      const doc = queue[i];
+      if (doc.state < DocumentState.Parsed) {
+        await this.langiumDocumentFactory.update(doc, cancelToken);
       }
-      const model2 = doc2.parseResult.value;
-      for (const imp of model2.imports ?? []) {
-        const uri = resolveImportUri(doc2.uri, imp.path);
+      const model = doc.parseResult.value;
+      for (const imp of model.imports ?? []) {
+        const uri = resolveImportUri(doc.uri, imp.path);
         if (!uri || seen.has(uri.toString())) continue;
         seen.add(uri.toString());
         try {
@@ -39255,703 +39122,1192 @@ var CommandDslDocumentBuilder = class extends DefaultDocumentBuilder {
   }
 };
 
-// src/language/command-dsl-module.ts
-var CommandDslNameProvider = class extends DefaultNameProvider {
-  getName(node) {
-    if (isRelationDef(node) && node.name) {
-      return node.name + "'s";
-    }
-    return super.getName(node);
-  }
-};
-var CommandDslTokenBuilder = class extends IndentationAwareTokenBuilder {
-  buildKeywordToken(keyword, terminalTokens, caseInsensitive) {
-    const token = super.buildKeywordToken(keyword, terminalTokens, caseInsensitive);
-    if (keyword.value === "on success do") {
-      token.PATTERN = /on[ \t]+success[ \t]+do/;
-      token.LINE_BREAKS = false;
-    }
-    return token;
-  }
-  buildTerminalToken(terminal) {
-    const token = super.buildTerminalToken(terminal);
-    if (terminal.name === "DOC_TEXT") {
-      token.LINE_BREAKS = true;
-    }
-    return token;
-  }
-};
-function dedentDocText(raw) {
-  let body = raw.slice(3, raw.length - 3);
-  const lines = body.replace(/\r\n/g, "\n").split("\n");
-  while (lines.length && lines[0].trim() === "") lines.shift();
-  while (lines.length && lines[lines.length - 1].trim() === "") lines.pop();
-  if (lines.length === 0) return "";
-  const widths = lines.filter((l) => l.trim() !== "").map((l) => (l.match(/^[ \t]*/)?.[0] ?? "").replace(/\t/g, "    ").length);
-  const common = widths.length ? Math.min(...widths) : 0;
-  return lines.map((l) => l.replace(/\t/g, "    ").slice(common)).join("\n");
-}
-var CommandDslValueConverter = class extends DefaultValueConverter {
-  runConverter(rule, input, cstNode) {
-    if (rule.name === "TEXT") {
-      return input.substring(1, input.length - 1);
-    }
-    if (rule.name === "DOC_TEXT") {
-      return dedentDocText(input);
-    }
-    return super.runConverter(rule, input, cstNode);
-  }
-};
-var CommandDslModule = {
-  parser: {
-    TokenBuilder: () => new CommandDslTokenBuilder({
-      // Girinti yalnız `on success do` bloğunda anlamlıdır; entity
-      // gövdesindeki ({...}) girinti normal boşluk sayılır.
-      ignoreIndentationDelimiters: [["{", "}"]]
-    }),
-    Lexer: (services) => new IndentationAwareLexer(services),
-    ValueConverter: () => new CommandDslValueConverter()
-  },
-  references: {
-    NameProvider: () => new CommandDslNameProvider(),
-    // D10: global scope import-filtreli; D11: using akış-içi scope
-    ScopeProvider: (services) => new CommandDslScopeProvider(services)
-  },
-  lsp: {
-    CompletionProvider: (services) => new CommandDslCompletionProvider(services)
-  },
-  validation: {
-    // Validator import çözümü için dokümanlara ve dosya sistemi türüne bakar
-    CommandDslValidator: (services) => new CommandDslValidator(services)
-  }
-};
-var CommandDslSharedModule = {
-  workspace: {
-    DocumentBuilder: (services) => new CommandDslDocumentBuilder(services)
-  }
-};
-function createCommandDslServices(context) {
-  const shared2 = inject(
-    createDefaultSharedModule(context),
-    CommandDslGeneratedSharedModule,
-    CommandDslSharedModule
-  );
-  const CommandDsl = inject(
-    createDefaultModule({ shared: shared2 }),
-    CommandDslGeneratedModule,
-    CommandDslModule
-  );
-  shared2.ServiceRegistry.register(CommandDsl);
-  registerValidationChecks(CommandDsl);
-  return { shared: shared2, CommandDsl };
-}
-
-// src/generator/generator.ts
+// src/frontend/frontend-dsl-scope.ts
 init_define_BUILD_INFO();
 
-// src/generator/expressions.ts
+// src/frontend/contracts.ts
 init_define_BUILD_INFO();
-
-// src/generator/naming.ts
-init_define_BUILD_INFO();
-function lowerFirst(s) {
-  return s.charAt(0).toLowerCase() + s.slice(1);
+import { readFileSync as readFileSync2 } from "node:fs";
+function resolveContractUri(contractPath, documentUri) {
+  return UriUtils.resolvePath(UriUtils.dirname(documentUri), contractPath);
 }
-function kebab(s) {
-  return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-// src/generator/cockburn.ts
-init_define_BUILD_INFO();
-
-// src/generator/plantuml.ts
-init_define_BUILD_INFO();
-var SKIN_BASE = `skinparam backgroundColor #1e1e1e
-skinparam defaultFontColor #cccccc
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam usecase {
-  BackgroundColor #252526
-  BorderColor #4fc1ff
-  FontColor #cccccc
-  StereotypeFontColor #8a8a8a
-}
-skinparam actor {
-  BackgroundColor #252526
-  BorderColor #4fc1ff
-  FontColor #cccccc
-}
-skinparam package {
-  BackgroundColor #252526
-  BorderColor #3c3c3c
-  FontColor #cccccc
-}
-skinparam arrow {
-  Color #8a8a8a
-  FontColor #8a8a8a
-}
-skinparam note {
-  BackgroundColor #2d2d30
-  BorderColor #3c3c3c
-  FontColor #cccccc
-}`;
-var DARK_STYLE = "left to right direction\n" + SKIN_BASE;
-function cstText(node) {
-  return (node?.$cstNode?.text ?? "").replace(/\s+/g, " ").trim();
-}
-
-// src/generator/coverage.ts
-init_define_BUILD_INFO();
-
-// src/generator/e2e.ts
-init_define_BUILD_INFO();
-
-// src/generator/routing.ts
-init_define_BUILD_INFO();
-
-// src/generator/process-doc.ts
-init_define_BUILD_INFO();
-
-// src/generator/process-e2e.ts
-init_define_BUILD_INFO();
-
-// src/generator/operations.ts
-init_define_BUILD_INFO();
-
-// src/generator/ops-expr.ts
-init_define_BUILD_INFO();
-var ADD = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
-function normalizeDuration(d) {
-  const text = cstText(d);
-  if (isUnitDuration(d)) {
-    const unit = d.unit.replace(/s$/, "");
-    return { value: d.value, unit, text };
-  }
-  if (isCompactDuration(d)) {
-    const m = /^(\d+)([hmd])$/.exec(d.literal);
-    const map2 = { h: "hour", m: "minute", d: "day" };
-    return { value: m ? Number(m[1]) : 0, unit: m ? map2[m[2]] : "?", text: d.literal };
-  }
-  return { value: 0, unit: "?", text };
-}
-function serializeExpr(e) {
-  if (isBinaryExpr(e)) return { node: ADD[e.op], op: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
-  if (isAggregateExpr(e)) return { node: "agg", fn: "sum", path: e.path.segments };
-  if (isFieldExpr(e)) return { path: e.path.segments };
-  if (isNumberExpr(e)) return { kind: "number", value: e.value };
-  if (isStringExpr(e)) return { kind: "string", value: e.value.replace(/^'|'$/g, "") };
-  return { path: [] };
-}
-function serializeCondition(c) {
-  if (isBinaryCondition(c)) return { node: c.op, left: serializeCondition(c.left), right: serializeCondition(c.right) };
-  if (isComparison(c)) {
-    const right = c.right;
-    let r;
-    if (isStringValue(right)) r = { kind: "string", value: right.value.replace(/^'|'$/g, "") };
-    else if (isNumberValue(right)) r = { kind: "number", value: right.value };
-    else if (isDurationValue(right)) r = { kind: "duration", ...normalizeDuration(right.value) };
-    else if (isFieldValue(right)) r = { path: right.path.segments };
-    else r = { path: [] };
-    return { node: "cmp", op: c.op, left: { path: c.left.segments }, right: r };
-  }
-  return { path: [] };
-}
-function serializeBoolExpr(b) {
-  if (isBinaryBool(b)) return { node: b.op, left: serializeBoolExpr(b.left), right: serializeBoolExpr(b.right) };
-  if (isExistsExpr(b)) return { node: "exists", negated: !!b.negated, collection: b.collection, where: serializeCondition(b.condition) };
-  return serializeCondition(b);
-}
-function box(node, ast) {
-  return { text: cstText(node), ast };
-}
-
-// src/generator/operations.ts
-function pathEntity(path, entityNames) {
-  const head = path?.segments?.[0];
-  return head && entityNames.has(head) ? head : void 0;
-}
-function conditionPaths(c, out) {
-  if (!c || typeof c !== "object") return;
-  const n = c;
-  if (isBinaryCondition(c)) {
-    conditionPaths(n.left, out);
-    conditionPaths(n.right, out);
-    return;
-  }
-  if (isComparison(c)) {
-    if (c.left) out.push(c.left);
-    if (isFieldValue(c.right)) out.push(c.right.path);
-    return;
-  }
-}
-function exprPaths(e, out) {
-  if (!e || typeof e !== "object") return;
-  if (isBinaryExpr(e)) {
-    exprPaths(e.left, out);
-    exprPaths(e.right, out);
-    return;
-  }
-  if (isFieldExpr(e) || isAggregateExpr(e)) {
-    out.push(e.path);
-    return;
-  }
-}
-function buildSignature(cmd) {
-  return {
-    actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
-    verb: cmd.verb,
-    ownership: ownershipKey(cmd.ownership),
-    resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText
-  };
-}
-function buildTarget(cmd) {
-  if (!cmd.targetResource) return null;
-  return {
-    ownership: ownershipKey(cmd.targetOwnership),
-    resource: cmd.targetResource.ref?.name ?? cmd.targetResource.$refText
-  };
-}
-function buildSource(cmd) {
-  if (!cmd.sourceResource) return null;
-  return {
-    ownership: ownershipKey(cmd.sourceOwnership),
-    resource: cmd.sourceResource.ref?.name ?? cmd.sourceResource.$refText
-  };
-}
-function buildRecipient(cmd) {
-  return cmd.recipient?.ref?.name ?? null;
-}
-function buildSchedule(op) {
-  const s = op.clauses.find(isSchedule);
-  if (!s) return null;
-  return { unit: s.unit, time: s.time ?? null };
-}
-function buildOrderBy(op) {
-  const f = op.clauses.find(isOrderByFilter);
-  if (!f) return null;
-  return { path: f.field.segments, direction: f.direction ?? null };
-}
-function buildLimit(op) {
-  return op.clauses.find(isLimitFilter)?.count ?? null;
-}
-function buildGuards(op) {
-  const out = [];
-  const counters = { where: 0, during: 0, if: 0, when: 0, rule: 0 };
-  const nextId = (kind) => `${kind}:${counters[kind]++}`;
-  const cmd = op.command;
-  if (isStandardCommand(cmd) && cmd.where) {
-    out.push({ id: nextId("where"), kind: "where", ...box(cmd.where, serializeCondition(cmd.where)) });
-  }
-  for (const cl of op.clauses) {
-    if (isDuringConstraint(cl)) {
-      out.push({
-        id: nextId("during"),
-        kind: "during",
-        calendar: cl.calendar?.$refText ?? cl.calendar?.ref?.name ?? "?"
-      });
-    } else if (isIfConstraint(cl)) {
-      out.push({ id: nextId("if"), kind: "if", ...box(cl.condition, serializeCondition(cl.condition)) });
-    } else if (isWhenConstraint(cl)) {
-      out.push({
-        id: nextId("when"),
-        kind: "when",
-        role: operationKind(op) === "query" ? "result-filter" : "precondition",
-        ...box(cl.condition, serializeCondition(cl.condition))
-      });
-    } else if (isRequiresConstraint(cl)) {
-      for (const rr of cl.rules) {
-        out.push({
-          id: nextId("rule"),
-          kind: "rule",
-          ref: rr?.ref?.name ?? rr?.$refText ?? "?"
-        });
+var businessTextProvider;
+function loadBusiness(contractPath, documentUri) {
+  const uri = resolveContractUri(contractPath, documentUri);
+  try {
+    const override = businessTextProvider?.(uri);
+    const raw = override !== void 0 ? override : readFileSync2(uri.fsPath, "utf-8");
+    const json = JSON.parse(raw);
+    const operations = new Map((json.operations ?? []).map((o) => [o.id, {
+      id: o.id,
+      kind: o.kind,
+      flows: o.flows ?? [],
+      processes: o.processes ?? []
+    }]));
+    const flows = /* @__PURE__ */ new Map();
+    for (const op of operations.values()) {
+      for (const f of op.flows) {
+        const list = flows.get(f) ?? [];
+        list.push(op.id);
+        flows.set(f, list);
       }
     }
+    return {
+      uri,
+      schemaVersion: json.meta?.schemaVersion ?? null,
+      operations,
+      actors: new Map((json.actors ?? []).map((a2) => [a2.id, a2])),
+      flows
+    };
+  } catch {
+    return null;
+  }
+}
+var techTextProvider;
+function loadTech(techPath, documentUri) {
+  const uri = resolveContractUri(techPath, documentUri);
+  try {
+    const override = techTextProvider?.(uri);
+    const raw = override !== void 0 ? override : readFileSync2(uri.fsPath, "utf-8");
+    const json = JSON.parse(raw);
+    const byId = /* @__PURE__ */ new Map();
+    const byRealizes = /* @__PURE__ */ new Map();
+    for (const o of json.operations ?? []) {
+      const op = {
+        id: o.id,
+        module: o.module ?? "",
+        visibility: o.visibility ?? "internal",
+        realizes: o.realizes ?? null,
+        throws: o.throws ?? [],
+        validation: o.validation ?? [],
+        pagination: o.pagination ?? null,
+        serving: o.serving ?? []
+      };
+      byId.set(`${op.module}.${op.id}`, op);
+      if (op.realizes) {
+        const list = byRealizes.get(op.realizes) ?? [];
+        list.push(op);
+        byRealizes.set(op.realizes, list);
+      }
+    }
+    const errIndex = new Map((json.errors ?? []).map((e) => [`${e.module}.${e.id}`, e.resultType]));
+    return {
+      uri,
+      byId,
+      byRealizes,
+      resultTypeOf: (module2, err) => errIndex.get(`${module2}.${err}`) ?? null
+    };
+  } catch {
+    return null;
+  }
+}
+function taggableResultsOf(ops, tech) {
+  const out = /* @__PURE__ */ new Set();
+  for (const op of ops) {
+    for (const err of op.throws) {
+      const rt = tech.resultTypeOf(op.module, err);
+      if (rt) out.add(rt);
+    }
+    if (op.validation.length > 0) out.add("NotValid");
   }
   return out;
 }
-function calcNode(a2) {
-  return {
-    target: a2.target.segments,
-    text: cstText(a2.expr),
-    expr: serializeExpr(a2.expr),
-    condition: a2.condition ? box(a2.condition, serializeCondition(a2.condition)) : null
+
+// src/frontend/frontend-dsl-scope.ts
+var FrontendDslScopeProvider = class extends DefaultScopeProvider {
+  contractScopeCache;
+  documents;
+  constructor(services) {
+    super(services);
+    this.contractScopeCache = new DocumentCache(services.shared);
+    this.documents = services.shared.workspace.LangiumDocuments;
+  }
+  getScope(context) {
+    const refType = this.reflection.getReferenceType(context);
+    if (refType === "UsesDecl") return this.usesScope(context.container);
+    if (refType === "Screen") return this.screenScope(context.container);
+    if (refType === "StateDecl") return this.stateScope(context.container);
+    if (refType === "ShapeField") return this.shapeFieldScope(context);
+    if (refType === "BusinessOp" || refType === "BizFlow") return this.contractScope(context, refType);
+    return super.getScope(context);
+  }
+  /** İçinde bulunulan Experience|SharedBlock (uses/screen konteyneri). */
+  owningContainer(node) {
+    return ast_utils_exports.getContainerOfType(node, (n) => isExperience(n) || isSharedBlock(n));
+  }
+  sharedMembersOf(node) {
+    const doc = ast_utils_exports.getDocument(node);
+    const model = doc.parseResult.value;
+    const result = [];
+    for (const m of visibleModels(model, this.documents)) {
+      for (const member of m.shared?.members ?? []) {
+        if (isUsesDecl(member) || isScreen(member)) result.push(member);
+      }
+    }
+    return result;
+  }
+  usesScope(node) {
+    const container = this.owningContainer(node);
+    const local = isExperience(container) ? container.members.filter(isUsesDecl) : [];
+    const shared2 = this.sharedMembersOf(node).filter(isUsesDecl);
+    return this.createScopeForNodes([...local, ...shared2]);
+  }
+  screenScope(node) {
+    const container = this.owningContainer(node);
+    const local = isExperience(container) ? container.members.filter(isScreen) : [];
+    const shared2 = this.sharedMembersOf(node).filter(isScreen);
+    return this.createScopeForNodes([...local, ...shared2]);
+  }
+  stateScope(node) {
+    const states = [];
+    const screen = ast_utils_exports.getContainerOfType(node, isScreen);
+    if (screen) states.push(...screen.members.filter(isStateDecl));
+    const exp = ast_utils_exports.getContainerOfType(node, isExperience);
+    if (exp) states.push(...exp.members.filter(isStateDecl));
+    if (states.length === 0) return EMPTY_SCOPE;
+    return this.createScopeForNodes(states);
+  }
+  shapeFieldScope(context) {
+    if (isShowClause(context.container)) {
+      const comp = ast_utils_exports.getContainerOfType(context.container, (n) => isListComponent(n) || isDetailComponent(n));
+      const op = comp && comp.bind?.op?.ref;
+      if (!op) return EMPTY_SCOPE;
+      return this.createScopeForNodes(op.outputs);
+    }
+    if (isFormField(context.container)) {
+      const form = ast_utils_exports.getContainerOfType(context.container, isFormComponent);
+      const op = form?.bind.op.ref;
+      if (!op) return EMPTY_SCOPE;
+      return this.createScopeForNodes(op.inputs);
+    }
+    return EMPTY_SCOPE;
+  }
+  /** realizes hedefleri: business operations.json → op-ID'leri / flow-ID'leri (sentetik). */
+  contractScope(context, refType) {
+    const document = ast_utils_exports.getDocument(context.container);
+    return this.contractScopeCache.get(document.uri, refType, () => {
+      const model = document.parseResult.value;
+      if (!model.contract?.path) return EMPTY_SCOPE;
+      const business = loadBusiness(model.contract.path, document.uri);
+      if (!business) return EMPTY_SCOPE;
+      const ids = refType === "BusinessOp" ? [...business.operations.keys()] : [...business.flows.keys()];
+      const descs = ids.map((id) => ({
+        node: { $type: refType },
+        // SENTETİK node (tech emsali)
+        name: id,
+        type: refType,
+        documentUri: business.uri,
+        path: ""
+      }));
+      return new MapScope(descs);
+    });
+  }
+};
+
+// src/frontend/frontend-token-builder.ts
+init_define_BUILD_INFO();
+var EXPR_VOCABULARY = /* @__PURE__ */ new Set(["and", "or", "sum", "of", "true", "false"]);
+var ID_SHAPED = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+var FrontendDslTokenBuilder = class extends DefaultTokenBuilder {
+  buildKeywordToken(keyword, terminalTokens, caseInsensitive) {
+    const tokenType = super.buildKeywordToken(keyword, terminalTokens, caseInsensitive);
+    if (ID_SHAPED.test(keyword.value) && !EXPR_VOCABULARY.has(keyword.value)) {
+      const idType = terminalTokens.find((t) => t.name === "ID");
+      if (idType) {
+        tokenType.CATEGORIES = [idType];
+      }
+    }
+    return tokenType;
+  }
+};
+
+// src/frontend/frontend-dsl-validation.ts
+init_define_BUILD_INFO();
+function registerFrontendValidationChecks(services) {
+  const registry = services.validation.ValidationRegistry;
+  const v = services.validation.FrontendDslValidator;
+  const checks = {
+    Model: [v.checkContracts, v.checkUncoveredExposedOps],
+    Experience: [v.checkExperienceNames, v.checkAudience, v.checkEntry, v.checkReachability],
+    UsesDecl: [v.checkUsesShape, v.checkAnchor],
+    Screen: [v.checkScreen],
+    ListComponent: [v.checkDataComponent, v.checkPagination],
+    DetailComponent: [v.checkDataComponent],
+    ValueComponent: [v.checkDataComponent],
+    FormComponent: [v.checkForm],
+    ActionComponent: [v.checkAction],
+    ResultHandler: [v.checkResultHandler],
+    UiEvent: [v.checkUiEvent],
+    WhenBlock: [v.checkWhenBlock],
+    FlowDecl: [v.checkFlowCoverage]
   };
+  registry.register(checks, v);
 }
-function buildCalculate(op) {
-  return op.clauses.filter(isCalculateAction).map(calcNode);
+function modelOf(node) {
+  return ast_utils_exports.getDocument(node).parseResult.value;
 }
-function buildEffects(op) {
-  const out = [];
-  for (const a2 of op.success?.actions ?? []) {
-    if (isCalculateAction(a2)) out.push({ kind: "calculate", ...calcNode(a2) });
-    else if (isSendAction(a2)) out.push({ kind: "send", message: a2.message, recipient: a2.recipient.segments });
-    else if (isCreateAction(a2)) out.push({
-      kind: "create",
-      target: a2.target?.ref?.name ?? a2.target?.$refText ?? "?",
-      source: a2.source?.ref?.name ?? a2.source?.$refText ?? "?"
-    });
-    else if (isPerformAction(a2)) out.push({
-      kind: "perform",
-      target: a2.target?.ref?.name ?? a2.target?.$refText ?? "?"
-    });
-  }
-  return out;
+function businessOf(node) {
+  const model = modelOf(node);
+  if (!model.contract?.path) return null;
+  return loadBusiness(model.contract.path, ast_utils_exports.getDocument(node).uri);
 }
-function buildDelegation(cmd) {
-  if (isGrantCommand(cmd)) {
-    return {
-      operation: "grant",
-      actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
-      permission: cmd.permission,
-      ownership: ownershipKey(cmd.ownership),
-      resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText,
-      grantee: cmd.grantee?.ref?.name ?? cmd.grantee?.$refText,
-      duration: cmd.duration ? { ...normalizeDuration(cmd.duration) } : null
-    };
-  }
-  if (isRevokeCommand(cmd)) {
-    return {
-      operation: "revoke",
-      actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
-      permission: cmd.permission,
-      ownership: ownershipKey(cmd.ownership),
-      resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText,
-      grantee: cmd.grantee?.ref?.name ?? cmd.grantee?.$refText,
-      duration: null
-    };
-  }
+function techOf(node) {
+  const model = modelOf(node);
+  if (!model.contract?.techPath) return null;
+  return loadTech(model.contract.techPath, ast_utils_exports.getDocument(node).uri);
+}
+function realizedBizOpId(u, business) {
+  if (u.realizes) return { id: u.realizes.$refText, source: "authored" };
+  if (business?.operations.has(u.name)) return { id: u.name, source: "by-name" };
   return null;
 }
-function buildActors(model2) {
+function isDataComp(n) {
+  return isListComponent(n) || isDetailComponent(n) || isValueComponent(n);
+}
+function isAnyComponent(n) {
+  return isDataComp(n) || isFormComponent(n) || isActionComponent(n);
+}
+function componentsOfScreen(screen) {
   const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isActorDef(el) || !el.name) continue;
-    out.push({ id: el.name, extends: el.parent?.ref?.name ?? el.parent?.$refText ?? null });
-  }
-  return out.sort((a2, b) => a2.id.localeCompare(b.id));
-}
-function readEntryNode(r) {
-  if (isBareRead(r)) return { kind: "entity", entity: r.entity?.ref?.name ?? r.entity?.$refText ?? "?", alias: r.alias ?? null };
-  return {
-    kind: "path",
-    hops: (r.hops ?? []).map((h) => h?.ref?.name ?? h?.$refText ?? "?"),
-    leaf: r.leaf?.ref?.name ?? r.leaf?.$refText ?? null,
-    alias: r.alias ?? null
-  };
-}
-function buildRules2(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isRuleDef(el) || !el.name || !el.body) continue;
-    out.push({
-      id: el.name,
-      reads: (el.reads ?? []).map(readEntryNode),
-      body: serializeBoolExpr(el.body),
-      note: el.note || null
-    });
-  }
-  return out.sort((a2, b) => a2.id.localeCompare(b.id));
-}
-function buildRelations(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isRelationDef(el) || !el.name) continue;
-    out.push({
-      id: el.name,
-      source: el.source?.ref?.name ?? el.source?.$refText,
-      target: el.target?.ref?.name ?? el.target?.$refText
-    });
-  }
-  return out.sort((a2, b) => a2.id.localeCompare(b.id));
-}
-function buildCalendars(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isCalendarDef(el) || !el.name) continue;
-    out.push(el.name);
-  }
-  return out.sort((a2, b) => a2.localeCompare(b));
-}
-function buildVerbs(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isVerbDef(el) || !el.name) continue;
-    out.push(el.name);
-  }
-  return out.sort((a2, b) => a2.localeCompare(b));
-}
-function buildDomains(model2) {
-  const set = /* @__PURE__ */ new Set();
-  for (const el of elementsOf(model2)) {
-    if (!isDomainDef(el) || !el.name) continue;
-    set.add(el.name);
-  }
-  return [...set].sort((a2, b) => a2.localeCompare(b));
-}
-function buildFields(el) {
-  return el.fields.map((f) => ({ name: f.name, type: f.type, collection: f.collection }));
-}
-function flowItem(item) {
-  if (isFlowStep(item)) return {
-    type: "step",
-    name: item.name,
-    target: item.target?.ref?.name ?? item.target?.$refText ?? "?",
-    optional: item.optional,
-    repeat: item.repeat,
-    using: item.source?.ref?.name ?? item.source?.$refText ?? null
-  };
-  if (isIncludeStep(item)) return {
-    type: "include",
-    target: item.target?.ref?.name ?? item.target?.$refText ?? "?",
-    optional: item.optional,
-    repeat: item.repeat
-  };
-  if (isOutsideNote(item)) return { type: "outside", text: item.text };
-  if (isAbandonNote(item)) return { type: "abandon", text: item.text };
-  return { type: "either", branches: item.branches.map((b) => b.items.map(flowItem)) };
-}
-function buildFlows(model2) {
-  return elementsOf(model2).filter(isFlowDef).map((f) => ({
-    id: f.name,
-    actor: f.actor?.ref?.name ?? f.actor?.$refText ?? "?",
-    note: f.note || null,
-    items: (f.items ?? []).map(flowItem)
-  }));
-}
-function processItem(item) {
-  if (isStageDef(item)) {
-    if (item.flow?.ref || item.flow?.$refText) return {
-      type: "stage",
-      name: item.name,
-      stageKind: "flow",
-      flow: item.flow?.ref?.name ?? item.flow?.$refText ?? "?",
-      by: item.actor?.ref?.name ?? item.actor?.$refText ?? "?"
-    };
-    return {
-      type: "stage",
-      name: item.name,
-      stageKind: "operation",
-      target: item.target?.ref?.name ?? item.target?.$refText ?? "?"
-    };
-  }
-  return { type: "anyOrder", branches: item.branches.map((b) => b.items.map(processItem)) };
-}
-function buildProcesses(model2) {
-  return elementsOf(model2).filter(isProcessDef).map((p) => ({
-    id: p.name,
-    entity: p.entity?.ref?.name ?? p.entity?.$refText ?? null,
-    note: p.note || null,
-    items: (p.items ?? []).map(processItem)
-  }));
-}
-function genOperationsIndex(model2, units2) {
-  const cov = computeCoverage(model2);
-  const domains = computeDomains(model2);
-  const entityNames = /* @__PURE__ */ new Set();
-  for (const el of elementsOf(model2)) if (isEntityDef(el) && el.name) entityNames.add(el.name);
-  const processesByOp = stagedProcessesByOperation(model2);
-  const entries = [];
-  for (const el of elementsOf(model2)) {
-    if (!isOperationDecl(el) || !el.name || !el.command) continue;
-    const sig = operationSignature(el);
-    const writes = /* @__PURE__ */ new Set();
-    const reads = /* @__PURE__ */ new Set();
-    const cmd = el.command;
-    if (isStandardCommand(cmd)) {
-      const isQuery = operationKind(el) === "query";
-      const primary = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
-      if (primary) (isQuery ? reads : writes).add(primary);
-      const target = cmd.targetResource?.ref?.name ?? cmd.targetResource?.$refText;
-      if (target) (isQuery ? reads : writes).add(target);
-      const source = cmd.sourceResource?.ref?.name ?? cmd.sourceResource?.$refText;
-      if (source) reads.add(source);
-      if (cmd.where) {
-        const ps = [];
-        conditionPaths(cmd.where, ps);
-        for (const p of ps) {
-          const e = pathEntity(p, entityNames);
-          if (e) reads.add(e);
-        }
-      }
-      const actions = [...el.clauses, ...el.success?.actions ?? []];
-      for (const a2 of actions) {
-        if (isCalculateAction(a2)) {
-          const te = pathEntity(a2.target, entityNames);
-          if (te) writes.add(te);
-          const ps = [];
-          exprPaths(a2.expr, ps);
-          if (a2.condition) conditionPaths(a2.condition, ps);
-          for (const p of ps) {
-            const e = pathEntity(p, entityNames);
-            if (e) reads.add(e);
-          }
-        } else if (isCreateAction(a2)) {
-          const t = a2.target?.ref?.name ?? a2.target?.$refText;
-          if (t) writes.add(t);
-          const s = a2.source?.ref?.name ?? a2.source?.$refText;
-          if (s) reads.add(s);
-        } else if (isSendAction(a2)) {
-          const e = pathEntity(a2.recipient, entityNames);
-          if (e) reads.add(e);
-        }
+  const walkRegion = (r) => {
+    for (const item of r.items) {
+      if (isRegion(item)) walkRegion(item);
+      else if (isAnyComponent(item)) out.push(item);
+      if (isDataComp(item) && !isValueComponent(item)) {
+        for (const m of item.members) if (isActionComponent(m)) out.push(m);
       }
     }
-    for (const w of writes) reads.delete(w);
-    const access = { writes: [...writes].sort(), reads: [...reads].sort() };
-    const cmd2 = el.command;
-    entries.push({
-      id: el.name,
-      kind: operationKind(el),
-      signature: isStandardCommand(cmd2) ? buildSignature(cmd2) : null,
-      delegation: buildDelegation(cmd2),
-      target: isStandardCommand(cmd2) ? buildTarget(cmd2) : null,
-      source: isStandardCommand(cmd2) ? buildSource(cmd2) : null,
-      recipient: isStandardCommand(cmd2) ? buildRecipient(cmd2) : null,
-      description: el.note || null,
-      schedule: buildSchedule(el),
-      orderBy: buildOrderBy(el),
-      limit: buildLimit(el),
-      guards: buildGuards(el),
-      calculate: buildCalculate(el),
-      effects: buildEffects(el),
-      access,
-      flows: sig ? [...new Set((cov.covered.get(sig) ?? []).map((v) => v.flow.name))] : [],
-      processes: processesByOp.get(el) ?? [],
-      domain: domains.get(el) ?? null
-    });
-  }
-  entries.sort((a2, b) => a2.id.localeCompare(b.id));
-  const entities = [];
-  for (const el of elementsOf(model2)) {
-    if (!isEntityDef(el) || !el.name) continue;
-    entities.push({ id: el.name, name: el.name, domain: domains.get(el) ?? null, fields: buildFields(el) });
-  }
-  entities.sort((a2, b) => a2.id.localeCompare(b.id));
-  let errorCount = 0;
-  for (const m of modelsOf(model2)) {
-    for (const d of m.$document?.diagnostics ?? []) if (d.severity === 1) errorCount++;
-  }
-  const meta = { schemaVersion: 3, hasErrors: errorCount > 0, errorCount };
-  return {
-    path: "operations.json",
-    content: JSON.stringify({
-      operations: entries,
-      entities,
-      flows: buildFlows(model2),
-      processes: buildProcesses(model2),
-      relations: buildRelations(model2),
-      actors: buildActors(model2),
-      rules: buildRules2(model2),
-      calendars: buildCalendars(model2),
-      verbs: buildVerbs(model2),
-      domains: buildDomains(model2),
-      meta
-    }, null, 4) + "\n"
   };
+  for (const m of screen.members) if (isRegion(m)) walkRegion(m);
+  return out;
 }
-function flowOperations(flow, path = /* @__PURE__ */ new Set()) {
-  if (path.has(flow)) return [];
-  path.add(flow);
+function effectiveName(c) {
+  if (isActionComponent(c)) return c.name;
+  return c.alias ?? c.bind.op.$refText;
+}
+function visibleUses(node, documents2) {
   const out = [];
-  for (const item of flowItemsDeep(flow)) {
-    if (isFlowStep(item) && item.target?.ref) out.push(item.target.ref);
-    else if (isIncludeStep(item) && item.target?.ref) out.push(...flowOperations(item.target.ref, path));
+  const exp = ast_utils_exports.getContainerOfType(node, isExperience);
+  if (exp) out.push(...exp.members.filter(isUsesDecl));
+  for (const m of visibleModels(modelOf(node), documents2)) {
+    for (const member of m.shared?.members ?? []) {
+      if (isUsesDecl(member)) out.push(member);
+    }
   }
   return out;
 }
-function stagedProcessesByOperation(model2) {
-  const out = /* @__PURE__ */ new Map();
-  const add = (op, processName) => {
-    const set = out.get(op) ?? /* @__PURE__ */ new Set();
-    set.add(processName);
-    out.set(op, set);
+function resolveActionUses(action, documents2) {
+  return visibleUses(action, documents2).find((u) => u.name === action.name);
+}
+function pathsOf(e, acc = []) {
+  if (isBinary(e) || isArith(e)) {
+    pathsOf(e.left, acc);
+    pathsOf(e.right, acc);
+  } else if (isCmp(e)) {
+    pathsOf(e.left, acc);
+    if (e.right) pathsOf(e.right, acc);
+  } else if (isAggregate(e)) acc.push(e.path);
+  else if (isCall(e)) e.args.forEach((a2) => pathsOf(a2, acc));
+  else if (isPath(e)) acc.push(e);
+  return acc;
+}
+function checkPathRootsIn(expr, node, accept, opts) {
+  if (!expr) return;
+  const roots = /* @__PURE__ */ new Set(["session", "currentUser"]);
+  const screen = ast_utils_exports.getContainerOfType(node, isScreen);
+  for (const p of screen?.params ?? []) roots.add(p.name);
+  for (const s of screen?.members.filter(isStateDecl) ?? []) roots.add(stateNameOf(s));
+  const exp = ast_utils_exports.getContainerOfType(node, isExperience);
+  for (const s of exp?.members.filter(isStateDecl) ?? []) roots.add(stateNameOf(s));
+  if (opts.rowAllowed) roots.add("row");
+  for (const r of opts.extraRoots ?? []) roots.add(r);
+  for (const p of pathsOf(expr)) {
+    if (p.segments.length < 2) continue;
+    const root2 = p.segments[0];
+    if (!roots.has(root2)) {
+      accept("error", `Bilinmeyen path k\xF6k\xFC '${root2}' \u2014 izinli k\xF6kler: session, currentUser, ekran-param, state/derived adlar\u0131${opts.rowAllowed ? ", row" : ""}${opts.extraRoots ? ", ba\u011Flam alanlar\u0131" : ""}.`, { node: p });
+    }
+  }
+}
+function stateNameOf(s) {
+  return isMutableState(s) || isDerivedState(s) ? s.name : "";
+}
+var ALL_RESULTS = ["Success", "NotAuthenticated", "NotAuthorized", "NotValid", "NotProcessable", "ServerError"];
+function dupsBy(items, key) {
+  const seen = /* @__PURE__ */ new Map();
+  for (const it of items) {
+    const k = key(it);
+    if (!k) continue;
+    (seen.get(k) ?? seen.set(k, []).get(k)).push(it);
+  }
+  return [...seen.values()].filter((g) => g.length > 1).flat();
+}
+var FrontendDslValidator = class {
+  constructor(documents2) {
+    this.documents = documents2;
+  }
+  documents;
+  /** contract dosyaları okunabilir + schemaVersion uyumlu mu. */
+  checkContracts = (model, accept) => {
+    if (!model.contract) return;
+    const docUri = ast_utils_exports.getDocument(model).uri;
+    const business = loadBusiness(model.contract.path, docUri);
+    if (!business) {
+      accept("error", `operations.json okunamad\u0131/bozuk: '${model.contract.path}'.`, { node: model.contract, property: "path" });
+    } else if (business.schemaVersion !== 3) {
+      accept("error", `operations.json schemaVersion ${business.schemaVersion ?? "yok"} \u2014 Frontend DSL v3 bekler (schemaVersion: 3). S\xF6zle\u015Fmeyi g\xFCncel \u0130\u015F DSL \xFCreticisiyle yeniden \xFCret.`, { node: model.contract, property: "path" });
+    }
+    if (model.contract.techPath && !loadTech(model.contract.techPath, docUri)) {
+      accept("error", `tech manifest okunamad\u0131/bozuk: '${model.contract.techPath}'.`, { node: model.contract, property: "techPath" });
+    }
   };
-  for (const el of elementsOf(model2)) {
-    if (!isProcessDef(el) || !el.name) continue;
-    for (const item of processItemsDeep(el)) {
-      if (!isStageDef(item)) continue;
-      if (item.target?.ref) add(item.target.ref, el.name);
-      if (item.flow?.ref) {
-        for (const op of flowOperations(item.flow.ref)) add(op, el.name);
+  /** Union-coverage (workspace): exposed+realizes'li tech-op'u hiçbir experience sunmuyor → warning. */
+  checkUncoveredExposedOps = (model, accept) => {
+    if (!model.contract?.techPath) return;
+    const docUri = ast_utils_exports.getDocument(model).uri;
+    const tech = loadTech(model.contract.techPath, docUri);
+    const business = loadBusiness(model.contract.path, docUri);
+    if (!tech) return;
+    const exposedBiz = /* @__PURE__ */ new Set();
+    for (const ops of tech.byRealizes.values()) {
+      for (const op of ops) if (op.visibility === "exposed" && op.realizes) exposedBiz.add(op.realizes);
+    }
+    if (exposedBiz.size === 0) return;
+    const offered = /* @__PURE__ */ new Set();
+    for (const doc of this.documents.all) {
+      if (!doc.uri.path.endsWith(".fcdsl")) continue;
+      const m = doc.parseResult.value;
+      const containers = [...m.experiences];
+      if (m.shared) containers.push(m.shared);
+      for (const c of containers) {
+        for (const screen of c.members.filter(isScreen)) {
+          for (const comp of componentsOfScreen(screen)) {
+            let uses;
+            if (isActionComponent(comp)) uses = resolveActionUses(comp, this.documents);
+            else uses = comp.bind.op.ref;
+            if (!uses) continue;
+            const realized = realizedBizOpId(uses, business);
+            if (realized) offered.add(realized.id);
+          }
+        }
+      }
+    }
+    const missing = [...exposedBiz].filter((id) => !offered.has(id)).sort();
+    if (missing.length > 0) {
+      accept("warning", `Uncovered-op (union): \u015Fu exposed op'lar\u0131 hi\xE7bir experience sunmuyor: ${missing.join(", ")}.`, { node: model.contract, property: "path" });
+    }
+  };
+  checkExperienceNames = (exp, accept) => {
+    for (const s of dupsBy(exp.members.filter(isScreen), (s2) => s2.name)) {
+      accept("error", `Ekran ad\u0131 '${s.name}' bu experience'ta birden \xE7ok kez tan\u0131ml\u0131.`, { node: s, property: "name" });
+    }
+    for (const u of dupsBy(exp.members.filter(isUsesDecl), (u2) => u2.name)) {
+      accept("error", `uses aray\xFCz\xFC '${u.name}' bu experience'ta birden \xE7ok kez tan\u0131ml\u0131.`, { node: u, property: "name" });
+    }
+    for (const st of dupsBy(exp.members.filter(isStateDecl), stateNameOf)) {
+      accept("error", `state/derived ad\u0131 '${stateNameOf(st)}' bu experience'ta birden \xE7ok kez tan\u0131ml\u0131.`, { node: st });
+    }
+  };
+  /** #45 — entry beyanı: yazılmamışsa warning; shared ekran hedefi error. */
+  checkEntry = (exp, accept) => {
+    if (!exp.entry) {
+      accept("warning", `Ba\u015Flang\u0131\xE7 ekran\u0131 beyan edilmedi \u2014 'entry <ekran>' yaz\u0131n; entry'siz 100 developer farkl\u0131 ekranda ba\u015Flar (davran\u0131\u015F-determinizmi, karar #45).`, { node: exp, property: "name" });
+      return;
+    }
+    const target = exp.entry.ref;
+    if (target && ast_utils_exports.getContainerOfType(target, isSharedBlock)) {
+      accept("error", `entry shared ekran\u0131 g\xF6steremez: '${exp.entry.$refText}' \u2014 ba\u015Flang\u0131\xE7 ekran\u0131 experience'\u0131n kendi ekran\u0131 olmal\u0131d\u0131r (karar #45).`, { node: exp, property: "entry" });
+    }
+  };
+  /** #45 — erişilebilirlik: entry'den kenarlarla (aksiyon-nav, result-nav, uiEvent-nav,
+   *  açık nav, flow-adımları, experience result-default hedefleri) ulaşılamayan ekran → warning.
+   *  Entry yoksa denetim atlanır; shared ekranlar muaf (her experience'a açık). */
+  checkReachability = (exp, accept) => {
+    const entry = exp.entry?.ref;
+    if (!entry || ast_utils_exports.getContainerOfType(entry, isSharedBlock)) return;
+    const screens = exp.members.filter(isScreen);
+    const edges = /* @__PURE__ */ new Map();
+    const addEdge = (from, to) => {
+      if (!to) return;
+      (edges.get(from) ?? edges.set(from, /* @__PURE__ */ new Set()).get(from)).add(to);
+    };
+    for (const screen of screens) {
+      for (const node of ast_utils_exports.streamAllContents(screen)) {
+        if (isActionComponent(node) && node.navTarget) addEdge(screen.name, node.navTarget.$refText);
+        else if (isResultHandler(node) && isNavHandler(node.handler)) addEdge(screen.name, node.handler.target.$refText);
+        else if (isEventNav(node)) addEdge(screen.name, node.target.$refText);
+      }
+    }
+    for (const nav of exp.members.filter(isNavDecl)) addEdge(nav.from.$refText, nav.to.$refText);
+    for (const flow of exp.members.filter(isFlowDecl)) {
+      for (let i = 0; i + 1 < flow.steps.length; i++) addEdge(flow.steps[i].$refText, flow.steps[i + 1].$refText);
+    }
+    const reachable = /* @__PURE__ */ new Set([entry.name]);
+    for (const h of exp.members.filter(isResultHandler)) {
+      if (isNavHandler(h.handler)) reachable.add(h.handler.target.$refText);
+    }
+    const queue = [...reachable];
+    while (queue.length > 0) {
+      const cur = queue.pop();
+      for (const next of edges.get(cur) ?? []) {
+        if (!reachable.has(next)) {
+          reachable.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    for (const s of screens) {
+      if (!reachable.has(s.name)) {
+        accept("warning", `Ekran '${s.name}' entry'den ('${entry.name}') hi\xE7bir kenarla ula\u015F\u0131lam\u0131yor \u2014 nav/flow/aksiyon-navigasyonu ekleyin veya ekran\u0131 kald\u0131r\u0131n (karar #45).`, { node: s, property: "name" });
+      }
+    }
+  };
+  /** #35 — linked'de audience adları actors[]'a karşı (bilinmeyen → warning). */
+  checkAudience = (exp, accept) => {
+    const business = businessOf(exp);
+    if (!business) return;
+    exp.audience.forEach((a2, i) => {
+      if (!business.actors.has(a2)) {
+        accept("warning", `Audience '${a2}' operations.json actors[] i\xE7inde yok.`, { node: exp, property: "audience", index: i });
+      }
+    });
+  };
+  checkUsesShape = (u, accept) => {
+    for (const f of dupsBy([...u.inputs], (f2) => f2.name)) {
+      accept("error", `in alan\u0131 '${f.name}' birden \xE7ok kez bildirildi.`, { node: f, property: "name" });
+    }
+    for (const f of dupsBy([...u.outputs], (f2) => f2.name)) {
+      accept("error", `out alan\u0131 '${f.name}' birden \xE7ok kez bildirildi.`, { node: f, property: "name" });
+    }
+  };
+  /** #41 by-name + #34 + kind-uyumu + #20 çağrılabilirlik + results divergence. */
+  checkAnchor = (u, accept) => {
+    const business = businessOf(u);
+    if (!business) return;
+    const realized = realizedBizOpId(u, business);
+    if (!realized) {
+      accept("info", `'${u.name}' contract'ta kar\u015F\u0131l\u0131ks\u0131z \u2014 standalone-aray\xFCz olarak derlenir (karar #41).`, { node: u, property: "name" });
+      return;
+    }
+    if (realized.source === "by-name") {
+      accept("info", `'${u.name}' ad-e\u015Fle\u015Fmesiyle business-op'a \xE7\u0131paland\u0131 (by-name, karar #41).`, { node: u, property: "name" });
+    }
+    const bizOp = business.operations.get(realized.id);
+    if (bizOp && bizOp.kind !== u.kind) {
+      accept("error", `Kind uyu\u015Fmazl\u0131\u011F\u0131: '${realized.id}' business'ta ${bizOp.kind}, burada ${u.kind}.`, { node: u, property: "kind" });
+    }
+    const tech = techOf(u);
+    if (!tech) return;
+    const techOps = tech.byRealizes.get(realized.id) ?? [];
+    if (techOps.length === 0) {
+      accept("warning", `\xC7a\u011Fr\u0131lamaz-op: '${realized.id}' tech-manifest'te hi\xE7bir op taraf\u0131ndan realize edilmiyor.`, { node: u, property: "name" });
+    } else if (techOps.every((o) => o.visibility === "internal")) {
+      accept("warning", `\xC7a\u011Fr\u0131lamaz-op: '${realized.id}' realize eden op'lar\u0131n t\xFCm\xFC @internal.`, { node: u, property: "name" });
+    }
+    if (u.results.length > 0 && techOps.length > 0) {
+      const taggable = taggableResultsOf(techOps, tech);
+      const authored = new Set(u.results);
+      const missing = [...taggable].filter((r) => !authored.has(r)).sort();
+      if (missing.length > 0) {
+        accept("warning", `Results divergence: contract \u015Funlar\u0131 \xFCretebilir ama authored results'ta yok: ${missing.join(", ")}.`, { node: u, property: "results" });
+      }
+    }
+  };
+  /** #39 B7 shared-persona yasağı + #35 persona cross-check + #38 component ad-çakışması. */
+  checkScreen = (screen, accept) => {
+    if (screen.persona && ast_utils_exports.getContainerOfType(screen, isSharedBlock)) {
+      accept("error", `Shared ekranda 'for ${screen.persona}' yaz\u0131lamaz \u2014 shared ekran her audience'a a\xE7\u0131kt\u0131r (karar #39/B7).`, { node: screen, property: "persona" });
+    }
+    const business = businessOf(screen);
+    if (screen.persona && business && !business.actors.has(screen.persona)) {
+      accept("warning", `Persona '${screen.persona}' operations.json actors[] i\xE7inde yok.`, { node: screen, property: "persona" });
+    }
+    const comps = componentsOfScreen(screen);
+    for (const c of dupsBy(comps, effectiveName)) {
+      accept("error", `Component ad\u0131 '${effectiveName(c)}' bu ekranda birden \xE7ok kez kullan\u0131l\u0131yor \u2014 'as <ad>' ile ay\u0131r\u0131n (karar #38).`, { node: c });
+    }
+  };
+  /** #24 cardinality + kind (list/detail/value). */
+  checkDataComponent = (c, accept) => {
+    const op = c.bind.op.ref;
+    if (op) {
+      if (op.kind !== "query") {
+        accept("error", `${c.$type === "ListComponent" ? "list" : c.$type === "DetailComponent" ? "detail" : "value"} yaln\u0131z query'ye ba\u011Flan\u0131r; '${op.name}' bir ${op.kind}.`, { node: c.bind });
+      }
+      if (isListComponent(c) && !op.outList) {
+        accept("error", `list liste-out ister: '${op.name}' tekil out bildiriyor (out list of {...} \u2014 karar #24).`, { node: c.bind });
+      }
+      if (!isListComponent(c) && op.outList) {
+        accept("error", `${isDetailComponent(c) ? "detail" : "value"} tekil-out ister: '${op.name}' liste out bildiriyor (karar #24).`, { node: c.bind });
+      }
+    }
+    for (const arg of c.bind.args) {
+      checkPathRootsIn(arg.value, arg, accept, { rowAllowed: this.inRowContext(c) });
+    }
+    this.checkHandlerCompleteness(c, op, [], accept, c.bind);
+  };
+  /** #43 — pagination cross-check (linked+tech; 3 kural). `size`/`keys` = üreteç-join, girmez. */
+  checkPagination = (c, accept) => {
+    const op = c.bind.op.ref;
+    if (!op) return;
+    const business = businessOf(c);
+    const tech = techOf(c);
+    if (!business || !tech) return;
+    const realized = realizedBizOpId(op, business);
+    if (!realized) return;
+    const techOps = tech.byRealizes.get(realized.id) ?? [];
+    if (techOps.length === 0) return;
+    const paged = techOps.filter((o) => o.pagination);
+    if (c.pagination) {
+      if (paged.length === 0) {
+        accept("warning", `Pagination divergence: '${realized.id}' contract'ta sayfalama ta\u015F\u0131m\u0131yor ama sunum '${c.pagination}' beyan edildi.`, { node: c, property: "pagination" });
+      } else if (c.pagination === "pager" && paged.some((o) => o.pagination?.strategy === "cursor")) {
+        accept("warning", `Pagination divergence: contract strategy 'cursor' \u2014 pager (sayfa-N'e atlama) cursor'la yap\u0131sal olarak desteklenmez; 'infinite' uygun sunum.`, { node: c, property: "pagination" });
+      }
+    } else if (paged.length > 0) {
+      accept("warning", `Pagination divergence: '${realized.id}' contract'ta sayfal\u0131 (${paged[0].pagination?.strategy}) ama list sunum beyan etmiyor \u2014 yaln\u0131z ilk sayfa g\xF6r\xFCn\xFCr.`, { node: c.bind });
+    }
+  };
+  /** form: command'a bağlanır; loads tekil query; #25 queue×out; linked validation-divergence. */
+  checkForm = (form, accept) => {
+    const op = form.bind.op.ref;
+    if (op && op.kind !== "command") {
+      accept("error", `form yaln\u0131z command'a ba\u011Flan\u0131r (submits); '${op.name}' bir ${op.kind}.`, { node: form.bind });
+    }
+    for (const loads of form.members.filter(isLoadsClause)) {
+      const lop = loads.bind.op.ref;
+      if (lop && lop.kind !== "query") {
+        accept("error", `loads yaln\u0131z query al\u0131r; '${lop.name}' bir ${lop.kind}.`, { node: loads.bind });
+      }
+      if (lop && lop.outList) {
+        accept("error", `loads tekil-out query ister (form tek kay\u0131t y\xFCkler); '${lop.name}' liste d\xF6n\xFCyor.`, { node: loads.bind });
+      }
+      for (const arg of loads.bind.args) checkPathRootsIn(arg.value, arg, accept, { rowAllowed: false });
+    }
+    this.checkQueueOut(form.mech, op, form.members.filter(isResultHandler), accept);
+    this.checkHandlerCompleteness(form, op, form.members.filter(isResultHandler), accept, form.bind);
+    for (const loads of form.members.filter(isLoadsClause)) {
+      this.checkHandlerCompleteness(form, loads.bind.op.ref, [], accept, loads.bind);
+    }
+    for (const rule of form.members.filter(isFormRule)) {
+      checkPathRootsIn(rule.expr, rule, accept, { rowAllowed: false, extraRoots: (op?.inputs ?? []).map((f) => f.name) });
+    }
+    const business = businessOf(form);
+    const tech = techOf(form);
+    if (op && business && tech) {
+      const realized = realizedBizOpId(op, business);
+      const techOps = realized ? tech.byRealizes.get(realized.id) ?? [] : [];
+      const contractValidations = techOps.reduce((n, o) => n + o.validation.length, 0);
+      const authoredRules = form.members.filter(isFormField).some((f) => f.rules.length > 0) || form.members.filter(isFormStep).some((s) => s.fields.some((f) => f.rules.length > 0)) || form.members.some(isFormRule);
+      if (contractValidations > 0 && !authoredRules) {
+        accept("warning", `Validation divergence: contract '${realized.id}' i\xE7in ${contractValidations} validation ta\u015F\u0131yor ama form hi\xE7 kural bildirmiyor (offline'da yerel do\u011Frulama bo\u015F kal\u0131r).`, { node: form.bind });
+      }
+    }
+  };
+  /** #39 B3 action bağlama + #25 queue×out + path kökleri. */
+  checkAction = (action, accept) => {
+    const uses = resolveActionUses(action, this.documents);
+    if (uses && uses.kind === "query") {
+      accept("error", `action query'ye ba\u011Flanamaz: '${action.name}' bir query aray\xFCz\xFC.`, { node: action, property: "name" });
+    }
+    if (!uses && action.mech) {
+      accept("warning", `Client-only action '${action.name}' i\xE7in mekanik (${action.mech}) anlams\u0131z \u2014 a\u011F \xE7a\u011Fr\u0131s\u0131 yok.`, { node: action, property: "mech" });
+    }
+    this.checkQueueOut(action.mech, uses, action.members.filter(isResultHandler), accept);
+    if (uses && uses.kind === "command") {
+      this.checkHandlerCompleteness(action, uses, action.members.filter(isResultHandler), accept, action);
+    }
+    for (const vw of action.members.filter(isVisibleWhen)) {
+      checkPathRootsIn(vw.expr, vw, accept, { rowAllowed: this.inRowContext(action) });
+    }
+    for (const set of action.members.filter(isSetClause)) {
+      checkPathRootsIn(set.expr, set, accept, { rowAllowed: this.inRowContext(action) });
+    }
+    for (const arg of action.navArgs ?? []) {
+      checkPathRootsIn(arg.value, arg, accept, { rowAllowed: this.inRowContext(action) });
+    }
+  };
+  /** #48 — handler-tamlık: efektif result-kümesi (authored `results:` ?? karar #34
+   *  taksonomi-tam) − (op'un kendi resultHandlers ∪ experience resultDefaults) →
+   *  kapsanmayan non-Success result → warning. Shared ekranlar atlanır (experience
+   *  bağlamı yok — cascade per-experience değerlendirilir). Manifest DEĞİŞMEZ
+   *  (karar #18 sadık-ayna); belgeli-default: kapsanmayan result → ServerError-handler'ı
+   *  gibi davranılır (spec §11). */
+  checkHandlerCompleteness(node, op, own, accept, at) {
+    if (!op) return;
+    const exp = ast_utils_exports.getContainerOfType(node, isExperience);
+    if (!exp) return;
+    const effective = op.results.length > 0 ? op.results : ALL_RESULTS;
+    const covered = /* @__PURE__ */ new Set([
+      ...own.map((h) => h.result),
+      ...exp.members.filter(isResultHandler).map((h) => h.result)
+    ]);
+    const missing = effective.filter((r) => r !== "Success" && !covered.has(r));
+    if (missing.length > 0) {
+      accept("warning", `Handler-taml\u0131k: '${op.name}' \u015Fu result'lar\u0131 \xFCretebilir ama ne kendi handler'\u0131 ne experience-default kar\u015F\u0131l\u0131yor: ${missing.join(", ")} \u2014 kapsanmayan result ServerError-handler'\u0131 gibi i\u015Flenir (belgeli-default, karar #48).`, { node: at });
+    }
+  }
+  /** #25 — queue mekanikli op'un Success-handler'ı out-alanına referans veremez. */
+  checkQueueOut(mech, op, handlers, accept) {
+    if (mech !== "queue" || !op) return;
+    const outNames = new Set(op.outputs.map((f) => f.name));
+    for (const h of handlers) {
+      if (h.result !== "Success" || !isNavHandler(h.handler)) continue;
+      for (const arg of h.handler.args) {
+        for (const p of pathsOf(arg.value)) {
+          if (p.segments.length > 0 && outNames.has(p.segments[0])) {
+            accept("error", `queue\xD7out (karar #25): '${p.segments[0]}' sunucu-\xE7\u0131kt\u0131s\u0131d\u0131r \u2014 queue'da Success enqueue-an\u0131nda ate\u015Flenir, out-alan\u0131 hen\xFCz yoktur. Yaln\u0131z client-side de\u011Fer kullan\u0131labilir.`, { node: p });
+          }
+        }
       }
     }
   }
-  return new Map([...out.entries()].map(([k, v]) => [k, [...v].sort()]));
-}
-
-// src/generator/generator.ts
-function collectCommands(model2) {
-  const map2 = /* @__PURE__ */ new Map();
-  const domains = computeDomains(model2);
-  for (const el of elementsOf(model2)) {
-    if (!isOperationDecl(el) || !isStandardCommand(el.command)) continue;
-    const cmd = el.command;
-    const actor = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
-    const resource = cmd.resource?.ref;
-    if (!actor || !resource || !el.name) continue;
-    const sig = commandSignature(actor, cmd.verb, ownershipKey(cmd.ownership), resource.name);
-    if (map2.has(sig)) continue;
-    map2.set(sig, {
-      command: cmd,
-      op: el,
-      slug: kebab(el.name),
-      fnName: lowerFirst(el.name),
-      actor,
-      verb: cmd.verb,
-      resource,
-      isQuery: READ_VERBS.has(cmd.verb),
-      domain: domains.get(el)
-    });
+  /** #36 — inline-errors yalnız form bağlamı (+ experience-düzeyi cascade default). */
+  checkResultHandler = (h, accept) => {
+    if (isInlineErrorsHandler(h.handler) && ast_utils_exports.getContainerOfType(h, isActionComponent)) {
+      accept("error", `inline-errors yaln\u0131z form ba\u011Flam\u0131nda anlaml\u0131d\u0131r (karar #36) \u2014 action'da kullan\u0131lamaz.`, { node: h });
+    }
+    if (isNavHandler(h.handler)) {
+      const target = h.handler.target.ref;
+      if (target && h.handler.args.length !== target.params.length) {
+        accept("error", `'${target.name}' ${target.params.length} parametre bekler, ${h.handler.args.length} verildi.`, { node: h.handler });
+      }
+      for (const arg of h.handler.args) {
+        checkPathRootsIn(arg.value, arg, accept, { rowAllowed: this.inRowContext(h) });
+      }
+    }
+  };
+  /** #38 — interaction hedefi ekrandaki component; hedefsiz biçim yalnız component içi. */
+  checkUiEvent = (ev, accept) => {
+    const screen = ast_utils_exports.getContainerOfType(ev, isScreen);
+    const comps = screen ? componentsOfScreen(screen) : [];
+    const names = new Set(comps.map(effectiveName));
+    if (isInteractionTrigger(ev.trigger)) {
+      if (ev.trigger.target) {
+        if (screen && !names.has(ev.trigger.target)) {
+          accept("error", `'${ev.trigger.target}' bu ekranda bildirilmi\u015F bir component de\u011Fil (karar #38).`, { node: ev.trigger, property: "target" });
+        }
+      } else {
+        const owner = ast_utils_exports.getContainerOfType(ev, isDataComp);
+        if (!owner) {
+          accept("error", `Hedefsiz '${ev.trigger.kind}' yaln\u0131z component g\xF6vdesinde kullan\u0131labilir (hedef = o component).`, { node: ev.trigger });
+        }
+      }
+    }
+    for (const a2 of ev.actions) {
+      if (a2.$type === "EventPerform" && screen && !names.has(a2.target)) {
+        accept("error", `action hedefi '${a2.target}' bu ekranda yok.`, { node: a2 });
+      }
+      if (a2.$type === "EventNav") {
+        const nav = a2;
+        const target = nav.target.ref;
+        if (target && nav.args.length !== target.params.length) {
+          accept("error", `'${target.name}' ${target.params.length} parametre bekler, ${nav.args.length} verildi.`, { node: a2 });
+        }
+        for (const arg of nav.args) {
+          checkPathRootsIn(arg.value, arg, accept, { rowAllowed: this.inRowContext(ev) });
+        }
+      }
+      if (a2.$type === "EventSet") {
+        checkPathRootsIn(a2.expr, a2, accept, { rowAllowed: this.inRowContext(ev) });
+      }
+    }
+  };
+  /** empty/loading = query-yaşamdöngüsü → yalnız list/detail gövdesinde; hide/reveal hedefleri. */
+  checkWhenBlock = (w, accept) => {
+    if ((w.state === "empty" || w.state === "loading") && !ast_utils_exports.getContainerOfType(w, isDataComp)) {
+      accept("error", `'when ${w.state}' query-ya\u015Famd\xF6ng\xFCs\xFCd\xFCr \u2014 yaln\u0131z list/detail g\xF6vdesinde kullan\u0131labilir.`, { node: w, property: "state" });
+    }
+    const screen = ast_utils_exports.getContainerOfType(w, isScreen);
+    if (!screen) return;
+    const names = new Set(componentsOfScreen(screen).map(effectiveName));
+    const collectRegions = (r) => {
+      names.add(r.name);
+      r.items.filter(isRegion).forEach(collectRegions);
+    };
+    screen.members.filter(isRegion).forEach(collectRegions);
+    for (const d of w.deltas) {
+      if ((isHideDelta(d) || isRevealDelta(d)) && !names.has(d.target)) {
+        accept("error", `'${d.target}' bu ekranda bir component/region ad\u0131 de\u011Fil.`, { node: d, property: "target" });
+      }
+    }
+  };
+  /** #21 — linked flow kapsaması: bizFlow op'ları adımların ekranlarında sunuluyor mu. */
+  checkFlowCoverage = (flow, accept) => {
+    const business = businessOf(flow);
+    if (!business || !flow.realizes) return;
+    const flowOps = business.flows.get(flow.realizes.$refText) ?? [];
+    if (flowOps.length === 0) return;
+    const offered = /* @__PURE__ */ new Set();
+    for (const stepRef of flow.steps) {
+      const screen = stepRef.ref;
+      if (!screen) continue;
+      for (const comp of componentsOfScreen(screen)) {
+        const uses = isActionComponent(comp) ? resolveActionUses(comp, this.documents) : comp.bind.op.ref;
+        if (!uses) continue;
+        const realized = realizedBizOpId(uses, business);
+        if (realized) offered.add(realized.id);
+      }
+    }
+    const missing = flowOps.filter((id) => !offered.has(id)).sort();
+    if (missing.length > 0) {
+      accept("warning", `Ak\u0131\u015F-ad\u0131m\u0131 kapsanmad\u0131: '${flow.realizes.$refText}' op'lar\u0131ndan \u015Funlar hi\xE7bir ad\u0131m-ekran\u0131nda sunulmuyor: ${missing.join(", ")}.`, { node: flow, property: "realizes" });
+    }
+  };
+  /** Satır-bağlamı: list/detail gövdesi içinde miyiz (row kökü izinli mi). */
+  inRowContext(node) {
+    return ast_utils_exports.getContainerOfType(node, isListComponent) !== void 0 || ast_utils_exports.getContainerOfType(node, isDetailComponent) !== void 0;
   }
-  return [...map2.values()];
+};
+
+// src/frontend/frontend-dsl-module.ts
+var FrontendDslModule = {
+  parser: {
+    TokenBuilder: () => new FrontendDslTokenBuilder()
+  },
+  references: {
+    ScopeProvider: (services) => new FrontendDslScopeProvider(services)
+  },
+  validation: {
+    FrontendDslValidator: (services) => new FrontendDslValidator(services.shared.workspace.LangiumDocuments)
+  }
+};
+var FrontendDslSharedModule = {
+  workspace: {
+    DocumentBuilder: (services) => new FrontendDslDocumentBuilder(services)
+  }
+};
+function createFrontendDslServices(context) {
+  const shared2 = inject(
+    createDefaultSharedModule(context),
+    FrontendDslGeneratedSharedModule,
+    FrontendDslSharedModule
+  );
+  const FrontendDsl = inject(
+    createDefaultModule({ shared: shared2 }),
+    FrontendDslGeneratedModule,
+    FrontendDslModule
+  );
+  shared2.ServiceRegistry.register(FrontendDsl);
+  registerFrontendValidationChecks(FrontendDsl);
+  return { shared: shared2, FrontendDsl };
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/emit-operations.src.mts
-var argv = process.argv.slice(2);
-if (argv.includes("--version")) {
+// src/frontend/experience.ts
+init_define_BUILD_INFO();
+var ARITH = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
+function serializeExpr(e) {
+  if (isBinary(e)) return { node: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
+  if (isArith(e)) return { node: ARITH[e.op], op: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
+  if (isCmp(e)) {
+    if (e.op) return { node: "cmp", op: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
+    return serializeExpr(e.left);
+  }
+  if (isAggregate(e)) return { node: "agg", fn: e.fn, path: [...e.path.segments] };
+  if (isCall(e)) return { node: "call", name: e.name, args: e.args.map(serializeExpr) };
+  if (isPath(e)) return { path: [...e.segments] };
+  if (isLit(e)) {
+    if (e.str != null) return { kind: "string", value: e.str.replace(/^['"]|['"]$/g, "") };
+    if (e.bool != null) return { kind: "boolean", value: e.bool === "true" };
+    return { kind: "number", value: e.num };
+  }
+  return { path: [] };
+}
+function emitExperience(document, documents2) {
+  const model = document.parseResult.value;
+  const docUri = document.uri;
+  const business = model.contract ? loadBusiness(model.contract.path, docUri) : null;
+  const tech = model.contract?.techPath ? loadTech(model.contract.techPath, docUri) : null;
+  const errorCount = (document.diagnostics ?? []).filter((d) => (d.severity ?? 1) === 1).length;
+  return {
+    mode: model.contract ? "linked" : "standalone",
+    contract: model.contract ? { business: model.contract.path, tech: model.contract.techPath ?? null } : null,
+    shared: model.shared ? sharedJson(model.shared, business, tech, documents2) : null,
+    experiences: model.experiences.map((e) => experienceJson(e, business, tech, documents2)),
+    meta: { hasErrors: errorCount > 0, errorCount }
+  };
+}
+function sharedJson(shared2, business, tech, documents2) {
+  return {
+    usesInterfaces: shared2.members.filter(isUsesDecl).map((u) => usesJson(u, business, tech)),
+    types: shared2.members.filter(isTypeDecl).map((t) => ({ name: t.name, fields: t.fields.map(fieldJson) })),
+    screens: shared2.members.filter(isScreen).map((s) => screenJson(s, documents2))
+  };
+}
+function experienceJson(exp, business, tech, documents2) {
+  return {
+    name: exp.name,
+    audience: [...exp.audience],
+    deliveryDefault: exp.delivery ?? null,
+    entryScreen: exp.entry?.$refText ?? null,
+    resultDefaults: exp.members.filter(isResultHandler).map(handlerJson),
+    usesInterfaces: exp.members.filter(isUsesDecl).map((u) => usesJson(u, business, tech)),
+    screens: exp.members.filter(isScreen).map((s) => screenJson(s, documents2)),
+    flows: exp.members.filter(isFlowDecl).map((f) => ({
+      name: f.name,
+      realizes: f.realizes?.$refText ?? null,
+      steps: f.steps.map((s) => s.$refText)
+    })),
+    navigation: exp.members.filter(isNavDecl).map((n) => ({ from: n.from.$refText, to: n.to.$refText })),
+    clientState: exp.members.filter(isStateDecl).map((s) => stateJson(s, "experience")),
+    whenDeltas: exp.members.filter(isWhenBlock).map(whenJson)
+  };
+}
+function usesJson(u, business, tech) {
+  const realized = business ? realizedBizOpId(u, business) : null;
+  let remoteSource = null;
+  if (realized && tech) {
+    const exposed = (tech.byRealizes.get(realized.id) ?? []).find((o) => o.visibility === "exposed");
+    if (exposed) remoteSource = { module: exposed.module, op: exposed.id };
+  }
+  const hasOut = u.outputs.length > 0 || u.outList;
+  return {
+    name: u.name,
+    opKind: u.kind,
+    in: u.inputs.map(fieldJson),
+    out: hasOut ? { cardinality: u.outList ? "list" : "single", fields: u.outputs.map(fieldJson) } : null,
+    results: u.results.length > 0 ? [...u.results] : null,
+    realizes: realized ? { op: realized.id, source: realized.source } : null,
+    remoteSource
+  };
+}
+function fieldJson(f) {
+  return { name: f.name, type: f.type ?? null };
+}
+function screenJson(s, documents2) {
+  return {
+    name: s.name,
+    title: s.title != null ? strip(s.title) : null,
+    persona: s.persona ?? null,
+    params: s.params.map((p) => ({ name: p.name })),
+    regions: s.members.filter(isRegion).map((r) => regionJson(r, documents2)),
+    whenDeltas: s.members.filter(isWhenBlock).map(whenJson),
+    uiEvents: s.members.filter(isUiEvent).map(uiEventJson),
+    clientState: s.members.filter(isStateDecl).map((st) => stateJson(st, "screen"))
+  };
+}
+function regionJson(r, documents2) {
+  const role = r.attrs.find((a2) => a2.$type === "RoleAttr");
+  const collapse = r.attrs.find((a2) => a2.$type === "CollapseAttr");
+  const components = [];
+  for (const item of r.items) {
+    if (isListComponent(item) || isDetailComponent(item) || isValueComponent(item)) components.push(dataComponentJson(item, documents2));
+    else if (isFormComponent(item)) components.push(formJson(item));
+    else if (isActionComponent(item)) components.push(actionJson(item, documents2));
+    else if (isExtComponent(item)) components.push(extComponentJson(item));
+  }
+  return {
+    name: r.name,
+    role: role?.value ?? null,
+    collapseWhen: collapse?.value ?? null,
+    children: r.items.filter(isRegion).map((cr) => regionJson(cr, documents2)),
+    components,
+    targetEscapes: r.items.filter(isTargetEscape).map(targetEscapeJson)
+  };
+}
+function dataComponentJson(c, documents2) {
+  const kind = isListComponent(c) ? "list" : isDetailComponent(c) ? "detail" : "value";
+  const op = c.bind.op.ref;
+  const members = isValueComponent(c) ? [] : c.members;
+  const showClause = members.find(isShowClause);
+  let show = null;
+  if (kind !== "value") {
+    show = showClause ? { fields: showClause.fields.map((f) => f.$refText), source: "authored" } : op ? { fields: op.outputs.map((f) => f.name), source: "default-all-out-fields" } : null;
+  }
+  return {
+    kind,
+    query: bindJson(c.bind),
+    mechanic: c.mech ?? null,
+    refreshable: !isValueComponent(c) && c.refreshable === true,
+    pagination: isListComponent(c) && c.pagination ? { intent: c.pagination } : null,
+    alias: c.alias ?? null,
+    show,
+    whenDeltas: members.filter(isWhenBlock).map(whenJson),
+    uiEvents: members.filter(isUiEvent).map(uiEventJson),
+    actions: members.filter(isActionComponent).map((a2) => actionJson(a2, documents2))
+  };
+}
+function formJson(f) {
+  const loads = f.members.find(isLoadsClause);
+  const fields = f.members.filter(isFormField).map(formFieldJson);
+  const steps = f.members.filter(isFormStep).map((s) => ({ name: s.name, fields: s.fields.map(formFieldJson) }));
+  return {
+    kind: "form",
+    submits: { ...bindJson(f.bind), mechanic: f.mech ?? null },
+    loads: loads ? bindJson(loads.bind) : null,
+    alias: f.alias ?? null,
+    fields,
+    steps,
+    rules: f.members.filter(isFormRule).map((r) => ({
+      text: (r.expr.$cstNode?.text ?? "").trim(),
+      ast: serializeExpr(r.expr)
+    })),
+    resultHandlers: f.members.filter(isResultHandler).map(handlerJson)
+  };
+}
+function formFieldJson(ff) {
+  const validation = {};
+  for (const r of ff.rules) {
+    if (isRequiredRule(r)) validation.required = true;
+    else if (isMaxRule(r)) validation.max = r.value;
+    else if (isMinRule(r)) validation.min = r.value;
+    else if (isPatternRule(r)) validation.pattern = r.value.replace(/^['"]|['"]$/g, "");
+  }
+  return { name: ff.field.$refText, validation };
+}
+function actionJson(a2, documents2) {
+  const uses = resolveActionUses(a2, documents2);
+  const confirmClause = a2.members.find(isConfirmClause);
+  return {
+    kind: "action",
+    name: a2.name,
+    command: uses ? { op: uses.name, mechanic: a2.mech ?? null } : null,
+    clientOnly: !uses,
+    confirm: confirmClause !== void 0,
+    confirmText: confirmClause?.text != null ? strip(confirmClause.text) : null,
+    visibleWhen: (() => {
+      const vw = a2.members.find(isVisibleWhen);
+      return vw ? { expr: serializeExpr(vw.expr), uxOnly: true } : null;
+    })(),
+    invalidates: a2.members.filter(isInvalidatesClause).flatMap((i) => i.targets.map((t) => t.$refText)),
+    set: a2.members.filter(isSetClause).map((s) => ({ state: s.state.$refText, expr: serializeExpr(s.expr) })),
+    navigation: a2.navTarget ? { screen: a2.navTarget.$refText, args: (a2.navArgs ?? []).map(argJson) } : null,
+    resultHandlers: a2.members.filter(isResultHandler).map(handlerJson)
+  };
+}
+function extComponentJson(e) {
+  return {
+    kind: "ext",
+    ext: {
+      ns: e.ext.ns,
+      name: e.ext.name,
+      args: Object.fromEntries(e.ext.args.map((a2) => [a2.name, litValue(a2.value)]))
+    },
+    query: e.bind ? bindJson(e.bind) : null
+  };
+}
+function litValue(lit) {
+  if (lit.str != null) return lit.str.replace(/^['"]|['"]$/g, "");
+  if (lit.bool != null) return lit.bool === "true";
+  return lit.num;
+}
+function targetEscapeJson(t) {
+  return {
+    args: t.args.map((a2) => ({
+      name: a2.name ?? null,
+      value: a2.str != null ? a2.str.replace(/^['"]|['"]$/g, "") : a2.num != null ? a2.num : a2.word ?? ""
+    }))
+  };
+}
+function bindJson(b) {
+  return { op: b.op.$refText, args: b.args.map(argJson) };
+}
+function argJson(a2) {
+  return { name: a2.name ?? null, expr: serializeExpr(a2.value) };
+}
+function handlerJson(h) {
+  const hd = h.handler;
+  if (isNavHandler(hd)) return { result: h.result, handler: { verb: "navigate", screen: hd.target.$refText, args: hd.args.map(argJson) } };
+  if (isToastHandler(hd)) return { result: h.result, handler: { verb: "toast", text: strip(hd.text), retry: hd.retry === true } };
+  if (isBannerHandler(hd)) return { result: h.result, handler: { verb: "banner", text: strip(hd.text) } };
+  if (isInlineErrorsHandler(hd)) return { result: h.result, handler: { verb: "inline-errors" } };
+  if (isRetryHandler(hd)) return { result: h.result, handler: { verb: "retry" } };
+  return { result: h.result, handler: { verb: "retry" } };
+}
+function uiEventJson(ev) {
+  const t = ev.trigger;
+  let trigger;
+  if (isLifecycleTrigger(t)) trigger = { kind: t.kind };
+  else if (isInteractionTrigger(t)) trigger = { kind: t.kind, target: t.target ?? null };
+  else if (isTimerTrigger(t)) trigger = { kind: t.kind, value: t.value, unit: t.unit };
+  else trigger = { kind: "enter" };
+  return {
+    trigger,
+    actions: ev.actions.map((a2) => {
+      if (isRefreshAction(a2)) return { do: "refresh", targets: a2.targets.map((t2) => t2.$refText) };
+      if (isEventNav(a2)) return { do: "navigate", screen: a2.target.$refText, args: a2.args.map(argJson) };
+      if (isEventSet(a2)) return { do: "set", state: a2.state.$refText, expr: serializeExpr(a2.expr) };
+      if (isEventInvalidate(a2)) return { do: "invalidates", targets: a2.targets.map((t2) => t2.$refText) };
+      if (isEventPerform(a2)) return { do: "action", target: a2.target };
+      return { do: "refresh", targets: [] };
+    })
+  };
+}
+function whenJson(w) {
+  return {
+    state: w.state,
+    delta: w.deltas.map((d) => {
+      if (isBannerDelta(d)) return { verb: "banner", text: strip(d.text) };
+      if (isBadgeDelta(d)) return { verb: "badge", text: strip(d.text) };
+      if (isHideDelta(d)) return { verb: "hide", target: d.target };
+      if (isRevealDelta(d)) return { verb: "reveal", target: d.target };
+      return { verb: "banner", text: "" };
+    })
+  };
+}
+function stateJson(s, scope) {
+  if (isMutableState(s)) {
+    return {
+      name: s.name,
+      scope,
+      kind: "state",
+      persisted: s.persisted === true,
+      type: s.type ?? null,
+      init: s.init ? serializeExpr(s.init) : null,
+      derivedExpr: null
+    };
+  }
+  return {
+    name: stateNameOf(s),
+    scope,
+    kind: "derived",
+    persisted: false,
+    type: null,
+    init: null,
+    derivedExpr: isDerivedState(s) ? serializeExpr(s.expr) : null
+  };
+}
+function strip(s) {
+  return s.replace(/^['"]|['"]$/g, "");
+}
+
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
+function parseArgs(argv) {
+  const args2 = { inputs: [], json: false, quiet: false, version: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a2 = argv[i];
+    if (a2 === "--out") args2.out = argv[++i];
+    else if (a2 === "--json") args2.json = true;
+    else if (a2 === "--quiet") args2.quiet = true;
+    else if (a2 === "--version") args2.version = true;
+    else if (a2 === "--help" || a2 === "-h") {
+      usage();
+      process.exit(0);
+    } else args2.inputs.push(a2);
+  }
+  return args2;
+}
+function usage() {
+  console.error(`Kullan\u0131m: node fcdsl.mjs <dosya.fcdsl | dizin ...> [--out <dizin>] [--json] [--quiet]
+
+  <dosya|dizin>   .fcdsl dosyalar\u0131; dizinler recursive taran\u0131r; TEK ko\u015Fuda derlenir (workspace-pass)
+  --out <dizin>   0 error \u0130SE dosya ba\u015F\u0131na <ad>.experience.json emit eder (error'da YAZMAZ \u2014 gate)
+  --json          stdout'a saf diagnostics dizisi (meta banner stderr'e)
+  --quiet         bilgi (info) sat\u0131rlar\u0131 bast\u0131r\u0131l\u0131r
+  --version       g\xF6m\xFCl\xFC BUILD_INFO (grammar + src hash \u2014 bayatl\u0131k tespiti)
+
+\xC7\u0131k\u0131\u015F kodu: 0 = temiz \xB7 1 = \u22651 error (emit yap\u0131lmad\u0131) \xB7 2 = kullan\u0131m/girdi hatas\u0131.`);
+}
+function collectFcdsl(paths) {
+  const out = [];
+  const visit = (p) => {
+    const st = statSync2(p);
+    if (st.isDirectory()) {
+      for (const e of readdirSync2(p)) {
+        if (e === "node_modules" || e.startsWith(".")) continue;
+        visit(join(p, e));
+      }
+    } else if (p.endsWith(".fcdsl")) {
+      out.push(resolve(p));
+    }
+  };
+  for (const p of paths) visit(p);
+  return [...new Set(out)].sort();
+}
+var args = parseArgs(process.argv.slice(2));
+if (args.version) {
   console.log(JSON.stringify(define_BUILD_INFO_default, null, 2));
   process.exit(0);
 }
-var positional = argv.filter((a2) => !a2.startsWith("--"));
-var [inArg, outArg] = positional;
-if (!inArg || !outArg) {
-  console.error("Kullan\u0131m: node emit-operations.mjs <girdi.cdsl> <\xE7\u0131kt\u0131.operations.json>");
+if (args.inputs.length === 0) {
+  usage();
   process.exit(2);
 }
-var inPath = isAbsolute(inArg) ? inArg : resolve(process.cwd(), inArg);
-var outPath = isAbsolute(outArg) ? outArg : resolve(process.cwd(), outArg);
+var files;
 try {
-  if (!statSync2(inPath).isFile()) throw new Error("dosya de\u011Fil");
-} catch {
-  console.error(`Hata: girdi okunamad\u0131: ${inPath}`);
+  files = collectFcdsl(args.inputs);
+} catch (e) {
+  console.error(`Hata: yol bulunamad\u0131: ${e.path ?? args.inputs.join(", ")}`);
   process.exit(2);
 }
-var { shared } = createCommandDslServices(NodeFileSystem);
-var doc = await shared.workspace.LangiumDocuments.getOrCreateDocument(URI2.file(inPath));
-await shared.workspace.DocumentBuilder.build([doc], { validation: true });
+if (files.length === 0) {
+  console.error("Hi\xE7 .fcdsl dosyas\u0131 bulunamad\u0131.");
+  process.exit(2);
+}
+var { shared } = createFrontendDslServices(NodeFileSystem);
+var documents = shared.workspace.LangiumDocuments;
+var docs = [];
+for (const f of files) {
+  docs.push(await documents.getOrCreateDocument(URI2.file(f)));
+}
+await shared.workspace.DocumentBuilder.build(docs, { validation: true });
+var diagnostics = [];
 var errors = 0;
-for (const e of doc.parseResult.lexerErrors) {
-  errors++;
-  console.error(`lexer: ${e.message}`);
-}
-for (const e of doc.parseResult.parserErrors) {
-  errors++;
-  console.error(`parser: ${e.message}`);
-}
-for (const d of doc.diagnostics ?? []) {
-  if ((d.severity ?? 1) === 1) {
+var warns = 0;
+var infos = 0;
+for (let i = 0; i < docs.length; i++) {
+  const doc = docs[i];
+  const file = basename(files[i]);
+  for (const e of doc.parseResult.lexerErrors) {
     errors++;
-    console.error(`error ${d.range.start.line + 1}: ${d.message}`);
+    diagnostics.push({ severity: 1, line: 0, col: 0, message: `lexer: ${e.message}`, file });
+  }
+  for (const e of doc.parseResult.parserErrors) {
+    errors++;
+    diagnostics.push({ severity: 1, line: 0, col: 0, message: `parser: ${e.message}`, file });
+  }
+  for (const d of doc.diagnostics ?? []) {
+    const sev = d.severity ?? 1;
+    if (sev === 1) errors++;
+    else if (sev === 2) warns++;
+    else if (sev >= 3) infos++;
+    diagnostics.push({
+      severity: sev,
+      line: d.range.start.line + 1,
+      // 1-tabanlı
+      col: d.range.start.character + 1,
+      // 1-tabanlı
+      message: d.message,
+      file
+    });
   }
 }
-if (errors > 0) {
-  console.error(`
-\u2717 ${errors} error \u2014 operations.json \xFCretilmedi. \xD6nce .cdsl'i d\xFCzelt.`);
-  process.exit(1);
+var ok = errors === 0;
+var shown = args.quiet ? diagnostics.filter((d) => d.severity < 3) : diagnostics;
+if (args.json) {
+  console.error(
+    `FrontendDsl do\u011Frulay\u0131c\u0131 \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 src ${define_BUILD_INFO_default.frontendSrcHash} \xB7 commit ${define_BUILD_INFO_default.commit} \xB7 langium ${define_BUILD_INFO_default.langium}`
+  );
+  console.error(`Dosyalar (${files.length}): ${files.map((f) => basename(f)).join(", ")}`);
+  console.error(`\xD6zet: ${errors} error, ${warns} warning, ${infos} info`);
+  process.stdout.write(JSON.stringify(diagnostics) + "\n");
+} else {
+  const sevName = { 1: "ERROR", 2: "WARN", 3: "INFO", 4: "HINT" };
+  console.log(
+    `
+=== FrontendDsl do\u011Frulama \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 src ${define_BUILD_INFO_default.frontendSrcHash} ===`
+  );
+  console.log(`Dosyalar (${files.length}): ${files.map((f) => basename(f)).join(", ")}
+`);
+  for (const d of shown) {
+    console.log(`${sevName[d.severity] ?? d.severity} ${d.file}:${d.line}: ${d.message}`);
+  }
+  if (shown.length === 0) console.log("(temiz \u2014 hi\xE7 diagnostic yok)");
+  console.log(`
+=== \xD6ZET: ${errors} error, ${warns} warning, ${infos} info ===`);
 }
-var model = doc.parseResult.value;
-var units = collectCommands(model);
-var { content } = genOperationsIndex(model, units);
-writeFileSync(outPath, content);
-console.error(`\u2713 operations.json yaz\u0131ld\u0131: ${outPath}`);
+if (args.out) {
+  if (!ok) {
+    console.error(`
+\u2717 emit atland\u0131: ${errors} error var \u2014 .experience.json ancak 0 error'da \xFCretilir (gate).`);
+  } else {
+    mkdirSync(args.out, { recursive: true });
+    for (let i = 0; i < docs.length; i++) {
+      const manifest = emitExperience(docs[i], documents);
+      const target = join(args.out, basename(files[i]).replace(/\.fcdsl$/, ".experience.json"));
+      writeFileSync(target, JSON.stringify(manifest, null, 2) + "\n");
+      console.error(`\u2192 ${target}`);
+    }
+  }
+}
+process.exit(ok ? 0 : 1);

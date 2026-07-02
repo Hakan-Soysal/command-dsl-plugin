@@ -66,7 +66,7 @@ bütünlük kuralını discharge eder — bu, "tutarlılık > sözdizimi" ilkesi
 
 Girdiyi netleştir:
 
-- **`operations.json` var mı?** Varsa doğrulamanın omurgasıdır; **v2** (`schemaVersion: 2`)
+- **`operations.json` var mı?** Varsa doğrulamanın omurgasıdır; **v3** (`schemaVersion: 3`)
   olduğunu teyit et (değilse doğrulayıcı error verir → güncel İş DSL üreticisiyle yeniden üret).
 - **Sadece `.cdsl` mı var?** Önce ondan operations.json üret — **gömülü self-contained araç**
   (CommandDSL deposu GEREKMEZ):
@@ -81,7 +81,7 @@ Sonra sekiz fazı sırayla yürüt. (Elicit top-down: büyük resim → detay; e
 ## Faz 0 — Bağlam & Mod
 
 **Amaç:** Linked moda bağlan. `contract './<...>.operations.json'` bildir.
-**Kapatır:** `checkContractVersion` (v2 değilse error) + tüm fidelity check'lerinin önkoşulu.
+**Kapatır:** `checkContractVersion` (v3 değilse error) + tüm fidelity check'lerinin önkoşulu.
 
 ---
 

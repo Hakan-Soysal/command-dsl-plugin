@@ -4,11 +4,11 @@
 > → TechDsl eşlemesini ve `realizes` köprüsünü tanımlar. Kaynak: `CommandDSL/src/tech/contract.ts`
 > (tüketilen şema) + gerçek `examples/tech/catalog.operations.json`.
 
-## 0. operations.json şeması (v2 — tüketilen alanlar)
+## 0. operations.json şeması (v3 — tüketilen alanlar; v3 = v2 + ADR-0033 `rules[]` [named-rule predicates] + guard'larda `kind:"rule"` referansları — additif)
 
 ```jsonc
 {
-  "meta": { "schemaVersion": 2, "hasErrors": false, "errorCount": 0 },   // 2 değilse → error
+  "meta": { "schemaVersion": 3, "hasErrors": false, "errorCount": 0 },   // 3 değilse → error
   "actors":    [ { "id": "Admin", "extends": "Employee" }, … ],          // roles + yetkili-küme
   "relations": [ { "id": "managedBranch", "source": "BranchManager", "target": "Branch" }, … ],
   "entities":  [ { "id": "Order", "name": "Order", "fields": [ { "name":"status","type":"String","collection":false } ] }, … ],

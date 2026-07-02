@@ -1,0 +1,101 @@
+# Linked exemplar — ÇİFT upstream (business + tech), skill'in ürettiği biçimin örneği.
+#   contract  = catalog.operations.json (business: semantik kimlik, actors, flows)
+#   tech      = orders.manifest.json    (tech: çağrılabilirlik/pagination/results
+#               — teknik-analiz örneği order-management.tcdsl'den GERÇEK emit-manifest ile üretildi)
+#
+# BEKLENEN diagnostics (README'de belgeli — hepsi bilinçli/didaktik):
+#   - 0 ERROR (gate geçer, emit çalışır)
+#   - 1 WARNING: 'ReadOwnOrder' çağrılamaz-op — business'ta var ama tech henüz realize
+#     etmemiş. Skill'in "warning → takip sorusu" döngüsünün örneği: "teknik analiz bu
+#     sorguyu kurmamış — ekran mı erken, teknik analiz mi eksik?"
+#   - 1 INFO: shared 'Login' contract'ta karşılıksız — standalone-arayüz (karar #41).
+
+contract './catalog.operations.json' tech './orders.manifest.json'
+
+# ───── shared: ortak ekran + arayüz (bir kez; karar #26) ─────
+shared {
+  uses command Login {
+    in {email, password}
+    out {token}
+    results: Success | NotAuthenticated | ServerError
+  }
+
+  screen Login "Giriş" {
+    region main (role: focus) {
+      form Login remote {
+        field email    { required }
+        field password { required }
+        # Success-sonrası dönüş: interrupt/resume (karar #33) — yazar bir şey yazmaz
+      }
+    }
+  }
+}
+
+# ───── Müşteri uygulaması ─────
+experience CustomerApp {
+  audience: Customer                            # operations.json actors[] ile cross-check (#35)
+  delivery: offline-first
+  entry MyOrders                                # davranış-determinizmi pini (#45)
+
+  # business=semantik kimlik (realizes hedefi); tech=çağrılabilirlik+pagination+results.
+  uses query ListOrders realizes ListOwnOrders {
+    out list of {id, total, status}             # cardinality AÇIK (liste ↔ list, #24)
+    results: Success | NotAuthenticated | ServerError
+  }
+  uses query OrderInfo realizes ReadOwnOrder {  # tech realize ETMEMİŞ → çağrılamaz-op warning (belgeli)
+    in {id}
+    out {id, total, status}
+    results: Success | NotAuthenticated | ServerError
+  }
+  uses command CancelOrder realizes CancelPendingOrder {
+    in {orderId}
+    # NotProcessable = tech'in throws→errors eşlemesinden (OrderNotCancellable) — authored küme kapsar
+    results: Success | NotAuthenticated | NotProcessable | ServerError
+  }
+  uses command PlaceOrder realizes PlaceOrderFromCart {
+    in {cartId}
+    out {orderId}
+    results: Success | NotValid | ServerError
+  }
+
+  # cascade varsayılanları (bir kez; #11) — handler-tamlık (#48) bunlarla kapanır
+  on NotAuthenticated -> screen Login
+  on ServerError toast "Bir hata oluştu" retry
+  on NotValid inline-errors
+
+  screen MyOrders "Siparişlerim" for Customer {
+    region main (role: primary) {
+      list ListOrders cache refreshable paginated infinite {   # tech: cursor → infinite uyumlu (#43)
+        show total, status                                     # görüntü-şekli (#23)
+        on activate -> screen OrderDetail(row.id)              # satır-nav (hedefsiz activate = bu component)
+        action CancelOrder remote {                            # satır-aksiyonu
+          confirm "Sipariş iptal edilsin mi?"                  # opsiyonel diyalog metni (#47)
+          invalidates: [ListOrders]                            # yazma sonrası tazeleme (#16)
+          on NotProcessable toast "Bu sipariş artık iptal edilemez"
+        }
+      }
+      action New -> screen NewOrder                            # client-only action (nav)
+    }
+    when offline { banner "Çevrimdışı — son eşitlenen liste" }
+  }
+
+  screen OrderDetail(orderId) "Sipariş Detayı" for Customer {
+    region main (role: focus) {
+      detail OrderInfo(id: orderId) cache                      # tekil-out ↔ detail (#24)
+    }
+    on enter { refresh OrderInfo }                             # lifecycle tazeleme
+  }
+
+  screen NewOrder "Yeni Sipariş" for Customer {
+    region main {
+      form PlaceOrder queue {
+        field cartId { required }
+        on Success -> screen MyOrders   # LEGAL; '-> OrderDetail(orderId)' DERLEME HATASI olurdu:
+      }                                 # queue'da Success=enqueue-anı, out-alanı henüz yok (#25)
+    }
+  }
+
+  # Bildirimsel yolculuk: business TEK-AKTÖR flow'una çıpa (#21) — kapsama denetlenir
+  flow Gezinme realizes flow BrowseOwnOrders = [MyOrders]
+  flow SiparisVer = [MyOrders -> NewOrder -> MyOrders]
+}

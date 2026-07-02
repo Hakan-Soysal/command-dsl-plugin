@@ -8,7 +8,7 @@
 Doğrulayıcı bunların çoğunu yakalar; ama emit'ten önce gözden geçir — düzeltmesi ucuz:
 
 **Linked bütünlük (ZORUNLU):**
-- [ ] Model başında `contract './<...>.operations.json'` var; JSON `meta.schemaVersion == 2`.
+- [ ] Model başında `contract './<...>.operations.json'` var; JSON `meta.schemaVersion == 3`.
 - [ ] Her `operation` bir `realizes <BizOpID>` taşıyor (saf-teknik op'lar hariç — onlar bilinçli).
 - [ ] Her business write-set entity'si, op'unun **module'ünde** `realizes` ile karşılanmış
       (entity-kapsama; en sık error kaynağı).

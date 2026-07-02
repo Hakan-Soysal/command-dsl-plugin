@@ -2,14 +2,15 @@
 
 # 🧭 command-dsl-tools
 
-**Bir uygulama fikrini _konuşarak_ tutarlı, parse-temiz CommandDSL iş analizine çeviren Claude Code plugin'i.**
+**Bir uygulama fikrini _konuşarak_ iş analizi → teknik tasarım → frontend tasarımı → kod üretimi zincirine taşıyan Claude Code plugin ailesi.**
 
 Teknik terim sormaz — işini anlatır gibi konuşturur, her adımda onay alır ve arka planda
-**Süreç → Akış → Eylem** modelini kurar. Sonunda gömülü doğrulayıcıyla `.cdsl`'in
-gerçek CommandDSL parser'ında **hatasız** olduğunu kanıtlar.
+DSL modellerini kurar. Her halka çıktısını **gömülü, self-contained doğrulayıcıyla**
+gerçek parser'da **0 error** olarak kanıtlar; 0-error geçince makine-devir JSON'ları
+(operations.json · manifest.json · experience.json) **otomatik** üretilir.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-d97757)
-![Skill](https://img.shields.io/badge/skill-is--analizi--dsl-4b8bbe)
+![Skills](https://img.shields.io/badge/skills-4-4b8bbe)
 ![Node](https://img.shields.io/badge/Node-%E2%89%A518-339933?logo=node.js&logoColor=white)
 ![Validator](https://img.shields.io/badge/do%C4%9Frulay%C4%B1c%C4%B1-g%C3%B6m%C3%BCl%C3%BC-2ea44f)
 
@@ -49,15 +50,22 @@ GitHub'a hiç gitmeden, klonladığın klasörden uçtan uca test:
 
 ---
 
-## 🧩 Ne sağlıyor
+## 🧩 Ne sağlıyor — 4 skill'lik zincir
 
-Plugin tek bir skill içerir: **`is-analizi-dsl`**.
+| Skill | Girdi → Çıktı | Çağırma |
+| --- | --- | --- |
+| **`is-analizi-dsl`** | fikir → `.cdsl` iş analizi + `operations.json` | `/command-dsl:is-analizi-dsl` |
+| **`teknik-analiz`** | operations.json → linked `.tcdsl` teknik tasarım + `manifest.json` | `/command-dsl:teknik-analiz` |
+| **`frontend-analiz`** | operations.json (+ opsiyonel manifest.json) → linked `.fcdsl` deneyim tasarımı + `<Ad>.experience.json` | `/command-dsl:frontend-analiz` |
+| **`kesif`** | operations.json + manifest.json → hedef-profili keşfi + üreteç kapısı (techgen'e devir) | `/command-dsl:kesif` |
 
-- **Çağırma:** `/command-dsl:is-analizi-dsl`
-- **Otomatik tetikleme:** Bir uygulama/ürün fikrini "iş analizine dök", "süreç çıkar",
-  "akış tasarla", "eylemleri detaylandır", ".cdsl üret" gibi ifadelerle anlattığında
-  kendiliğinden devreye girer.
-- **Kim için:** Teknik olmayan kullanıcı dahil — jargon sormaz, işini anlatır gibi konuşturur.
+- **Otomatik tetikleme:** "iş analizine dök", "teknik analiz çıkar", "ekranları tasarla /
+  frontend DSL üret", "kod üretimine geç" gibi ifadelerle ilgili halka kendiliğinden devreye girer.
+- **Kim için:** Teknik olmayan kullanıcı dahil — jargon sormaz; her skill muhatabının
+  diliyle konuşur (iş sahibi · mimar · ürün/UX sahibi).
+- **Sözleşme sürümü:** zincir **operations.json v3** (`meta.schemaVersion: 3`) üzerinde
+  çalışır; eski v2 sözleşmeler açık bir hata mesajıyla reddedilir (güncel üreticiyle
+  yeniden üretin).
 
 ---
 
@@ -120,12 +128,11 @@ command-dsl-plugin/
         ├── .claude-plugin/
         │   └── plugin.json           # plugin manifesti
         └── skills/
-            └── is-analizi-dsl/
-                ├── SKILL.md          # skill girişi (4 faz prosedürü)
-                ├── references/       # dsl-reference · operation-translation · …
-                │   └── examples/     # parser-doğrulanmış known-good model
-                ├── assets/           # validator.config örneği
-                └── validator/        # validate.mjs (gömülü) + build.mjs + kaynak
+            ├── is-analizi-dsl/       # fikir → .cdsl + operations.json (gömülü validate.mjs + emit)
+            ├── teknik-analiz/        # → linked .tcdsl + manifest.json (validate-tech + emit-manifest)
+            ├── frontend-analiz/      # → linked .fcdsl + experience.json (fcdsl.mjs: doğrula + gate'li emit)
+            └── kesif/                # → hedef-profili keşfi + üreteç kapısı
+                # her skill: SKILL.md + references/(examples) + validator/(gömülü bundle + build)
 ```
 
 ---
@@ -144,9 +151,11 @@ command-dsl-plugin/
 ## 🔧 Bakım
 
 ```bash
-# Doğrulayıcıyı CommandDSL grammar'ı değişince tazele (canlı depo gerekir):
-cd plugins/command-dsl/skills/is-analizi-dsl/validator
-node build.mjs <CommandDSL-yolu>
+# Doğrulayıcıları CommandDSL değişince tazele (canlı depo gerekir; her skill kendi validator/ dizininde):
+cd plugins/command-dsl/skills/<skill>/validator
+CMDDSL=<CommandDSL-yolu> node build.*.mjs
+# ⚠ Bir skill'in bundle'larını hep AYNI repo durumundan BİRLİKTE build et — tek tarafı
+#   tazelemek sürüm-kayması üretir (örn. operations.json v3 ↔ eski validator).
 
 # Yeni sürümü yayınla:
 git add -A && git commit -m "…" && git push

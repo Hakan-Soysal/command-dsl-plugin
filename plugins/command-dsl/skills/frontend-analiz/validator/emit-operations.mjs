@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/emit-operations.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/emit-operations.src.mts
 init_define_BUILD_INFO();
 import { writeFileSync, statSync as statSync2 } from "node:fs";
 import { resolve, isAbsolute } from "node:path";
@@ -39907,7 +39907,7 @@ function collectCommands(model2) {
   return [...map2.values()];
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/emit-operations.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/emit-operations.src.mts
 var argv = process.argv.slice(2);
 if (argv.includes("--version")) {
   console.log(JSON.stringify(define_BUILD_INFO_default, null, 2));

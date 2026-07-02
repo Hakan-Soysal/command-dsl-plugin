@@ -1,0 +1,26 @@
+{
+  "skill_name": "frontend-analiz",
+  "evals": [
+    {
+      "id": 1,
+      "name": "siparis-cift-upstream-tam-akis",
+      "prompt": "Elimde onaylanmış bir sipariş yönetimi iş analizi (operations.json) VE teknik analizi (manifest.json) var: müşteri sepetten sipariş veriyor, kendi siparişlerini listeliyor (liste büyüyebilir, backend cursor'la sayfalıyor), bekleyen siparişini iptal edebiliyor (iptal edilemez durumda ayrı hata dönüyor). Müşteriler mobilde, sahada interneti kesik kullanıyor. Bunun frontend analizini çıkar: ekranlar, offline davranışı, hata deneyimi.",
+      "expected_output": "Linked .fcdsl: 'contract ...operations.json tech ...manifest.json' (İKİ upstream bağlı). Tek müşteri experience'ı: audience actors[]'dan, 'delivery: offline-first', 'entry' pinli. Sipariş listesi 'list ... cache refreshable paginated infinite' (backend cursor → pager DEĞİL; pager yazılsaydı divergence warning'i soruya çevrilirdi); satır-nav bileşen-içi 'on activate -> screen Detay(row.id)'. Sipariş verme 'form ... queue' — 'on Success' listeye döner; sipariş-ID'li detaya nav YAZILMAMIŞ (queue×out error olurdu; skill bu çelişkiyi kullanıcıya 'anında onay mı, sonra eşitleme mi' diye sormuş olmalı). İptal 'action ... confirm \"...\"' + iptal-edilemez durumu için op-düzeyi handler (results kümesi tech throws→NotProcessable'ı kapsar); NotAuthenticated/ServerError experience-düzeyi cascade'de BİR KEZ. Offline delta'sı ('when offline { banner ... }') var. Gömülü fcdsl.mjs ile 0 error; warning'ler kullanıcıya soru olarak yansıtılıp giderilmiş/belgelenmiş; 0-error sonrası .experience.json OTOMATİK üretilmiş (gate).",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "izin-yalniz-business-techsiz-mod",
+      "prompt": "İzin talep sürecinin iş analizi elimde (.cdsl dosyası olarak — operations.json henüz üretilmedi, teknik analiz de yapılmadı): çalışan izin talebi açıyor ve kendi taleplerini görüyor; yöneticisi ekibinin bekleyen taleplerini listeleyip onaylıyor/reddediyor. Frontend analizini şimdiden çıkarmak istiyorum.",
+      "expected_output": "Önce gömülü emit-operations.mjs ile .cdsl'den operations.json üretilmiş (parse hatalıysa iş tarafı düzelttirilir, frontend'e geçilmez). Kullanıcıya AÇIKÇA söylenmiş: teknik analiz yok → çağrılamaz-op/results-validation-pagination divergence/uncovered-op denetimleri KAPALI; manifest gelince 'tech' yolu eklenip yeniden doğrulanacak. İKİ ayrı experience (çalışan + yönetici — aynı uygulamaya tıkılmamış); persona/audience adları operations.json actors[] ile uyumlu; her experience'ta entry + erişilebilir ekran haritası; onay/red aksiyonlarında confirm sorgulanmış; yönetici listesi için flow 'realizes flow' ile business tek-aktör akışına çıpalı ve akışın tüm op'ları adım-ekranlarında sunuluyor (kapsama warning'i yok). Yalnız-business linked .fcdsl, fcdsl.mjs ile 0 error + emit.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "saha-satis-offline-tuzaklari",
+      "prompt": "Saha satış ekibi için offline-first bir uygulama tasarlıyoruz (iş + teknik analiz çıktıları mevcut): temsilci müşteri ziyaretinde katalogdan teklif oluşturuyor (internet çoğu zaman yok), teklifleri listeliyor, gönderilmiş teklifi geri çekebiliyor. Backend teklif oluşturmada başlık/tutar validation'ı koyuyor ve 'geri çekilemez durumda' hatası dönüyor. Frontend analizini çıkar.",
+      "expected_output": "Skill offline tuzaklarını sorgulamış: teklif listesi 'cache' + 'when offline' delta + refreshable; teklif oluşturma 'queue' + form'da YEREL validation authored (backend validation'ı varken form boş bırakılmamış — divergence warning'i 'offline'da tek doğrulama budur' sorusuna çevrilmiş); 'on Success' out-alanına referans YOK (queue×out); eşitleme başarısızlığı için experience-düzeyi 'when SyncFailed' delta'sı. Geri çekme action'ı confirm'lü; 'geri çekilemez' NotProcessable handler'ı op-düzeyinde, geri kalan non-Success'ler cascade'de (handler-tamlık warning'i kalmamış ya da belgeli-default kullanıcıya onaylatılmış). Canlı güncelleme İSTENDİYSE vaat edilmemiş (enter-refresh + interval + invalidates ile karşılanmış). 0 error + otomatik emit; devir paketi (experience.json + operations.json + manifest.json) birlikte teslim edilmiş.",
+      "files": []
+    }
+  ]
+}

@@ -4,7 +4,7 @@ description: >-
   Bir kullanıcının düz dille anlattığı uygulama/yazılım fikrini, adım adım
   sorgulama ve her aşamada onay alarak tutarlı bir CommandDSL (.cdsl) iş
   analizine — Süreç (process), Akış (flow), Eylem (operation) — dönüştürür.
-  Doğrulama 0-error geçince gömülü araçla makine-devir `operations.json` (v2)
+  Doğrulama 0-error geçince gömülü araçla makine-devir `operations.json` (v3)
   sözleşmesini OTOMATİK üretir (teknik-analiz/kesif girdisi).
   Kullanıcı teknik olmasa bile çalışır: jargon sormaz, işini anlatır gibi
   konuşturur. Şu durumlarda MUTLAKA kullan: kullanıcı bir uygulama/ürün fikri
@@ -268,8 +268,8 @@ sözleşmesidir — `teknik-analiz` ve `kesif` onu tüketir. İnsana sunulan dok
 node ${CLAUDE_SKILL_DIR}/validator/emit-operations.mjs <model.cdsl> <model.operations.json>
 ```
 Araç **kendi içinde de doğrular**: `.cdsl`'de severity-1 error varsa emit ETMEZ (exit 1) →
-"doğrulama tamamlanınca üret" garantisi araçla zorlanır, prose'a bırakılmaz. Çıktı v2'dir
-(`meta.schemaVersion: 2`); `teknik-analiz` bunu `contract` olarak bağlar.
+"doğrulama tamamlanınca üret" garantisi araçla zorlanır, prose'a bırakılmaz. Çıktı v3'tür
+(`meta.schemaVersion: 3`); `teknik-analiz` bunu `contract` olarak bağlar.
 
 ⚠ **Araç per-dosyadır — import kapanışını birleştirmez.** `emit-operations.mjs` yalnız
 **verilen `.cdsl` dosyasının** operation'larını yazar; o dosya başka bir `.cdsl`'i `import`

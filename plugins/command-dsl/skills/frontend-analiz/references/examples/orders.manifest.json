@@ -1,0 +1,413 @@
+{
+    "mode": "linked",
+    "contract": "./catalog.operations.json",
+    "meta": {
+        "hasErrors": false,
+        "errorCount": 0
+    },
+    "deployables": [],
+    "modules": [
+        {
+            "name": "Orders",
+            "pureTechnical": false
+        },
+        {
+            "name": "Shared",
+            "pureTechnical": true
+        }
+    ],
+    "operations": [
+        {
+            "id": "PlaceMyOrder",
+            "module": "Orders",
+            "visibility": "exposed",
+            "realizes": "PlaceOrderFromCart",
+            "signature": {
+                "params": [
+                    {
+                        "name": "cartId",
+                        "type": "CartId",
+                        "collection": false
+                    }
+                ],
+                "returns": "OrderId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/orders"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/orders\")"
+                }
+            ],
+            "roles": [
+                "Customer"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Cart"
+                ],
+                "creates": [
+                    "Order"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Aynı sepetle ikinci çağrı yeni sipariş yaratmamalı (retry-safe).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": {
+                "keys": [
+                    "cartId"
+                ]
+            },
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ListMyOrders",
+            "module": "Orders",
+            "visibility": "exposed",
+            "realizes": "ListOwnOrders",
+            "signature": {
+                "params": [],
+                "returns": "Order"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/orders"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/orders\")"
+                }
+            ],
+            "roles": [
+                "Customer"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Order"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": null,
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "cursor",
+                "keys": [
+                    {
+                        "field": "createdAt",
+                        "direction": "desc"
+                    },
+                    {
+                        "field": "id",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 50
+            }
+        },
+        {
+            "id": "CancelMyOrder",
+            "module": "Orders",
+            "visibility": "exposed",
+            "realizes": "CancelPendingOrder",
+            "signature": {
+                "params": [
+                    {
+                        "name": "id",
+                        "type": "OrderId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/orders/:id/cancel",
+                            "params": [
+                                "id"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/orders/:id/cancel\")"
+                }
+            ],
+            "roles": [
+                "Customer"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Refund"
+                ],
+                "updates": [
+                    "Order"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "İptal sonrası iade webhook'u beklenmeli — senkron yanıt varsayma.",
+            "businessNote": "İptal penceresi DSL'de 'only if Order.age <= 1 hour' ile sınırlı; gerçek\niade SLA'sı (24s) ve 3DS geri-ödeme akışı DSL dışıdır — handler ödeme\nsağlayıcısının iade webhook'unu beklemeli, senkron yanıt varsaymamalı.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "OrderNotCancellable"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        }
+    ],
+    "entities": [
+        {
+            "id": "Order",
+            "module": "Orders",
+            "realizes": [
+                "Order"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "OrderId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "status",
+                    "type": "OrderStatus",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "enum"
+                },
+                {
+                    "name": "total",
+                    "type": "Money",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "type"
+                },
+                {
+                    "name": "createdAt",
+                    "type": "Timestamp",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [
+                {
+                    "text": "total.amount >= 0",
+                    "ast": {
+                        "node": "cmp",
+                        "op": ">=",
+                        "left": {
+                            "path": [
+                                "total",
+                                "amount"
+                            ]
+                        },
+                        "right": {
+                            "kind": "number",
+                            "value": 0
+                        }
+                    }
+                }
+            ],
+            "concurrency": "optimistic"
+        },
+        {
+            "id": "Refund",
+            "module": "Orders",
+            "realizes": [
+                "Refund"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "RefundId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "amount",
+                    "type": "Money",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "type"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "Cart",
+            "module": "Orders",
+            "realizes": [
+                "Cart"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "CartId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "total",
+                    "type": "Money",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "type"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        }
+    ],
+    "types": [
+        {
+            "id": "Money",
+            "module": "Shared",
+            "kind": "composite",
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "currency",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "OrderStatus",
+            "module": "Shared",
+            "kind": "enum",
+            "values": [
+                "Pending",
+                "Cancelled",
+                "Completed"
+            ]
+        }
+    ],
+    "errors": [
+        {
+            "id": "OrderNotCancellable",
+            "module": "Orders",
+            "resultType": "NotProcessable"
+        }
+    ],
+    "events": [],
+    "subscriptions": [],
+    "externals": [],
+    "uncharted": [],
+    "callEdges": [],
+    "coverage": {
+        "unrealizedBusinessOps": [
+            "ApproveProposal",
+            "BrowsePublicArticle",
+            "CalculateCommission",
+            "CalculateInvoiceTotal",
+            "CancelBranchOrder",
+            "CleanupTempFiles",
+            "CommentOnFriendPhoto",
+            "CreateProposal",
+            "DelegateOrderRead",
+            "DeleteComment",
+            "FlagComment",
+            "IssueGiftCard",
+            "LikeFriendComment",
+            "ListAllProposals",
+            "ListPublicArticles",
+            "ListRecentReceipts",
+            "PostPhoto",
+            "PurgeLogs",
+            "ReadBranchOrder",
+            "ReadOwnOrder",
+            "RejectProposal",
+            "RevokeOperatorUserWrite",
+            "UpdateAnyCredentials",
+            "UpdateOwnCredentials"
+        ],
+        "uncoveredEntities": [
+            "Article",
+            "Branch",
+            "Comment",
+            "Commission",
+            "Credentials",
+            "GiftCard",
+            "Invoice",
+            "InvoiceItem",
+            "Like",
+            "Logs",
+            "Photo",
+            "Proposal",
+            "Receipt",
+            "TempFile",
+            "User"
+        ]
+    }
+}

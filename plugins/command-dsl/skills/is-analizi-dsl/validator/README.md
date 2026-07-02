@@ -9,7 +9,7 @@ servisleriyle** parse-temiz + tutarlı olduğunu kanıtlayan tek dosyalık bundl
 - **`build.mjs`** — kaynağı canlı CommandDSL'den `validate.mjs`'e derleyen script.
 
 **Kardeş araç — operations.json üreteci (kanonik):**
-- **`emit-operations.mjs`** — `.cdsl → operations.json` (v2, `meta.schemaVersion: 2`) tek dosyalık
+- **`emit-operations.mjs`** — `.cdsl → operations.json` (v3, `meta.schemaVersion: 3`) tek dosyalık
   bundle; CommandDSL deposu/`node_modules` gerekmez. `.cdsl`'de severity-1 error varsa emit ETMEZ
   (exit 1) → "doğrulama tamamlanınca üret" garantisi araçta. Skill bunu, validator 0-error geçince
   **otomatik** çağırır (makine-devir sözleşmesi; `teknik-analiz`/`kesif` tüketir).

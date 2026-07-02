@@ -9,7 +9,7 @@ Bir construct'ı nasıl yazacağından emin değilsen buraya bak.
 
 ## Dosyalar
 
-- **`catalog.operations.json`** — paylaşılan iş sözleşmesi (schemaVersion 2). `realizes`
+- **`catalog.operations.json`** — paylaşılan iş sözleşmesi (schemaVersion 3). `realizes`
   hedeflerinin (op + entity ID) ve `rolemap` aktörlerinin kaynağı. Linked örnekler buna `contract`'lar.
 - **`slice.tcdsl`** — **minimal** vertical slice: tek komut (`CancelOrder realizes
   CancelPendingOrder`), write-set'i (Order, Refund) aynı module'de realize. En sade linked iskelet.

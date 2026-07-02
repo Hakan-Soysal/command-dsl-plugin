@@ -1,4 +1,4 @@
-// Zengin LINKED TechDsl exemplar — catalog.operations.json'a bağlı (schemaVersion 2).
+// Zengin LINKED TechDsl exemplar — catalog.operations.json'a bağlı (schemaVersion 3).
 // Tek module (intra-module = strong consistency → mode gerekmez, consistency warning yok).
 // Gösterdiği construct'lar: contract + realizes (op & entity) + rolemap + access (CRUD) +
 // roles/ownership + idempotent (param-key) + error/throws + pagination + entity invariant
