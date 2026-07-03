@@ -9,7 +9,8 @@ rolemap {
 module Proposals {
     error DuplicateProposal : NotProcessable
     event ProposalSubmitted { proposalId: Id  title: Text }
-    entity Proposal realizes Proposal { id: Id  title: Text  amount: Money  status: Text  owner: Id }
+    entity Proposal realizes Proposal { id: Id  title: Text  amount: Money  status: Text  owner: Id
+        invariant amount >= 0 as "non-negative-amount" }
     entity AuditLine { id: Id  proposalId: Id  remark: Text }   // 'note' tech-keyword — alan adı olamaz
 
     @rest(post) operation SubmitProposal(title: Text, amount: Money) : Proposal realizes SubmitProposal {
@@ -45,4 +46,15 @@ module Proposals {
 external Payments {
     operation ReserveFee(amount: Money) : Reservation
     operation ReleaseFee(reservationId: Id) : Ack
+}
+
+// Çapraz-kesen tech garantisi → guarantee-coverage sinerjisi: testable yükümlülükleri
+// (guard/throws) proposals.qa'daki testler kapsar; invariant STRUCTURAL (rollup dışı).
+// merged qa.json'da coverage.guarantees[]: ValidProposal → covered.
+guarantee ValidProposal "Teklif gönderimi doğrulanmış ve mükerrer-korumalı" traces "REQ-PROP-1" {
+    by invariant Proposals.Proposal : "non-negative-amount"
+    by guard     Proposals.SubmitProposal : "title-required"
+    by guard     Proposals.SubmitProposal : "amount-positive"
+    by guard     Proposals.SubmitProposal : "proposal-limit"
+    by throws    Proposals.SubmitProposal : DuplicateProposal
 }

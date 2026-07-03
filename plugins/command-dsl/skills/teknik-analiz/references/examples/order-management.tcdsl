@@ -2,7 +2,8 @@
 // Tek module (intra-module = strong consistency → mode gerekmez, consistency warning yok).
 // Gösterdiği construct'lar: contract + realizes (op & entity) + rolemap + access (CRUD) +
 // roles/ownership + idempotent (param-key) + error/throws + pagination + entity invariant
-// (composite path) + concurrency optimistic + serving görünürlük (@rest).
+// (etiketli — `as "..."`) + concurrency optimistic + serving görünürlük (@rest) +
+// guarantee (izlenebilirlik: insan-garantisi → mevcut yükümlülük eşlemesi).
 // Doğrulayıcı beklentisi: 0 error (realizes/divergence kapsama info'ları olabilir).
 contract './catalog.operations.json'
 
@@ -51,7 +52,7 @@ module Orders {
     status: OrderStatus
     total: Money
     createdAt: Timestamp
-    invariant total.amount >= 0
+    invariant total.amount >= 0 as "non-negative-total"
     concurrency optimistic
   }
   entity Refund realizes Refund { id: RefundId  amount: Money }
@@ -62,4 +63,19 @@ module Orders {
 module Shared {
   type Money { amount: Decimal  currency: String }
   enum OrderStatus { Pending  Cancelled  Completed }
+}
+
+// ── Guarantee (izlenebilirlik): insan-garantisini onu ENFORCE eden MEVCUT yapısal
+//    yükümlülüğe statik-denetlenen bir EŞLEME ile bağlar. Mantık yükümlülükte kalır;
+//    guarantee salt mapping (+ opsiyonel `traces` upstream-REQ köprüsü, `note` proza).
+//    Yükümlülük silinir/yeniden-adlandırılırsa validator derleme-zamanı error verir. ──
+guarantee OrderTotalNeverNegative
+    "Bir siparişin toplamı hiçbir işlem sonrasında negatif olamaz"
+    traces "REQ-ORD-007" {
+    by invariant Orders.Order : "non-negative-total"
+    note "Toplam etiketli invariant'la her durumda korunur."
+}
+guarantee OnlyPendingOrdersCancellable
+    "Yalnızca iptal edilebilir durumdaki siparişler iptal edilir; aksi reddedilir" {
+    by throws Orders.CancelMyOrder : OrderNotCancellable
 }

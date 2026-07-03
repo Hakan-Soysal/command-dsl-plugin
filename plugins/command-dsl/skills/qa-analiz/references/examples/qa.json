@@ -211,7 +211,81 @@
         ]
       }
     ],
-    "processes": []
+    "processes": [],
+    "guarantees": [
+      {
+        "id": "ValidProposal",
+        "tech": "proposals.tcdsl",
+        "text": "Teklif gönderimi doğrulanmış ve mükerrer-korumalı",
+        "traces": [
+          "REQ-PROP-1"
+        ],
+        "status": "covered",
+        "obligations": [
+          {
+            "kind": "invariant",
+            "op": null,
+            "entity": "Proposals.Proposal",
+            "label": "non-negative-amount",
+            "testable": false,
+            "status": "structural",
+            "coveredBy": []
+          },
+          {
+            "kind": "guard",
+            "op": "Proposals.SubmitProposal",
+            "guard": "title-required",
+            "testable": true,
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "boş başlık reddedilir"
+              }
+            ]
+          },
+          {
+            "kind": "guard",
+            "op": "Proposals.SubmitProposal",
+            "guard": "amount-positive",
+            "testable": true,
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "sıfır tutar reddedilir"
+              }
+            ]
+          },
+          {
+            "kind": "guard",
+            "op": "Proposals.SubmitProposal",
+            "guard": "proposal-limit",
+            "testable": true,
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "bütçe limiti aşılırsa reddedilir"
+              }
+            ]
+          },
+          {
+            "kind": "throws",
+            "op": "Proposals.SubmitProposal",
+            "error": "DuplicateProposal",
+            "testable": true,
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "mükerrer teklif reddedilir"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "files": [
     {

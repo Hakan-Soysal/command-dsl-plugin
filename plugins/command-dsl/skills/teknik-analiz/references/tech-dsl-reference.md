@@ -5,7 +5,8 @@
 > TechDsl`); `import './shared'` ile birleşik `Expr` alt-grameri gelir.
 >
 > **Emit sırası (dependency-order):** `contract`/`standalone` → `rolemap` → `import` →
-> `extension` → `deployable` → `module`/`external`/`uncharted`. Referans verilen önce gelir.
+> `extension` → `deployable` → `module`/`external`/`uncharted` → `guarantee` (§11; module/op/
+> invariant'lara referans verdiği için **EN SON**). Referans verilen önce gelir.
 
 ---
 
@@ -70,13 +71,16 @@ entity Order realizes Order {           // realizes: kaba (0..N) business entity
   lines: list of LineItem                // list of → koleksiyon (to-many)
   total: Money
   customerId: CustomerId sourceOfTruth(CRM.Customer)   // cross-module bağ (aşağı bkz.)
-  invariant total.amount >= 0            // entity-düzeyi "her zaman doğru" (saf-tech)
+  invariant total.amount >= 0 as "non-negative"   // entity-düzeyi "her zaman doğru"; `as "..."` = opsiyonel etiket
   concurrency optimistic                 // lost-update koruması (entity başına ≤1)
 }
 ```
 - **Nötr-tipli alanlar** (teknik-only dahil); alan-düzeyi business eşleme YOK (kaba realizes).
-- **`invariant <Expr>`**: path'ler composite `type` ve **intra-module** entity-ref'leri gezer;
-  **cross-module entity navigasyonu → error**; `sum of`'suz to-many skaler bağlamda → error.
+- **`invariant <Expr> ('as' "<etiket>")?`**: path'ler composite `type` ve **intra-module**
+  entity-ref'leri gezer; **cross-module entity navigasyonu → error**; `sum of`'suz to-many
+  skaler bağlamda → error. Opsiyonel **`as "<etiket>"`** invariant'a ad verir → bir `guarantee`
+  onu `by invariant <Module>.<Entity> : "<etiket>"` ile referanslayabilir (§11); etiket
+  yalnız izlenebilirlik içindir, davranışı değiştirmez.
 - **`concurrency optimistic`**: entity-başına ≤1 (2.→error); **uncharted entity'de → error**.
   `version` alanı YAZMA (mekanizma üreteçte).
 - **`sourceOfTruth(Module.Entity)`**: cross-module bağın TEK yolu. İşaretli alan **skaler/ID**
@@ -323,3 +327,44 @@ a.b.c                                            // path (segment'ler)
 `rule` kökü param/`access`-entity-veya-alias/`calls`-alias; `invariant`/`permit when` kökü entity
 alanları/`resource.*` (cross-module entity navigasyonu → error). Bildirilmemiş/yanlış-eksen kök →
 error (bkz. §6).
+
+---
+
+## 11. Guarantee (izlenebilirlik) — top-decl
+
+İnsan-seviyesi bir garantiyi (güvenlik/emniyet/uyum), onu ENFORCE eden **MEVCUT yapısal
+yükümlülüklere** statik-denetlenen bir **EŞLEME** ile bağlar. **Mantık YOK** — mantık
+`invariant`/`validation`/`rule`/`throws`/result-taksonomisinde kalır; guarantee salt ad + metin
+(+ opsiyonel `traces` upstream-REQ köprüsü, `note` proza) + çözülebilir referanslardır. `manifest`
+= mapping (süperset değil). Bir yükümlülük silinir/yeniden-adlandırılırsa validator **derleme-zamanı
+error** verir → çapraz-kesen garantinin **sessiz drift'i** yakalanır.
+
+```
+guarantee NonNegativeBalance                       // ad (benzersiz) + insan-metni (STRING)
+    "Bakiye hiçbir operasyon sonrasında negatif olamaz"
+    traces "REQ-PAY-014", "REQ-PAY-015" {          // (opsiyonel) upstream gereksinim ID'leri
+    by invariant Payments.Account : "non-negative"  // entity invariant'ının ETİKETİ (§2 `as "..."`)
+    by guard     Payments.Withdraw : "sufficient-funds"   // op'un validation/rule guard-id'si
+    by throws    Payments.Withdraw : InsufficientFunds    // op'un throws listesindeki error
+    by operation Payments.Reconcile                 // (etiketsiz) op'un bütünü garantiyi taşır
+    note "Withdraw yetersiz bakiyede reddeder."      // (opsiyonel) serbest metin, davranışı yönetmez
+}
+```
+
+- **Top-decl** (module gibi model kökünde; §0 emit-order'da **EN SON** — referanslarından sonra).
+  Referanslar `Module.op` / `Module.Entity` nitelikli; op'lar **cross-module bedava** çözülür (linker).
+- **4 yükümlülük türü** (`by …`): `operation <Mod>.<Op>` · `guard <Mod>.<Op> : "id"` ·
+  `invariant <Mod>.<Entity> [: "etiket"]` · `throws <Mod>.<Op> : <Error>`.
+- **`traces "REQ…"`** = üst-akış gereksinim/hedef ID'leri (salt-metin köprü; goalId manifest'e taşınır).
+- **Validator kısıtları** (`checkGuarantee` + `checkGuaranteeNames`):
+  - `by guard … : "id"` → id op'un `validation`/`rule` guard-id'lerinde yoksa → **error**.
+  - `by throws … : Err` → Err op'un `throws` listesinde yoksa → **error**.
+  - `by invariant <Entity> : "etiket"` → entity'de o etiketli invariant yoksa → **error**;
+    entity'nin hiç invariant'ı yoksa → **warning** (etiketsiz `by invariant` de invariant ister).
+  - **Hiç yükümlülüğü olmayan** garanti → **warning** (salt-proza anlamsız; `note` kullan).
+  - **Yinelenen guarantee adı** → **error**. Dangling op/entity/error ref → **linker error**.
+- **Manifest:** üst-düzey `guarantees[]` (`{ id, text, traces[], obligationCount, obligations[], note }`);
+  entity `invariant`'ları da `label` taşır. Additif — mevcut clause semantiği dokunulmaz.
+- **Ne zaman üret:** yalnızca birden çok op/entity'ye **yayılan** çapraz-kesen bir garanti (ör.
+  "bakiye asla negatif olamaz", "yalnız pozitif tutar") varsa. Tek-op yerel kuralı zaten
+  `invariant`/`rule`'da; onu guarantee'ye sarma (gereksiz). **Opsiyonel** construct.

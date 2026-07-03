@@ -256,6 +256,18 @@ if (ok && args.merged) {
     const covered = branches.filter(b => b.status === 'covered').length;
     const waived = branches.filter(b => b.status === 'waived').length;
     log(`→ ${args.merged} (birleşik: ${merged.coverage.operations.length} op · dal ${covered} covered / ${waived} waived / ${branches.length - covered - waived} uncovered)`);
+    // guarantee-coverage sinerjisi: tech garantilerinin testable yükümlülük (guard/throws) durumu.
+    const gcov = merged.coverage.guarantees;
+    if (gcov.length > 0) {
+        const by = (s: string): number => gcov.filter(g => g.status === s).length;
+        log(`  garantiler: ${gcov.length} · ${by('covered')} covered / ${by('partial')} partial / ${by('uncovered')} uncovered / ${by('structural')} structural`);
+        for (const g of gcov.filter(g => g.status === 'partial' || g.status === 'uncovered')) {
+            const gaps = g.obligations
+                .filter(o => o.testable && o.status === 'uncovered')
+                .map(o => o.guard ? `${o.op} guard "${o.guard}"` : o.error ? `${o.op} throws ${o.error}` : o.op);
+            log(`    ⚠ ${g.id} [${g.status}] — kapsanmayan: ${gaps.join(', ')}`);
+        }
+    }
 }
 
 // ── rapor kapanışı ──────────────────────────────────────────────────────────

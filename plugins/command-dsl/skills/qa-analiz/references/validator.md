@@ -47,7 +47,11 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs --version
   sarmalayıcı şemasıyla paralel).
 - `--out <dizin>`: 0-error'da kaynak dosya başına `<ad>.qa.json`.
 - `--merged <dosya>`: 0-error'da birleşik `qa.json` — **coverage YALNIZ burada**
-  (karar #18). Önerilen ad/konum: çıktı dizininde `qa.json`.
+  (karar #18). Önerilen ad/konum: çıktı dizininde `qa.json`. Bağlı tech dosyalarında
+  `guarantee` varsa merged'e `coverage.guarantees[]` de eklenir (guarantee-coverage
+  sinerjisi; `tech-to-qa-translation.md §A2`); CLI, dal özetinin altında `garantiler:
+  N · … covered / … partial / … uncovered / … structural` satırını ve `partial`/
+  `uncovered` garantilerin kapsanmayan yükümlülüklerini `⚠` ile basar.
 
 ## Diagnostics → düzeltme döngüsü
 

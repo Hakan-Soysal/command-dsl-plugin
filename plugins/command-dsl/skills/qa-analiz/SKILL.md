@@ -178,6 +178,10 @@ ETME — yalnız testlerin gerçekten kullanacağı kimlikler; ama yetki-testler
   `waive <Op> covers <dal> [until "YYYY-MM-DD"] because "…"`.
 - Kullanıcı "girişsiz deneyince ne olur testi" / "sayfa boyutu testi" isterse sınırı
   açıkla: **yazmıyoruz — üreteç politikası** (P1/P3; tek cümle gerekçeyle).
+- **Guarantee-farkındalığı (çapraz-kesen):** bir guard/throws dalı bir tech `guarantee`'sinin
+  yükümlülüğüyse, onu kapsamak/waive'lemek o garantinin rollup'ını da ilerletir. Ayrı bir karar
+  DEĞİL — aynı dal kararının çapraz-kesen görünümü; merged `qa.json` `partial`/`uncovered` kalan
+  garantileri işaretler, kapanışta (Faz 6) takip sorusuna dönüşür (bkz. Emit + qa.json bölümü).
 
 **⚠ Anti-pattern — Waive kaçışı (iki yönlü):** waive bir sus düğmesi değildir; gerekçe
 ZORUNLU ve anlamlı olmalı ("vaktimiz yok" kabul edilmez → `until` ile erteleme yaz).
@@ -327,6 +331,18 @@ partial yok). "0-error → otomatik emit" garantisi prose'a değil **araca** gö
 `qa.json` üretilir (**coverage YALNIZ merged'de** — karar #18). Merged, "her dal
 kapalı" iddiasının makine-okur kanıtıdır; test-üreteci onu tech `manifest.json` ile
 **çift girdi** alır (devir paketi: `references/consistency-and-emit.md` §E).
+
+**guarantee-coverage sinerjisi (additif, merged'de).** Bağlı tech dosyalarında
+`guarantee` (çapraz-kesen izlenebilirlik; tech DSL §11) varsa, merged `qa.json`'a
+`coverage.guarantees[]` eklenir: her garantinin **testable** yükümlülükleri (`by guard`
+/ `by throws`) op-dal kapsamasına join edilir (durum: covered/waived/uncovered),
+`by invariant`/`by operation` **structural**'dır (dal değil, rollup dışı). Garanti
+rollup'ı: `covered` (tüm testable kapsanmış) / `partial` / `uncovered` / `structural`.
+CLI de merged özetinin altında `garantiler: N · … covered / … partial / …` satırını,
+ve `partial`/`uncovered` garantilerin kapsanmayan yükümlülüklerini `⚠` ile basar. **QA
+garanti YAZMAZ** (guarantee tech'te authored); QA yalnız test-kapsamasını **raporlar** —
+`partial`/`uncovered` bir garanti = çapraz-kesen bir güvencenin testi eksik → kullanıcıya
+takip sorusu ("bu garantinin şu guard'ı test edilmemiş — test mi, waive mı?").
 
 Konum çözümleme, strict varsayılanı, bayatlık (iki-hash) uyarısı,
 aile-eşzamanlı-build kuralı: `references/validator.md`.

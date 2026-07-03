@@ -19,8 +19,11 @@ Bir construct'ı nasıl yazacağından emin değilsen buraya bak.
   - `realizes` (op & entity), `access { creates/updates/reads }`, `roles`/`ownership`
   - `idempotent by <param>` (retry-safe), `error N: NotProcessable` + `throws`
   - `paginated by cursor <field> desc, <field> asc size N` (list-dönen sorguda)
-  - entity `invariant` (composite path `total.amount`) + `concurrency optimistic`
+  - entity `invariant` (composite path `total.amount`, **etiketli** `as "non-negative-total"`) +
+    `concurrency optimistic`
   - serving görünürlük (`@rest(...)`), saf-teknik `Shared` module'ü (yalnız type+enum)
+  - `guarantee` (izlenebilirlik): iki çapraz-kesen garanti → `by invariant` (etiketli) ve
+    `by throws` yükümlülüklerine eşleme + `traces "REQ-…"` upstream köprüsü
   - Doğrulama: `0 error / 1 warn (kapsam) / 2 info`.
 
 ## "kapsam" warning'i neden var? (beklenen — hata değil)

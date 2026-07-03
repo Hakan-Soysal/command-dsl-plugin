@@ -12,7 +12,7 @@
 (qcdsl tooling turu). `.qa` içindeki `uses` yolları göreli (`./proposals.tcdsl`,
 `./proposals.operations.json`) olduğundan kopya bu dizinde **aynen** çalışır.
 
-## Doğrulama kanıtı (gömülü araçla — build: grammar `c7bab5da7065`, src `b0333be6e3b3`)
+## Doğrulama kanıtı (gömülü araçla — build: grammar `5e7f3ca61106`, src `8803bb50614c`)
 
 Bu dizinin İÇİNDEN (cwd = bu dizin; `meta.source` yolları temiz kalsın):
 
@@ -27,8 +27,14 @@ Beklenen (strict VARSAYILAN, exit **0**):
 ◦ proposals.tcdsl (kapanış) — 0 hata, 4 uyarı, 3 bilgi
 → proposals.qa.json
 → qa.json (birleşik: 4 op · dal 10 covered / 3 waived / 0 uncovered)
+  garantiler: 1 · 1 covered / 0 partial / 0 uncovered / 0 structural
 ÖZET: 1 dosya · 0 hata · 4 uyarı · 3 bilgi · strict
 ```
+
+> **guarantee-coverage satırı** (dal özetinin altında): tech `guarantee`'lerinin testable
+> yükümlülük (guard/throws) durumu. `proposals.tcdsl`'deki `ValidProposal` garantisinin 3
+> guard + 1 throws yükümlülüğü zaten kapsandığından **covered**; `partial`/`uncovered`
+> garantiler ayrıca kapsanmayan yükümlülüklerini `⚠` ile listeler.
 
 `.qa` dosyasının kendisi **0/0/0**; tüm uyarı/bilgi kapanıştaki `proposals.tcdsl`'den
 gelir ve **bilinçli/didaktiktir** — tech exemplar'ı bu tanıları göstermek için böyle
@@ -95,6 +101,11 @@ waives var) — coverage yalnız merged'de hesaplanır; `meta.source: "proposals
   waive'lenip ownership testle kapatılmış (niteleyicili waive).
 - **defaults + dataset + override**: `defaults for SubmitProposal { as … stub … }` +
   `with gecerliTeklif { title: "" }` satır-içi override deseni.
+- **guarantee-coverage sinerjisi**: `proposals.tcdsl`'deki çapraz-kesen `guarantee
+  ValidProposal` (tech) → merged `qa.json` `coverage.guarantees[]`'te rollup. Testable
+  yükümlülükleri (3 guard + throws `DuplicateProposal`) mevcut testlerce kapsandığından
+  **covered**; `invariant "non-negative-amount"` STRUCTURAL (dal değil, rollup dışı,
+  `coveredBy: []`). QA garanti YAZMAZ — tech guarantee'lerinin test-kapsamasını RAPORLAR.
 
 ## Yeniden üretme
 

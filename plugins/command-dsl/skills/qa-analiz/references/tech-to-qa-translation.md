@@ -30,6 +30,29 @@ Op-başına dal envanterini bu tabloyla KENDİN çıkar, kullanıcıya düz dill
 - Aynı dalı birden çok test kapsayabilir (redundans serbest; merged `coveredBy[]`
   hepsini listeler). Senaryo `expect`'leri de coverage'a sayılır (karar #12).
 
+## A2. Tech `guarantee` → coverage rollup (guarantee-coverage sinerjisi)
+
+Tech DSL'de bir `guarantee` (çapraz-kesen izlenebilirlik; tech-dsl §11) **yeni dal
+DOĞURMAZ** — zaten §A'da türettiğin guard/throws dallarına bir **eşleme** koyar. QA
+tarafı guarantee YAZMAZ; merged `qa.json`'a garantinin **rollup**'ını ekler. Yükümlülük
+türü → durum kaynağı:
+
+| Guarantee yükümlülüğü | testable? | coverage durumu nereden |
+|---|---|---|
+| `by guard <Op> : "id"` | **evet** | o op'un `guard "id"` dalının QA durumu (covered/waived/uncovered) — §A |
+| `by throws <Op> : E` | **evet** | o op'un `error E` dalının QA durumu — §A |
+| `by invariant <Ent> : "etiket"` | hayır | **structural** (dal değil; `coveredBy: []`, rollup dışı) |
+| `by operation <Op>` | hayır | **structural** (belirli dal yok) |
+
+- **Garanti rollup'ı:** `covered` (tüm testable yükümlülük covered/waived) · `partial`
+  (bazısı) · `uncovered` (hiçbiri) · `structural` (hiç testable yok — yalnız invariant/operation).
+- **Türetim mekaniği:** guarantee'nin `by guard`/`by throws` işaret ettiği op-dalı zaten
+  §A envanterindedir; onu test/waive ederek garantiyi de ilerletirsin. Ekstra bir `covers`
+  biçimi YOK — guarantee'ye doğrudan test yazılmaz, yükümlülük-dalları test edilir.
+- **Sorgulama sinyali:** `partial`/`uncovered` bir garanti = çapraz-kesen bir güvencenin
+  test-kapsaması eksik. CLI `garantiler:` özeti + `⚠` ile kapsanmayan yükümlülükleri listeler;
+  kapanışta (Faz 6) "bu garantinin şu guard'ı test edilmemiş — test mi, waive mı?" sorusuna çevir.
+
 ## B. NotAuthorized mekanizma-seçim rehberi (karar #21 + İQ8)
 
 - Op'ta **TEK** yetki mekanizması varsa: çıplak `covers NotAuthorized` yeterlidir —

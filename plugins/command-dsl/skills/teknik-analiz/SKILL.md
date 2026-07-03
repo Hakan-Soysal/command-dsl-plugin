@@ -74,7 +74,8 @@ Girdiyi netleştir:
   (`${CLAUDE_SKILL_DIR}` = bu skill'in dizini; CWD kullanıcının cwd'si olduğundan göreli yol kullanma).
   `.cdsl` parse hatalıysa araç emit etmez (exit 1) — **önce iş tarafını düzelttir**, tech'e geçme.
 
-Sonra sekiz fazı sırayla yürüt. (Elicit top-down: büyük resim → detay; emit dependency-order.)
+Sonra sekiz elicitation fazını (Faz 0–7) sırayla yürüt; ardından **opsiyonel** Faz 8'i (guarantee,
+yalnız çapraz-kesen garanti varsa). (Elicit top-down: büyük resim → detay; emit dependency-order.)
 
 ---
 
@@ -227,12 +228,34 @@ idempotent/emits/on linker'ları.
 
 ---
 
+## Faz 8 — Guarantee (opsiyonel, izlenebilirlik)
+
+**Amaç:** Birden çok op/entity'ye **yayılan** çapraz-kesen bir insan-garantisini, onu ENFORCE
+eden **mevcut** yapısal yükümlülüklere (invariant/guard/throws) bir **eşleme** ile bağlamak —
+böylece o yükümlülüklerden biri silinir/yeniden-adlandırılırsa validator drift'i derleme-zamanı
+yakalar. Bu faz **yeni mantık üretmez**; yalnız zaten yazılmış yükümlülükleri haritalar. **Yoksa atla.**
+**Elicit et (yalnız gerekiyorsa):**
+- "Bu tasarımda **birden çok işlemi kesen**, tek bir kayıt/kuralla sınırlı olmayan bir güvence
+  var mı (ör. 'bir hesabın bakiyesi asla negatif olamaz', 'para hareketleri yalnız pozitif tutarla')?"
+  → varsa `guarantee <Ad> "<insan-metni>"` + onu tutan yükümlülükleri `by invariant/guard/throws`
+  ile eşle. Üst-akış gereksinim ID'si varsa → `traces "REQ-…"`.
+- Etiketle bağlanacak invariant'a §2'deki `as "<etiket>"` ekliliğini ver (`by invariant M.E : "etiket"`).
+
+**⚠ Anti-pattern — garantiyi mantık zannetme / gereksiz sarma:** guarantee'ye kural YAZMA (mantık
+invariant/rule/throws'ta kalır); **tek-op yerel** kuralı guarantee'ye sarma (zaten `invariant`/`rule`).
+Yükümlülüğü olmayan salt-proza garanti → warning (`note` kullan). Yinelenen ad → error.
+**Kapatır:** `checkGuarantee` (guard/throws/invariant-etiket çözünürlüğü → error; boş → warning),
+`checkGuaranteeNames` (dup → error). Tam sözdizimi/kısıt: `references/tech-dsl-reference.md §11`.
+
+---
+
 ## Emit (dependency-order) + Doğrulama + manifest.json
 
 **Emit:** Linked `.tcdsl`. ⚠ Bir sistemin **tüm domain module'leri TEK kök dosyada** olmalı
 (manifest üreteci yalnız kök dokümanı gezer — `consistency-and-emit.md §C` manifest kısıtı);
 modülleri tip-bazlı dosyalara **bölme**, dosya içinde dependency sırasında diz (referans verilen
 önce). `import` yalnız extension-pack içindir. `contract` + her op/entity'de `realizes` zorunlu.
+(Varsa) `guarantee`'ler **en sonda** — module/op/invariant'lara referans verdikleri için.
 Tam tutarlılık self-check'i ve dosya kuralı: `references/consistency-and-emit.md`.
 
 **Doğrula (zorunlu):** Gömülü Tech doğrulayıcısını çalıştır:
