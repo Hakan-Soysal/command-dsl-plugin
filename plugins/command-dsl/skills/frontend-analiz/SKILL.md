@@ -299,6 +299,34 @@ denetimlerin listesi: `references/validator.md`.
 
 ---
 
+## İnsan-okur raporlar (otomatik)
+
+`.experience.json`'lar 0-error'la üretildikten sonra rapor aracı **OTOMATİK** koşulur —
+varsayılan davranıştır; kullanıcı istemezse tek cümleyle atlanır (opt-out):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-frontend.mjs <çıktı-dizini> --flows <operations.json> --reports <çıktı>/reports --title "<Proje>"
+```
+
+Girdi, `--out` ile üretilen `.experience.json`'ların dizinidir; `--flows` ile business
+sözleşmesi bağlanır. Üretilenler (playground'un **kendi programatik üreteçleri** —
+el yazımı görsel yok): `frontend/wireframes/<slug>.puml` (ekran başına Salt) ·
+`flows/<slug>.puml` (experience storyboard) · `bizflows/<slug>.puml` (İş-Akışı:
+business flow × ekranlar — yalnız `--flows` verilince). Ardından araç
+`reports/index.md` + `index.html`'i **diski tarayarak YENİDEN üretir** (idempotent) —
+üç aile skill'i (business/frontend/qa) aynı `reports/` kökünde birleşir; hepsinde
+**aynı `--title`**'ı ver.
+
+Exit sözleşmesi: **0** üretildi · **1** girdi hatalı (HİÇBİR rapor yazılmaz — zaten
+0-error emit'ten geliyorsan görülmez) · **2** kullanım hatası.
+
+Kapanışta kullanıcıya `reports/index.md`'yi işaret et; `.puml`'ler index'teki
+plantuml.com "görüntüle" linkleriyle açılır — görüntüleme harici sunucuda render
+edildiğinden, içerik hassassa linke tıklamama tercihi kullanıcınındır (bunu tek
+cümleyle not düş). Sözleşme detayı: `references/validator.md`.
+
+---
+
 ## Referans dosyaları (gerektiğinde oku)
 
 - `references/frontend-dsl-reference.md` — FrontendDsl construct'larının tam
@@ -311,6 +339,7 @@ denetimlerin listesi: `references/validator.md`.
 - `references/consistency-and-emit.md` — emit öncesi bütünlük self-check + dosya
   granülaritesi + workspace-pass kuralı + gate'in garantisi.
 - `references/validator.md` — gömülü araç çağrımı + bayatlık + diagnostics→düzeltme +
-  warning→takip-sorusu döngüsü + tech'siz mod.
+  warning→takip-sorusu döngüsü + tech'siz mod + insan-okur rapor aracı
+  (`report-frontend.mjs`) sözleşmesi.
 - `references/examples/` — parser-doğrulanmış linked `.fcdsl` exemplar + GERÇEK
   upstream fixture'ları (operations.json + emit-manifest'ten üretilmiş manifest.json).

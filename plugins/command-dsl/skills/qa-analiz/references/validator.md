@@ -141,3 +141,30 @@ Parse hatalı `.cdsl`'de emit etmez (exit 1) — önce iş tarafını `is-analiz
 düzelttir. (Kanonik üretici is-analizi skill'indedir; buradaki self-contained
 kopyadır.) Üretilen sözleşme **v3**'tür (`meta.schemaVersion: 3`) — qa'nın `uses
 flows`'u da v3 bekler.
+
+## İnsan-okur rapor aracı (`report-qa.mjs`)
+
+0-error emit'ten (`--merged` → `qa.json`) sonra çalışan gömülü rapor üreteci
+(varsayılan otomatik; opt-out kuralı SKILL.md'de):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-qa.mjs <qa.json> --reports <dizin> [--title "<Proje>"] [--quiet]
+```
+
+- Girdi **merged manifest**'tir (coverage yalnız orada — karar #18); per-file
+  `<ad>.qa.json` verilmez.
+- **exit:** 0 = üretildi · 1 = girdi hatalı (HİÇBİR rapor yazılmaz — gate) ·
+  2 = kullanım hatası.
+- **Üretilen** (`reports/qa/…`): `kapsama.html` — playground "Kapsama" sekmesinin
+  statik eşdeğeri (op×dal chip'li tablo + flow/process presence + meta).
+  `hasErrors: true` taşıyan bir girdi (skill akışının dışından gelen manifest)
+  raporda belirgin uyarı bandıyla işaretlenir.
+- **Index regen kuralı:** her koşu sonunda `reports/index.md` + `index.html` **diski
+  TARAYARAK yeniden üretilir** (idempotent — hangi aile aracı son koşarsa koşsun aynı
+  index; business/frontend/qa aynı `reports/` kökünde birleşir, aynı `--title`'ı ver).
+  `.puml` girdileri göreli kaynak linki + plantuml.com/plantuml/svg/ görüntüleme
+  linkiyle listelenir (render harici sunucuda — hassas içerikte tıklamamak
+  kullanıcının tercihi).
+- **Bayatlık:** `REPORT-SNAPSHOT.json` aile iki-hash disipliniyle aynı BUILD_INFO'yu
+  taşır; rapor bundle'ı da yukarıdaki **aile-eşzamanlı build** kuralına tabidir —
+  tüm aile bundle'ları AYNI repo durumundan birlikte tazelenir.

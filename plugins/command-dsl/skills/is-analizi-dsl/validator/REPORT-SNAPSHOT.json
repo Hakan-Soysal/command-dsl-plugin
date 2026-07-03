@@ -1,0 +1,11 @@
+{
+  "source": "CommandDSL",
+  "tool": "report-business.mjs",
+  "grammarVersion": "cdsl-v3.x-b75a56181dad",
+  "grammarHash": "b75a56181dad",
+  "srcHash": "97abc8f039e9",
+  "commit": "ddaa1b8",
+  "builtAt": "2026-07-03T10:19:33+03:00",
+  "langium": "4.2.4",
+  "note": "İnsan-okur rapor bundle'ı — üreteçler: plantuml/plantuml-flow/plantuml-process/plantuml-blueprint/process-doc/cockburn/coverage + report-index (kanonik ortak kopya)"
+}

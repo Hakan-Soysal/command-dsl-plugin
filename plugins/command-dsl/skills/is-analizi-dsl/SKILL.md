@@ -279,6 +279,31 @@ bağlayacağı tüm business op'ları **tek bir `.cdsl` dosyasında** olmalı (m
 kuralının business karşılığı). Çok-modüllü bir sistemi tek `operations.json`'da istiyorsan
 modülleri tek dosyada topla; ayrı dosyalar ayrı (kısmi) sözleşmeler üretir.
 
+## İnsan-okur raporlar (otomatik)
+
+Makine-JSON'lar 0-error'la üretildikten sonra rapor aracı **OTOMATİK** koşulur —
+varsayılan davranıştır; kullanıcı istemezse tek cümleyle atlanır (opt-out):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-business.mjs <model.cdsl> --reports <çıktı>/reports --title "<Proje>"
+```
+
+Girdi, emit ettiğin `.cdsl`'dir (import kapanışıyla). Üretilenler — hepsi CommandDSL
+playground'unun **kendi programatik üreteçlerinden**, el yazımı görsel yok:
+`business/usecase.puml` · `flows/<slug>.puml` · `processes/<slug>.puml` +
+`<slug>.blueprint.puml` · `docs/**` (process-doc + cockburn) · `COVERAGE.md`. Ardından
+araç `reports/index.md` + `index.html`'i **diski tarayarak YENİDEN üretir**
+(idempotent) — üç aile skill'i (business/frontend/qa) aynı `reports/` kökünde
+birleşir; hepsinde **aynı `--title`**'ı ver.
+
+Exit sözleşmesi: **0** üretildi · **1** girdi hatalı (HİÇBİR rapor yazılmaz — zaten
+0-error emit'ten geliyorsan görülmez) · **2** kullanım hatası.
+
+Kapanışta kullanıcıya `reports/index.md`'yi işaret et; `.puml`'ler index'teki
+plantuml.com "görüntüle" linkleriyle açılır — görüntüleme harici sunucuda render
+edildiğinden, içerik hassassa linke tıklamama tercihi kullanıcınındır (bunu tek
+cümleyle not düş). Sözleşme detayı: `references/validator.md` (§7).
+
 ---
 
 ## Referans dosyaları (gerektiğinde oku)
@@ -293,7 +318,8 @@ modülleri tek dosyada topla; ayrı dosyalar ayrı (kısmi) sözleşmeler üreti
 - `references/consistency-and-emit.md` — emit öncesi tutarlılık self-check'i +
   dependency-order emit + dosya bölme. **Emit'ten önce oku.**
 - `references/validator.md` — doğrulayıcı konum zinciri + diagnostics + düzeltme
-  döngüsü. Üretimden sonra doğrulama yaparken oku.
+  döngüsü + insan-okur rapor aracı (`report-business.mjs`) sözleşmesi. Üretimden
+  sonra doğrulama/raporlama yaparken oku.
 - `references/examples/` — **parser-doğrulanmış (0 error) known-good exemplar**:
   dilin tüm construct'larını gösteren çok-modüllü model (`shop.cdsl`+`support.cdsl`)
   + `README.md` (nerede ne var). Bir yapıyı nasıl yazacağından emin değilsen buraya bak.

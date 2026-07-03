@@ -1,0 +1,10 @@
+{
+  "tool": "report-qa",
+  "srcHash": "5f0df26cd0c6",
+  "srcFiles": [
+    "report-qa.src.mts",
+    "report-index.src.mts"
+  ],
+  "builtAt": "2026-07-03T13:25:51.009Z",
+  "note": "SAF json→html rapor aracı; grammar/dil servisi gömülmez. Girdi şeması: CommandDSL spec qa-dsl-tasarim-spec-2026-07-02.md §6.2 (merged qa.json). HTML yapısı: playground qa-main.ts renderCoverage/branchLabel portu + emsal reports/qa/kapsama.html CSS."
+}

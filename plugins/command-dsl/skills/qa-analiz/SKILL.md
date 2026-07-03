@@ -333,6 +333,33 @@ aile-eşzamanlı-build kuralı: `references/validator.md`.
 
 ---
 
+## İnsan-okur raporlar (otomatik)
+
+Merged `qa.json` 0-error'la üretildikten sonra rapor aracı **OTOMATİK** koşulur —
+varsayılan davranıştır; kullanıcı istemezse tek cümleyle atlanır (opt-out):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-qa.mjs <çıktı>/qa.json --reports <çıktı>/reports --title "<Proje>"
+```
+
+Girdi, `--merged` ile üretilen birleşik manifest'tir (coverage yalnız orada — karar
+#18). Üretilen (playground'un **kendi programatik üreteci** — el yazımı görsel yok):
+`qa/kapsama.html` — playground "Kapsama" sekmesinin statik eşdeğeri (op×dal chip'li
+tablo + flow/process presence + meta). Ardından araç `reports/index.md` +
+`index.html`'i **diski tarayarak YENİDEN üretir** (idempotent) — üç aile skill'i
+(business/frontend/qa) aynı `reports/` kökünde birleşir; hepsinde **aynı `--title`**'ı ver.
+
+Exit sözleşmesi: **0** üretildi · **1** girdi hatalı (HİÇBİR rapor yazılmaz — zaten
+0-error emit'ten geliyorsan görülmez) · **2** kullanım hatası.
+
+Kapanışta kullanıcıya `reports/index.md`'yi işaret et; index'teki `.puml`'ler (diğer
+aile skill'lerinin raporları) plantuml.com "görüntüle" linkleriyle açılır —
+görüntüleme harici sunucuda render edildiğinden, içerik hassassa linke tıklamama
+tercihi kullanıcınındır (bunu tek cümleyle not düş). Sözleşme detayı:
+`references/validator.md`.
+
+---
+
 ## Referans dosyaları (gerektiğinde oku)
 
 - `references/qa-dsl-reference.md` — QA DSL construct'larının tam sözdizimi/anlamı:
@@ -350,7 +377,7 @@ aile-eşzamanlı-build kuralı: `references/validator.md`.
   anlamı + test-üreteci devir paketi.
 - `references/validator.md` — gömülü araç çağrımı + strict varsayılanı + bayatlık
   (iki-hash + aile-eşzamanlı-build) + diagnostics→düzeltme + warning→takip-sorusu
-  döngüsü.
+  döngüsü + insan-okur rapor aracı (`report-qa.mjs`) sözleşmesi.
 - `references/examples/` — parser-doğrulanmış (strict 0 error) exemplar:
   `proposals.qa` + `proposals.tcdsl` + `proposals.operations.json` üçlüsü + gömülü
   araçla üretilmiş `proposals.qa.json` + `qa.json`.

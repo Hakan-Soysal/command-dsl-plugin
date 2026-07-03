@@ -95,3 +95,28 @@ bundled/url snapshot olduğu için grammar değişince bayatlar. Mümkünse:
 - T5: yinelenen 4'lü imza.
 - Tanımsız entity/relation/calendar/actor.
 Hepsi `consistency-and-emit.md` self-check'inde önlenebilir; doğrulayıcı son emniyet kemeridir.
+
+## 7. İnsan-okur rapor aracı (`report-business.mjs`)
+
+Doğrulama 0-error geçip makine-JSON'lar üretildikten sonra çalışan gömülü rapor
+üreteci (varsayılan otomatik; opt-out kuralı SKILL.md'de):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-business.mjs <model.cdsl> --reports <dizin> [--title "<Proje>"] [--quiet]
+```
+
+- **exit:** 0 = üretildi · 1 = girdi hatalı (HİÇBİR rapor yazılmaz — gate) ·
+  2 = kullanım hatası.
+- **Üretilenler** (`reports/business/…`): `usecase.puml` · `flows/<slug>.puml` ·
+  `processes/<slug>.puml` + `<slug>.blueprint.puml` · `docs/**` (process-doc +
+  cockburn) · `COVERAGE.md` — hepsi playground'un kendi programatik üreteçlerinden.
+- **Index regen kuralı:** her koşu sonunda `reports/index.md` + `index.html` **diski
+  TARAYARAK yeniden üretilir** (idempotent — hangi aile aracı son koşarsa koşsun aynı
+  index; business/frontend/qa aynı `reports/` kökünde birleşir, aynı `--title`'ı ver).
+  `.puml` girdileri göreli kaynak linki + plantuml.com/plantuml/svg/ görüntüleme
+  linkiyle listelenir (render harici sunucuda — hassas içerikte tıklamamak
+  kullanıcının tercihi).
+- **Bayatlık:** `REPORT-SNAPSHOT.json` aile iki-hash disipliniyle aynı BUILD_INFO'yu
+  taşır; rapor bundle'ı da **aile-eşzamanlı build** kuralına tabidir — tüm aile
+  bundle'ları AYNI repo durumundan birlikte tazelenir, tek tarafı tazelemek
+  sürüm-kayması üretir.

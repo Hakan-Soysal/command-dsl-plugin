@@ -93,3 +93,28 @@ düzelttir. (Kanonik üretici is-analizi skill'indedir; buradaki self-contained 
 > onayıyla, local) ve iki bundle + `catalog.operations.json` fixture'ı birlikte tazelendi.
 > Kural kalıcıdır: **iki bundle'ı hep AYNI repo durumundan birlikte build et**
 > (`build.emit.mjs` + `build.frontend.mjs`) — tek tarafı tazelemek sürüm-kayması üretir.
+
+## İnsan-okur rapor aracı (`report-frontend.mjs`)
+
+0-error emit'ten (`--out` → `.experience.json`'lar) sonra çalışan gömülü rapor
+üreteci (varsayılan otomatik; opt-out kuralı SKILL.md'de):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-frontend.mjs <experience-dizini> [--flows <operations.json>] --reports <dizin> [--title "<Proje>"] [--quiet]
+```
+
+- **exit:** 0 = üretildi · 1 = girdi hatalı (HİÇBİR rapor yazılmaz — gate) ·
+  2 = kullanım hatası.
+- **Üretilenler** (`reports/frontend/…`): `wireframes/<slug>.puml` (ekran başına Salt) ·
+  `flows/<slug>.puml` (experience storyboard) · `bizflows/<slug>.puml` (İş-Akışı:
+  business flow × ekranlar — yalnız `--flows` verilince) — hepsi playground'un kendi
+  programatik üreteçlerinden (`frontend-salt` + `frontend-flow`).
+- **Index regen kuralı:** her koşu sonunda `reports/index.md` + `index.html` **diski
+  TARAYARAK yeniden üretilir** (idempotent — hangi aile aracı son koşarsa koşsun aynı
+  index; business/frontend/qa aynı `reports/` kökünde birleşir, aynı `--title`'ı ver).
+  `.puml` girdileri göreli kaynak linki + plantuml.com/plantuml/svg/ görüntüleme
+  linkiyle listelenir (render harici sunucuda — hassas içerikte tıklamamak
+  kullanıcının tercihi).
+- **Bayatlık:** `REPORT-SNAPSHOT.json` aile iki-hash disipliniyle aynı BUILD_INFO'yu
+  taşır; rapor bundle'ı da yukarıdaki **aile-eşzamanlı build** kuralına tabidir —
+  tüm aile bundle'ları AYNI repo durumundan birlikte tazelenir.
