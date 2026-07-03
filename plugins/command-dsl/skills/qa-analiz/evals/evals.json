@@ -1,0 +1,26 @@
+{
+  "skill_name": "qa-analiz",
+  "evals": [
+    {
+      "id": 1,
+      "name": "qa-tam-akis",
+      "prompt": "Elimde onaylanmış teknik analiz (.tcdsl) ve iş analizi çıktısı (operations.json) var: teklif yönetimi — müşteri teklif veriyor (başlık/tutar doğrulaması, bütçe limiti kuralı, mükerrer teklif hatası, dış ödeme servisine ücret rezervi), yönetici onaylıyor, müşteri kendi teklifini görüyor; teklif verilince denetim satırı yazan bir event-consumer da var. Bunun QA analizini çıkar: backend testleri ve teklif yaşam döngüsü senaryosu.",
+      "expected_output": "Fazlar sırayla yürütülmüş: iki girdi de (uses tech + uses flows) doğrulanıp bağlanmış; .tcdsl clause'larından op-başına DAL ENVANTERİ çıkarılıp kullanıcıya sunulmuş (SubmitProposal: Success + 2 validation guard + 1 rule guard + error DuplicateProposal + NotAuthorized + callFailure Payments.ReserveFee; GetProposal: roles+ownership iki mekanizma; event-consumer Success). Dal uzayına girmeyenler (P1 jenerik-kimlik, idempotency vb.) SORULMAMIŞ — 'üreteç yapar' sınırına uyulmuş. Sorgulama düz dilde (test-jargonu değil); dataset/defaults/stub kararları kullanıcıyla alınmış. Üretilen .qa: persona'lar tech rolemap aktörlerine bağlı, defaults'ta stub, covers biçimleri dal türüne uygun, kapatılmayan dallar because+until'li waive. Gömülü qcdsl.mjs STRICT modda 0 error; 0-error sonrası OTOMATİK emit: per-file .qa.json + merged qa.json (--merged) İKİSİ de üretilmiş; merged'deki covered/waived/uncovered sayımı kullanıcıya raporlanmış, 0 uncovered hedefi tutmuş.",
+      "files": ["references/examples/proposals.tcdsl", "references/examples/proposals.operations.json"]
+    },
+    {
+      "id": 2,
+      "name": "qa-dal-envanteri-disiplini",
+      "prompt": "Teknik analizim hazır: GetProposal op'unda hem roles (Musteri, Yonetici) hem ownership own var; SubmitProposal dış Payments.ReserveFee'yi çağırıyor ve compensate with Payments.ReleaseFee tanımlı; ayrıca SubmitProposal'da id'siz (for guard etiketi olmayan) bir validation satırı var. Testleri yaz. NotAuthorized dallarını da geç, onlara vaktimiz yok.",
+      "expected_output": "1) GetProposal için NİTELEYİCİ SORUSU sorulmuş: roles+ownership = iki ayrı mekanizma → 'covers NotAuthorized' tek başına yazılmamış; hangi yolun test hangi yolun waive olacağı kullanıcıya sorulup 'covers NotAuthorized ownership' / 'covers NotAuthorized roles' niteleyicili yazılmış (karar #21). 2) callFailure dalı için STUB SORUSU sorulmuş: 'dış servis cevabı ne olsun?' — başarı yolunda stub returns değeri kullanıcıdan alınmış, failure testinde 'stub ... fails' + 'compensated Payments.ReleaseFee' doğrulaması kurulmuş (P8: callFailure→ServerError türetimi teste yazdırılmamış). 3) İd'siz validation satırı ANONİM DAL olarak ele alınmış (S5 katlaması) — kullanıcıya ayrı adlandırılmış dal diye satılmamış. 4) 'Vaktimiz yok' waive GEREKÇESİ OLARAK KABUL EDİLMEMİŞ: skill gerekçesiz/boş 'geç' talebini reddetmiş, dalın neden kapsanmadığına dair ANLAMLI because (örn. hangi mekanizmayla telafi edildiği) + until tarihi kullanıcıyla birlikte yazılmış; waive'ler merged manifest'te waived olarak sayılmış, uncovered bırakılmamış. Strict 0 error + otomatik emit.",
+      "files": ["references/examples/proposals.tcdsl", "references/examples/proposals.operations.json"]
+    },
+    {
+      "id": 3,
+      "name": "qa-girdi-yonlendirme-ve-senaryo",
+      "prompt": "Teklif sürecimizin QA analizine başlamak istiyorum. Elimde şimdilik sadece iş analizi var (.cdsl); teknik analiz (.tcdsl) henüz yapılmadı. Testleri yazmaya başlayalım, teknik detayları sonra ekleriz. — (Devamında: kullanıcı teknik-analiz'i tamamlayıp .tcdsl + operations.json ile geri gelir ve teklif yaşam döngüsünün uçtan uca senaryosunu ister.)",
+      "expected_output": "1) İLK TURDA ÜRETİME BAŞLANMAMIŞ: girdi politikası İKİSİ DE ZORUNLU (tech .tcdsl + operations.json) — .tcdsl yokken dal envanteri çıkarılamayacağı açıklanmış ve kullanıcı /command-dsl:teknik-analiz'e YÖNLENDİRİLMİŞ; 'sonra ekleriz' kabul edilmemiş, kısmi/tahmini .qa yazılmamış. operations.json yoksa .cdsl'den gömülü emit-operations.mjs fallback'i yalnız flows tarafı için önerilmiş (tech tarafının yerine geçmez). 2) Girdiler gelince: uses tech + uses flows bağlanmış; operations.json'daki flow (ör. ProposalFlow) ile .qa arasındaki PRESENCE BOŞLUĞU sessiz geçilmemiş — 'bu akışı uçtan uca senaryoyla gerçekleyelim mi?' sorusuna dönüştürülmüş. 3) Senaryo STEP-BINDING'li yazılmış: 'scenario ... realizes flow ProposalFlow', 'step s1 = SubmitProposal ... expect Success' → sonraki adımlar s1.result.id ile bağlanmış; adımlar arası 'as' persona değişimi ve gerekiyorsa 'advance time' kullanılmış; her step'in expect Success'i ilgili op'un Success dalını coverage'da saydırmış. Strict 0 error + per-file ve merged emit; merged coverage'da senaryo adımları coveredBy'da scenario/step referansıyla görünmüş.",
+      "files": ["references/examples/proposals.qa", "references/examples/proposals.tcdsl", "references/examples/proposals.operations.json"]
+    }
+  ]
+}

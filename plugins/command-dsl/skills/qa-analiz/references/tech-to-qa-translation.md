@@ -1,0 +1,156 @@
+# Tech → QA eşlemesi (.tcdsl + operations.json → .qa)
+
+> **En kritik dosya.** Faz 2-5'te oku. Dal envanteri kullanıcıdan DEĞİL, buradaki
+> mekanik türetimden çıkar — kullanıcıya yalnız KARAR sorulur (nasıl test / neden
+> waive). İki girdinin NE verdiğini karıştırmak bu skill'in en büyük hata sınıfıdır:
+> dal/veri/stub/assert **tech**'ten, akış/süreç evreni **operations.json**'dan gelir.
+
+## A. `.tcdsl` clause → dal eşleme tablosu (spec §4.1 birebir + §4.5 event-tetikli satırı)
+
+Op-başına dal envanterini bu tabloyla KENDİN çıkar, kullanıcıya düz dille sun:
+
+| Tech clause | Doğurduğu dal | covers biçimi | Kullanıcıya düz-dil sunumu |
+|---|---|---|---|
+| her operation | Success | `covers Success` | "başarılı çağrı" |
+| `validation { … for guard "x" }` | guard-dalı (NotValid sınıfı) | `covers guard "x"` | "girdi kuralı: <kuralın anlamı>" |
+| `rule { … for guard "y" }` | guard-dalı (NotProcessable sınıfı) | `covers guard "y"` | "iş kuralı: <kuralın anlamı>" |
+| `throws E` | named-error dalı | `covers error E` | "<E'nin anlamı> hatası" |
+| `roles …` | NotAuthorized·roles | `covers NotAuthorized roles` | "yanlış roldeki kullanıcı" |
+| `ownership …` (`public` hariç) | NotAuthorized·ownership | `covers NotAuthorized ownership` | "başkasının kaydına erişim" |
+| `permit when …` | NotAuthorized·permit | `covers NotAuthorized permit` | "koşullu izin dışı çağrı" |
+| `scope …` | NotAuthorized·scope | `covers NotAuthorized scope` | "kapsam dışı çağrı" |
+| id'siz validation check(ler)i | TEK anonim NotValid dalı (S5) | `covers NotValid` | "adsız girdi kuralları (topluca)" |
+| id'siz rule check(ler)i | TEK anonim NotProcessable dalı (S5) | `covers NotProcessable` | "adsız iş kuralları (topluca)" |
+| `calls <Ext.Op> compensate with <Ext.Op2>` — hedef `external`\|`uncharted` | callFailure dalı | `covers callFailure <Ext.Op>` | "dış servis çökerse (telafisiyle)" |
+| `on Module.Event` (consumer op) | dal uzayı AYNI kurallarla; tek fark act biçimi | test `when event … with { … }` yazar (karar #11) | "olay gelince ne yapıyor" |
+
+- Karşılıksız hedef (olmayan guard-id, olmayan error, mekanizmasız op'a NotAuthorized,
+  olmayan mekanizma-niteleyicisi, compensate'siz/iç calls'a callFailure) → **error**
+  (covers/expect/waive üçünde de aynı kural — spec §4.3/m6).
+- Aynı dalı birden çok test kapsayabilir (redundans serbest; merged `coveredBy[]`
+  hepsini listeler). Senaryo `expect`'leri de coverage'a sayılır (karar #12).
+
+## B. NotAuthorized mekanizma-seçim rehberi (karar #21 + İQ8)
+
+- Op'ta **TEK** yetki mekanizması varsa: çıplak `covers NotAuthorized` yeterlidir —
+  emit'te etkin mekanizmaya çözülür (İQ8: per-file manifest'te bile `via:'roles'` vb.
+  yazılır; `via:null` manifest'te görünmez). Yine de okunabilirlik için niteleyiciyi
+  yazmak serbesttir.
+- **BİRDEN ÇOK** mekanizma varsa (ör. `roles` + `ownership`): niteleyici **ZORUNLU**
+  (niteleyicisiz → error "mekanizma belirtin"). Gerekçe güvenlik-kritiktir: yanlış-rol
+  testi ownership yolunu sessizce örtmemeli.
+- Sorgulama kalıbı (mekanizma-başına AYRI karar al): "Bu işleme iki ayrı kapı var —
+  (a) yanlış roldeki kullanıcı, (b) doğru rolde ama **başkasının kaydına** erişen
+  kullanıcı. Hangilerini test edelim, hangisini neden geçelim?" Tipik desen (spec §7
+  exemplar): ownership yolu elle test edilir (`as musteri` + `seed p1 = … owner:
+  baskaMusteri` + `when call with { id: p1 }`), roles yolu P1 jenerik-kimlik
+  gerekçesiyle waive edilir.
+- Test verisi ipucu: ownership testi İKİ persona ister (çağıran + kaydın sahibi) —
+  Faz 1'de `baskaMusteri` benzeri ikinci kimliği ekletmiş ol.
+
+## C. Anonim dal katlaması (S5)
+
+Tech'te `for guard` opsiyoneldir; id'siz check'ler tek tek adreslenemez
+(indeks-tabanlı adresleme kırılgan). Kural:
+
+- Op'un id'siz **validation** check'leri (0'dan çoksa) → TEK "anonim NotValid" dalı;
+  `covers NotValid` hepsini birden kapsar.
+- Id'siz **rule** check'leri → TEK "anonim NotProcessable" dalı.
+- Doğrulayıcı info üretir: "dal-düzeyi coverage için `for guard` önerilir" — bunu
+  **tech'e iyileştirme önerisi** olarak raporla ("teknik analizde şu kurallara ad
+  verilirse her biri ayrı izlenebilir"); qa tarafında bekletme, katlanmış dalı
+  tek testle/waive'le kapat.
+
+## D. Stub-birleşimi HESABI (QA-07) — emit'ten önce KENDİN hesapla
+
+Bir test/senaryo için zorunlu stub kümesi:
+
+```
+yürütülen op'lar  = { when-op }                    (testte)
+                  ∪ { tüm step-op'ları }           (senaryoda)
+                  ∪ { tüm given-call op'ları }     (ikisinde de)
+
+zorunlu stub'lar  = bu op'ların DOĞRUDAN `calls` hedeflerinden
+                    external | uncharted BoundaryOp olanların BİRLEŞİMİ
+```
+
+- **Eksik stub → error; birleşim-dışı hedefe stub → error.** Stub `defaults for <Op>`
+  bloğundan gelebilir (İQ3 öncelik: given-stub > defaults; ilk sağlayan kazanır).
+- **İç-modül `calls` stub'LANMAZ (karar #10)** — gerçek koşar; birleşime girmez.
+- **S14:** iç-modül compensate'li calls **callFailure dalı da doğurmaz** (stub'lanamaz
+  → deterministik tetiklenemez); doğrulayıcı bunları uses-tech node'una info ile
+  listeler — kullanıcıya açıkla: "bu telafi yolu, hedef op'un kendi dallarıyla dolaylı
+  test edilir".
+- Compensate'siz external calls: stub beyanı yine ZORUNLU (birleşim kuralı), ama
+  failure dalı zorunlu coverage DEĞİL.
+- Kullanıcıya taşıma biçimi: error'ı değil İHTİYACI söyle — "bu test şu dış servise
+  dokunuyor; test sırasında ne cevap versin?" (`returns { … }` — dönüş tipine
+  tip-doğrulanır, S18 degrade) veya "çökmüş gibi mi davransın?" (`fails`).
+
+## E. callFailure → ServerError türetimi (P8)
+
+`covers callFailure <Ext.Op>` dalının türetilmiş beklenen outcome'u **ServerError**'dır
+(S10 tablosu; P8: stub `fails` davranışının sonuç sınıfı normatif olarak ServerError).
+Dal anahtarı yine `callFailure{target}` kalır — manifest'te ikisi ayrı alandır.
+Kullanıcıya: "dış servis çökünce kullanıcıya sistem-hatası döner; biz burada ayrıca
+**telafinin koştuğunu** kanıtlarız" → `then { compensated <compensator>  not emitted …
+state <Entity> absent { … } }`.
+
+## F. Dal uzayına GİRMEYENLER — "sorma, üreteç yapar" tablosu
+
+Bunlar için test İSTENMEZ ve YAZILMAZ; kullanıcı isterse tek cümle gerekçeyle sınırı
+açıkla (politika detayları: `interrogation-playbook.md` §P):
+
+| Kullanıcı isteği / tech sinyali | Neden dal DEĞİL | Karşılığı |
+|---|---|---|
+| "girişsiz/kimliksiz deneyince ne olur testi" (NotAuthenticated) | global politika (karar #6) | P1: üreteç, kimlik isteyen (roles\|ownership\|permit\|scope taşıyan) her op için jenerik kimliksiz-çağrı testi üretir |
+| "sunucu hatası testi" (ServerError) | altyapı davranışı | P2: üreteç isterse taksonomi-uyumlu hata zarfını tek altyapı testiyle doğrular (callFailure dalının outcome'u ServerError'dur ama dal anahtarı callFailure kalır — §E) |
+| "sayfa boyutu / imleç testi" (`paginated by`) | mekanik | P3: jenerik sıralama-tutarlılığı + size-üst-sınırı + imleç-devamlılığı testleri üretilir; yazar isterse `page`/`after` yüzeyiyle VERİ-ÖZEL doğrulama ekler (karar #16) |
+| `consistency async` | politika | P12: async efektler test yürütmesinde senkron-eşdeğer tamamlanmış kabul edilir; polling YASAK |
+| entity `invariant` | politika | P13/S16: dokunulan entity'lerin invariant'ları her test/step sonunda ÖRTÜK assert edilir — ayrıca yazdırma |
+| "her testten sonra temizlik" | politika | P6: her test/senaryo temiz state ile başlar |
+| `idempotent by` / `concurrency optimistic` | v1.1 dal-adayı (spec §9) | bugün istenirse senaryo + `state count 1` ile elle modellenebilir; zorunlu coverage değil |
+| "yük/performans/kaos testi" | kapsam dışı (spec §9) | bu DSL davranış-doğrulama modelidir; başka araç işi |
+
+Kullanıcı bu politikalardan FARKLI davranış isterse not düş — üreteç-politikası
+değişikliği ayrı iştir, test-niyeti beyanı değil.
+
+## G. operations.json → flow/process evreni (+ S12)
+
+- Evren = operations.json v3'teki op-üyelik listelerinin **union'ı**: her op'un
+  `flows[]` ve `processes[]` alanlarındaki id'lerin birleşimi (karar #20). Ayrı bir
+  flow kataloğu aranmaz.
+- `uses flows` bağlıyken her flow-id ve process-id için workspace'te en az bir
+  `realizes flow/process` senaryosu yoksa → **warning** (#23/#24; strict'te de warning
+  kalır — S6 yalnız dal-coverage vaadi). Presence uyarısı waive ile KAPANMAZ — ya
+  senaryo yazılır ya belgeli-açık kalır.
+- **Sınır beyanı (karar #24):** flow-coverage presence-DÜZEYİDİR; business flow'un
+  iç-dallanmaları (either/optional/repeat) v1'de dal-düzeyi coverage'a girmez.
+  Business OnSuccess aksiyonları test-dünyasında kapsam dışıdır.
+- **S12:** bağlanan tech dosyasının kendi `contract` path'i, `uses flows`'a verilen
+  dosyadan FARKLIYSA info — kullanıcıya sor: "teknik analiz başka sözleşmeye realizes
+  ediyor; doğru operations.json'u mu bağladık?" Cevaba göre ya flows yolunu düzelt ya
+  tech'i güncellet.
+
+## H. Guard-id tekilliği (S17) — düzeltme yeri TECH
+
+- Op-içi `validation ∪ rule` birleşiminde guard-id'ler tekil olmalı; ihlal qa
+  link-time **error**'dur ve guard'a referans yazılmasa bile PROAKTİF raporlanır
+  (uses-tech özetinde). Tech bugün bunu kendisi denetlemiyor — ilk yakalayan qa'dır.
+- **Qa tarafında yamalamaya çalışma** (farklı guard'a covers yazmak, dalı waive'lemek
+  çözüm değildir): kullanıcıya "teknik analizde aynı kural-adı iki kez kullanılmış;
+  önce orayı düzeltelim" de, `teknik-analiz` skill'ine yönlendir, tech düzelince
+  doğrulamayı tekrarla.
+
+## I. Neyi YAZMAYACAKSIN (sınır disiplini)
+
+- **Beklenen outcome** — S10 türetir; `then outcome` diye bir yüzey yok.
+- **Üreteç-politikası testleri** — §F tablosu; DSL yüzeye çıkarmaz (S8: manifest'e de
+  yazılmaz).
+- **Test kodu / framework adı** (xUnit/Jest/K6) — üreteç kapsamı (karar #1); qa'nın
+  işi test-manifest sözleşmesinin doğru ve tam olması.
+- **Negatif veri türetimi** — v1'de negatif veri ELLE yazılır (karar #8): validator
+  dalın kapsandığını sayar, girdinin gerçekten ihlal ettiğini İDDİA ETMEZ; bu yüzden
+  ihlal-girdisini kullanıcıyla birlikte bilinçli kur.
+- **Business gerçeğinin kopyası** — kural sorgulaması `teknik-analiz`'in işiydi; qa
+  kuralları yeniden bildirmez, test niyetini bildirir.

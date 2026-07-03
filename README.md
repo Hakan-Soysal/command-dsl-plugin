@@ -2,15 +2,15 @@
 
 # 🧭 command-dsl-tools
 
-**Bir uygulama fikrini _konuşarak_ iş analizi → teknik tasarım → frontend tasarımı → kod üretimi zincirine taşıyan Claude Code plugin ailesi.**
+**Bir uygulama fikrini _konuşarak_ iş analizi → teknik tasarım → frontend tasarımı → test tasarımı → kod üretimi zincirine taşıyan Claude Code plugin ailesi.**
 
 Teknik terim sormaz — işini anlatır gibi konuşturur, her adımda onay alır ve arka planda
 DSL modellerini kurar. Her halka çıktısını **gömülü, self-contained doğrulayıcıyla**
 gerçek parser'da **0 error** olarak kanıtlar; 0-error geçince makine-devir JSON'ları
-(operations.json · manifest.json · experience.json) **otomatik** üretilir.
+(operations.json · manifest.json · experience.json · qa.json) **otomatik** üretilir.
 
 ![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-d97757)
-![Skills](https://img.shields.io/badge/skills-4-4b8bbe)
+![Skills](https://img.shields.io/badge/skills-5-4b8bbe)
 ![Node](https://img.shields.io/badge/Node-%E2%89%A518-339933?logo=node.js&logoColor=white)
 ![Validator](https://img.shields.io/badge/do%C4%9Frulay%C4%B1c%C4%B1-g%C3%B6m%C3%BCl%C3%BC-2ea44f)
 
@@ -50,19 +50,21 @@ GitHub'a hiç gitmeden, klonladığın klasörden uçtan uca test:
 
 ---
 
-## 🧩 Ne sağlıyor — 4 skill'lik zincir
+## 🧩 Ne sağlıyor — 5 skill'lik zincir
 
 | Skill | Girdi → Çıktı | Çağırma |
 | --- | --- | --- |
 | **`is-analizi-dsl`** | fikir → `.cdsl` iş analizi + `operations.json` | `/command-dsl:is-analizi-dsl` |
 | **`teknik-analiz`** | operations.json → linked `.tcdsl` teknik tasarım + `manifest.json` | `/command-dsl:teknik-analiz` |
 | **`frontend-analiz`** | operations.json (+ opsiyonel manifest.json) → linked `.fcdsl` deneyim tasarımı + `<Ad>.experience.json` | `/command-dsl:frontend-analiz` |
+| **`qa-analiz`** | `.tcdsl` + operations.json → linked `.qa` test tasarımı + test-manifest (`<ad>.qa.json` + merged `qa.json`) | `/command-dsl:qa-analiz` |
 | **`kesif`** | operations.json + manifest.json → hedef-profili keşfi + üreteç kapısı (techgen'e devir) | `/command-dsl:kesif` |
 
 - **Otomatik tetikleme:** "iş analizine dök", "teknik analiz çıkar", "ekranları tasarla /
-  frontend DSL üret", "kod üretimine geç" gibi ifadelerle ilgili halka kendiliğinden devreye girer.
+  frontend DSL üret", "testleri tasarla / qa analiz", "kod üretimine geç" gibi ifadelerle ilgili
+  halka kendiliğinden devreye girer.
 - **Kim için:** Teknik olmayan kullanıcı dahil — jargon sormaz; her skill muhatabının
-  diliyle konuşur (iş sahibi · mimar · ürün/UX sahibi).
+  diliyle konuşur (iş sahibi · mimar · ürün/UX sahibi · QA/test tasarımcısı).
 - **Sözleşme sürümü:** zincir **operations.json v3** (`meta.schemaVersion: 3`) üzerinde
   çalışır; eski v2 sözleşmeler açık bir hata mesajıyla reddedilir (güncel üreticiyle
   yeniden üretin).
@@ -131,6 +133,7 @@ command-dsl-plugin/
             ├── is-analizi-dsl/       # fikir → .cdsl + operations.json (gömülü validate.mjs + emit)
             ├── teknik-analiz/        # → linked .tcdsl + manifest.json (validate-tech + emit-manifest)
             ├── frontend-analiz/      # → linked .fcdsl + experience.json (fcdsl.mjs: doğrula + gate'li emit)
+            ├── qa-analiz/            # → linked .qa + test-manifest (qcdsl.mjs: strict doğrula + gate'li emit)
             └── kesif/                # → hedef-profili keşfi + üreteç kapısı
                 # her skill: SKILL.md + references/(examples) + validator/(gömülü bundle + build)
 ```

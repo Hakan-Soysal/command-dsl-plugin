@@ -1,0 +1,48 @@
+// QA DSL kanonik örneğinin tech tarafı (spec §7) — gerçek gramerle parse/link/validate uyumlu.
+contract "./proposals.operations.json"
+rolemap {
+    Customer -> Musteri
+    Admin -> Yonetici
+    ~ -> Scheduler
+}
+
+module Proposals {
+    error DuplicateProposal : NotProcessable
+    event ProposalSubmitted { proposalId: Id  title: Text }
+    entity Proposal realizes Proposal { id: Id  title: Text  amount: Money  status: Text  owner: Id }
+    entity AuditLine { id: Id  proposalId: Id  remark: Text }   // 'note' tech-keyword — alan adı olamaz
+
+    @rest(post) operation SubmitProposal(title: Text, amount: Money) : Proposal realizes SubmitProposal {
+        roles Musteri
+        validation {
+            title != "" for guard "title-required"
+            amount > 0  for guard "amount-positive"
+        }
+        access { creates Proposal  reads Proposal }
+        rule { sum of Proposal.amount < 1000 for guard "proposal-limit" }
+        throws DuplicateProposal
+        emits ProposalSubmitted
+        calls Payments.ReserveFee compensate with Payments.ReleaseFee
+    }
+
+    operation ApproveProposal(id: Id) : Proposal realizes ApproveProposal {
+        roles Yonetici
+        access { updates Proposal }
+    }
+
+    operation GetProposal(id: Id) : Proposal realizes GetProposal {
+        roles Musteri, Yonetici
+        ownership own
+        access { reads Proposal }
+    }
+
+    operation OnProposalSubmitted(proposalId: Id, title: Text) : Ack {
+        on Proposals.ProposalSubmitted
+        access { creates AuditLine }
+    }
+}
+
+external Payments {
+    operation ReserveFee(amount: Money) : Reservation
+    operation ReleaseFee(reservationId: Id) : Ack
+}

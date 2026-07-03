@@ -1,0 +1,102 @@
+{
+    "operations": [
+        {
+            "id": "SubmitProposal",
+            "kind": "command",
+            "signature": { "actor": "Customer", "verb": "submits", "ownership": "own", "resource": "Proposal" },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": { "writes": ["Proposal"], "reads": ["Proposal"] },
+            "flows": ["ProposalFlow"],
+            "processes": [],
+            "domain": "Proposals"
+        },
+        {
+            "id": "ApproveProposal",
+            "kind": "command",
+            "signature": { "actor": "Admin", "verb": "approves", "ownership": "any", "resource": "Proposal" },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": { "writes": ["Proposal"], "reads": [] },
+            "flows": ["ProposalFlow"],
+            "processes": [],
+            "domain": "Proposals"
+        },
+        {
+            "id": "GetProposal",
+            "kind": "query",
+            "signature": { "actor": "Customer", "verb": "views", "ownership": "own", "resource": "Proposal" },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": { "writes": [], "reads": ["Proposal"] },
+            "flows": ["ProposalFlow"],
+            "processes": [],
+            "domain": "Proposals"
+        }
+    ],
+    "entities": [
+        {
+            "id": "Proposal",
+            "name": "Proposal",
+            "domain": "Proposals",
+            "fields": [
+                { "name": "title", "type": "String", "collection": false },
+                { "name": "amount", "type": "Number", "collection": false },
+                { "name": "status", "type": "String", "collection": false }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "id": "ProposalFlow",
+            "actor": "Customer",
+            "note": null,
+            "items": [
+                { "type": "step", "name": "SubmitProposal", "target": "SubmitProposal", "optional": false, "repeat": false, "using": null },
+                { "type": "step", "name": "ApproveProposal", "target": "ApproveProposal", "optional": false, "repeat": false, "using": null },
+                { "type": "step", "name": "GetProposal", "target": "GetProposal", "optional": false, "repeat": false, "using": null }
+            ]
+        }
+    ],
+    "processes": [],
+    "relations": [],
+    "actors": [
+        { "id": "Customer", "extends": null },
+        { "id": "Admin", "extends": null }
+    ],
+    "calendars": [],
+    "verbs": [],
+    "domains": ["Proposals"],
+    "meta": {
+        "schemaVersion": 3,
+        "hasErrors": false,
+        "errorCount": 0
+    }
+}

@@ -1,0 +1,873 @@
+{
+  "meta": {
+    "dsl": "qa",
+    "schemaVersion": 1,
+    "merged": true,
+    "sources": [
+      "proposals.qa"
+    ],
+    "hasErrors": false,
+    "errorCount": 0
+  },
+  "coverage": {
+    "operations": [
+      {
+        "id": "Proposals.ApproveProposal",
+        "tech": "proposals.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "scenario": "teklif yaşam döngüsü",
+                "step": 2
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "tek-rollü op; yanlış-rol yolu P1 jenerik-kimlik testleriyle kapsanıyor"
+          }
+        ]
+      },
+      {
+        "id": "Proposals.GetProposal",
+        "tech": "proposals.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "scenario": "teklif yaşam döngüsü",
+                "step": 3
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "rol yolu P1 jenerik-kimlik testleriyle kapsanıyor; ownership yolu elle test edildi"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "başkasının teklifi görülemez"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Proposals.OnProposalSubmitted",
+        "tech": "proposals.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "denetim satırı yazılır"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Proposals.SubmitProposal",
+        "tech": "proposals.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "başarılı teklif"
+              },
+              {
+                "file": "proposals.qa",
+                "scenario": "teklif yaşam döngüsü",
+                "step": 0
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "validationGuard",
+              "id": "title-required"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "boş başlık reddedilir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "validationGuard",
+              "id": "amount-positive"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "sıfır tutar reddedilir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "proposal-limit"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "bütçe limiti aşılırsa reddedilir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "DuplicateProposal"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "mükerrer teklif reddedilir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "tek-rollü op; yanlış-rol yolu P1 jenerik-kimlik testleriyle kapsanıyor"
+          },
+          {
+            "branch": {
+              "kind": "callFailure",
+              "target": "Payments.ReserveFee"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "proposals.qa",
+                "test": "ücret rezervi düşer, telafi koşar"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "id": "ProposalFlow",
+        "status": "covered",
+        "coveredBy": [
+          {
+            "file": "proposals.qa",
+            "scenario": "teklif yaşam döngüsü"
+          }
+        ]
+      }
+    ],
+    "processes": []
+  },
+  "files": [
+    {
+      "meta": {
+        "dsl": "qa",
+        "schemaVersion": 1,
+        "source": "proposals.qa"
+      },
+      "uses": {
+        "tech": [
+          "proposals.tcdsl"
+        ],
+        "flows": "proposals.operations.json"
+      },
+      "personas": [
+        {
+          "id": "musteri",
+          "binding": {
+            "kind": "actor",
+            "actor": "Customer"
+          }
+        },
+        {
+          "id": "baskaMusteri",
+          "binding": {
+            "kind": "actor",
+            "actor": "Customer"
+          }
+        },
+        {
+          "id": "yonetici",
+          "binding": {
+            "kind": "actor",
+            "actor": "Admin"
+          }
+        },
+        {
+          "id": "zamanlayici",
+          "binding": {
+            "kind": "role",
+            "role": "Scheduler"
+          }
+        }
+      ],
+      "datasets": [
+        {
+          "id": "gecerliTeklif",
+          "operation": "Proposals.SubmitProposal",
+          "values": {
+            "title": {
+              "kind": "literal",
+              "value": "Yeni teklif"
+            },
+            "amount": {
+              "kind": "literal",
+              "value": 100
+            }
+          }
+        }
+      ],
+      "tests": [
+        {
+          "title": "başarılı teklif",
+          "operation": "Proposals.SubmitProposal",
+          "covers": {
+            "kind": "success"
+          },
+          "expectedOutcome": {
+            "class": "Success"
+          },
+          "actor": "musteri",
+          "time": "2026-07-02T10:00:00Z",
+          "given": [],
+          "stubs": [
+            {
+              "target": "Payments.ReserveFee",
+              "behavior": "returns",
+              "values": {
+                "reservationId": {
+                  "kind": "literal",
+                  "value": "res-1"
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": "gecerliTeklif",
+              "overrides": {},
+              "values": null
+            }
+          },
+          "asserts": [
+            {
+              "kind": "cmp",
+              "left": {
+                "root": "result",
+                "path": [
+                  "title"
+                ]
+              },
+              "op": "=",
+              "right": {
+                "kind": "string",
+                "value": "Yeni teklif"
+              }
+            },
+            {
+              "kind": "state",
+              "entity": "Proposals.Proposal",
+              "mode": "exists",
+              "count": null,
+              "conds": [
+                {
+                  "field": "title",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "Yeni teklif"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "emitted",
+              "event": "Proposals.ProposalSubmitted",
+              "conds": [
+                {
+                  "field": "title",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "Yeni teklif"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "called",
+              "target": "Payments.ReserveFee",
+              "conds": [
+                {
+                  "field": "amount",
+                  "op": "=",
+                  "value": {
+                    "kind": "number",
+                    "value": 100
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "boş başlık reddedilir",
+          "operation": "Proposals.SubmitProposal",
+          "covers": {
+            "kind": "validationGuard",
+            "id": "title-required"
+          },
+          "expectedOutcome": {
+            "class": "NotValid",
+            "guard": "title-required"
+          },
+          "actor": "musteri",
+          "time": null,
+          "given": [],
+          "stubs": [
+            {
+              "target": "Payments.ReserveFee",
+              "behavior": "returns",
+              "values": {
+                "reservationId": {
+                  "kind": "literal",
+                  "value": "res-1"
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": "gecerliTeklif",
+              "overrides": {
+                "title": {
+                  "kind": "literal",
+                  "value": ""
+                }
+              },
+              "values": null
+            }
+          },
+          "asserts": [
+            {
+              "kind": "notEmitted",
+              "event": "Proposals.ProposalSubmitted",
+              "conds": null
+            }
+          ]
+        },
+        {
+          "title": "sıfır tutar reddedilir",
+          "operation": "Proposals.SubmitProposal",
+          "covers": {
+            "kind": "validationGuard",
+            "id": "amount-positive"
+          },
+          "expectedOutcome": {
+            "class": "NotValid",
+            "guard": "amount-positive"
+          },
+          "actor": "musteri",
+          "time": null,
+          "given": [],
+          "stubs": [
+            {
+              "target": "Payments.ReserveFee",
+              "behavior": "returns",
+              "values": {
+                "reservationId": {
+                  "kind": "literal",
+                  "value": "res-1"
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": "gecerliTeklif",
+              "overrides": {
+                "amount": {
+                  "kind": "literal",
+                  "value": 0
+                }
+              },
+              "values": null
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "bütçe limiti aşılırsa reddedilir",
+          "operation": "Proposals.SubmitProposal",
+          "covers": {
+            "kind": "ruleGuard",
+            "id": "proposal-limit"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "guard": "proposal-limit"
+          },
+          "actor": "musteri",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": null,
+              "count": 10,
+              "entity": "Proposals.Proposal",
+              "values": {
+                "amount": {
+                  "kind": "literal",
+                  "value": 150
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "Active"
+                },
+                "owner": {
+                  "kind": "personaRef",
+                  "persona": "musteri"
+                }
+              }
+            }
+          ],
+          "stubs": [
+            {
+              "target": "Payments.ReserveFee",
+              "behavior": "returns",
+              "values": {
+                "reservationId": {
+                  "kind": "literal",
+                  "value": "res-1"
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": "gecerliTeklif",
+              "overrides": {},
+              "values": null
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "mükerrer teklif reddedilir",
+          "operation": "Proposals.SubmitProposal",
+          "covers": {
+            "kind": "error",
+            "id": "DuplicateProposal"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "error": "DuplicateProposal"
+          },
+          "actor": "musteri",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": null,
+              "count": 1,
+              "entity": "Proposals.Proposal",
+              "values": {
+                "title": {
+                  "kind": "literal",
+                  "value": "Yeni teklif"
+                },
+                "amount": {
+                  "kind": "literal",
+                  "value": 50
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "Draft"
+                },
+                "owner": {
+                  "kind": "personaRef",
+                  "persona": "musteri"
+                }
+              }
+            }
+          ],
+          "stubs": [
+            {
+              "target": "Payments.ReserveFee",
+              "behavior": "returns",
+              "values": {
+                "reservationId": {
+                  "kind": "literal",
+                  "value": "res-1"
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": "gecerliTeklif",
+              "overrides": {},
+              "values": null
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "ücret rezervi düşer, telafi koşar",
+          "operation": "Proposals.SubmitProposal",
+          "covers": {
+            "kind": "callFailure",
+            "target": "Payments.ReserveFee"
+          },
+          "expectedOutcome": {
+            "class": "ServerError"
+          },
+          "actor": "musteri",
+          "time": null,
+          "given": [],
+          "stubs": [
+            {
+              "target": "Payments.ReserveFee",
+              "behavior": "fails",
+              "values": null
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": "gecerliTeklif",
+              "overrides": {},
+              "values": null
+            }
+          },
+          "asserts": [
+            {
+              "kind": "compensated",
+              "target": "Payments.ReleaseFee"
+            },
+            {
+              "kind": "notEmitted",
+              "event": "Proposals.ProposalSubmitted",
+              "conds": null
+            },
+            {
+              "kind": "state",
+              "entity": "Proposals.Proposal",
+              "mode": "absent",
+              "count": null,
+              "conds": [
+                {
+                  "field": "title",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "Yeni teklif"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "başkasının teklifi görülemez",
+          "operation": "Proposals.GetProposal",
+          "covers": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "expectedOutcome": {
+            "class": "NotAuthorized"
+          },
+          "actor": "musteri",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "p1",
+              "count": 1,
+              "entity": "Proposals.Proposal",
+              "values": {
+                "title": {
+                  "kind": "literal",
+                  "value": "gizli"
+                },
+                "amount": {
+                  "kind": "literal",
+                  "value": 10
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "Draft"
+                },
+                "owner": {
+                  "kind": "personaRef",
+                  "persona": "baskaMusteri"
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "id": {
+                  "kind": "seedRef",
+                  "seed": "p1"
+                }
+              }
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "denetim satırı yazılır",
+          "operation": "Proposals.OnProposalSubmitted",
+          "covers": {
+            "kind": "success"
+          },
+          "expectedOutcome": {
+            "class": "Success"
+          },
+          "actor": "zamanlayici",
+          "time": null,
+          "given": [],
+          "stubs": [],
+          "when": {
+            "kind": "event",
+            "event": "Proposals.ProposalSubmitted",
+            "payload": {
+              "proposalId": {
+                "kind": "literal",
+                "value": "p1"
+              },
+              "title": {
+                "kind": "literal",
+                "value": "t"
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "Proposals.AuditLine",
+              "mode": "count",
+              "count": 1,
+              "conds": []
+            }
+          ]
+        }
+      ],
+      "scenarios": [
+        {
+          "title": "teklif yaşam döngüsü",
+          "realizes": {
+            "flow": "ProposalFlow"
+          },
+          "time": "2026-07-02T09:00:00Z",
+          "given": [],
+          "stubs": [
+            {
+              "target": "Payments.ReserveFee",
+              "behavior": "returns",
+              "values": {
+                "reservationId": {
+                  "kind": "literal",
+                  "value": "res-1"
+                }
+              }
+            }
+          ],
+          "steps": [
+            {
+              "kind": "op",
+              "actor": "musteri",
+              "binding": "s1",
+              "operation": "Proposals.SubmitProposal",
+              "input": {
+                "dataset": "gecerliTeklif",
+                "overrides": {},
+                "values": null
+              },
+              "after": null,
+              "expect": {
+                "kind": "success"
+              },
+              "expectedOutcome": {
+                "class": "Success"
+              },
+              "asserts": []
+            },
+            {
+              "kind": "advanceTime",
+              "amount": 2,
+              "unit": "days"
+            },
+            {
+              "kind": "op",
+              "actor": "yonetici",
+              "binding": null,
+              "operation": "Proposals.ApproveProposal",
+              "input": {
+                "dataset": null,
+                "overrides": {},
+                "values": {
+                  "id": {
+                    "kind": "stepPath",
+                    "step": "s1",
+                    "path": [
+                      "result",
+                      "id"
+                    ]
+                  }
+                }
+              },
+              "after": null,
+              "expect": {
+                "kind": "success"
+              },
+              "expectedOutcome": {
+                "class": "Success"
+              },
+              "asserts": []
+            },
+            {
+              "kind": "op",
+              "actor": "musteri",
+              "binding": null,
+              "operation": "Proposals.GetProposal",
+              "input": {
+                "dataset": null,
+                "overrides": {},
+                "values": {
+                  "id": {
+                    "kind": "stepPath",
+                    "step": "s1",
+                    "path": [
+                      "result",
+                      "id"
+                    ]
+                  }
+                }
+              },
+              "after": null,
+              "expect": {
+                "kind": "success"
+              },
+              "expectedOutcome": {
+                "class": "Success"
+              },
+              "asserts": [
+                {
+                  "kind": "cmp",
+                  "left": {
+                    "root": "result",
+                    "path": [
+                      "status"
+                    ]
+                  },
+                  "op": "=",
+                  "right": {
+                    "kind": "string",
+                    "value": "Approved"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "waives": [
+        {
+          "operation": "Proposals.SubmitProposal",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "tek-rollü op; yanlış-rol yolu P1 jenerik-kimlik testleriyle kapsanıyor"
+        },
+        {
+          "operation": "Proposals.ApproveProposal",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "tek-rollü op; yanlış-rol yolu P1 jenerik-kimlik testleriyle kapsanıyor"
+        },
+        {
+          "operation": "Proposals.GetProposal",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "rol yolu P1 jenerik-kimlik testleriyle kapsanıyor; ownership yolu elle test edildi"
+        }
+      ]
+    }
+  ]
+}

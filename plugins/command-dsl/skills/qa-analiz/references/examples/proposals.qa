@@ -1,0 +1,100 @@
+// QA DSL kanonik örneği (spec §7) — dal-coverage TAM: her dal ya test/senaryo-adımı ya waive.
+qa "Proposals — backend testleri"
+
+uses tech "./proposals.tcdsl"
+uses flows "./proposals.operations.json"
+
+persona musteri: Customer
+persona baskaMusteri: Customer
+persona yonetici: Admin
+persona zamanlayici: role Scheduler
+
+dataset gecerliTeklif for SubmitProposal {
+    title: "Yeni teklif"
+    amount: 100
+}
+
+defaults for SubmitProposal {
+    as musteri
+    stub Payments.ReserveFee returns { reservationId: "res-1" }
+}
+
+// ── SubmitProposal dal uzayı: Success · guard title-required · guard amount-positive
+// ── · guard proposal-limit · error DuplicateProposal · NotAuthorized(roles) · callFailure Payments.ReserveFee
+
+test "başarılı teklif" of SubmitProposal covers Success {
+    given { time "2026-07-02T10:00:00Z" }
+    when call with gecerliTeklif
+    then {
+        result.title = "Yeni teklif"
+        state Proposal exists { title = "Yeni teklif" }
+        emitted ProposalSubmitted with { title = "Yeni teklif" }
+        called Payments.ReserveFee with { amount = 100 }
+    }
+}
+
+test "boş başlık reddedilir" of SubmitProposal covers guard "title-required" {
+    when call with gecerliTeklif { title: "" }
+    then not emitted ProposalSubmitted
+}
+
+test "sıfır tutar reddedilir" of SubmitProposal covers guard "amount-positive" {
+    when call with gecerliTeklif { amount: 0 }
+}
+
+test "bütçe limiti aşılırsa reddedilir" of SubmitProposal covers guard "proposal-limit" {
+    given { seed 10 Proposal { amount: 150, status: "Active", owner: musteri } }
+    when call with gecerliTeklif
+}
+
+test "mükerrer teklif reddedilir" of SubmitProposal covers error DuplicateProposal {
+    given { seed Proposal { title: "Yeni teklif", amount: 50, status: "Draft", owner: musteri } }
+    when call with gecerliTeklif
+}
+
+test "ücret rezervi düşer, telafi koşar" of SubmitProposal covers callFailure Payments.ReserveFee {
+    given { stub Payments.ReserveFee fails }
+    when call with gecerliTeklif
+    then {
+        compensated Payments.ReleaseFee
+        not emitted ProposalSubmitted
+        state Proposal absent { title = "Yeni teklif" }
+    }
+}
+
+// GetProposal: roles + ownership = İKİ mekanizma → niteleyici zorunlu (karar #21)
+test "başkasının teklifi görülemez" of GetProposal covers NotAuthorized ownership {
+    as musteri
+    given { seed p1 = Proposal { title: "gizli", amount: 10, status: "Draft", owner: baskaMusteri } }
+    when call with { id: p1 }
+}
+
+test "denetim satırı yazılır" of OnProposalSubmitted covers Success {
+    as zamanlayici
+    when event Proposals.ProposalSubmitted with { proposalId: "p1", title: "t" }
+    then state AuditLine count 1
+}
+
+scenario "teklif yaşam döngüsü" realizes flow ProposalFlow {
+    time "2026-07-02T09:00:00Z"
+    as musteri
+    step s1 = SubmitProposal with gecerliTeklif expect Success
+    advance time 2 days
+    as yonetici
+    step ApproveProposal with { id: s1.result.id } expect Success
+    as musteri
+    step GetProposal with { id: s1.result.id } expect Success {
+        result.status = "Approved"
+    }
+}
+
+// Kalan NotAuthorized dalları — P1 jenerik-kimlik + rol-matrisi tavsiyesi kapsamında yeterli görüldü.
+waive SubmitProposal covers NotAuthorized
+    until "2026-12-31"
+    because "tek-rollü op; yanlış-rol yolu P1 jenerik-kimlik testleriyle kapsanıyor"
+waive ApproveProposal covers NotAuthorized
+    until "2026-12-31"
+    because "tek-rollü op; yanlış-rol yolu P1 jenerik-kimlik testleriyle kapsanıyor"
+waive GetProposal covers NotAuthorized roles
+    until "2026-12-31"
+    because "rol yolu P1 jenerik-kimlik testleriyle kapsanıyor; ownership yolu elle test edildi"
