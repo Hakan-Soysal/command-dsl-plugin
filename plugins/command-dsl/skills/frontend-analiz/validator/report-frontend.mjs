@@ -364,7 +364,7 @@ function encode64(data) {
 function encodePlantUml(text) {
   return encode64(new Uint8Array(deflateRawSync(Buffer.from(text, "utf8"), { level: 9 })));
 }
-var SECTIONS = ["business", "frontend", "qa"];
+var SECTIONS = ["business", "tech", "frontend", "qa"];
 function walk(dir, acc = []) {
   for (const name of readdirSync(dir).sort()) {
     if (name.startsWith(".")) continue;

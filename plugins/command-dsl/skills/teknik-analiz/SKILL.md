@@ -268,6 +268,38 @@ node ${CLAUDE_SKILL_DIR}/validator/emit-manifest.mjs <kök.tcdsl | emit-dizini> 
 
 ---
 
+## İnsan-okur raporlar (otomatik)
+
+`manifest.json` 0-error'la üretildikten sonra rapor aracı **OTOMATİK** koşulur —
+varsayılan davranıştır; kullanıcı istemezse tek cümleyle atlanır (opt-out):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-tech.mjs <çıktı>/manifest.json --reports <çıktı>/reports --title "<Proje>"
+```
+
+Girdi, `emit-manifest.mjs`'in ürettiği `manifest.json`'dır. Üretilenler
+(`reports/tech/…`; hepsi araca gömülü **programatik üreteçlerden** — el yazımı
+görsel yok): `context.puml` (modül-bağlam haritası) · `er/<modül>.puml`
+(modül-başına ER) · `sagas/<op-slug>.puml` (YALNIZ telafili — compensate'li — dış
+çağrısı olan op'lar) · `events.puml` (event akışı) · `docs/<modül>.md` (operasyon
+el kitabı) · `ACCESS.md` / `AUTH.md` / `COVERAGE.md` matrisleri. Ardından araç
+`reports/index.md` + `index.html`'i **diski tarayarak YENİDEN üretir** (idempotent;
+bölüm sırası business→tech→frontend→qa) — dört aile skill'i aynı `reports/` kökünde
+birleşir; hepsinde **aynı `--title`**'ı ver.
+
+Exit sözleşmesi: **0** üretildi · **1** girdi bozuk/şema-dışı (HİÇBİR rapor
+yazılmaz — gate; zaten 0-error emit'ten geliyorsan görülmez) · **2** kullanım
+hatası (olmayan yol dahil). `meta.hasErrors: true` taşıyan bir manifest'te raporlar
+belirgin "işaretli koşu" uyarısıyla işaretlenir — ama bu skill akışında manifest
+zaten 0-error gate'inden üretildiğinden bu uyarı görülmez.
+
+Kapanışta kullanıcıya `reports/index.md`'yi işaret et; `.puml`'ler index'teki
+plantuml.com "görüntüle" linkleriyle açılır — görüntüleme harici sunucuda render
+edildiğinden, içerik hassassa linke tıklamama tercihi kullanıcınındır (bunu tek
+cümleyle not düş). Sözleşme detayı: `references/validator.md`.
+
+---
+
 ## Referans dosyaları (gerektiğinde oku)
 
 - `references/tech-dsl-reference.md` — TechDsl construct'larının tam sözdizimi/anlamı.
@@ -278,5 +310,5 @@ node ${CLAUDE_SKILL_DIR}/validator/emit-manifest.mjs <kök.tcdsl | emit-dizini> 
 - `references/consistency-and-emit.md` — emit öncesi bütünlük self-check + dependency-order
   emit + module-bazlı dosya bölme + linked zorunluluğu.
 - `references/validator.md` — gömülü doğrulayıcı çağrımı + diagnostics→düzeltme +
-  warning→takip-sorusu döngüsü.
+  warning→takip-sorusu döngüsü + insan-okur rapor aracı (`report-tech.mjs`) sözleşmesi.
 - `references/examples/` — parser-doğrulanmış (0 error) linked `.tcdsl` exemplar'lar.

@@ -314,7 +314,7 @@ el yazımı görsel yok): `frontend/wireframes/<slug>.puml` (ekran başına Salt
 `flows/<slug>.puml` (experience storyboard) · `bizflows/<slug>.puml` (İş-Akışı:
 business flow × ekranlar — yalnız `--flows` verilince). Ardından araç
 `reports/index.md` + `index.html`'i **diski tarayarak YENİDEN üretir** (idempotent) —
-üç aile skill'i (business/frontend/qa) aynı `reports/` kökünde birleşir; hepsinde
+dört aile skill'i (business/tech/frontend/qa) aynı `reports/` kökünde birleşir; hepsinde
 **aynı `--title`**'ı ver.
 
 Exit sözleşmesi: **0** üretildi · **1** girdi hatalı (HİÇBİR rapor yazılmaz — zaten

@@ -1,0 +1,8 @@
+{
+  "source": "CommandDSL",
+  "tool": "report-tech",
+  "srcHash": "8b3ef156d6a9",
+  "commit": "ddaa1b8",
+  "builtAt": "2026-07-03T10:19:33+03:00",
+  "note": "SAF json→puml/md rapor aracı; grammar/dil servisi gömülmez. Girdi: emit-manifest çıktısı manifest.json (tek-kaynak tip: src/tech/manifest.ts). Üreteçler: CommandDSL src/tech-report (context/er/saga/events/opdoc/matrices, T1–T6c) + report-index (kanonik ortak kopya)."
+}

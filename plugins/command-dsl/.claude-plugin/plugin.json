@@ -1,7 +1,7 @@
 {
   "name": "command-dsl",
   "description": "CommandDSL ailesi için beş skill: (1) is-analizi — iş fikrini parse-temiz CommandDSL (.cdsl) iş analizine çevirir; (2) teknik-analiz — iş analizinden (.cdsl / operations.json) belirsizlikleri sorgulayarak linked Tech DSL (.tcdsl) üretir; (3) frontend-analiz — iş (+opsiyonel teknik) analizden deneyim belirsizliklerini sorgulayarak linked Frontend DSL (.fcdsl) ve <Ad>.experience.json üretir; (4) qa-analiz — teknik analizden (.tcdsl + operations.json) her davranış dalının test niyetini sorgulayarak QA DSL (.qa) ve test-manifest (<ad>.qa.json + merged qa.json) üretir ('her dal ya test ya gerekçeli waive', strict); (5) kesif — teknik tasarımı (operations.json/manifest.json) bir hedef profiline keşfedip kayıtlı üreteç yeteneğiyle eşleştiren ve çalıştırmayı executor'a (techgen-sync) devreden seçici keşif + kapı. İlk dördü gömülü standalone doğrulayıcı ile.",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "author": {
     "name": "Hakan Soysal",
     "email": "66327932+Hakan-Soysal@users.noreply.github.com"

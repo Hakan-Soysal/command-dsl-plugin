@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-qa", srcHash: "5f0df26cd0c6", srcFiles: ["report-qa.src.mts", "report-index.src.mts"], builtAt: "2026-07-03T13:25:51.009Z" };
+var define_BUILD_INFO_default = { tool: "report-qa", srcHash: "59cb812fe30a", srcFiles: ["report-qa.src.mts", "report-index.src.mts"], builtAt: "2026-07-03T14:10:51.591Z" };
 
 // report-qa.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync } from "node:fs";
@@ -28,7 +28,7 @@ function encode64(data) {
 function encodePlantUml(text) {
   return encode64(new Uint8Array(deflateRawSync(Buffer.from(text, "utf8"), { level: 9 })));
 }
-var SECTIONS = ["business", "frontend", "qa"];
+var SECTIONS = ["business", "tech", "frontend", "qa"];
 function walk(dir, acc = []) {
   for (const name of readdirSync(dir).sort()) {
     if (name.startsWith(".")) continue;

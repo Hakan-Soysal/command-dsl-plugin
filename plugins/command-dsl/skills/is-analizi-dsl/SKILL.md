@@ -293,7 +293,7 @@ playground'unun **kendi programatik üreteçlerinden**, el yazımı görsel yok:
 `business/usecase.puml` · `flows/<slug>.puml` · `processes/<slug>.puml` +
 `<slug>.blueprint.puml` · `docs/**` (process-doc + cockburn) · `COVERAGE.md`. Ardından
 araç `reports/index.md` + `index.html`'i **diski tarayarak YENİDEN üretir**
-(idempotent) — üç aile skill'i (business/frontend/qa) aynı `reports/` kökünde
+(idempotent) — dört aile skill'i (business/tech/frontend/qa) aynı `reports/` kökünde
 birleşir; hepsinde **aynı `--title`**'ı ver.
 
 Exit sözleşmesi: **0** üretildi · **1** girdi hatalı (HİÇBİR rapor yazılmaz — zaten

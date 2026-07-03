@@ -87,3 +87,43 @@ node validate-tech.mjs --version
 
 Bundle üretilemiyorsa (CommandDSL erişilemez), valid-by-construction + §A self-check (`consistency-
 and-emit.md`) ile devam et; ama bundle varsa **MUTLAKA çalıştır** ve error'da düzeltme döngüsüne gir.
+
+## İnsan-okur rapor aracı (`report-tech.mjs`)
+
+0-error emit'ten (`emit-manifest.mjs` → `manifest.json`) sonra çalışan gömülü rapor
+üreteci (varsayılan otomatik; opt-out kuralı SKILL.md'de):
+
+```
+node ${CLAUDE_SKILL_DIR}/validator/report-tech.mjs <manifest.json> --reports <dizin> [--title "<Proje>"] [--quiet]
+```
+
+- **exit:** 0 = üretildi · 1 = girdi bozuk/şema-dışı (HİÇBİR rapor yazılmaz — gate) ·
+  2 = kullanım hatası (olmayan girdi yolu dahil — aile hizası).
+- **Üretilenler** (`reports/tech/…`): `context.puml` (modül-bağlam haritası: modüller +
+  external/uncharted sistemler; callEdges okları — external düz · uncharted «?» ·
+  compensate'li kenarda telafi etiketi · eventual kesikli — + subscription yayın okları) ·
+  `er/<modül>.puml` (modül-başına ER: entity alanları + `ref`-ilişki kenarları +
+  invariant note'ları + concurrency/realizes etiketleri) · `sagas/<op-slug>.puml`
+  (YALNIZ compensate'li dış çağrısı olan op'lar: çağrı sırası + failure dalında
+  telafiler TERS sırada + başarıda emits) · `events.puml` (üretici op → event →
+  subscription consumer akışı) · `docs/<modül>.md` (operasyon el kitabı: imza +
+  serving + visibility + realizes + yetki eksenleri + guard metinleri + throws +
+  access CRUD + emits/calls + idempotent/concurrency/consistency/pagination) ·
+  `ACCESS.md` (op × entity CRUD matrisi) · `AUTH.md` (op × yetki mekanizması:
+  roles · ownership · abac · scopes) · `COVERAGE.md` (op→realizes tablosu +
+  `coverage.unrealizedBusinessOps` + `uncoveredEntities`).
+- `meta.hasErrors: true` taşıyan bir girdi (skill akışının dışından gelen manifest —
+  `emit-manifest.mjs` gate'i skill akışında böylesini üretmez) raporlarda belirgin
+  "işaretli koşu" uyarısıyla işaretlenir.
+- **Index regen kuralı:** her koşu sonunda `reports/index.md` + `index.html` **diski
+  TARAYARAK yeniden üretilir** (idempotent — hangi aile aracı son koşarsa koşsun aynı
+  index; bölüm sırası business→tech→frontend→qa; dört aile skill'i aynı `reports/`
+  kökünde birleşir, aynı `--title`'ı ver). `.puml` girdileri göreli kaynak linki +
+  plantuml.com/plantuml/svg/ görüntüleme linkiyle listelenir (render harici
+  sunucuda — hassas içerikte tıklamamak kullanıcının tercihi).
+- **Bayatlık:** `REPORT-SNAPSHOT.json` — `srcHash` = CommandDSL `src/tech-report/**`
+  kaynakları + ortak report-index modülü. **Grammar hash'i YOK** — araç saf
+  manifest→puml/md dönüşümüdür, dile dokunmaz; §2'deki `validate-tech`/`emit-manifest`
+  SNAPSHOT'ından bağımsızdır ve ona dokunmaz. Rapor bundle'ı **aile-eşzamanlı build**
+  kuralına tabidir: ortak index modülü dört skill'de byte-özdeş kopyadır → tüm aile
+  rapor bundle'ları AYNI CommandDSL repo durumundan birlikte tazelenir.

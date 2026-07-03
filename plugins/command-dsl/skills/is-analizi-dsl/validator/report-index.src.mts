@@ -1,12 +1,13 @@
 /**
  * reports/ kök index'inin (index.md + index.html) ORTAK üreteci.
  *
- * ÜÇ rapor aracında (report-business / report-frontend / report-qa) BYTE-ÖZDEŞ
- * kopya olarak yaşar (aile self-contained kuralı; kanonik davranış = bu dosya).
- * Kural: index diski TARAYARAK yeniden üretilir (idempotent) — hangi araç son
- * koşarsa koşsun aynı içerik; üç DSL aynı reports/ kökünde birleşebilir.
+ * DÖRT rapor aracında (report-business / report-tech / report-frontend /
+ * report-qa) BYTE-ÖZDEŞ kopya olarak yaşar (aile self-contained kuralı; kanonik
+ * davranış = bu dosya). Kural: index diski TARAYARAK yeniden üretilir
+ * (idempotent) — hangi araç son koşarsa koşsun aynı içerik; dört DSL aynı
+ * reports/ kökünde birleşebilir.
  *
- * - Bölüm sırası: business → frontend → qa (yalnız mevcut olanlar).
+ * - Bölüm sırası: business → tech → frontend → qa (yalnız mevcut olanlar).
  * - Dosyalar bölüm içinde göreli-yol'a göre sıralı (basit codepoint sort).
  * - `.puml` → göreli kaynak linki + plantuml.com/plantuml/svg/ "görüntüle"
  *   linki (deflate-raw + PlantUML base64 alfabesi — src/playground/
@@ -41,7 +42,7 @@ export function encodePlantUml(text: string): string {
     return encode64(new Uint8Array(deflateRawSync(Buffer.from(text, 'utf8'), { level: 9 })));
 }
 
-const SECTIONS = ['business', 'frontend', 'qa'] as const;
+const SECTIONS = ['business', 'tech', 'frontend', 'qa'] as const;
 const ROOT_SKIP = new Set(['index.md', 'index.html', '.report-meta.json']);
 
 interface Entry { rel: string; kind: 'puml' | 'doc' | 'other'; label: string; url?: string }

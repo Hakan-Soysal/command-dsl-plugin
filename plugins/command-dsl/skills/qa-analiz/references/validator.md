@@ -161,7 +161,7 @@ node ${CLAUDE_SKILL_DIR}/validator/report-qa.mjs <qa.json> --reports <dizin> [--
   raporda belirgin uyarı bandıyla işaretlenir.
 - **Index regen kuralı:** her koşu sonunda `reports/index.md` + `index.html` **diski
   TARAYARAK yeniden üretilir** (idempotent — hangi aile aracı son koşarsa koşsun aynı
-  index; business/frontend/qa aynı `reports/` kökünde birleşir, aynı `--title`'ı ver).
+  index; business/tech/frontend/qa aynı `reports/` kökünde birleşir, aynı `--title`'ı ver).
   `.puml` girdileri göreli kaynak linki + plantuml.com/plantuml/svg/ görüntüleme
   linkiyle listelenir (render harici sunucuda — hassas içerikte tıklamamak
   kullanıcının tercihi).
