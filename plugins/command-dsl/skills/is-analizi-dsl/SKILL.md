@@ -240,7 +240,7 @@ düzelt, tekrar denetle.
 
 **"Ne sormadım?" geçidi — ÇİFT-SIFIR (0-tutarsızlık VE 0-sessiz-eksik).** Tutarlılık tek başına
 YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyonel guard / `calculate` /
-`perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). İki süpürme:
+`perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). Üç süpürme:
 1. **Sessiz-eksik (★ süpürmesi):** `references/dsl-reference.md` **Yetenek Envanteri**nin **★**
    satırlarını gez; sorulmamış her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu sor
    ("Bu işlemin bir ön-koşulu var mı? / Onaylanınca durum değişiyor mu? / Otomatik tetiklenen bir
@@ -248,6 +248,15 @@ YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyo
 2. **Sessiz-yanlış (teşhir):** zorunlu **ownership** yanlış-değerle de tutarlı görünür — `any` /
    `public` genişliği güvenlik-kritiktir. Seçtiğin ownership'i sessiz emit etme: "Bu işlemi herkes
    (any) yapabiliyor — kendi kaydıyla (own) sınırlı olmalı mı?" diye açıkça onaylat.
+3. **Sınır-devri (köprü süpürmesi):** bir işlemin çıktısını/etkisini **başka bir aktör ya da akış**
+   tüketiyor mu? El-değiştirme (handoff) açık mı — process `stage … by <aktör>` / `perform` / sonraki
+   flow adımı — yoksa "öteki taraf halleder" diye sessiz mi varsayılıyor? Çok-aktör süreçte el
+   değiştiren her aktörün payı modellenmelidir.
+
+**Kalan warning = çözülmemiş soru (üçüncü hâl — tutarsızlık değil, sessiz-eksik değil).** Warning'i
+skill KENDİ uydurduğu düzeltmeyle kapatamaz — çözüm **authored**'dır (büyü yok). Meşru kapanış üç:
+(a) sor → cevaba göre düzelt, (b) gerekçeli kabul, (c) yanlış-pozitif olduğunu göster. Sessiz auto-fix
+/ sessiz geçiştirme YASAK. Kabul gerekçesi düşülebilir bilgidir → `note """…"""` ile makinece taşı.
 
 ## Üretim (doküman + DSL)
 
@@ -281,9 +290,11 @@ Akış **iki zorunlu adım**, sırayla:
 ```
 node ${CLAUDE_SKILL_DIR}/validator/validate.mjs <emit-dizini> --json
 ```
-`error` varsa düzelt, tekrar çalıştır — **0 error olmadan döngüden çıkma**. `info`/`warning`
-bilgilendiricidir (ör. F6 kapsama). Konum çözümleme, bayatlık (grammar+src hash) uyarısı ve
-diagnostics→düzeltme döngüsü: **`references/validator.md`**.
+`error` varsa düzelt, tekrar çalıştır — **0 error olmadan döngüden çıkma**. `info` bilgilendiricidir
+(ör. F6 kapsama). **`warning` = ikinci-tur soru** — bilgilendirici DEĞİL; çoğu gerçek bir eksik/
+tutarsızlık işaretidir → kullanıcıya takip sorusu olarak yansıt, ya gider ya gerekçeyle belgele
+(teknik/frontend/qa kardeşleriyle aynı disiplin). Konum çözümleme, bayatlık (grammar+src hash) uyarısı
+ve diagnostics→düzeltme döngüsü: **`references/validator.md`**.
 
 **2. operations.json'ı OTOMATİK üret (doğrulama 0-error geçince).** Bu makine-devir
 sözleşmesidir — `teknik-analiz` ve `kesif` onu tüketir. İnsana sunulan doküman/DSL seçiminden

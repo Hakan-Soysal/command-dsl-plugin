@@ -286,7 +286,7 @@ modülleri tip-bazlı dosyalara **bölme**, dosya içinde dependency sırasında
 Tam tutarlılık self-check'i ve dosya kuralı: `references/consistency-and-emit.md`.
 
 **Emit-öncesi "Ne sormadım?" geçidi — ÇİFT-SIFIR (0-error VE 0-sessiz-eksik).** 0-error tek başına
-YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Emit'ten önce iki süpürme:
+YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Emit'ten önce üç süpürme:
 1. **Sessiz-eksik (★ süpürmesi):** `references/tech-dsl-reference.md` **Yetenek Envanteri**nin **★**
    satırlarını gez; bu oturumda sorulmamış her ★ için ya örtük kapandığını/gerçekten yok olduğunu
    göster, ya tek doğrulama sorusu sor ("Bu kayıtlarda hassas veri var mı? / Bu liste büyüyebilir
@@ -295,6 +295,18 @@ YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Emit'ten önce iki s
    **yetki eksenleri** (`roles` genişliği · `ownership own|any|all|public` · `permit`). Seçtiğin authz
    değerini sessiz emit etme: "Bu op'u yalnız X rolü, kendi kaydında yapabiliyor — doğru mu?" diye
    açıkça söyle ve onaylat (Faz 4 "güvenlik-zayıflatan eksende sor" ilkesinin emit-anı teşhiri).
+3. **Sınır-devri (köprü süpürmesi):** bir fact sınırı geçip **köprüsüz** mü kaldı?
+   - **Cross-module (kardeş module):** bir module başka module'ün verisine/olayına muhtaç mı? Köprü
+     açık olmalı — read → `calls <Module>.<Query>` (yalnız QUERY); write → `emits`+`on` (event;
+     kardeş module'e `calls`-write YOK); referans → `sourceOfTruth`. Köprüsüz "öteki module halleder"
+     varsayımı = sessiz kayıp.
+   - **External/uncharted:** bir dış-sistem çağrısı köprüsüz mü varsayılıyor? → `calls System.Op`
+     (yan-etkili ise `compensate with` = saga; salt-okur ise `readonly`).
+
+**Kalan warning = çözülmemiş soru (üçüncü hâl — error değil, sessiz-eksik değil).** Warning'i skill
+KENDİ uydurduğu düzeltmeyle kapatamaz — çözüm **authored**'dır (büyü yok). Meşru kapanış üç: (a) sor →
+cevaba göre düzelt, (b) gerekçeli kabul, (c) yanlış-pozitif olduğunu göster. Sessiz auto-fix / sessiz
+geçiştirme YASAK. Kabul gerekçesi düşülebilir bilgidir → op-`note` ile makinece taşı.
 
 **Doğrula (zorunlu):** Gömülü Tech doğrulayıcısını çalıştır:
 ```

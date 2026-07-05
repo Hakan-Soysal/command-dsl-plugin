@@ -323,6 +323,15 @@ Branch-coverage tam olsa bile YETMEZ: bir dal SAYILDI diye gerçekten test edild
 2. Her komut/Success testinde kalıcı etki (`state`/`emitted`/`called`) doğrulandı mı, yoksa
    assert'siz sığ mı? Zamana-duyarlı op'ta `time` pini, state-rule'da `seed` var mı? `until`'siz
    waive kaldı mı? Sorulmamış her ★'ı göster ya da tek soruyla kapat.
+3. **Sınır-devri (köprü süpürmesi):** çok-aktör bir süreç ya da event-zinciri (üretici `emits` →
+   tüketici `on`) var mı? Tek-op testi sınırı geçmez — bir `scenario realizes process` gerekli mi?
+   (NOT: uçtan-uca üretici→tüketici gözlemi qa v1'de YOK — reference §4.5; sınırı **bildir**, niyeti
+   senaryoyla yakala, kapsayamadığın parçayı gerekçeyle waive'le.)
+
+**Kalan warning = çözülmemiş soru (üçüncü hâl — error değil, sessiz-eksik değil).** Warning'i skill
+KENDİ uydurduğu düzeltmeyle kapatamaz — çözüm **authored**'dır (büyü yok). Meşru kapanış üç: (a) sor →
+test ekle, (b) `waive … because` (gerekçe ZORUNLU — makinece taşınır), (c) yanlış-pozitif olduğunu
+göster. Sessiz swallow / gerekçesiz waive YASAK.
 
 **Doğrula (zorunlu):** Gömülü doğrulayıcıyı çalıştır:
 ```
