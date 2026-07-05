@@ -321,8 +321,15 @@ uncharted=şirkete-ait → deployable'a girebilir).
 > - **Annotation/prelude** (`@ns.name` — NOKTALI: `@trigger.*`/`@http.*`/`@audit.*`/`@metric.*`/
 >   `@sensitivity.*`/`@crypto.*`) → **İSİMLİ** arg ZORUNLU (`AnnotationArg: name ':' value`):
 >   `@trigger.cron(schedule: "…")`. Pozisyonel (`@trigger.cron("…")`) **parse HATASI**.
+> - **SIRA — annotation prelude'ları serving'lerden ÖNCE gelir** (grammar zorunlu, keyfi değil):
+>   `@ns.name` annotation'ları **ModuleMember öneki**dir (`ModuleMember: (annotations)* (Operation|Entity|…)`);
+>   `@rest`/`@grpc`/`@queue`/`@internal` ise **Operation'ın İÇİNDE**dir. Bu yüzden doğru sıra
+>   **`@audit.logged(…)  @rest(POST,"/x")  operation …`** — annotation üstte, serving altta.
+>   Ters sıra (`@rest` sonra `@audit.*`) → **parse HATASI** ("Expecting '(' but found '.'"): parser
+>   `@rest`'ten sonra Operation içinde kalır, `@audit`'i serving sanıp `(` bekler, `.` görür. Aynı
+>   uniform önek entity/type/enum/event annotation'ları için de geçerlidir.
 
-Op'un ÜZERİNE decorator olarak; ≥1 yayın protokolü → op **exposed**:
+Op'un ÜZERİNE decorator olarak (annotation'lar EN ÜSTTE, sonra serving); ≥1 yayın protokolü → op **exposed**:
 ```
 @rest(POST, "/x")  @grpc(...)  @queue(...)      // Serving — POZİSYONEL (exposed)
 @internal                                        // açıkça yayınlanmadı

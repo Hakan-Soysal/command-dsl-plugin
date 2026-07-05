@@ -153,7 +153,9 @@ veri yalnız `calls` ile akar.
   updates … deletes … }`. Komut/sorgu ayrımı access'ten türer (write-sınıfı varsa komut).
 - "Bu işlemin çağrılması **denetim/uyum kaydı** gerektiriyor mu (finansal işlem, kişisel-veri
   erişimi)?" → op-önü `@audit.logged(category: "…", retention: "…")` (opsiyonel/authored). `retention`
-  sınıflandırmadır; saklama gerçeklemesi üreteç-politikası.
+  sınıflandırmadır; saklama gerçeklemesi üreteç-politikası. **SIRA:** annotation prelude'ları
+  (`@audit`/`@trigger`/`@metric`) serving'lerden (`@rest`/`@internal`) ÖNCE yazılır — ters sıra
+  parse HATASI (grammar: annotation=member-öneki, serving=operation-içi; bkz. reference §9 SIRA).
 
 **⚠ Anti-pattern — CQRS kayması & access yükseltme:** iş'in "sorgu" saydığı işleme write
 access verme (warning); iş'in salt-okunur saydığı entity'yi tech'te mutasyon etme
