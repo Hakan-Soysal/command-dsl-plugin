@@ -60,6 +60,13 @@ bütünlük kuralını discharge eder — bu, "tutarlılık > sözdizimi" ilkesi
   mekanikte (pagination key, idempotent param) makul varsayım + toplu onay yeterli.
 - **Anti-pattern guard'larını aktif tut.** Her fazın tipik hatası işaretli; sessizce yakala,
   nazikçe sor.
+- **Birinci-sınıf olmayanı `note` ile yakala.** DSL'in yapısal karşılamadığı ama işe-ait bir
+  kural/kısıt/karar (op-kapsamlı SLO/performans, veri-saklama/silme, in-transit şifreleme,
+  arayüz-sürümü, ya da formalize edilemeyen bir iş-kuralı) gelirse **kaybetme** — op-düzeyi
+  `note` ile DSL dosyasına yaz (`#` yorumu derlemede atılır; `note` makinece taşınır →
+  üretece/geliştiriciye ulaşır). Sıra: **yapısal-önce** (hassas→`@sensitivity`/`@crypto`,
+  çapraz-kesen güvence→`guarantee`), yapısal karşılık yoksa `note`. Saf proje-yönetimi (maliyet,
+  milestone, paydaş-siyaseti) DSL'e GİRMEZ — aile-üstü.
 - **Onaylanmamış hiçbir şeyi emit etme.** Üretim en sondadır.
 
 ## Başlamadan
@@ -114,6 +121,12 @@ ise sınır oradadır.
   **ID-skaler + sourceOfTruth(Module.Entity)**. (Aynı sınırdaki bağ → doğrudan entity-tipi serbest.)
 - "Bu kayıt için **her zaman** doğru kalması gereken bir kural var mı?" → `invariant`.
 - "Aynı kaydı iki kişi aynı anda güncellerse çakışma riski var mı?" → `concurrency optimistic`.
+- "Bu alanlardan biri **kişisel/hassas veri** mi (kimlik no, sağlık, iletişim, konum) ya da
+  **at-rest şifrelenmeli** mi (parola, kart, sır)?" → alan-önü dekorasyon:
+  `@sensitivity.tag(level: "pii")` ve/veya `@crypto.encrypted(description: "…", algorithm: "…")`.
+  Opsiyonel/authored (sert-gate değil) — hassas görüneni **işaretsiz bırakma**; sor ve açıkça yaz
+  (büyü yok). Sınıflandırma modelli; **saklama/silme gerçeklemesi** üreteç-politikasıdır (sorulursa
+  söyle, DSL'e mekanik yazma; kalıcı bir kural notu gerekiyorsa op-`note`'a düşür).
 
 **⚠ Anti-pattern — Sınır-aşan navigasyon:** cross-module entity-tipli alan (error) veya
 cross-module entity üzerinden path navigasyonu (error). Modül verisi internal; cross-module
@@ -131,6 +144,9 @@ veri yalnız `calls` ile akar.
   realizes BizOp`.
 - "Hangi kayıtları okuyor / yaratıyor / güncelliyor / siliyor?" → `access { reads … creates …
   updates … deletes … }`. Komut/sorgu ayrımı access'ten türer (write-sınıfı varsa komut).
+- "Bu işlemin çağrılması **denetim/uyum kaydı** gerektiriyor mu (finansal işlem, kişisel-veri
+  erişimi)?" → op-önü `@audit.logged(category: "…", retention: "…")` (opsiyonel/authored). `retention`
+  sınıflandırmadır; saklama gerçeklemesi üreteç-politikası.
 
 **⚠ Anti-pattern — CQRS kayması & access yükseltme:** iş'in "sorgu" saydığı işleme write
 access verme (warning); iş'in salt-okunur saydığı entity'yi tech'te mutasyon etme
@@ -239,6 +255,10 @@ yakalar. Bu faz **yeni mantık üretmez**; yalnız zaten yazılmış yükümlül
   var mı (ör. 'bir hesabın bakiyesi asla negatif olamaz', 'para hareketleri yalnız pozitif tutarla')?"
   → varsa `guarantee <Ad> "<insan-metni>"` + onu tutan yükümlülükleri `by invariant/guard/throws`
   ile eşle. Üst-akış gereksinim ID'si varsa → `traces "REQ-…"`.
+- **Fonksiyonel-OLMAYAN, çapraz-kesen bir güvence** ("veri asla kaybolmaz", bir SLO/yanıt-süresi
+  hedefi) geçerse mekanizma **uydurma**: yapısal yükümlülüğü (invariant/guard/throws) varsa
+  `guarantee` + `traces "REQ-…"` ile bağla; salt-proza ise op-`note`'a düşür (üst-akış REQ-ID'sini
+  not metnine yaz). İkisi de bilgiyi DSL dosyasında tutar — izlenebilirliği sessizce düşürme.
 - Etiketle bağlanacak invariant'a §2'deki `as "<etiket>"` ekliliğini ver (`by invariant M.E : "etiket"`).
 
 **⚠ Anti-pattern — garantiyi mantık zannetme / gereksiz sarma:** guarantee'ye kural YAZMA (mantık

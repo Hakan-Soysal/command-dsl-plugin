@@ -55,6 +55,12 @@ Bu yapı iki ilkeyi dayatır ve skill'in tüm tasarımı bunlardan çıkar:
   boşa iş yapmamak ve yanlış anlamayı erken yakalamak için.
 - **Anti-pattern guard'ları aktif tut.** Her katmanın tipik hatası var; aşağıda
   her fazda işaretli. Bunları sessizce yakala ve kullanıcıya nazikçe sor.
+- **Birinci-sınıf olmayan iş-kuralını `note` ile yakala.** DSL'in formalize edemediği
+  ama işe-ait bir kural/kısıt/dikkat-noktası (ör. "onay 48 saat içinde yapılmalı",
+  karmaşık bir istisna) gelirse **kaybetme** — ilgili operation/flow/process'e
+  `note """…"""` ile yaz (`#` yorumu derlemede atılır; `note` makinece taşınır → alt
+  katmanlara/geliştiriciye ulaşır). Ayrım: gerçek **iş-kuralı → note**; saf proje-yönetimi
+  (paydaş-siyaseti, fizibilite, maliyet, milestone) `.cdsl`'e GİRMEZ — bunlar aile-üstüdür.
 - **Onaylanmamış hiçbir şeyi emit etme.** Doküman/DSL üretimi en sondadır.
 
 ## Başlamadan

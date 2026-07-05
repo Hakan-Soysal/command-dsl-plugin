@@ -18,6 +18,9 @@
 - "Bu kayıt **başka bir sınırdaki** kayda bağlanıyor mu?" → ID + sourceOfTruth (entity-tipi DEĞİL).
 - "Bu kayıt için **istisnasız her zaman** doğru kalması gereken bir şey var mı?" → invariant.
 - "Aynı kaydı iki kişi aynı anda değiştirirse, sonradan yazan öncekini ezmemeli mi?" → concurrency.
+- "Bu alanlar arasında **kişisel/hassas veri** (kimlik, sağlık, iletişim) ya da **şifre/sır** var mı?"
+  → alan-önü `@sensitivity.tag`/`@crypto.encrypted` (authored). ⟦data classification: hassas alan
+  işaretsiz kalmasın; saklama/silme gerçeklemesi üreteç-politikasıdır — kalıcı kural gerekirse op-`note`.⟧
 - **⚠ Sınır-aşan navigasyon:** "şu kaydın içinden öteki module'ün kaydına gitmek" → yasak
   (error). ⟦data ownership: veri kimin? başka module'e yalnız `calls` ile sor.⟧
 
@@ -26,6 +29,8 @@
 - "Bu işlem teknik olarak **neyi girdi alır, ne döndürür**?" ⟦interface stability: bu imza
   client'lar tarafından mı tüketilecek? geriye-uyumlu evrilebilir mi?⟧
 - "Hangi kayıtları **okuyor**, hangilerini **yaratıyor/güncelliyor/siliyor**?" → CRUD access.
+- "Bu işlemin çağrılması **denetim kaydı** ister mi (finansal, kişisel-veri erişimi)?" →
+  `@audit.logged` (op-önü, authored). ⟦compliance: kim-neye-ne-zaman erişti izi gerekli mi?⟧
 - **⚠ CQRS kayması:** iş'in "sorgu" dediği işleme yazma verme. **⚠ Access yükseltme:** iş'in
   salt-okunur saydığı kaydı tech'te yazıyorsan → **bu kasıtlı mı?** diye AÇIKÇA sor (güvenlik).
 

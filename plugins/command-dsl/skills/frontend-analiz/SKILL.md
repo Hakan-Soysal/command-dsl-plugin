@@ -71,6 +71,13 @@ bütünlük kuralını discharge eder.
   Backend-push v1-dışıdır; frontend backend-event'ine çıpalanmaz.
 - **Anti-pattern guard'larını aktif tut.** Her fazın tipik hatası işaretli
   (`references/interrogation-playbook.md`); sessizce yakala, nazikçe sor.
+- **Birinci-sınıf olmayanı `#` yorumla yakala — sınırını bilerek.** DSL'in karşılamadığı ama
+  sunuma ait bir niyet/kısıt (ör. erişilebilirlik: "bu ekran klavyeyle tam gezilebilmeli";
+  backend'in hassas işaretlediği alanın UI'da maskelenmesi beklentisi) gelirse **düşürme** —
+  ilgili yere `#` yorum yaz. **Önemli fark (tech/business `note`'un aksine):** frontend yorumu
+  derlemede **atılır** → `experience.json`'a girmez, üretece ulaşmaz; yalnız `.fcdsl` kaynağını
+  okuyan geliştiriciye ulaşır. Yani kaynak-içi hatırlatmadır, makinece-taşınan kayıt DEĞİL —
+  gerçek gereksinimse üstakışta (tech `note`/`@sensitivity`, business `note`) yakalanmalı.
 - **Onaylanmamış hiçbir şeyi emit etme.** Üretim en sondadır.
 
 ## Başlamadan
