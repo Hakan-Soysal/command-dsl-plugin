@@ -22,6 +22,33 @@ DSL'ini** (`.cdsl`) üretir; tech DSL (`.tcdsl`) bu skill'in konusu değildir.
 
 ---
 
+## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
+
+> **Snapshot:** grammar `b75a56181dad` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+
+Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
+
+**★** = yüksek (sessiz + iş-kuralı/durum kaybı) · **○** = orta
+
+| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk |
+|---|---|---|---|
+| Guard ailesi: `where` / `only if` / `only when` / `only during` | "yalnız şu koşulda / şu durumdaysa / mesai saatinde / bakiye yeterse geçer / reddedilir" | 3 | ★ |
+| `calculate <Entity>.status = '…'` (durum geçişi) | "onaylanınca durumu X olur / şu aşamaya geçer" (süreç durum-zinciri bundan türer; yoksa UNKNOWN) | 3 | ★ |
+| `perform <İşlem>` (otomatik zincir) | "bu olunca şu da otomatik yapılır (arka planda, kullanıcı istemeden)" | 3 | ★ |
+| `schedule: every …` (zamanlanmış komut) | "her gün/ay / gece otomatik çalışır / periyodik iş" | 3 | ★ |
+| `<ilişki>'s` ownership + `relation` | "yalnız kendi ekibinin / bölgesinin / müşterisinin kaydı" | 0/3 | ★ |
+| `either/or` (akış dallanması) | "ya şöyle ya böyle ilerler / duruma göre farklı yol" | 2 | ★ |
+| `note """…"""` | formalize edilemeyen iş-kuralı / dikkat-noktası (süre, istisna, politika) | her faz | ★ |
+| `grant/revoke` (çalışma-anı yetki devri) | "geçici erişim ver (24s sonra kalksın) / vekâlet" | 3 | ○ |
+| `send <Mesaj> to` (bildirim) | "onaylanınca / olunca haber gitsin, bildirim" | 3 | ○ |
+| `create … from` (türetilmiş kayıt) | "talepten sipariş / şundan bu üretilir" | 3 | ○ |
+| `outside "…"` (sistem-dışı adım) | "kullanıcı sistem dışında bir şey yapar (fiziksel, 3.parti, bilişsel seçim)" | 2 | ○ |
+| `abandon anytime` (akıştan çıkış) | "her noktada vazgeçebilir / yarıda bırakabilir" | 2 | ○ |
+| `actor <A> extends <B>` (yetki kalıtımı) | "yönetici, çalışanın tüm yetkilerine + fazlasına sahip" | 0 | ○ |
+| query `order by` / `limit to` | "en yeniden eskiye sırala / ilk N kayıt" | 3 | ○ |
+
+---
+
 ## §1 Temel bildirimler (foundation)
 
 ```

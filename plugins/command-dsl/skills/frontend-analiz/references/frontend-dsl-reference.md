@@ -5,6 +5,31 @@
 > **tek `=`**, `!=` var, `not` YOK). Bu dosya yazım-anı başvurusudur; sorgulama soruları
 > `interrogation-playbook.md`'de.
 
+## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
+
+> **Snapshot:** grammar `e5764dfe0cec` · src `a4f0d2a6d1fa` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+
+Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listeler (zorunlular — experience/screen/uses/region — faz+validator'ca zorlanır). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → eşleşme aday-soru kuyruğuna girer (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok). `entry` ve result-handler-tamlığı zaten validator-warning'idir (sessiz değil) → burada yok; warning geldiğinde ikinci-tur soru olarak ele al.
+
+**★** = yüksek (sessiz + davranış/veri kaybı) · **○** = orta
+
+| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk |
+|---|---|---|---|
+| `cache`/`queue`/`remote` + `delivery` (offline mekaniği) | "internet yokken de çalışmalı / sahada çekmiyor / çevrimdışı kullanım" | 5 | ★ |
+| `when offline\|syncing\|SyncFailed\|SyncConflict` (sync deltaları) | "çevrimdışıyken / eşitlenirken ne görünsün; bekleyen değişiklik; çakışma" | 5 | ★ |
+| `refreshable` / `invalidates` / `on enter refresh` (tazeleme) | "veri bayatlamasın / yazınca liste güncellensin / elle yenile" | 5 | ★ |
+| `field { required\|min\|max\|pattern }` + form `rule` (validation) | "şu alan zorunlu / şu formatta / çapraz-alan kuralı (offline'da yerel doğrula)" | 6 | ★ |
+| `confirm ["metin"]` (yıkıcı aksiyon) | "silmeden/iptal etmeden önce sorsun / geri alınamaz eylem" | 6 | ★ |
+| `visible-when` (koşullu görünürlük) | "bu buton yalnız yöneticide / şu koşulda görünsün" (UX — güvenlik DEĞİL) | 4 | ★ |
+| `paginated infinite\|pager` (list) | "liste çok uzun / sayfa sayfa / sonsuz kaydır" | 4 | ★ (warning-routed) |
+| `when empty` / `when loading` (query yaşamdöngüsü) | "yüklenirken / hiç kayıt yokken ekranda ne görünsün" | 4 | ○ |
+| UI-event: `on enter/leave` · `timer/interval` · `activate/secondary` | "ekrana girince / N sn sonra / periyodik / uzun-bas / sağ-tık" | 7 | ○ |
+| `persisted state` (kalıcı client-state) | "kapatıp açınca kaybolmasın (sepet, taslak)" | 5 | ○ |
+| `show a, b` (görüntü-şekli) | "listede/detayda yalnız şu alanlar görünsün" | 4 | ○ |
+| `step` (form wizard) | "adım adım form / sihirbaz" | 6 | ○ |
+
+**Not:** field-decoration (`@ui.*` / backend-hassas→maske) bu bundle'da YOK (grammar `e5764dfe0cec` desteklemiyor — probe'lu doğrulandı) → envantere GİRMEZ; gerektiğinde `#` yorumla kaynak-içi anılır (SKILL Altın kural).
+
 ## 1. Model kökü
 
 ```

@@ -10,6 +10,38 @@
 
 ---
 
+## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
+
+> **Snapshot:** grammar `9cdbb74d0d27` · src `166e343c353d` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+
+Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
+
+**★★** = en yüksek (sessiz + güvenlik/gizlilik) · **★** = yüksek · **○** = orta
+
+| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk |
+|---|---|---|---|
+| `@sensitivity.tag` / `@crypto.encrypted` (field) | "SSN, kimlik no, sağlık, iletişim, parola, kart, sır, kişisel veri" | 2 | ★★ |
+| `invariant` (entity) | "her zaman / asla / negatif olamaz / hep şu koşul geçerli kalmalı" | 2 | ★ |
+| `concurrency optimistic` (entity) | "aynı kaydı iki kişi aynı anda düzenler; son yazan öncekini ezmesin" | 2 | ★ |
+| `sourceOfTruth` (field) | "başka modülün/servisin kaydına bağlı; asıl kaynağı orada" | 2 | ★ |
+| `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ |
+| `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ |
+| `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ |
+| `scope` (op) | "OAuth kapsamı / token izni gerekli" | 4 | ○ |
+| `idempotent by` (op) | "aynı istek iki kez gelirse; ağ tekrarı; mükerrer önle" | 6 | ★ |
+| `consistency async\|durable` (op) | "başka modüle yazıyor; anında mı görünmeli, arka planda dayanıklı mı" | 6 | ★ (warning-routed) |
+| `calls … compensate with` / saga (op) | "dış sistemi çağır; başarısız olursa geri al" | 6 | ★ |
+| `paginated by` (op) | "liste çok büyüyebilir; sayfalama" | 6 | ★ |
+| `@trigger.*` (op) | "gece 2'de / her ay / kuyruktan / webhook ile / dosya düşünce otomatik başlar" | 3/6 | ★ |
+| `emits` / `on` (op) | "olay yay; başka ekip/modül haber alsın; olayı dinle" | 6 | ○ (sınır-devri) |
+| `note` (op) | "en fazla 3 sn / %99.9; X yıl sakla sonra sil; formalize edilemeyen iş-kuralı" | her faz | ★ |
+| `readonly` (boundary-op) | "bu dış çağrı yan-etkisiz, salt-okur (sonucu kurala/guarantee'ye girer)" | 7 | ○ (→★ sonucu rule/guarantee besliyorsa) |
+| `guarantee … traces` (top) | "çapraz-kesen güvence + üst-akış gereksinim ID'si (REQ-…)" | 8 | ○ |
+
+**`note` disiplini (structural-first):** yapısal karşılığı olanı note'a atma (hassas→`@sensitivity`, çapraz-kesen güvence→`guarantee`); note yalnız **yapısal karşılığı OLMAYAN** için. Saf proje-yönetimi (maliyet/milestone) hiç girmez.
+
+---
+
 ## 0. Model başlığı & mod
 
 **`contract` (linked) ↔ `standalone` (karşılıklı dışlayıcı):**

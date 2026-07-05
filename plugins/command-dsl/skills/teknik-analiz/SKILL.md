@@ -84,6 +84,13 @@ Girdiyi netleştir:
 Sonra sekiz elicitation fazını (Faz 0–7) sırayla yürüt; ardından **opsiyonel** Faz 8'i (guarantee,
 yalnız çapraz-kesen garanti varsa). (Elicit top-down: büyük resim → detay; emit dependency-order.)
 
+**Sessiz-eksik disiplini (her faz + emit).** Faz'lar zorunlu ekseni kapatır; ama **opsiyonel**
+yetenekler (hassasiyet, concurrency, idempotent, pagination, audit, trigger, saga…) sorulmazsa
+**sessizce yok sayılır** — doğrulayıcı bunu YAKALAMAZ (YANLIŞ'ı yakalar, EKSİK'i değil). Dinlerken
+`references/tech-dsl-reference.md` **Yetenek Envanteri**nin "sinyal" kolonunu tara (kullanıcı "SSN"
+der, `@sensitivity`'yi *sen* bilirsin); eşleşmeyi aday-soru olarak kuyruğa al, hibrit onayla toplu
+sor. Emit'ten önce **★** satırlarını süpür → aşağıda "Emit" (Pre-Emit Gate, ÇİFT-SIFIR).
+
 ---
 
 ## Faz 0 — Bağlam & Mod
@@ -277,6 +284,17 @@ modülleri tip-bazlı dosyalara **bölme**, dosya içinde dependency sırasında
 önce). `import` yalnız extension-pack içindir. `contract` + her op/entity'de `realizes` zorunlu.
 (Varsa) `guarantee`'ler **en sonda** — module/op/invariant'lara referans verdikleri için.
 Tam tutarlılık self-check'i ve dosya kuralı: `references/consistency-and-emit.md`.
+
+**Emit-öncesi "Ne sormadım?" geçidi — ÇİFT-SIFIR (0-error VE 0-sessiz-eksik).** 0-error tek başına
+YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Emit'ten önce iki süpürme:
+1. **Sessiz-eksik (★ süpürmesi):** `references/tech-dsl-reference.md` **Yetenek Envanteri**nin **★**
+   satırlarını gez; bu oturumda sorulmamış her ★ için ya örtük kapandığını/gerçekten yok olduğunu
+   göster, ya tek doğrulama sorusu sor ("Bu kayıtlarda hassas veri var mı? / Bu liste büyüyebilir
+   mi, sayfalama gerekir mi? / Aynı istek iki kez gelirse sorun olur mu?"). Hiçbir ★'ı sessizce atlama.
+2. **Sessiz-yanlış (teşhir):** zorunlu construct'lar **yanlış değerle de** 0-error geçer — özellikle
+   **yetki eksenleri** (`roles` genişliği · `ownership own|any|all|public` · `permit`). Seçtiğin authz
+   değerini sessiz emit etme: "Bu op'u yalnız X rolü, kendi kaydında yapabiliyor — doğru mu?" diye
+   açıkça söyle ve onaylat (Faz 4 "güvenlik-zayıflatan eksende sor" ilkesinin emit-anı teşhiri).
 
 **Doğrula (zorunlu):** Gömülü Tech doğrulayıcısını çalıştır:
 ```

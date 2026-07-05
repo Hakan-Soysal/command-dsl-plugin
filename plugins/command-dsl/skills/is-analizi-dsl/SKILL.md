@@ -75,6 +75,13 @@ Ton: sıcak, sade, yönlendirici. Örnek açılış:
 Sonra dört fazı sırayla yürüt; Faz 3'ten sonra emit'ten önce ön-gereksinim
 kapanışını (Faz 3.5) çalıştır.
 
+**Sessiz-eksik disiplini (her faz + emit).** Faz'lar zorunlu ekseni (aktör/işlem/akış) kapatır; ama
+**opsiyonel** iş-kuralları (guard'lar, `calculate` durum-geçişi, `perform` zinciri, `schedule`,
+ilişki-ownership, akış dallanması…) sorulmazsa sessizce yok sayılır — doğrulayıcı bunu YAKALAMAZ.
+Dinlerken `references/dsl-reference.md` **Yetenek Envanteri**nin "sinyal" kolonunu tara (kullanıcı
+"gece otomatik çalışır" der, `schedule`'ı *sen* bilirsin); eşleşmeyi aday-soru olarak kuyruğa al
+(hibrit onay). Emit'ten önce **★** satırlarını süpür → "Emit öncesi — Tutarlılık self-check".
+
 ---
 
 ## Faz 0 — Bağlam & Aktör Haritası (KİM? NE?)
@@ -230,6 +237,17 @@ her flow step → var olan operation; her process stage → var olan flow/operat
 `only if`/`on success` yok, komutta `order by` yok); benzersiz 4'lü imza;
 ownership ilişkileri ve takvimler bildirilmiş. Bir ihlal varsa **emit etme** —
 düzelt, tekrar denetle.
+
+**"Ne sormadım?" geçidi — ÇİFT-SIFIR (0-tutarsızlık VE 0-sessiz-eksik).** Tutarlılık tek başına
+YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyonel guard / `calculate` /
+`perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). İki süpürme:
+1. **Sessiz-eksik (★ süpürmesi):** `references/dsl-reference.md` **Yetenek Envanteri**nin **★**
+   satırlarını gez; sorulmamış her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu sor
+   ("Bu işlemin bir ön-koşulu var mı? / Onaylanınca durum değişiyor mu? / Otomatik tetiklenen bir
+   şey var mı?"). Hiçbir ★'ı sessizce atlama.
+2. **Sessiz-yanlış (teşhir):** zorunlu **ownership** yanlış-değerle de tutarlı görünür — `any` /
+   `public` genişliği güvenlik-kritiktir. Seçtiğin ownership'i sessiz emit etme: "Bu işlemi herkes
+   (any) yapabiliyor — kendi kaydıyla (own) sınırlı olmalı mı?" diye açıkça onaylat.
 
 ## Üretim (doküman + DSL)
 

@@ -117,6 +117,12 @@ Girdiyi netleştir — **İKİSİ DE ZORUNLU** (skill politikası, tasarım kara
 Sonra yedi fazı sırayla yürüt (elicit top-down: kimlikler → dal-envanteri kararları →
 veri → test gövdeleri → senaryolar → kapanış; emit en sonda).
 
+**Sessiz-eksik disiplini — "kapsandı ≠ doğrulandı".** Branch-coverage validator dal uzayını
+süpürür; ama bir dal **sayıca "covered" olup test onu gerçekten tetiklemeyebilir / etkisini
+doğrulamayabilir** (karar #8). Test gövdesi yazarken `references/qa-dsl-reference.md` **Yetenek
+Envanteri**nin "sinyal" kolonunu tara (negatif-girdi dalı gerçekten ihlal ediyor mu? etki-assert'i
+var mı? zaman/seed gerekli mi?). Emit'ten önce **★** satırlarını süpür → aşağıda "Emit" (Pre-Emit Gate).
+
 ---
 
 ## Faz 0 — Bağlam & çift-girdi
@@ -308,6 +314,15 @@ persona / dataset / defaults / test / scenario / waive. Tavsiye edilen granülar
 tech-dosyası-başına bir `.qa` (küçük modelde tek dosya); coverage **workspace-union**
 olduğundan bölme serbesttir — TÜM dosyaları doğrulayıcıya **tek çağrıda** ver
 (union ancak böyle doğru). Dosya kuralları: `references/consistency-and-emit.md`.
+
+**Emit-öncesi "Kapsandı ≠ doğrulandı" geçidi — ÇİFT-SIFIR (0-error VE 0-sessiz-eksik).**
+Branch-coverage tam olsa bile YETMEZ: bir dal SAYILDI diye gerçekten test edildiği anlamına gelmez.
+`references/qa-dsl-reference.md` **Yetenek Envanteri**nin **★** satırlarını gez:
+1. Her negatif dal (`covers guard/error/NotAuthorized`) için — `when`/`given` girdisi o dalı
+   GERÇEKTEN tetikliyor mu, yoksa yanlış girdiyle sessizce Success mi dönüyor? (karar #8)
+2. Her komut/Success testinde kalıcı etki (`state`/`emitted`/`called`) doğrulandı mı, yoksa
+   assert'siz sığ mı? Zamana-duyarlı op'ta `time` pini, state-rule'da `seed` var mı? `until`'siz
+   waive kaldı mı? Sorulmamış her ★'ı göster ya da tek soruyla kapat.
 
 **Doğrula (zorunlu):** Gömülü doğrulayıcıyı çalıştır:
 ```

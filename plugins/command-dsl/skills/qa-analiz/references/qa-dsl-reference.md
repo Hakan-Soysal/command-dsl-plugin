@@ -7,6 +7,25 @@
 > başvurusudur; sorgulama soruları `interrogation-playbook.md`'de, tech→dal eşlemesi
 > `tech-to-qa-translation.md`'de.
 
+## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
+
+> **Snapshot:** grammar `5e7f3ca61106` · src `8803bb50614c` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+
+QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
+
+**★★** = en yüksek (kapsam sayılır, ihlal doğrulanmaz) · **★** = yüksek · **○** = orta
+
+| Derinlik | Ne zaman gerekli (sinyal) | Faz | Risk |
+|---|---|---|---|
+| Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8) | 4 | ★★ |
+| `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ |
+| `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ |
+| `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ |
+| `waive … until` (süreli) | dalı kapsamak yerine waive ediyorsan süre koydun mu? `until`'siz waive = **kalıcı sessiz boşluk** | 2 | ★ |
+| senaryo `realizes flow/process` (yaşam döngüsü) | çok-adımlı / çok-aktör akış var mı? presence-coverage | 5 | ○ (warning-routed) |
+| `page` assert'leri (paginated) | sayfalı sorguda jenerik ötesi sayfa-özel veri doğrulaması gerekli mi? | 4 | ○ |
+| stub `returns` gerçekçiliği | dış çağrı sonucu testin sonucunu etkiliyorsa `returns` içeriği gerçeği yansıtmalı | 3 | ○ |
+
 ## 1. Kök + uses ikilisi (§2, karar #2/#20)
 
 ```
