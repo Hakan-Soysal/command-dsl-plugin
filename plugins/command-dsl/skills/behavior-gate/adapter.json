@@ -1,0 +1,21 @@
+{
+  "_note": "Unified adapter for the consolidated behavior-gate: per-op invocation (endpoint, field, auth principals) + per-entity state-oracle. Payload/invariant drives authenticate as the op's AUTHORIZED principal so authz never masks them. In production this is produced by discovery (§12.H) + runtime-input UX; here hand-written.",
+  "boot": { "cmd": "node", "arg": "server.mjs", "port": 7855, "readyTimeoutMs": 3000 },
+  "errorField": "result",
+  "operations": {
+    "IssueGiftCard": {
+      "endpoint": { "method": "POST", "path": "/gift-cards" },
+      "field": "amount",
+      "authHeader": "x-actor-role",
+      "principals": { "authorized": "System", "underPrivileged": "Customer" },
+      "satisfyBody": { "amount": 50 }
+    }
+  },
+  "entities": {
+    "Ledger": {
+      "stateRead": { "method": "GET", "path": "/ledger" },
+      "driveOp": "IssueGiftCard",
+      "trajectory": [10, 20, 30]
+    }
+  }
+}

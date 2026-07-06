@@ -8,10 +8,10 @@
     {
       "name": "command-dsl",
       "source": "./plugins/command-dsl",
-      "description": "CommandDSL ailesi: is-analizi (.cdsl iş analizi) + teknik-analiz (linked .tcdsl teknik tasarım) + frontend-analiz (linked .fcdsl deneyim tasarımı + experience.json) + qa-analiz (.qa test tasarımı + test-manifest, 'her dal ya test ya gerekçeli waive') + kesif (teknik tasarımı üretece bağlayan seçici keşif + kapı, executor'a devreder) skill'leri.",
-      "version": "0.18.0",
+      "description": "CommandDSL ailesi: is-analizi (.cdsl iş analizi) + teknik-analiz (linked .tcdsl teknik tasarım) + frontend-analiz (linked .fcdsl deneyim tasarımı + experience.json) + qa-analiz (.qa test tasarımı + test-manifest, 'her dal ya test ya gerekçeli waive') + kesif (teknik tasarımı üretece bağlayan seçici keşif + kapı, executor'a devreder) skill'leri. 2. grup (vibecoder) köprüsü: spec-context (manifest.json → backend yükümlülüklerini emireden CLAUDE.md, vibecode spec-bağlamı; deterministik emitter) + behavior-gate (çalışan app'i manifest'e karşı davranışsal kapı, deneysel·advisory).",
+      "version": "0.20.0",
       "category": "development",
-      "tags": ["dsl", "business-analysis", "technical-analysis", "frontend-analysis", "qa-analysis", "test-design", "code-generation", "command-dsl", "tech-dsl", "frontend-dsl", "qa-dsl", "is-analizi", "teknik-analiz", "frontend-analiz", "qa-analiz", "kesif"]
+      "tags": ["dsl", "business-analysis", "technical-analysis", "frontend-analysis", "qa-analysis", "test-design", "code-generation", "command-dsl", "tech-dsl", "frontend-dsl", "qa-dsl", "is-analizi", "teknik-analiz", "frontend-analiz", "qa-analiz", "kesif", "spec-context", "behavior-gate", "vibecode"]
     }
   ]
 }

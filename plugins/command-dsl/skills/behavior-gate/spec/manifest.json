@@ -1,0 +1,29 @@
+{
+  "mode": null,
+  "operations": [
+    {
+      "id": "IssueGiftCard",
+      "module": "GC",
+      "visibility": "exposed",
+      "roles": ["System"],
+      "scopes": [],
+      "abac": null,
+      "serving": [{ "method": "POST", "path": "/gift-cards" }],
+      "validation": [
+        { "text": "amount > 0", "ast": { "node": "cmp", "op": ">", "left": { "path": ["amount"] }, "right": { "kind": "number", "value": 0 } } }
+      ],
+      "rule": [],
+      "throws": []
+    }
+  ],
+  "entities": [
+    {
+      "id": "Ledger",
+      "module": "GC",
+      "invariants": [
+        { "text": "sum of entries.amount = total", "ast": { "node": "cmp", "op": "=", "left": { "node": "agg", "fn": "sum", "path": ["entries", "amount"] }, "right": { "path": ["total"] } } }
+      ]
+    }
+  ],
+  "errors": []
+}

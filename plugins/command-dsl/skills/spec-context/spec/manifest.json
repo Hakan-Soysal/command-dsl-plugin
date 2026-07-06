@@ -1,0 +1,23 @@
+{
+  "mode": null,
+  "operations": [
+    {
+      "id": "IssueGiftCard", "module": "GC", "visibility": "exposed",
+      "roles": ["System", "Manager"], "scopes": ["gc:write"], "ownership": "actor==card.owner",
+      "abac": { "permit": { "node": "cmp", "op": "==", "left": { "path": ["user", "role"] }, "right": { "kind": "string", "value": "admin" } } },
+      "serving": [{ "method": "POST", "path": "/gift-cards" }],
+      "validation": [{ "text": "amount > 0", "ast": { "node": "cmp", "op": ">", "left": { "path": ["amount"] }, "right": { "kind": "number", "value": 0 } } }],
+      "rule": [{ "text": "amount <= 10000", "ast": { "node": "cmp", "op": "<=", "left": { "path": ["amount"] }, "right": { "kind": "number", "value": 10000 } } }],
+      "throws": ["budgetExceeded", "cardNotFound"]
+    },
+    {
+      "id": "Ping", "module": "GC", "visibility": "internal",
+      "roles": [], "scopes": [], "abac": null, "serving": [], "validation": [], "rule": [], "throws": []
+    }
+  ],
+  "entities": [
+    { "id": "Ledger", "module": "GC", "invariants": [{ "text": "sum of entries.amount = total", "ast": { "node": "cmp", "op": "=", "left": { "node": "agg", "fn": "sum", "path": ["entries", "amount"] }, "right": { "path": ["total"] } } }] },
+    { "id": "AuditLog", "module": "GC", "invariants": [] }
+  ],
+  "errors": []
+}
