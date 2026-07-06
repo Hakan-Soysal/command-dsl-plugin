@@ -18,25 +18,25 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 
 **★★** = en yüksek (sessiz + güvenlik/gizlilik) · **★** = yüksek · **○** = orta
 
-| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk |
-|---|---|---|---|
-| `@sensitivity.tag` / `@crypto.encrypted` (field) | "SSN, kimlik no, sağlık, iletişim, parola, kart, sır, kişisel veri" | 2 | ★★ |
-| `invariant` (entity) | "her zaman / asla / negatif olamaz / hep şu koşul geçerli kalmalı" | 2 | ★ |
-| `concurrency optimistic` (entity) | "aynı kaydı iki kişi aynı anda düzenler; son yazan öncekini ezmesin" | 2 | ★ |
-| `sourceOfTruth` (field) | "başka modülün/servisin kaydına bağlı; asıl kaynağı orada" | 2 | ★ |
-| `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ |
-| `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ |
-| `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ |
-| `scope` (op) | "OAuth kapsamı / token izni gerekli" | 4 | ○ |
-| `idempotent by` (op) | "aynı istek iki kez gelirse; ağ tekrarı; mükerrer önle" | 6 | ★ |
-| `consistency async\|durable` (op) | "başka modüle yazıyor; anında mı görünmeli, arka planda dayanıklı mı" | 6 | ★ (warning-routed) |
-| `calls … compensate with` / saga (op) | "dış sistemi çağır; başarısız olursa geri al" | 6 | ★ |
-| `paginated by` (op) | "liste çok büyüyebilir; sayfalama" | 6 | ★ |
-| `@trigger.*` (op) | "gece 2'de / her ay / kuyruktan / webhook ile / dosya düşünce otomatik başlar" | 3/6 | ★ |
-| `emits` / `on` (op) | "olay yay; başka ekip/modül haber alsın; olayı dinle" | 6 | ○ (sınır-devri) |
-| `note` (op) | "en fazla 3 sn / %99.9; X yıl sakla sonra sil; formalize edilemeyen iş-kuralı" | her faz | ★ |
-| `readonly` (boundary-op) | "bu dış çağrı yan-etkisiz, salt-okur (sonucu kurala/guarantee'ye girer)" | 7 | ○ (→★ sonucu rule/guarantee besliyorsa) |
-| `guarantee … traces` (top) | "çapraz-kesen güvence + üst-akış gereksinim ID'si (REQ-…)" | 8 | ○ |
+| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk | Atlanırsa (adlandırılmış mod) |
+|---|---|---|---|---|
+| `@sensitivity.tag` / `@crypto.encrypted` (field) | "SSN, kimlik no, sağlık, iletişim, parola, kart, sır, kişisel veri" | 2 | ★★ | **PII-açık** — hassas alan işaretlenmez; şifresiz/maskesiz saklanır ve arayüze/loga açık akar |
+| `invariant` (entity) | "her zaman / asla / negatif olamaz / hep şu koşul geçerli kalmalı" | 2 | ★ | **denetlenmeyen-değişmez** — her-zaman-geçerli kural zorlanmaz; entity yasak duruma (negatif bakiye vb.) girebilir |
+| `concurrency optimistic` (entity) | "aynı kaydı iki kişi aynı anda düzenler; son yazan öncekini ezmesin" | 2 | ★ | **kayıp-güncelleme (lost-update)** — eşzamanlı iki yazımdan sonraki, öncekini sessizce ezer |
+| `sourceOfTruth` (field) | "başka modülün/servisin kaydına bağlı; asıl kaynağı orada" | 2 | ★ | **kaynak-drifti** — asıl-kaynak işaretlenmez; yerel kopya otorite sanılır, gerçek kaynaktan sapar |
+| `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ | **izlenemez-değişiklik** — kim-ne-zaman izi tutulmaz; denetim/uyum kaydı oluşmaz |
+| `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ | **ölçülemez-işlem** — sayaç/metrik yayılmaz; işlem gözlemlenemez |
+| `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ | **öznitelik-yetki-aşımı** — bölge/departman koşulu düşer; aktör kapsam-dışı kayda erişir |
+| `scope` (op) | "OAuth kapsamı / token izni gerekli" | 4 | ○ | **kapsamsız-erişim** — token izni zorlanmaz; yetersiz-kapsamlı token işlemi çağırabilir |
+| `idempotent by` (op) | "aynı istek iki kez gelirse; ağ tekrarı; mükerrer önle" | 6 | ★ | **çift-işlem** — tekrarlanan istek iki kez işlenir (mükerrer kayıt / çift tahsilat) |
+| `consistency async\|durable` (op) | "başka modüle yazıyor; anında mı görünmeli, arka planda dayanıklı mı" | 6 | ★ (warning-routed) | **belirsiz-tutarlılık** — modüller-arası yazımın görünürlük/dayanıklılık kipi tanımsız; yanlış varsayılana düşer |
+| `calls … compensate with` / saga (op) | "dış sistemi çağır; başarısız olursa geri al" | 6 | ★ | **telafisiz-kısmi-hata** — dış çağrı başarısızında geri-alma yok; sistem yarı-yazılmış durumda kalır |
+| `paginated by` (op) | "liste çok büyüyebilir; sayfalama" | 6 | ★ | **sınırsız-sonuç** — büyüyen liste tek seferde döner; bellek/performans çöküşü |
+| `@trigger.*` (op) | "gece 2'de / her ay / kuyruktan / webhook ile / dosya düşünce otomatik başlar" | 3/6 | ★ | **tetiklenmeyen-otomasyon** — zamanlı/kuyruk/webhook başlatıcı hiç koşmaz |
+| `emits` / `on` (op) | "olay yay; başka ekip/modül haber alsın; olayı dinle" | 6 | ○ (sınır-devri) | **kopuk-olay-sınırı** — olay yayılmaz/dinlenmez; modüller-arası sınır-devri gerçekleşmez |
+| `note` (op) | "en fazla 3 sn / %99.9; X yıl sakla sonra sil; formalize edilemeyen iş-kuralı" | her faz | ★ | **kaybolan-iş-kuralı** — formalize edilemeyen kural (SLA, saklama süresi) makinece hiçbir yere taşınmaz |
+| `readonly` (boundary-op) | "bu dış çağrı yan-etkisiz, salt-okur (sonucu kurala/guarantee'ye girer)" | 7 | ○ (→★ sonucu rule/guarantee besliyorsa) | **yanlış-sınıflı-dış-çağrı** — salt-okur çağrı yan-etkili sanılır; sonucu kurala/guarantee'ye güvenle giremez |
+| `guarantee … traces` (top) | "çapraz-kesen güvence + üst-akış gereksinim ID'si (REQ-…)" | 8 | ○ | **izlenemez-güvence** — çapraz-kesen güvence ve üst-akış gereksinim bağı (REQ-…) kaybolur |
 
 **`note` disiplini (structural-first):** yapısal karşılığı olanı note'a atma (hassas→`@sensitivity`, çapraz-kesen güvence→`guarantee`); note yalnız **yapısal karşılığı OLMAYAN** için. Saf proje-yönetimi (maliyet/milestone) hiç girmez.
 

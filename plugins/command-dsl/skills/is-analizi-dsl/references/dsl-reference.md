@@ -26,26 +26,36 @@ DSL'ini** (`.cdsl`) üretir; tech DSL (`.tcdsl`) bu skill'in konusu değildir.
 
 > **Snapshot:** grammar `b75a56181dad` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 
-Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
+Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate) — riski soyut değil **"Atlanırsa"** kolonundaki adıyla teşhir et. Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
 
 **★** = yüksek (sessiz + iş-kuralı/durum kaybı) · **○** = orta
 
-| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk |
-|---|---|---|---|
-| Guard ailesi: `where` / `only if` / `only when` / `only during` | "yalnız şu koşulda / şu durumdaysa / mesai saatinde / bakiye yeterse geçer / reddedilir" | 3 | ★ |
-| `calculate <Entity>.status = '…'` (durum geçişi) | "onaylanınca durumu X olur / şu aşamaya geçer" (süreç durum-zinciri bundan türer; yoksa UNKNOWN) | 3 | ★ |
-| `perform <İşlem>` (otomatik zincir) | "bu olunca şu da otomatik yapılır (arka planda, kullanıcı istemeden)" | 3 | ★ |
-| `schedule: every …` (zamanlanmış komut) | "her gün/ay / gece otomatik çalışır / periyodik iş" | 3 | ★ |
-| `<ilişki>'s` ownership + `relation` | "yalnız kendi ekibinin / bölgesinin / müşterisinin kaydı" | 0/3 | ★ |
-| `either/or` (akış dallanması) | "ya şöyle ya böyle ilerler / duruma göre farklı yol" | 2 | ★ |
-| `note """…"""` | formalize edilemeyen iş-kuralı / dikkat-noktası (süre, istisna, politika) | her faz | ★ |
-| `grant/revoke` (çalışma-anı yetki devri) | "geçici erişim ver (24s sonra kalksın) / vekâlet" | 3 | ○ |
-| `send <Mesaj> to` (bildirim) | "onaylanınca / olunca haber gitsin, bildirim" | 3 | ○ |
-| `create … from` (türetilmiş kayıt) | "talepten sipariş / şundan bu üretilir" | 3 | ○ |
-| `outside "…"` (sistem-dışı adım) | "kullanıcı sistem dışında bir şey yapar (fiziksel, 3.parti, bilişsel seçim)" | 2 | ○ |
-| `abandon anytime` (akıştan çıkış) | "her noktada vazgeçebilir / yarıda bırakabilir" | 2 | ○ |
-| `actor <A> extends <B>` (yetki kalıtımı) | "yönetici, çalışanın tüm yetkilerine + fazlasına sahip" | 0 | ○ |
-| query `order by` / `limit to` | "en yeniden eskiye sırala / ilk N kayıt" | 3 | ○ |
+| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk | Atlanırsa (adlandırılmış mod) |
+|---|---|---|---|---|
+| Guard ailesi: `where` / `only if` / `only when` / `only during` | "yalnız şu koşulda / şu durumdaysa / mesai saatinde / bakiye yeterse geçer / reddedilir" | 3 | ★ | **koşulsuz-geçiş** — ön-koşul kaybolur; reddedilmesi gereken kayıt işlemi geçer |
+| `calculate <Entity>.status = '…'` (durum geçişi) | "onaylanınca durumu X olur / şu aşamaya geçer" (süreç durum-zinciri bundan türer; yoksa UNKNOWN) | 3 | ★ | **UNKNOWN-durum-zinciri** — durum geçişi kaybolur; süreç durum-sütunu türetilemez |
+| `perform <İşlem>` (otomatik zincir) | "bu olunca şu da otomatik yapılır (arka planda, kullanıcı istemeden)" | 3 | ★ | **kopuk-otomasyon** — arka-plan zinciri kopar; downstream işlem hiç tetiklenmez |
+| `schedule: every …` (zamanlanmış komut) | "her gün/ay / gece otomatik çalışır / periyodik iş" | 3 | ★ | **tetiklenmeyen-periyodik-iş** — zamanlanmış komut hiç koşmaz |
+| `<ilişki>'s` ownership + `relation` | "yalnız kendi ekibinin / bölgesinin / müşterisinin kaydı" | 0/3 | ★ | **yatay-yetki-aşımı** — kapsam `any`/`own`a düşer; aktör başkasının kaydına erişir |
+| `either/or` (akış dallanması) | "ya şöyle ya böyle ilerler / duruma göre farklı yol" | 2 | ★ | **kayıp-alternatif-dal** — dallanma tek-yola iner; diğer iş-senaryosu görünmez |
+| `note """…"""` | formalize edilemeyen iş-kuralı / dikkat-noktası (süre, istisna, politika) | her faz | ★ | **kaybolan-iş-kuralı** — formalize edilemeyen kural makinece hiçbir yere taşınmaz |
+| `grant/revoke` (çalışma-anı yetki devri) | "geçici erişim ver (24s sonra kalksın) / vekâlet" | 3 | ○ | **kalıcı-veya-eksik-yetki** — geçici devir modellenmez; erişim ya süresiz ya hiç yok |
+| `send <Mesaj> to` (bildirim) | "onaylanınca / olunca haber gitsin, bildirim" | 3 | ○ | **sessiz-bildirim-kaybı** — haber gitmez; alıcı olaydan habersiz |
+| `create … from` (türetilmiş kayıt) | "talepten sipariş / şundan bu üretilir" | 3 | ○ | **üretilmeyen-türev-kayıt** — kaynaktan doğması gereken kayıt oluşmaz |
+| `outside "…"` (sistem-dışı adım) | "kullanıcı sistem dışında bir şey yapar (fiziksel, 3.parti, bilişsel seçim)" | 2 | ○ | **görünmez-manuel-adım** — sistem-dışı adım akışta yer almaz; süreç eksiksiz sanılır |
+| `abandon anytime` (akıştan çıkış) | "her noktada vazgeçebilir / yarıda bırakabilir" | 2 | ○ | **modellenmemiş-çıkış** — yarıda bırakma yolu yok; akış tek-yönlü sanılır |
+| `actor <A> extends <B>` (yetki kalıtımı) | "yönetici, çalışanın tüm yetkilerine + fazlasına sahip" | 0 | ○ | **kopyalanan-veya-eksik-yetki** — kalıtım yok; yetkiler elle tekrar → drift |
+| query `order by` / `limit to` | "en yeniden eskiye sırala / ilk N kayıt" | 3 | ○ | **sırasız-sınırsız-sonuç** — kayıtlar rasgele sırayla / sınırsız döner |
+
+**Jeneratif dinleme-sinyalleri** (yukarıdaki tablo construct→sinyal; bu blok tersi:
+düz-cümle *sinyalini* dinle → aday-soru). `operation-translation.md` "Dinleme
+dedektörü" katmanının envanter-yüzü; sinyal soruyu **TETİKLER, cevabı DOLDURMAZ**:
+
+- `(öznesiz-edilgen: "mail gider / kayıt oluşturulur") => sor: "bunu HANGİ aktör yapıyor?" [★, actor + 4'lü imza]`
+- `(belirsiz niceleyici: "genelde / bazen / duruma göre") => sor: "hangi koşulda bu yol, hangisinde diğeri?" [★, either-or / Guard]`
+- `(örtük gereksinim: "…olmalı / gerekir") => sor: "bu kural hangi koşulda uygulanır?" (SORU üretir, cevap asla) [★, Guard]`
+- `(kapsam-boşluğu: "kaydı / talebi" — kimin? belirsiz) => sor: "kimin kaydı — kendi / ilişki / herhangi?" [★, ownership / relation]`
+- `(durum-sıfatı: "onaylı / kapalı / askıdaki kayıt") => sor: "bu duruma hangi işlem taşıyor?" [★, calculate status]`
 
 ---
 

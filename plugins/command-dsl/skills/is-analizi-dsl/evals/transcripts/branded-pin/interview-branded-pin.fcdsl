@@ -1,0 +1,461 @@
+# BrandedPin — Frontend Analizi (linked; business + tech)
+#   contract = interview-branded-pin.operations.json (semantik kimlik, actors, flows)
+#   tech     = interview-branded-pin.manifest.json   (çağrılabilirlik, throws, pagination, visibility)
+#
+# ── EMIT-ÖNCESİ TEŞHİR (Pre-Emit Gate) ──────────────────────────────────────────
+# 1) OFFLINE (sessiz-yanlış teşhiri): Görüşmede HİÇBİR grup için çevrimdışı çalışma
+#    gereksinimi çıkmadı (Tur1-2b: "tanımlanmamış, karar sizin"). Üç uygulamayı da
+#    remote-only VARSAYDIM — bu bir varsayımdır, doğrulanmalı. Offline gerekirse
+#    kritik listelere cache + yazmalara queue eklenir.
+# 2) CANLI GÜNCELLEME VAAT EDİLMEDİ: moderatör kuyruğu (Tur2-1c) ve ödeme-bekliyor
+#    (Tur3-4a) için anlık akış YOK → on enter + refreshable ile modellendi.
+# 3) SÖZLEŞME SINIRLARI (sınır-devri; UI'da köprüsü OLMAYAN backend-gerçekleri):
+#    - İÇERİK-ALANI YOK: CreateCampaign/UpdateCampaign/CreatePOI/UpdatePOI/CreatePackage/
+#      CreateTaxonomy imzaları YALNIZ id taşır; kampanya (açıklama/banner/kupon/tarih),
+#      konum (koordinat/kategori), paket (fiyat/limit) alanları op-paramı DEĞİL →
+#      zengin düzenleme formları bu sözleşmeye karşı İFADE EDİLEMİYOR (aksiyon olarak
+#      modellendi). Gerçek gereksinimse üstakışta (tech imza) taşınmalı.
+#    - RED GEREKÇESİ: RejectApplication/RejectCampaign/RejectPOI imzası 'reason' paramı
+#      TAŞIMIYOR → Tur2-2d'de kararlaşan serbest-metin/şablon red gerekçesi bu sözleşmeyle
+#      gönderilemiyor (kanal panel+e-posta üstakışta; girdi UI'dan alınamıyor).
+#    - OKUMA/LİSTE BOŞLUĞU: müşterinin "kampanyalarım/konumlarım" listesi, org-durum
+#      sorgusu, kurumsal-org listesi, aktif-kampanya listesi YOK → birçok id-tabanlı op
+#      (aşağıda "ERTELENEN") UI'dan bağlanamıyor.
+#    - PII: Organization.email tech'te @sensitivity(pii). Bu bundle'da @ui.* maske YOK
+#      (grammar e5764dfe0cec) → UI ifade edemez; taşıyıcı üstakıştır (yalnız kaynak-içi not).
+#    - visible-when = UX'tir, GÜVENLİK DEĞİL — gerçek yetki her istekte sunucuda.
+#
+# ── BİLİNÇLİ ERTELENEN EXPOSED OP'LAR (uncovered-op = ikinci-tur kapsam sorusu) ──
+#   UpdateApplication      — imza yalnız orgId, alan yok; düzeltme akışı Submit üstünden.
+#   PauseCampaignEnterprise— campaignId gerektirir; kurumsal-kampanya listesi query'si yok.
+#   DeactivatePremiumLogo  — logoId gerektirir; logo listeleme query'si yok (aç sonrası nav
+#                            edilebilir ama kaynak-liste yok → ertelendi).
+#   UpdatePackage          — packageId gerektirir; paket listeleme query'si yok.
+#   EmergencyRemoveByModerator / EmergencyRemoveByAdmin — aktif/onaylı kampanya listeleme
+#                            query'si YOK → moderatör/admin hangi kampanyayı seçeceğini
+#                            gösteren bir okuma yüzeyi olmadan bağlanamıyor (Tur2-2a).
+#   (DelegateToAgency / RevokeAgency tech'te 'internal' — çağrılamaz, UI-dışı; ajans
+#    devir SUNUMU Tur2-4b'de netleşmedi → modellenmedi.)
+
+contract './interview-branded-pin.operations.json' tech './interview-branded-pin.manifest.json'
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 1) KAMUYA AÇIK BAŞVURU (henüz üye olmayan markalar + ajanslar)
+# ══════════════════════════════════════════════════════════════════════════════
+experience PublicOnboarding {
+  audience: Applicant, AgencyApplicant
+  delivery: remote-only          # offline gereksinimi çıkmadı (varsayım)
+  entry BasvuruSecim
+
+  uses command CreateApplication realizes CreateApplication {
+    in { legalName, country, sector, taxNumber, corporateEmail }
+    out { orgId }
+  }
+  uses command CreateBrandProfile realizes CreateBrandProfile {
+    in { orgId }
+    out { brandId }
+    # NOT: op imzası yalnız orgId alır — BrandProfile.brandName paramı DEĞİL (sözleşme sınırı).
+  }
+  uses command SubmitApplication realizes SubmitApplication { in { orgId } }
+  uses command CreateAgencyApplication realizes CreateAgencyApplication {
+    in { legalName, country, corporateEmail }
+    out { orgId }
+  }
+  uses command SubmitAgencyApplication realizes SubmitAgencyApplication { in { orgId } }
+
+  # Uygulama-geneli hata deneyimi (bir kez; form/aksiyon yalnız istisnayı ezer)
+  on NotAuthenticated banner "Oturum sona erdi — TruID ile yeniden giriş yapın"
+  on NotAuthorized    banner "Bu işlem için yetkiniz yok"
+  on NotValid         inline-errors
+  on NotProcessable   toast "İşlem şu an gerçekleştirilemedi"
+  on ServerError      toast "Bir hata oluştu" retry
+
+  screen BasvuruSecim "Başvuru Türü" {
+    region Icerik (role: primary) {
+      action GitMarkaBasvuru -> screen MarkaBasvuru
+      action GitAjansBasvuru -> screen AjansBasvuru
+    }
+  }
+
+  # Uzun form: Tur2-3a/3b — toplu (submit-anı) doğrulama, checklist yaklaşımı MBSE ile tutarlı.
+  screen MarkaBasvuru "Marka Başvurusu" for Applicant {
+    region Icerik (role: focus) {
+      form CreateApplication remote {
+        field legalName      { required }
+        field country        { required }
+        field sector         { required }   # sektör Taxonomy'den seçilir (kaynak-liste query'si yok → serbest metin)
+        field taxNumber      { required }
+        field corporateEmail { required }   # e-posta format + kurumsal alan adı SUNUCUDA doğrulanır
+        on Success -> screen MarkaBasvuruTamamla(orgId)
+      }
+    }
+  }
+
+  screen MarkaBasvuruTamamla(orgId) "Marka Profili & Gönderim" for Applicant {
+    region Icerik (role: focus) {
+      form CreateBrandProfile remote { }   # orgId ekran-paramından; içerik alanı sözleşmede yok
+      action SubmitApplication remote {
+        confirm "Başvuru gönderilsin mi? Gönderdikten sonra düzenleme yalnız reddedilirse (60 gün) açılır."
+      }
+    }
+  }
+
+  screen AjansBasvuru "Ajans Başvurusu" for AgencyApplicant {
+    region Icerik (role: focus) {
+      form CreateAgencyApplication remote {
+        field legalName      { required }
+        field country        { required }
+        field corporateEmail { required }
+        on Success -> screen AjansBasvuruTamamla(orgId)
+      }
+    }
+  }
+
+  screen AjansBasvuruTamamla(orgId) "Ajans Başvurusu — Gönderim" for AgencyApplicant {
+    region Icerik (role: focus) {
+      action SubmitAgencyApplication remote {
+        confirm "Başvuru gönderilsin mi?"
+      }
+    }
+  }
+
+  # Tek-aktör iş akışları (UpdateApplication ertelendi → kapsama warning'i bilinçli)
+  flow MarkaBasvuruYolu realizes flow ApplicationOnboarding = [BasvuruSecim -> MarkaBasvuru -> MarkaBasvuruTamamla]
+  flow AjansBasvuruYolu realizes flow AgencyOnboarding = [BasvuruSecim -> AjansBasvuru -> AjansBasvuruTamamla]
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 2) MARKA PANELİ (external — marka ekibi + ajans; tek giriş, çoklu-marka ajans)
+# ══════════════════════════════════════════════════════════════════════════════
+experience ClientApp {
+  audience: ClientAdmin, ClientEditor, ClientViewer, AgencyUser
+  delivery: remote-only
+  entry MarkaPanosu
+
+  uses query ViewAnalytics realizes ViewAnalytics {
+    out list of { eventType, count }
+  }
+  uses query AgencyViewAnalytics realizes AgencyViewAnalytics {
+    out list of { eventType, count }
+  }
+  uses query ViewProforma realizes ViewProforma {
+    in { orgId }
+    out { amount, vat }
+  }
+  uses command InviteUser realizes InviteUser {
+    in { orgId, inviteeEmail }
+    out { userId }
+  }
+  uses command CreateCampaign realizes CreateCampaign { in { orgId } out { campaignId } }
+  uses command AgencyCreateCampaign realizes AgencyCreateCampaign { in { orgId } out { campaignId } }
+  uses command UpdateCampaign realizes UpdateCampaign { in { campaignId } }
+  uses command SubmitCampaign realizes SubmitCampaign { in { campaignId } }
+  uses command PauseCampaign realizes PauseCampaign { in { campaignId } }
+  uses command ResumeCampaign realizes ResumeCampaign { in { campaignId } }
+  uses command CreatePOI realizes CreatePOI { in { orgId } out { poiId } }
+  uses command UpdatePOI realizes UpdatePOI { in { poiId } }
+  uses command SubmitPOI realizes SubmitPOI { in { poiId } }
+  uses command DeletePOI realizes DeletePOI { in { poiId } }
+
+  on NotAuthenticated banner "Oturum sona erdi — TruID ile yeniden giriş yapın"
+  on NotAuthorized    banner "Bu işlem için yetkiniz yok"
+  on NotValid         inline-errors
+  on NotProcessable   toast "İşlem şu an gerçekleştirilemedi"
+  on ServerError      toast "Bir hata oluştu" retry
+
+  screen MarkaPanosu "Marka Panosu" {
+    region Menu (role: navigation) {
+      action GitAnalitik    -> screen Analitik
+      action GitKampanya    -> screen KampanyaOlustur
+      action GitKonum       -> screen KonumEkle
+      action GitEkip        -> screen EkipDavet
+      action GitOdeme       -> screen OdemeBekliyor
+      action GitAjansAnalitik -> screen AjansAnalitik {
+        visible-when: currentUser.role = "AgencyUser"   # UX; ajans-analitiği yalnız ajansa (güvenlik DEĞİL)
+      }
+    }
+  }
+
+  # Marka analitiği — üç rol de görür (ClientViewer tabanı; Editor/Admin devralır).
+  screen Analitik "Analitik" for ClientViewer {
+    region Icerik (role: primary) {
+      list ViewAnalytics remote refreshable paginated pager {   # tech: offset → pager uyumlu
+        show eventType, count
+        when empty { banner "Henüz analitik verisi yok" }
+      }
+      # Tazelik (Tur3-1c): canlı sayaç YOK — Countly'den toplu, gecikmeli+yaklaşık; nadiren çift-sayım (kabul).
+      # Kupon kullanımı ölçülmez (Tur3-1a, mağazada) → burada gösterilmez.
+    }
+    on enter { refresh ViewAnalytics }
+  }
+
+  screen AjansAnalitik "Ajans — Müşteri Analitiği" for AgencyUser {
+    region Icerik (role: primary) {
+      list AgencyViewAnalytics remote refreshable paginated pager {
+        show eventType, count
+        when empty { banner "Bu müşteri için analitik verisi yok" }
+      }
+      # Tur3-1d: ajans devredilen her markayı AYRI görür (birleşik çoklu-marka özeti MBSE'de yok).
+    }
+    on enter { refresh AgencyViewAnalytics }
+  }
+
+  screen KampanyaOlustur "Yeni Kampanya" for ClientEditor {
+    region Icerik (role: focus) {
+      # SÖZLEŞME SINIRI: CreateCampaign yalnız orgId alır — içerik alanları (açıklama/banner/
+      # kupon/tarih) op-paramı değil → boş taslak oluşturur, sonra düzenleme de id-only.
+      action CreateCampaign remote {
+        on Success -> screen KampanyaDetay(campaignId)
+      }
+      action AgencyCreateCampaign remote {
+        visible-when: currentUser.role = "AgencyUser"
+        on Success -> screen KampanyaDetay(campaignId)
+      }
+    }
+  }
+
+  screen KampanyaDetay(campaignId) "Kampanya" for ClientEditor {
+    region Icerik (role: focus) {
+      action UpdateCampaign remote { }   # yalnız 'draft'; içerik alanı sözleşmede yok
+      action SubmitCampaign remote {
+        confirm "Kampanya onaya gönderilsin mi? Onaylanınca DÜZENLENEMEZ ve İPTAL EDİLEMEZ (yalnız duraklatma / acil kaldırma)."
+      }
+      action PauseCampaign remote {
+        confirm "Kampanya duraklatılsın mı? Yayından iner."
+        on NotProcessable toast "Kampanya şu an duraklatılamaz (aktif değil)"
+      }
+      action ResumeCampaign remote { }
+    }
+  }
+
+  screen KonumEkle "Yeni Konum" for ClientAdmin {
+    region Icerik (role: focus) {
+      # SÖZLEŞME SINIRI: CreatePOI yalnız orgId alır — koordinat/kategori op-paramı değil.
+      action CreatePOI remote {
+        on NotProcessable toast "Konum limiti dolu — ek kapasite için hesap yöneticinizle görüşün (self-serve yükseltme yok)"   # PoiLimitReached (Tur2-3d)
+        on Success -> screen KonumDetay(poiId)
+      }
+    }
+  }
+
+  screen KonumDetay(poiId) "Konum" for ClientAdmin {
+    region Icerik (role: focus) {
+      action SubmitPOI remote { }
+      action UpdatePOI remote { }   # K2: onaylı konum düzenlenince otomatik yeniden moderasyona düşer
+      action DeletePOI remote {
+        confirm "Konum silinsin mi?"
+        on NotProcessable toast "Bu konum canlı bir kampanyada kullanılıyor — önce ilgili kampanyaları kaldırın"   # PoiInUse (Tur2-2c)
+      }
+    }
+  }
+
+  screen EkipDavet "Ekip Daveti" for ClientAdmin {
+    region Icerik (role: focus) {
+      form InviteUser remote {
+        field inviteeEmail { required }   # orgId oturumdan (session.orgId); kurumsal alan adı sunucuda doğrulanır
+        on NotValid       inline-errors    # EmailDomainMismatch → NotValid (H2)
+        on NotProcessable toast "Koltuk limiti dolu — ek koltuk için hesap yöneticinizle görüşün"   # SeatLimitReached (Tur2-3d)
+      }
+    }
+  }
+
+  # Ödeme-bekliyor (Tur3-4): onay sonrası proforma; ödeme dış sayfada; aktivasyon webhook'la (arka plan).
+  screen OdemeBekliyor "Ödeme Bekliyor" for ClientAdmin {
+    region Icerik (role: focus) {
+      detail ViewProforma(orgId: session.orgId) remote {
+        show amount, vat
+      }
+      # Tur3-4a: anlık otomatik geçiş VAAT EDİLMEZ — dış ödeme onayı gecikebilir. 'Durumu yenile' ile elle kontrol.
+      # SÖZLEŞME BOŞLUĞU: org-durum okuma query'si YOK → ekran "aktif oldu mu" durumunu gösteremiyor (üstakış eksiği).
+      # Tur3-4b: ödeme başarısız → tekrar-başlat dış Gateway'de (retry option, UC-10 AF-01).
+      # Tur3-4c: aynı ödeme iki kez → tek aktivasyon/tek fatura (transactionId; ek gösterim gerekmez).
+      action DurumuYenile { }   # client-only: proforma'yı tazele
+    }
+    on enter { refresh ViewProforma }
+  }
+
+  flow KampanyaHazirla realizes flow CampaignAuthoring = [KampanyaOlustur -> KampanyaDetay]
+  flow KonumYonet realizes flow POIManagement = [KonumEkle -> KonumDetay]
+}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 3) İÇ PANEL (Moderatör + Kurumsal Temsilci + İç Yönetim)
+#    NOT: üçünü tek experience'ta topladım — ortak kimlik/yetki katmanı (Keycloak realm)
+#    paylaşırlar (Tur1-1a); MBSE tek-app olarak dayatmıyor, bu bir SUNUM kararıdır.
+#    Ekran-bazı 'for' persona ile ayrık tutuldu.
+# ══════════════════════════════════════════════════════════════════════════════
+experience InternalPanel {
+  audience: Moderator, AccountManager, InternalAdmin
+  delivery: remote-only
+  entry IcPano
+
+  # — Moderatör —
+  uses query ListPendingApplications realizes ListPendingApplications {
+    out list of { legalName, sector, status }
+  }
+  uses command ApproveApplication realizes ApproveApplication { in { orgId } }
+  uses command RejectApplication realizes RejectApplication { in { orgId } }
+  uses query ListPendingCampaigns realizes ListPendingCampaigns {
+    out list of { description, status }
+  }
+  uses command ApproveCampaign realizes ApproveCampaign { in { campaignId } }
+  uses command RejectCampaign realizes RejectCampaign { in { campaignId } }
+  uses query ListPendingPOIs realizes ListPendingPOIs {
+    out list of { category, status }
+  }
+  uses command ApprovePOI realizes ApprovePOI { in { poiId } }
+  uses command RejectPOI realizes RejectPOI { in { poiId } }
+
+  # — Kurumsal Temsilci (AccountManager) —
+  uses command CreateEnterpriseApplication realizes CreateEnterpriseApplication {
+    in { legalName, country, sector, taxNumber, corporateEmail }
+    out { orgId }
+  }
+  uses command MarkEnterprisePaid realizes MarkEnterprisePaid { in { orgId } }
+  uses command ActivatePremiumLogo realizes ActivatePremiumLogo { in { orgId } out { logoId } }
+  uses command CreateEnterpriseFeatureSet realizes CreateEnterpriseFeatureSet { out { featureSetId } }
+  uses query ViewSystemAnalyticsAM realizes ViewSystemAnalyticsAM {
+    out list of { eventType, count }
+  }
+
+  # — İç Yönetim (InternalAdmin) —
+  uses command CreatePackage realizes CreatePackage { out { packageId } }
+  uses command CreateTaxonomy realizes CreateTaxonomy { out { taxonomyId } }
+  uses query ViewSystemAnalyticsInternal realizes ViewSystemAnalyticsInternal {
+    out list of { eventType, count }
+  }
+
+  on NotAuthenticated banner "Oturum sona erdi — TruID ile yeniden giriş yapın"
+  on NotAuthorized    banner "Bu işlem için yetkiniz yok"
+  on NotValid         inline-errors
+  on NotProcessable   toast "İşlem şu an gerçekleştirilemedi"
+  on ServerError      toast "Bir hata oluştu" retry
+
+  screen IcPano "İç Panel" {
+    region Menu (role: navigation) {
+      action GitBasvuruKuyrugu  -> screen BasvuruKuyrugu   { visible-when: currentUser.role = "Moderator" }
+      action GitKampanyaKuyrugu -> screen KampanyaKuyrugu  { visible-when: currentUser.role = "Moderator" }
+      action GitKonumKuyrugu    -> screen KonumKuyrugu      { visible-when: currentUser.role = "Moderator" }
+      action GitKurumsal        -> screen KurumsalCalisma   { visible-when: currentUser.role = "AccountManager" }
+      action GitAnalitikAM      -> screen SistemAnalitikAM  { visible-when: currentUser.role = "AccountManager" }
+      action GitTanimlar        -> screen Tanimlar          { visible-when: currentUser.role = "InternalAdmin" }
+      action GitAnalitikAdmin   -> screen SistemAnalitikAdmin { visible-when: currentUser.role = "InternalAdmin" }
+    }
+  }
+
+  # Üç ayrı moderasyon kuyruğu (MBSE üç ayrı akış; birleşik kutu MBSE'de yok — Tur2-1a).
+  # cursor + en-eski-önce (FIFO) → 'sayfa sayfa 25' yerine kaydırdıkça (cursor sayfa-atlamayı desteklemez).
+  screen BasvuruKuyrugu "Bekleyen Başvurular" for Moderator {
+    region Icerik (role: primary) {
+      list ListPendingApplications remote refreshable paginated infinite {
+        show legalName, sector, status
+        when empty { banner "Kuyruk boş" }
+        action ApproveApplication remote { invalidates: [ListPendingApplications] }
+        action RejectApplication remote {
+          confirm "Başvuru reddedilsin mi? Yazılı gerekçe iletilir (60 gün düzeltme penceresi)."
+          invalidates: [ListPendingApplications]
+          # SÖZLEŞME SINIRI: RejectApplication 'reason' paramı taşımıyor → serbest-metin gerekçe gönderilemiyor (Tur2-2d).
+          on NotProcessable toast "Bu öğe başka bir moderatör tarafından işlendi (artık incelemede değil)"   # Tur2-1d + garanti: ilk karar kazanır
+        }
+      }
+    }
+    on enter { refresh ListPendingApplications }
+    # Canlı akış YOK (Tur2-1c): girişte tazele + elle yenile.
+  }
+
+  screen KampanyaKuyrugu "Bekleyen Kampanyalar" for Moderator {
+    region Icerik (role: primary) {
+      list ListPendingCampaigns remote refreshable paginated infinite {
+        show description, status
+        when empty { banner "Kuyruk boş" }
+        action ApproveCampaign remote { invalidates: [ListPendingCampaigns] }
+        action RejectCampaign remote {
+          confirm "Kampanya reddedilsin mi? Gerekçe panel + e-posta ile iletilir (yeniden gönderim sınırsız)."
+          invalidates: [ListPendingCampaigns]
+          on NotProcessable toast "Bu öğe başka bir moderatör tarafından işlendi (artık incelemede değil)"
+        }
+      }
+    }
+    on enter { refresh ListPendingCampaigns }
+  }
+
+  screen KonumKuyrugu "Bekleyen Konumlar" for Moderator {
+    region Icerik (role: primary) {
+      list ListPendingPOIs remote refreshable paginated infinite {
+        show category, status
+        when empty { banner "Kuyruk boş" }
+        action ApprovePOI remote { invalidates: [ListPendingPOIs] }
+        action RejectPOI remote {
+          confirm "Konum reddedilsin mi? Gerekçe client'a iletilir."
+          invalidates: [ListPendingPOIs]
+          # NOT: POI reddi iletim kanalı MBSE'de netleşmemiş (FN-EVT-11 boş; Tur2-2d).
+          on NotProcessable toast "Bu öğe başka bir moderatör tarafından işlendi (artık incelemede değil)"
+        }
+      }
+    }
+    on enter { refresh ListPendingPOIs }
+  }
+
+  # Kurumsal Temsilci çalışma alanı (Tur3-3e: MBSE gruplamıyor, bu bir sunum kararı).
+  screen KurumsalCalisma "Kurumsal Kurulum" for AccountManager {
+    region Icerik (role: focus) {
+      # Tur3-3a: AM, self-serve ile AYNI temel alanları doldurur (sadeleştirilmiş form değil).
+      form CreateEnterpriseApplication remote {
+        field legalName      { required }
+        field country        { required }
+        field sector         { required }
+        field taxNumber      { required }
+        field corporateEmail { required }
+        on Success -> screen KurumsalOrg(orgId)
+      }
+    }
+  }
+
+  screen KurumsalOrg(orgId) "Kurumsal Müşteri" for AccountManager {
+    region Icerik (role: focus) {
+      action MarkEnterprisePaid remote {
+        confirm "Bu müşteri aktif edilecek ('Ödendi' işaretlenecek). Emin misiniz?"   # Tur3-3b
+        # NOT: MarkEnterprisePaid tek yönlü ('active'); sözleşmede 'unpaid'e çevirme op'u YOK (Tur3-3b durum-alanı nüansı taşınamıyor).
+        # Kurumsal başvuru da moderasyon kuyruğundan geçer (UC-02→UC-03); 'hemen aktif' değil.
+      }
+      action ActivatePremiumLogo remote { }   # Tur3-3c: aç/kapa, onay yok, anında; push başarısızsa arka planda retry (temsilciye anında hata yok)
+      action CreateEnterpriseFeatureSet remote { }   # G3: ayrı onay/moderasyon yok
+      # ERTELENEN (id kaynağı yok): DeactivatePremiumLogo (logoId), PauseCampaignEnterprise (campaignId) — liste query'si yok.
+    }
+  }
+
+  # İç yönetim tanımları (Tur3-2).
+  screen Tanimlar "Tanımlar (Paket & Sektör)" for InternalAdmin {
+    region Icerik (role: primary) {
+      action CreatePackage remote { }    # imza param taşımaz → boş oluşturur; fiyat/limit UpdatePackage (id-only) ertelendi
+      action CreateTaxonomy remote { }
+      # Tur3-2b: paket tier'lar sabit 5'li enum — 'sil/geri çek' op'u YOK (tasarım gereği).
+      #          Sektör CRUD MBSE'de var ama sözleşmede yalnız Create — Update/Delete op'u yok (bu sözleşmede düzenleme/silme taşınamıyor).
+      # Tur3-2c: fiyat değişikliği yalnız yeni/yenileyen müşteriye — ekranda hatırlatma metni (UI kopya).
+    }
+  }
+
+  screen SistemAnalitikAM "Sistem Analitiği (Temsilci)" for AccountManager {
+    region Icerik (role: primary) {
+      list ViewSystemAnalyticsAM remote refreshable paginated pager {
+        show eventType, count
+        when empty { banner "Veri yok" }
+      }
+    }
+    on enter { refresh ViewSystemAnalyticsAM }
+  }
+
+  screen SistemAnalitikAdmin "Sistem Analitiği (Yönetim)" for InternalAdmin {
+    region Icerik (role: primary) {
+      list ViewSystemAnalyticsInternal remote refreshable paginated pager {
+        show eventType, count
+        when empty { banner "Veri yok" }
+      }
+    }
+    on enter { refresh ViewSystemAnalyticsInternal }
+  }
+
+  flow BasvuruModerasyon realizes flow ApplicationModeration = [BasvuruKuyrugu]
+  flow KampanyaModerasyon realizes flow CampaignModeration = [KampanyaKuyrugu]
+  flow KonumModerasyon realizes flow POIModeration = [KonumKuyrugu]
+}

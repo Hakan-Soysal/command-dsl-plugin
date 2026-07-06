@@ -75,7 +75,38 @@ Sessizce kurma; "paket yok, geç" deme — kullanıcı kurmadan keşfe devam etm
 kurulu-skill listesinde görünür → keşif normal akar (Faz 1.5 token-tara yeniden işler). Mekanik:
 `protocol/self-describe.md` §4 + Faz 1.5 madde 4 (tek kaynak; burada yalnız erken-kapı olarak hatırlatılır).
 
-Sonra altı fazı sırayla yürüt.
+Sonra — fazlara girmeden — **öncül-sorgulama merceğini** geçir, ardından altı fazı sırayla yürüt.
+
+---
+
+## Öncül-sorgulama merceği (kapsam-daraltma — over-modeling freni)
+
+**Amaç:** Fazlara geçip bir profili keşfetmeden ve üretimi devretmeden **önce**, "bu üretim gerçekten
+bu kapsamda mı gerekli?" sorusunu bir kez açıkça sor. Bu bir **VETO değil, yüzeye-çıkarmadır**: hazır bir
+manifest'le ve net bir niyetle gelinse bile, kapı mekanik-devretmez — en dar üretilebilir dilimi arar.
+Neden burada: keşif tüm domain'i profile çevirmeye ("her alanı doldur") ve tüm manifest'i tek seferde
+üretece taşımaya doğal olarak eğilimlidir; bu, geri-alması pahalı bir **over-modeling** riskidir.
+
+**Üç soru (kapsam = ŞİMDİ üretece devredilecek dilim — upstream iş-analizini yeniden-açmaz):**
+
+1. **Gerçekten gerekli mi?** Bu manifest için üretilmiş koda bu turda ihtiyaç var mı — yoksa niyeti
+   karşılamak için elde bir şey zaten var mı? **Brownfield'de statüko = mevcut app**: keşfedilecek dilimi
+   mevcut app zaten realize ediyorsa, onu yeniden-üretmek net bir kazanç değil, tekrardır.
+2. **En dar dilim ne?** Niyeti karşılayan **en küçük** operasyon/entity alt-kümesi hangisi? Tüm manifest'i
+   devretmek yerine, değer taşıyan çekirdek dilimle başlanabilir mi (özellikle brownfield+integrated-module:
+   host'a eklenecek **tek modül** çoğu zaman tüm-app'ten dar ve doğrudur — bkz. Faz 0b).
+3. **Statüko maliyeti ne?** Bu dilimi ŞİMDİ üretMEmenin bedeli nedir? Düşükse — ertele.
+
+**Dispozisyon (sessiz-daraltma YOK — Faz 3 kalıbı):** Bu merceğin çıktısı bir karar değil, bir **soru**dur.
+Daraltma gerektiği görülürse dilimi sessizce kısma; **dispozisyonu kullanıcıya bıraktır** (dar-dilimle-devam
+vs tam-manifest-devret vs bu-turda-üretme) — tıpkı Faz 3'ün boşluk-dispozisyonu ve "Sessiz default YOK"
+altın kuralı gibi. Merceğin sonucunu (kapsam + gerekçe) kaydet; Faz 0 (mod/brownfield) ve Faz 1 (ne kadar
+profil keşfedileceği) bu daraltılmış kapsamı girdi alır.
+
+**⚠ Anti-pattern — mekanik-devretme:** hazır-planla/hazır-manifest'le gelindi diye merceği atlayıp tüm
+manifest'i doğrudan profile+devretme hattına sokma. Bu mercek Faz 1'in "profili gereğinden şişirme" ve
+Faz 4'ün "şişirilmiş config" anti-pattern'lerinin **giriş-seviyesindeki genel ilkesidir** — orada değil,
+burada bir kez sorulur.
 
 ---
 
@@ -134,7 +165,8 @@ mode mümkün görünse bile (bkz. Faz 4.5).
 `api-and-interface-design` (Contract First, error-semantics). Detay: `references/profile-discovery.md`.
 
 **⚠ Anti-pattern — sessiz profil:** belirsiz `dbProvider`/`transport`'u doldurmadan geçme; ya
-kaynaktan türet ya sor. Profili gereğinden şişirme — alanların çoğu üreteç-sabiti/unsupported'a düşebilir.
+kaynaktan türet ya sor. Profili gereğinden şişirme — alanların çoğu üreteç-sabiti/unsupported'a düşebilir
+(bunun giriş-seviyesindeki genel hâli: yukarıdaki **öncül-sorgulama merceği** — "en dar dilim ne").
 **Çıktı:** kayıtlı `profile.json` artefaktı.
 
 ---

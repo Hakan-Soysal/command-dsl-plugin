@@ -1,0 +1,797 @@
+// ============================================================================
+// BrandedPin — LINKED TechDsl (interview-branded-pin.operations.json'ı realize eder)
+// Üç turlu teknik görüşmenin Emit çıktısı. Tek kök dosya, dependency-order.
+// Mimari kararlar: 8 domain module (tutarlılık/deploy sınırı) + 3 dış/uncharted sınır.
+// Co-write kısıtı (checkEntityCoverage): ActivateOrganization/MarkEnterprisePaid
+// [Invoice, Organization] ve ApproveApplication [Organization, ProformaInvoice] birlikte
+// yazıldığından Organization+Invoice+ProformaInvoice AYNI module'de (OrgManagement).
+// Cross-module dayanıklı zincir (TUR3-D9): olay köprüsü (emits/on) — org-aktivasyon →
+// içerik yayını, org-kapanma → içerik indirme + premium logo kapatma.
+// ============================================================================
+contract './interview-branded-pin.operations.json'
+
+// ── Business aktör → tech rol (capability) M:N tablosu (roles burada çözülür) ──
+rolemap {
+  Applicant       -> Applicant
+  AgencyApplicant -> AgencyApplicant
+  AgencyUser      -> AgencyUser
+  ClientViewer    -> ClientViewer
+  ClientEditor    -> ClientEditor
+  ClientAdmin     -> ClientAdmin
+  AccountManager  -> AccountManager
+  Moderator       -> Moderator
+  InternalAdmin   -> InternalAdmin
+}
+
+// ============================================================================
+// MODULE 1 — Identity  (LG-SS-01 Identity & Access: kullanıcı hesabı + ajans devri)
+//   Girişler dış TruID/Keycloak üzerinden (kapsam dışı; yalnız JWT doğrulama sınırı).
+// ============================================================================
+module Identity {
+
+  error EmailDomainMismatch : NotValid
+  error SeatLimitReached    : NotProcessable
+
+  // H2: davet — e-posta org kurumsal alan adıyla eşleşmeli (SYS-REQ-17). Domain/koltuk
+  // kontrolleri org kaydına (OrgManagement) bakar → cross-module, note ile taşınır.
+  @rest(POST, "/orgs/:orgId/users/invite")
+  operation InviteUser(orgId: OrgId, inviteeEmail: String): UserId realizes InviteUser {
+    roles ClientAdmin
+    ownership own
+    access { creates UserAccount }
+    throws EmailDomainMismatch, SeatLimitReached
+    note "H2: davet edilen e-posta org kurumsal alan adıyla eşleşmeli (FN-OP-05, cross-module → OrgManagement.Organization.email; note). Standart 2 koltuk (1 Admin zorunlu), kurumsalda sınırsız; limit dolunca engellenir, ek koltuk ödemesi onaylanınca açılır (otomatik ücret yok)."
+  }
+
+  // A3/D3: kapsam müşteriye göre değişir (Admin/Editor/Viewer). delegatedClient ilişkisini
+  // bu devir doldurur. Business'ta 'grant' delegation → tech'te yazma (AgencyDelegation).
+  @internal
+  operation DelegateToAgency(orgId: OrgId, agencyUserId: UserId, accessScope: String): Unit realizes DelegateToAgency {
+    roles ClientAdmin
+    ownership own
+    access { creates AgencyDelegation }
+    note "A3: aynı ajans A müşterisinde geniş, B'de salt-görüntü olabilir. Devredilen kapsam yalnız kampanya + analitik (TUR3-F16); POI/faturalama devredilmez (UC-04/UC-10/11 connected-actors'ta ACT-05 yok)."
+  }
+
+  // D2/L1: geri alma ANINDA etkili (immediate effect). Ajansın yarım taslak kampanyaları
+  // OLDUĞU GİBİ kalır (silinmez). Otomatik süre-dolumu yok (yalnız elle).
+  @internal
+  operation RevokeAgency(orgId: OrgId, agencyUserId: UserId): Unit realizes RevokeAgency {
+    roles ClientAdmin
+    ownership own
+    access { deletes AgencyDelegation }
+    note "D2/L1: geri alma anında etkili; yetki her istekte gerçek-zamanlı kontrol edilir (önbelleklenmez, TUR3-F17). Ajansın taslak kampanyaları korunur; müşteri ekibi sürdürür."
+  }
+
+  entity UserAccount realizes UserAccount {
+    id: UserId
+    role: String
+    emailDomain: String
+  }
+
+  // Tech-only kayıt (business entity yok): ajans devir kapsamı. orgId cross-module bağ.
+  entity AgencyDelegation {
+    id: DelId
+    orgId: OrgId sourceOfTruth(OrgManagement.Organization)
+    agencyUserId: UserId
+    accessScope: String
+  }
+}
+
+// ============================================================================
+// MODULE 2 — OrgManagement  (LG-SS-02 Org Mgmt + faturalama co-located)
+//   Organization + Invoice + ProformaInvoice + BrandProfile (co-write kısıtı).
+//   ScreenApplication burada (Organization yazdığı için; ortak Can.AI motoru mantıksal).
+// ============================================================================
+module OrgManagement {
+
+  error InvalidApplicationState : NotProcessable
+
+  // Olaylar — cross-module dayanıklı zincir köprüsü (TUR3-D9/D10).
+  event OrganizationActivated { orgId: OrgId }
+  event OrganizationExpired   { orgId: OrgId }
+
+  // --- Başvuru oluşturma (üç varyant, aynı moderasyon havuzu) ---
+  @rest(POST, "/applications")
+  operation CreateApplication(legalName: String, country: String, sector: String, taxNumber: String, corporateEmail: String): OrgId realizes CreateApplication {
+    roles Applicant
+    ownership own
+    access { creates Organization }
+    note "Marka self-serve başvurusu; orgType=client, başlangıç 'draft'."
+  }
+
+  @rest(POST, "/agency-applications")
+  operation CreateAgencyApplication(legalName: String, country: String, corporateEmail: String): OrgId realizes CreateAgencyApplication {
+    roles AgencyApplicant
+    ownership own
+    access { creates Organization }
+    note "Ajans başvurusu; orgType=agency, POI/marka profili adımı YOK. Sabit yıllık 12.000 TL (5 koltuk dahil, ek koltuk 1.200 TL/yıl)."
+  }
+
+  @rest(POST, "/enterprise-applications")
+  operation CreateEnterpriseApplication(legalName: String, country: String, sector: String, taxNumber: String, corporateEmail: String): OrgId realizes CreateEnterpriseApplication {
+    roles AccountManager
+    ownership any
+    access { creates Organization }
+    note "Kurumsal başvuru — Temsilci müşteri adına elle girer; konum limiti yok, kademe Ecosystem/Enterprise."
+  }
+
+  @rest(PATCH, "/applications/:orgId")
+  operation UpdateApplication(orgId: OrgId): Unit realizes UpdateApplication {
+    roles Applicant
+    ownership own
+    access { reads Organization as org by orgId  updates Organization }
+    rule { org.status = "draft" or org.status = "rejected" for guard "where:0" }
+    throws InvalidApplicationState
+    note "Reddedilen başvuru AYNI kayıt üzerinden 60 gün içinde düzeltilir (yeni başvuru açılmaz)."
+  }
+
+  @rest(POST, "/applications/:orgId/submit")
+  operation SubmitApplication(orgId: OrgId): Unit realizes SubmitApplication {
+    roles Applicant
+    ownership own
+    access { reads Organization as org by orgId  updates Organization }
+    rule { org.status = "draft" or org.status = "rejected" for guard "where:0" }
+    throws InvalidApplicationState
+    note "Gönderim → 'submitted'; ardından ScreenApplication (same-module, iç orkestrasyon)."
+  }
+
+  @rest(POST, "/agency-applications/:orgId/submit")
+  operation SubmitAgencyApplication(orgId: OrgId): Unit realizes SubmitAgencyApplication {
+    roles AgencyApplicant
+    ownership own
+    access { reads Organization as org by orgId  updates Organization }
+    rule { org.status = "draft" or org.status = "rejected" for guard "where:0" }
+    throws InvalidApplicationState
+  }
+
+  // Can.AI ön-kontrol: ASLA otomatik ONAY; net ihlalde otomatik red, yoksa 'inReview'.
+  @internal
+  operation ScreenApplication(orgId: OrgId): Unit realizes ScreenApplication {
+    ownership any
+    access { reads Organization as org by orgId  updates Organization }
+    calls CanAI.Screen as risk
+    rule { org.status = "submitted" for guard "where:0" }
+    note "Can.AI net ihlalde (kötü dil/sahte belge/malware/tekrar) otomatik reddeder; yoksa 'inReview'. Her ONAY istisnasız insan moderatörden geçer (SYS-REQ-32). Can.AI down → tarama atlanır, öğe doğrudan insan kuyruğuna düşer (TUR3-D12; auto-approve yasak olduğundan güvenli)."
+  }
+
+  // --- Moderasyon kararları (ilk-karar-kazanır: rule where:0 → ikinci karar 'inReview' değil) ---
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/applications/:orgId/approve")
+  operation ApproveApplication(orgId: OrgId): Unit realizes ApproveApplication {
+    roles Moderator
+    ownership any
+    access { reads Organization as org by orgId  updates Organization  creates ProformaInvoice }
+    rule { org.status = "inReview" for guard "where:0" }
+    throws InvalidApplicationState
+    note "Onay → 'approved' + proforma fatura (bilgilendirme; kesin fatura değil) + karar bildirimi (tek işlem). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/applications/:orgId/reject")
+  operation RejectApplication(orgId: OrgId): Unit realizes RejectApplication {
+    roles Moderator
+    ownership any
+    access { reads Organization as org by orgId  updates Organization }
+    rule { org.status = "inReview" for guard "where:0" }
+    throws InvalidApplicationState
+    note "Yazılı gerekçe + 60 gün düzeltme penceresi (sonunda otomatik silinir). Ara hatırlatma kapsam dışı (R2). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  // Self-serve aktivasyon: ödeme Gateway webhook'u → org Aktif + kesin fatura (o günkü ECB
+  // kuru lockedRate'e kilitlenir). idempotent by transactionId (TUR3-B4 çift-webhook koruması).
+  @audit.logged(category: "financial", retention: "10y")
+  @internal
+  operation ActivateOrganization(orgId: OrgId, transactionId: String): Unit realizes ActivateOrganization {
+    ownership any
+    access { reads Organization as org by orgId  updates Organization  creates Invoice }
+    rule { org.status = "approved" for guard "where:0" }
+    idempotent by transactionId
+    emits OrganizationActivated
+    throws InvalidApplicationState
+    note "TUR3-B4: aynı 'ödendi' iki kez → tek aktivasyon/tek fatura (transactionId damgası). TUR3-E14: kart verisi ASLA saklanmaz — yalnız cardToken + sonuç (ICD IF-20/21). lockedRate yalnız iç gelir takibi (satış fiyatını etkilemez, geriye dönük sabit). İçerik yayını OrganizationActivated olayı ile Campaign.PublishContent'e köprülenir (dayanıklı, TUR3-D9). Denetim-izi (audit) tutulur — kategori: financial (10y); kim/ne zaman (TUR3-E15)."
+  }
+
+  // Kurumsal: fatura/tahsilat dışarıda (SAP + Temsilci elle). Sisteme yalnız 'Ödendi' işaretlenir.
+  @audit.logged(category: "financial", retention: "10y")
+  @rest(POST, "/enterprise/:orgId/mark-paid")
+  operation MarkEnterprisePaid(orgId: OrgId): Unit realizes MarkEnterprisePaid {
+    roles AccountManager
+    ownership any
+    access { reads Organization as org by orgId  updates Organization  creates Invoice }
+    rule { org.status = "approved" for guard "where:0" }
+    idempotent by orgId
+    emits OrganizationActivated
+    throws InvalidApplicationState
+    note "TUR3-B5: ikinci 'Ödendi' işaretleme zaten aktif → engellenir, ikinci fatura oluşmaz (rule status=approved doğal no-op). SAP hataları Temsilci (insan) müdahalesi gerektirir. Denetim-izi (audit) tutulur — kategori: financial (10y); kim/ne zaman (TUR3-E15)."
+  }
+
+  // Ödeme başarısız webhook'u → 'paused' (grace). İçerik YAYINDA KALIR (inme grace SONUNDA).
+  @internal
+  operation SuspendOnPaymentFail(orgId: OrgId): Unit realizes SuspendOnPaymentFail {
+    ownership any
+    access { reads Organization as org by orgId  updates Organization }
+    rule { org.status = "active" for guard "where:0" }
+    idempotent by orgId
+    note "TUR2-A2: ikinci 'başarısız' webhook zaten paused → etkisiz (rule status=active doğal no-op). 5 gün içinde ödenirse RecoverOrganization ile kesintisiz Aktif'e döner; içerik hiç inmediği için yeniden-yayın yok."
+  }
+
+  @internal
+  operation RecoverOrganization(orgId: OrgId): Unit realizes RecoverOrganization {
+    ownership any
+    access { reads Organization as org by orgId  updates Organization }
+    rule { org.status = "paused" for guard "where:0" }
+    note "J3: grace içinde ödeme gelince otomatik Aktif (elle onay yok)."
+  }
+
+  // C2: 5 günlük grace DOLAN paused org → 'expired'; içerik iner + premium logo kapanır (olay köprüsü).
+  @trigger.cron(schedule: "0 2 * * *")
+  @internal
+  operation ExpireOrganizations(): Unit realizes ExpireOrganizations {
+    ownership all
+    access { updates Organization }
+    emits OrganizationExpired
+    note "C2: grace-DOLAN paused org'lar 'expired' (tarih-şimdi filtresi 'where' ile ifade edilemez, note). OrganizationExpired olayı → Campaign.WithdrawContent + Distribution.DeactivatePremiumLogo (Q1; dayanıklı, TUR3-D10)."
+  }
+
+  // B2: 60 gün DOLAN reddedilmiş başvurular otomatik silinir.
+  @trigger.cron(schedule: "0 2 * * *")
+  @internal
+  operation PurgeRejectedApplications(): Unit realizes PurgeRejectedApplications {
+    ownership all
+    access { deletes Organization }
+    note "B2: 60 gün DOLAN 'rejected' başvurular silinir (insan eli gerekmez). Süre-dolum filtresi note ile taşınır."
+  }
+
+  @rest(POST, "/applications/:orgId/brand-profile")
+  operation CreateBrandProfile(orgId: OrgId): BrandId realizes CreateBrandProfile {
+    roles Applicant
+    ownership own
+    access { creates BrandProfile }
+    note "Marka profili yalnız marka başvurusunda (ajansta YOK). D1: onaylı profil güncellemeleri de ortak moderasyondan geçer."
+  }
+
+  @rest(GET, "/orgs/:orgId/proforma")
+  operation ViewProforma(orgId: OrgId): ProformaInvoice realizes ViewProforma {
+    roles ClientAdmin
+    ownership own
+    access { reads ProformaInvoice }
+    note "M1: 'ödeme bekliyor' ekranında isteğe bağlı indirilir. Paket + konum ücreti + %20 KDV; bilgilendirme amaçlı."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(GET, "/moderation/applications/pending")
+  operation ListPendingApplications(): list of Organization realizes ListPendingApplications {
+    roles Moderator
+    ownership any
+    access { reads Organization }
+    paginated by cursor createdAt asc, id asc size 25
+    note "Kuyruk 'inReview' filtreli (when result-filter). TUR3-G18/G19: sayfa 25, en eski önce (FIFO). Denetim-izi (audit): kişisel-veri içeren başvuruya erişim izlenir — kim/ne zaman (TUR3-E15)."
+  }
+
+  entity Organization realizes Organization {
+    id: OrgId
+    legalName: String
+    country: String
+    sector: String
+    taxNumber: String @sensitivity.tag(level: "pii")
+    email: String
+    orgType: String
+    status: String
+    createdAt: Date
+  }
+
+  entity Invoice realizes Invoice {
+    id: InvId
+    amount: Decimal
+    vat: Decimal
+    lockedRate: Decimal
+    status: String
+  }
+
+  entity ProformaInvoice realizes ProformaInvoice {
+    id: PiId
+    amount: Decimal
+    vat: Decimal
+  }
+
+  entity BrandProfile realizes BrandProfile {
+    id: BrandId
+    brandName: String
+  }
+}
+
+// ============================================================================
+// MODULE 3 — Campaign  (LG-SS-03 Campaign + içerik yayın/indirme etabı)
+//   PublishContent/WithdrawContent Campaign yazdığı için burada (Distribution değil).
+// ============================================================================
+module Campaign {
+
+  error InvalidCampaignState : NotProcessable
+  error InvalidCampaignDates : NotValid
+  error OrgNotActive         : NotProcessable
+
+  @rest(POST, "/campaigns")
+  operation CreateCampaign(orgId: OrgId): CampaignId realizes CreateCampaign {
+    roles ClientEditor
+    ownership own
+    access { creates Campaign }
+    throws OrgNotActive
+    note "H3/J4 ÖN-KOŞUL: kampanya oluşturma yalnız org 'active' iken (paused/expired KAPALI). Çapraz-varlık koşulu (org OrgManagement'ta) → 'where' ile ifade edilemez, note. Taslak kalıcı, süre sınırı yok."
+  }
+
+  @rest(POST, "/agency/campaigns")
+  operation AgencyCreateCampaign(orgId: OrgId): CampaignId realizes AgencyCreateCampaign {
+    roles AgencyUser
+    ownership delegatedClient
+    access { creates Campaign }
+    throws OrgNotActive
+    note "Ajans, devredilen kapsam Editör+ ise müşteri adına oluşturur (kapsam kontrolü her istekte)."
+  }
+
+  @rest(PATCH, "/campaigns/:campaignId")
+  operation UpdateCampaign(campaignId: CampaignId): Unit realizes UpdateCampaign {
+    roles ClientEditor
+    ownership own
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "draft" for guard "where:0" }
+    throws InvalidCampaignState
+  }
+
+  @rest(POST, "/campaigns/:campaignId/submit")
+  operation SubmitCampaign(campaignId: CampaignId): Unit realizes SubmitCampaign {
+    roles ClientEditor
+    ownership own
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "draft" and camp.endDate >= camp.startDate for guard "where:0" }
+    throws InvalidCampaignState, InvalidCampaignDates
+    note "ÖN-KOŞUL org 'active' (cross-module, note). Gönderince DONAR. Kupon kodu org içinde tekil (Q3; AI doğrular; cross-varlık → note). Ardından ScreenCampaign (same-module)."
+  }
+
+  @internal
+  operation ScreenCampaign(campaignId: CampaignId): Unit realizes ScreenCampaign {
+    ownership any
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    calls CanAI.Screen as risk
+    rule { camp.status = "pendingReview" for guard "where:0" }
+    note "Can.AI (metin/link/kupon/görsel-şablon). İhlal yoksa 'inReview'; net ihlalde otomatik red (→'draft'). Asla otomatik onay. Can.AI down → doğrudan insan kuyruğu (TUR3-D12)."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/campaigns/:campaignId/approve")
+  operation ApproveCampaign(campaignId: CampaignId): Unit realizes ApproveCampaign {
+    roles Moderator
+    ownership any
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "inReview" for guard "where:0" }
+    throws InvalidCampaignState
+    note "A4: onaylı kampanya kullanıcıca iptal/geri çekilemez (kilitli). Kaldırma yalnız Acil Kaldır. Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/campaigns/:campaignId/reject")
+  operation RejectCampaign(campaignId: CampaignId): Unit realizes RejectCampaign {
+    roles Moderator
+    ownership any
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "inReview" for guard "where:0" }
+    throws InvalidCampaignState
+    note "Red → 'draft', kilit açılır; yeniden gönderim SINIRSIZ. AI-red ile insan-red kullanıcı gözünde aynı (panel+e-posta gerekçe). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  // C3: başlangıç tarihi GELEN onaylı kampanyalar otomatik Aktif → PublishContent (same-module).
+  @trigger.cron(schedule: "0 2 * * *")
+  @internal
+  operation ActivateDueCampaigns(): Unit realizes ActivateDueCampaigns {
+    ownership all
+    access { updates Campaign }
+    note "C3: 'approved' + başlangıç tarihi gelen → 'active' (tarih-şimdi karşılaştırması note ile taşınır). Ardından PublishContent (same-module iç orkestrasyon)."
+  }
+
+  // C3: bitiş tarihi GEÇEN aktif kampanyalar otomatik 'past' → WithdrawContent (same-module).
+  @trigger.cron(schedule: "0 2 * * *")
+  @internal
+  operation EndDueCampaigns(): Unit realizes EndDueCampaigns {
+    ownership all
+    access { updates Campaign }
+    note "C3: 'active' + bitiş tarihi geçen → 'past'. Ardından WithdrawContent (same-module)."
+  }
+
+  @rest(POST, "/campaigns/:campaignId/pause")
+  operation PauseCampaign(campaignId: CampaignId): Unit realizes PauseCampaign {
+    roles ClientAdmin
+    ownership own
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "active" for guard "where:0" }
+    throws InvalidCampaignState
+    note "Yayından iner (WithdrawContent, same-module). Tarih aralığındaysa ResumeCampaign ile Aktif'e döner; duraklatmışken bitiş geçerse doğrudan 'past'."
+  }
+
+  @rest(POST, "/enterprise/campaigns/:campaignId/pause")
+  operation PauseCampaignEnterprise(campaignId: CampaignId): Unit realizes PauseCampaignEnterprise {
+    roles AccountManager
+    ownership any
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "active" for guard "where:0" }
+    throws InvalidCampaignState
+  }
+
+  @rest(POST, "/campaigns/:campaignId/resume")
+  operation ResumeCampaign(campaignId: CampaignId): Unit realizes ResumeCampaign {
+    roles ClientAdmin
+    ownership own
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "paused" for guard "where:0" }
+    throws InvalidCampaignState
+    note "Aktif'e döner → PublishContent (same-module)."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/admin/campaigns/:campaignId/emergency-remove")
+  operation EmergencyRemoveByAdmin(campaignId: CampaignId): Unit realizes EmergencyRemoveByAdmin {
+    roles InternalAdmin
+    ownership any
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "active" or camp.status = "approved" for guard "where:0" }
+    throws InvalidCampaignState
+    note "A5 KALICI: 'emergencyRemoved'dan geçiş yok, bir daha yayına dönmez. Ardından WithdrawContent (≤2dk, TUR3-A2). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/moderation/campaigns/:campaignId/emergency-remove")
+  operation EmergencyRemoveByModerator(campaignId: CampaignId): Unit realizes EmergencyRemoveByModerator {
+    roles Moderator
+    ownership any
+    access { reads Campaign as camp by campaignId  updates Campaign }
+    rule { camp.status = "active" or camp.status = "approved" for guard "where:0" }
+    throws InvalidCampaignState
+    note "A5 KALICI. Ardından WithdrawContent (≤2dk acil, TUR3-A2). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  // E1: dışarı yalnız (kampanya 'active' + org 'active' + ilgili POI 'approved') gider — üç
+  // varlık üç module: çapraz gate note ile taşınır (advisor: sentetik query uydurma).
+  // Org-aktivasyon durumunda cross-module dayanıklı köprü: OrganizationActivated → burada.
+  operation PublishContent(): Unit realizes PublishContent {
+    ownership all
+    access { updates Campaign }
+    on OrgManagement.OrganizationActivated
+    note "E1 üç-yönlü gate (kampanya+org+POI durumu; 3 module → cross-module, note). E3: Trumore=kampanya+POI+banner, Togg=kampanya+POI+premium logo; hiçbir surface'e fiyat/paket gitmez. E4: olay-bazlı tekil güncelleme (önbellekli servis). Normal içeriği Trumore/Togg ÇEKER (pull). Yayına çıkış ≤5dk (TUR3-A1). Same-module tetikleyiciler: ActivateDueCampaigns/ResumeCampaign/MarkEnterprisePaid; cross-module (org-aktivasyon) OrganizationActivated olayı ile (dayanıklı, TUR3-D9)."
+  }
+
+  // E2: kampanya bitti/duraklatıldı/acil-kaldırıldı/org kapandı → 'kaldır'. Org-kapanma
+  // cross-module dayanıklı köprü: OrganizationExpired → burada.
+  operation WithdrawContent(): Unit realizes WithdrawContent {
+    ownership all
+    access { updates Campaign }
+    on OrgManagement.OrganizationExpired
+    note "E2: kaldır sinyali. TUR3-A2 hedefleri: standart inme ≤15dk, acil ≤2dk. Trumore/Togg önbellek tazeliği ≤10dk (TUR3-A3). TUR3-D10: teknik aksaklıkta içerik sessizce yayında kalmaz — yeniden dene, garanti indir (Distribution 'Update complete' guard'ı uyumlu). Same-module tetikleyiciler: PauseCampaign/EndDueCampaigns/EmergencyRemove*; cross-module (org-kapanma) OrganizationExpired olayı ile (dayanıklı)."
+  }
+
+  @rest(GET, "/moderation/campaigns/pending")
+  operation ListPendingCampaigns(): list of Campaign realizes ListPendingCampaigns {
+    roles Moderator
+    ownership any
+    access { reads Campaign }
+    paginated by cursor createdAt asc, id asc size 25
+    note "Kuyruk 'inReview' filtreli (when result-filter). TUR3-G18/G19: sayfa 25, en eski önce (FIFO)."
+  }
+
+  entity Campaign realizes Campaign {
+    id: CampaignId
+    description: String
+    bannerUrl: String
+    link: String
+    couponCode: String
+    startDate: Date
+    endDate: Date
+    poiScope: String
+    status: String
+    createdAt: Date
+    concurrency optimistic
+  }
+}
+
+// ============================================================================
+// MODULE 4 — POIManagement  (LG-SS-04 POI / konum)
+// ============================================================================
+module POIManagement {
+
+  error InvalidPOIState : NotProcessable
+  error PoiLimitReached : NotProcessable
+  error PoiInUse        : NotProcessable
+
+  @rest(POST, "/pois")
+  operation CreatePOI(orgId: OrgId): PoiId realizes CreatePOI {
+    roles ClientAdmin
+    ownership own
+    access { creates POI }
+    throws PoiLimitReached
+    note "H1: paket poiLimit dolmuşsa yeni ekleme ENGELLENİR (paket-yükselt ekranı, otomatik ücret yok). Sayım-bazlı çapraz-varlık (Package OrgManagement/InternalAdmin) → 'where' ile ifade edilemez, note. Kurumsalda limit yok. Editör POI ekleyemez (yalnız Admin/AccountManager)."
+  }
+
+  @rest(PATCH, "/pois/:poiId")
+  operation UpdatePOI(poiId: PoiId): Unit realizes UpdatePOI {
+    roles ClientAdmin
+    ownership own
+    access { reads POI as poi by poiId  updates POI }
+    rule { poi.status = "approved" for guard "where:0" }
+    throws InvalidPOIState
+    note "K2: onaylı POI düzenlenince otomatik yeniden moderasyona düşer ('submitted' → ScreenPOI)."
+  }
+
+  @rest(DELETE, "/pois/:poiId")
+  operation DeletePOI(poiId: PoiId): Unit realizes DeletePOI {
+    roles ClientAdmin
+    ownership own
+    access { reads POI as poi by poiId  deletes POI }
+    rule { poi.status = "approved" for guard "where:0" }
+    throws PoiInUse
+    note "O2(a): en az bir Aktif/canlı kampanya bu POI'yi kullanıyorsa silme ENGELLENİR ('önce kampanyaları kaldırın'). Sayım-bazlı çapraz-varlık (Campaign) → 'where' ile ifade edilemez, note. 'Silindi' ayrı durumu yok (bilinçli iş kararı)."
+  }
+
+  @rest(POST, "/pois/:poiId/submit")
+  operation SubmitPOI(poiId: PoiId): Unit realizes SubmitPOI {
+    roles ClientAdmin
+    ownership own
+    access { reads POI as poi by poiId  updates POI }
+    rule { poi.status = "draft" for guard "where:0" }
+    throws InvalidPOIState
+    note "Ardından ScreenPOI (same-module)."
+  }
+
+  @internal
+  operation ScreenPOI(poiId: PoiId): Unit realizes ScreenPOI {
+    ownership any
+    access { reads POI as poi by poiId  updates POI }
+    calls CanAI.Screen as risk
+    rule { poi.status = "submitted" for guard "where:0" }
+    note "Can.AI: koordinat sınır + 500m yarıçap tekrar/duplicate + taksonomi kategori + format. İhlal yoksa 'inReview'. Can.AI down → doğrudan insan kuyruğu (TUR3-D12)."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/pois/:poiId/approve")
+  operation ApprovePOI(poiId: PoiId): Unit realizes ApprovePOI {
+    roles Moderator
+    ownership any
+    access { reads POI as poi by poiId  updates POI }
+    rule { poi.status = "inReview" for guard "where:0" }
+    throws InvalidPOIState
+    note "Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @audit.logged(category: "moderation", retention: "3y")
+  @rest(POST, "/pois/:poiId/reject")
+  operation RejectPOI(poiId: PoiId): Unit realizes RejectPOI {
+    roles Moderator
+    ownership any
+    access { reads POI as poi by poiId  updates POI }
+    rule { poi.status = "inReview" for guard "where:0" }
+    throws InvalidPOIState
+    note "K3: gerekçe client'a iletilir (kanal panel+e-posta varsayımı; MBSE'de netleşmemiş). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @rest(GET, "/moderation/pois/pending")
+  operation ListPendingPOIs(): list of POI realizes ListPendingPOIs {
+    roles Moderator
+    ownership any
+    access { reads POI }
+    paginated by cursor createdAt asc, id asc size 25
+    note "Kuyruk 'inReview' filtreli. TUR3-G18/G19: sayfa 25, en eski önce (FIFO)."
+  }
+
+  entity POI realizes POI {
+    id: PoiId
+    latitude: Decimal
+    longitude: Decimal
+    category: String
+    status: String
+    createdAt: Date
+    concurrency optimistic
+  }
+}
+
+// ============================================================================
+// MODULE 5 — Distribution  (LG-SS-07 içerik dağıtımı: premium logo push)
+//   Premium logo Trumore API'sine BİZ göndeririz (push; normal içerik pull edilir).
+// ============================================================================
+module Distribution {
+
+  error LogoNotActive : NotProcessable
+
+  @rest(POST, "/premium-logo/:orgId/activate")
+  operation ActivatePremiumLogo(orgId: OrgId): LogoId realizes ActivatePremiumLogo {
+    roles AccountManager
+    ownership any
+    access { creates PremiumLogo }
+    calls Trumore.PushPremiumLogo
+    note "G2: Togg araç ekranında kalıcı marka logosu, Trumore API üzerinden doğrudan; moderasyon YOK. TUR3-D11: push başarısızsa temsilciye anında hata YOK — arka planda otomatik yeniden dene; kalıcı başarısızlıkta admin'e görünür uyarı (MBSE'de dönüş/hata olayı tanımsız — bu karar eklendi). Doğrulayıcı 'korumasız-erişim' uyarısı BİLİNÇLİ KABUL: MBSE'de premium logo push için caller-side input validation tanımlı değil; dayanıklılık fail-fast doğrulama ile değil retry ile sağlanır (TUR3-D11)."
+  }
+
+  @rest(POST, "/premium-logo/:logoId/deactivate")
+  operation DeactivatePremiumLogo(logoId: LogoId): Unit realizes DeactivatePremiumLogo {
+    roles AccountManager
+    ownership any
+    access { reads PremiumLogo as logo by logoId  updates PremiumLogo }
+    rule { logo.status = "active" for guard "where:0" }
+    on OrgManagement.OrganizationExpired
+    throws LogoNotActive
+    note "Elle kapatılır; ayrıca Q1: org kapanınca (OrganizationExpired olayı) otomatik iner (MBSE'de yoktu, eklendi)."
+  }
+
+  entity PremiumLogo realizes PremiumLogo {
+    id: LogoId
+    orgId: OrgId sourceOfTruth(OrgManagement.Organization)
+    status: String
+  }
+}
+
+// ============================================================================
+// MODULE 6 — Billing  (LG-SS-06 döviz kuru; Invoice OrgManagement'ta co-located)
+// ============================================================================
+module Billing {
+
+  // C4: her gün ECB'den EUR/TL kuru çekilir, o günkü faturaya kilitlenir.
+  @internal
+  operation FetchFXRate(): FXRate realizes FetchFXRate {
+    ownership all
+    access { creates FXRate }
+    calls ECB.GetRate as rate
+    note "C4: ECB'nin herkese açık verisini kazır (özel entegrasyon yok). İç gelir dönüşümü; satış fiyatını etkilemez."
+  }
+
+  entity FXRate realizes FXRate {
+    id: RateId
+    rate: Decimal
+    fetchedOn: Date
+  }
+}
+
+// ============================================================================
+// MODULE 7 — InternalAdmin  (LG-SS-09 Internal Administration: paket/taksonomi/kurumsal)
+// ============================================================================
+module InternalAdmin {
+
+  @rest(POST, "/admin/packages")
+  operation CreatePackage(): PackageId realizes CreatePackage {
+    roles InternalAdmin
+    ownership any
+    access { creates Package }
+  }
+
+  @rest(PATCH, "/admin/packages/:packageId")
+  operation UpdatePackage(packageId: PackageId): Unit realizes UpdatePackage {
+    roles InternalAdmin
+    ownership any
+    access { updates Package }
+    note "G4/Q2(a): fiyat değişikliği YALNIZ yeni abonelik/yenilemelere uygulanır; mevcut müşteri dönem sonuna kadar eski fiyatta."
+  }
+
+  @rest(POST, "/admin/taxonomy")
+  operation CreateTaxonomy(): TaxonomyId realizes CreateTaxonomy {
+    roles InternalAdmin
+    ownership any
+    access { creates Taxonomy }
+    note "Uygun sektör listesi; başvuruda sektör bundan seçilir. Yöneten tek taraf InternalAdmin."
+  }
+
+  @rest(POST, "/enterprise/feature-sets")
+  operation CreateEnterpriseFeatureSet(): FeatureSetId realizes CreateEnterpriseFeatureSet {
+    roles AccountManager
+    ownership any
+    access { creates EnterpriseFeatureSet }
+    note "G3: Temsilci internal panelden tanımlayıp kurumsal org'a bağlar. Ayrı onay/moderasyon YOK."
+  }
+
+  entity Package realizes Package {
+    id: PackageId
+    tier: String
+    price: Decimal
+    poiLimit: Int
+    seatLimit: Int
+  }
+
+  entity Taxonomy realizes Taxonomy {
+    id: TaxonomyId
+    sector: String
+  }
+
+  entity EnterpriseFeatureSet realizes EnterpriseFeatureSet {
+    id: FeatureSetId
+    name: String
+  }
+}
+
+// ============================================================================
+// MODULE 8 — Analytics  (LG-SS-08 analitik toplama + görüntüleme)
+//   Countly (3.parti SDK) olayları İTER; biz üretmeyiz, toplarız.
+// ============================================================================
+module Analytics {
+
+  @internal
+  operation IngestAnalytics(): Unit realizes IngestAnalytics {
+    ownership all
+    access { creates AnalyticsEvent }
+    note "N1: ham olay (impression/click/routing) Trumore+Togg'a gömülü Countly'den gelir. N2: alım sıklığı MBSE'de tanımsız. TUR3-B6: Countly olayında eventId YOK → tekilleştirme yapılamaz, olduğu gibi sayılır (çift-sayım riski KABUL edildi; ek entegrasyona değmez). R1: kupon kullanımı ölçülmez (görüş alanı dışı)."
+  }
+
+  @audit.logged(category: "analytics-export", retention: "3y")
+  @rest(GET, "/analytics")
+  operation ViewAnalytics(): list of AnalyticsEvent realizes ViewAnalytics {
+    roles ClientViewer
+    ownership own
+    access { reads AnalyticsEvent }
+    paginated by offset eventType asc size 25
+    note "F2/F4: Viewer/Editor/Admin aynı org-seviyesi ekranı görür (extends devralır); yalnız kendi org'u. F3: rapor export var. Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @audit.logged(category: "analytics-export", retention: "3y")
+  @rest(GET, "/agency/analytics")
+  operation AgencyViewAnalytics(): list of AnalyticsEvent realizes AgencyViewAnalytics {
+    roles AgencyUser
+    ownership delegatedClient
+    access { reads AnalyticsEvent }
+    paginated by offset eventType asc size 25
+    note "Devredilen kapsam analitiği içeriyorsa müşterinin analitiğini görür. Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @audit.logged(category: "analytics-export", retention: "3y")
+  @rest(GET, "/system-analytics/am")
+  operation ViewSystemAnalyticsAM(): list of AnalyticsEvent realizes ViewSystemAnalyticsAM {
+    roles AccountManager
+    ownership all
+    access { reads AnalyticsEvent }
+    paginated by offset eventType asc size 25
+    note "Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  @audit.logged(category: "analytics-export", retention: "3y")
+  @rest(GET, "/system-analytics/internal")
+  operation ViewSystemAnalyticsInternal(): list of AnalyticsEvent realizes ViewSystemAnalyticsInternal {
+    roles InternalAdmin
+    ownership all
+    access { reads AnalyticsEvent }
+    paginated by offset eventType asc size 25
+    note "F2: sistem-geneli görünüm (gelir, moderasyon hacmi, kampanya hacmi). Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15)."
+  }
+
+  entity AnalyticsEvent realizes AnalyticsEvent {
+    id: EventId
+    eventType: String
+    count: Int
+  }
+}
+
+// ============================================================================
+// DIŞ / UNCHARTED SINIRLAR (üretilmez; yalnız çağrı adapter'ı üretilir)
+// ============================================================================
+
+// Can.AI — şirkete ait iç servis (relations.yaml "internal system"); yan-etkisiz risk skoru
+// döner → readonly (sonucu gerekirse rule/karara girer). ASLA auto-approve (SYS-REQ-32).
+uncharted CanAI {
+  readonly operation Screen(itemId: String, itemType: String): Risk
+}
+
+// ECB — 3.parti açık döviz verisi; yan-etkisiz okuma.
+external ECB {
+  readonly operation GetRate(base: String, quote: String): Decimal
+}
+
+// Trumore API — premium logo push hedefi; yan-etkili (retry ile dayanıklı teslim, TUR3-D11).
+external Trumore {
+  operation PushPremiumLogo(logoId: LogoId): Unit
+}
+
+// ============================================================================
+// GUARANTEE (izlenebilirlik) — çapraz-kesen: moderasyon kararı yalnız hâlâ incelemede
+// olan öğeye uygulanır (ilk-karar-kazanır; ikinci karar durum 'inReview' olmadığından
+// reddedilir). Başvuru/kampanya/POI moderasyonunu keser → EN SON (referanslarından sonra).
+// ============================================================================
+guarantee ModerationDecisionRequiresPendingItem
+    "Bir moderasyon onay/red kararı yalnız hâlâ 'inceleme' durumundaki bir öğeye uygulanır; iki moderatör aynı öğeyi işlerse ilk karar kazanır, ikinci karar durum artık 'inReview' olmadığı için reddedilir (TUR3-C7)" {
+  by guard OrgManagement.ApproveApplication : "where:0"
+  by guard OrgManagement.RejectApplication  : "where:0"
+  by guard Campaign.ApproveCampaign         : "where:0"
+  by guard Campaign.RejectCampaign          : "where:0"
+  by guard POIManagement.ApprovePOI         : "where:0"
+  by guard POIManagement.RejectPOI          : "where:0"
+}

@@ -13,20 +13,20 @@ Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listele
 
 **★** = yüksek (sessiz + davranış/veri kaybı) · **○** = orta
 
-| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk |
-|---|---|---|---|
-| `cache`/`queue`/`remote` + `delivery` (offline mekaniği) | "internet yokken de çalışmalı / sahada çekmiyor / çevrimdışı kullanım" | 5 | ★ |
-| `when offline\|syncing\|SyncFailed\|SyncConflict` (sync deltaları) | "çevrimdışıyken / eşitlenirken ne görünsün; bekleyen değişiklik; çakışma" | 5 | ★ |
-| `refreshable` / `invalidates` / `on enter refresh` (tazeleme) | "veri bayatlamasın / yazınca liste güncellensin / elle yenile" | 5 | ★ |
-| `field { required\|min\|max\|pattern }` + form `rule` (validation) | "şu alan zorunlu / şu formatta / çapraz-alan kuralı (offline'da yerel doğrula)" | 6 | ★ |
-| `confirm ["metin"]` (yıkıcı aksiyon) | "silmeden/iptal etmeden önce sorsun / geri alınamaz eylem" | 6 | ★ |
-| `visible-when` (koşullu görünürlük) | "bu buton yalnız yöneticide / şu koşulda görünsün" (UX — güvenlik DEĞİL) | 4 | ★ |
-| `paginated infinite\|pager` (list) | "liste çok uzun / sayfa sayfa / sonsuz kaydır" | 4 | ★ (warning-routed) |
-| `when empty` / `when loading` (query yaşamdöngüsü) | "yüklenirken / hiç kayıt yokken ekranda ne görünsün" | 4 | ○ |
-| UI-event: `on enter/leave` · `timer/interval` · `activate/secondary` | "ekrana girince / N sn sonra / periyodik / uzun-bas / sağ-tık" | 7 | ○ |
-| `persisted state` (kalıcı client-state) | "kapatıp açınca kaybolmasın (sepet, taslak)" | 5 | ○ |
-| `show a, b` (görüntü-şekli) | "listede/detayda yalnız şu alanlar görünsün" | 4 | ○ |
-| `step` (form wizard) | "adım adım form / sihirbaz" | 6 | ○ |
+| Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk | Atlanırsa (adlandırılmış mod) |
+|---|---|---|---|---|
+| `cache`/`queue`/`remote` + `delivery` (offline mekaniği) | "internet yokken de çalışmalı / sahada çekmiyor / çevrimdışı kullanım" | 5 | ★ | **çevrimdışı-veri-kaybı** — bağlantı yokken yapılan eylem tutulmaz/kuyruğa alınmaz; kayıt kaybolur |
+| `when offline\|syncing\|SyncFailed\|SyncConflict` (sync deltaları) | "çevrimdışıyken / eşitlenirken ne görünsün; bekleyen değişiklik; çakışma" | 5 | ★ | **görünmez-eşitleme-çakışması** — bekleyen/çakışan değişiklik kullanıcıya gösterilmez; sessizce ezilir/kaybolur |
+| `refreshable` / `invalidates` / `on enter refresh` (tazeleme) | "veri bayatlamasın / yazınca liste güncellensin / elle yenile" | 5 | ★ | **bayat-veri** — yazımdan sonra liste tazelenmez; kullanıcı eski veriyi görür |
+| `field { required\|min\|max\|pattern }` + form `rule` (validation) | "şu alan zorunlu / şu formatta / çapraz-alan kuralı (offline'da yerel doğrula)" | 6 | ★ | **doğrulanmamış-girdi** — geçersiz/eksik alan istemcide yakalanmaz; hatalı veri backend'e gider (offline'da hiç yakalanmaz) |
+| `confirm ["metin"]` (yıkıcı aksiyon) | "silmeden/iptal etmeden önce sorsun / geri alınamaz eylem" | 6 | ★ | **kazara-yıkıcı-eylem** — geri-alınamaz eylem onaysız tetiklenir |
+| `visible-when` (koşullu görünürlük) | "bu buton yalnız yöneticide / şu koşulda görünsün" (UX — güvenlik DEĞİL) | 4 | ★ | **koşulsuz-görünür-öğe** — yalnız belirli koşulda/rolde görünmesi gereken öğe herkese görünür (güvenlik açığı DEĞİL — yetki backend'de zorlanır; UX/karışıklık) |
+| `paginated infinite\|pager` (list) | "liste çok uzun / sayfa sayfa / sonsuz kaydır" | 4 | ★ (warning-routed) | **sınırsız-liste-yükü** — uzun liste tek seferde çizilir; kayma/bellek çöküşü |
+| `when empty` / `when loading` (query yaşamdöngüsü) | "yüklenirken / hiç kayıt yokken ekranda ne görünsün" | 4 | ○ | **boş/donuk-ekran** — yükleme veya kayıtsız durumda ekran boş kalır; kullanıcı takıldı sanır |
+| UI-event: `on enter/leave` · `timer/interval` · `activate/secondary` | "ekrana girince / N sn sonra / periyodik / uzun-bas / sağ-tık" | 7 | ○ | **tetiklenmeyen-arayüz-olayı** — ekrana-giriş/zamanlayıcı/uzun-bas eylemi bağlanmaz; etkileşim gerçekleşmez |
+| `persisted state` (kalıcı client-state) | "kapatıp açınca kaybolmasın (sepet, taslak)" | 5 | ○ | **kaybolan-taslak** — kapat-aç'ta client-state (sepet/taslak) sıfırlanır |
+| `show a, b` (görüntü-şekli) | "listede/detayda yalnız şu alanlar görünsün" | 4 | ○ | **belirsiz-alan-izdüşümü** — hangi alanların görüneceği tanımsız; varsayılana/tümüne düşer |
+| `step` (form wizard) | "adım adım form / sihirbaz" | 6 | ○ | **çökmüş-sihirbaz** — adımlı form tek sayfaya iner; uzun form bir arada gelir |
 
 **Not:** field-decoration (`@ui.*` / backend-hassas→maske) bu bundle'da YOK (grammar `e5764dfe0cec` desteklemiyor — probe'lu doğrulandı) → envantere GİRMEZ; gerektiğinde `#` yorumla kaynak-içi anılır (SKILL Altın kural).
 

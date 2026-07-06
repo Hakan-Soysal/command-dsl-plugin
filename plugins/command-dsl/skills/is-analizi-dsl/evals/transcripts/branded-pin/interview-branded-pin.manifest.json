@@ -1,0 +1,5206 @@
+{
+    "mode": "linked",
+    "contract": "./interview-branded-pin.operations.json",
+    "meta": {
+        "hasErrors": false,
+        "errorCount": 0
+    },
+    "deployables": [],
+    "modules": [
+        {
+            "name": "Identity",
+            "pureTechnical": false
+        },
+        {
+            "name": "OrgManagement",
+            "pureTechnical": false
+        },
+        {
+            "name": "Campaign",
+            "pureTechnical": false
+        },
+        {
+            "name": "POIManagement",
+            "pureTechnical": false
+        },
+        {
+            "name": "Distribution",
+            "pureTechnical": false
+        },
+        {
+            "name": "Billing",
+            "pureTechnical": false
+        },
+        {
+            "name": "InternalAdmin",
+            "pureTechnical": false
+        },
+        {
+            "name": "Analytics",
+            "pureTechnical": false
+        }
+    ],
+    "operations": [
+        {
+            "id": "InviteUser",
+            "module": "Identity",
+            "visibility": "exposed",
+            "realizes": "InviteUser",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    },
+                    {
+                        "name": "inviteeEmail",
+                        "type": "String",
+                        "collection": false
+                    }
+                ],
+                "returns": "UserId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/orgs/:orgId/users/invite",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/orgs/:orgId/users/invite\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "UserAccount"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "H2: davet edilen e-posta org kurumsal alan adıyla eşleşmeli (FN-OP-05, cross-module → OrgManagement.Organization.email; note). Standart 2 koltuk (1 Admin zorunlu), kurumsalda sınırsız; limit dolunca engellenir, ek koltuk ödemesi onaylanınca açılır (otomatik ücret yok).",
+            "businessNote": "H2: e-posta ile davet. Standart pakette 2 koltuk (1'i Admin zorunlu), kurumsalda sınırsız. Limit dolunca davet ENGELLENİR; ek koltuk ödemesi onaylanınca engel kalkar (otomatik ücret yok). Girişler dış TruID üzerinden (kimlik altyapısı kapsam dışı).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "EmailDomainMismatch",
+                "SeatLimitReached"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "DelegateToAgency",
+            "module": "Identity",
+            "visibility": "internal",
+            "realizes": "DelegateToAgency",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    },
+                    {
+                        "name": "agencyUserId",
+                        "type": "UserId",
+                        "collection": false
+                    },
+                    {
+                        "name": "accessScope",
+                        "type": "String",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "AgencyDelegation"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "A3: aynı ajans A müşterisinde geniş, B'de salt-görüntü olabilir. Devredilen kapsam yalnız kampanya + analitik (TUR3-F16); POI/faturalama devredilmez (UC-04/UC-10/11 connected-actors'ta ACT-05 yok).",
+            "businessNote": "A3: kapsam müşteriye göre değişir (Admin/Editor/Viewer); aynı ajans A müşterisinde geniş, B'de salt-görüntü olabilir. delegatedClient ilişkisini bu devir doldurur (D3).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "RevokeAgency",
+            "module": "Identity",
+            "visibility": "internal",
+            "realizes": "RevokeAgency",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    },
+                    {
+                        "name": "agencyUserId",
+                        "type": "UserId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [],
+                "deletes": [
+                    "AgencyDelegation"
+                ]
+            },
+            "validation": [],
+            "rule": [],
+            "note": "D2/L1: geri alma anında etkili; yetki her istekte gerçek-zamanlı kontrol edilir (önbelleklenmez, TUR3-F17). Ajansın taslak kampanyaları korunur; müşteri ekibi sürdürür.",
+            "businessNote": "D2/L1: geri alma ANINDA etkili. Ajansın yarım bıraktığı taslak kampanyalar L1 kararıyla OLDUĞU GİBİ kalır (silinmez); müşterinin kendi ekibi sürdürebilir. Otomatik süre-dolumu YOK (yalnız elle).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "CreateApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "CreateApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "legalName",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "country",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "sector",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "taxNumber",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "corporateEmail",
+                        "type": "String",
+                        "collection": false
+                    }
+                ],
+                "returns": "OrgId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/applications"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/applications\")"
+                }
+            ],
+            "roles": [
+                "Applicant"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Organization"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Marka self-serve başvurusu; orgType=client, başlangıç 'draft'.",
+            "businessNote": "Marka self-serve başvurusu. orgType=client, başlangıç durumu 'draft'.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "CreateAgencyApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "CreateAgencyApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "legalName",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "country",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "corporateEmail",
+                        "type": "String",
+                        "collection": false
+                    }
+                ],
+                "returns": "OrgId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/agency-applications"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/agency-applications\")"
+                }
+            ],
+            "roles": [
+                "AgencyApplicant"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Organization"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Ajans başvurusu; orgType=agency, POI/marka profili adımı YOK. Sabit yıllık 12.000 TL (5 koltuk dahil, ek koltuk 1.200 TL/yıl).",
+            "businessNote": "Ajans başvurusu. orgType=agency; POI ve marka profili adımı YOK. Sabit yıllık ücret 12.000 TL (5 koltuk dahil, ek koltuk 1.200 TL/yıl).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "CreateEnterpriseApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "CreateEnterpriseApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "legalName",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "country",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "sector",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "taxNumber",
+                        "type": "String",
+                        "collection": false
+                    },
+                    {
+                        "name": "corporateEmail",
+                        "type": "String",
+                        "collection": false
+                    }
+                ],
+                "returns": "OrgId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/enterprise-applications"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/enterprise-applications\")"
+                }
+            ],
+            "roles": [
+                "AccountManager"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Organization"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Kurumsal başvuru — Temsilci müşteri adına elle girer; konum limiti yok, kademe Ecosystem/Enterprise.",
+            "businessNote": "Kurumsal başvuru — Temsilci müşteri adına elle girer. Aynı adım iskeleti; konum limiti yok, kademe Ecosystem/Enterprise. Temsilci müşteriyi self-serve forma da davet edebilir.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "UpdateApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "UpdateApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "PATCH"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/applications/:orgId",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(PATCH, \"/applications/:orgId\")"
+                }
+            ],
+            "roles": [
+                "Applicant"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"draft\" or org.status = \"rejected\"",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "org",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "org",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "rejected"
+                            }
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Reddedilen başvuru AYNI kayıt üzerinden 60 gün içinde düzeltilir (yeni başvuru açılmaz).",
+            "businessNote": "Reddedilen başvuru AYNI kayıt üzerinden 60 gün içinde düzeltilip yeniden gönderilir (yeni başvuru açılmaz).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidApplicationState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "SubmitApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "SubmitApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/applications/:orgId/submit",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/applications/:orgId/submit\")"
+                }
+            ],
+            "roles": [
+                "Applicant"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"draft\" or org.status = \"rejected\"",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "org",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "org",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "rejected"
+                            }
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Gönderim → 'submitted'; ardından ScreenApplication (same-module, iç orkestrasyon).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidApplicationState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "SubmitAgencyApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "SubmitAgencyApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/agency-applications/:orgId/submit",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/agency-applications/:orgId/submit\")"
+                }
+            ],
+            "roles": [
+                "AgencyApplicant"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"draft\" or org.status = \"rejected\"",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "org",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "org",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "rejected"
+                            }
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": null,
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidApplicationState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ScreenApplication",
+            "module": "OrgManagement",
+            "visibility": "internal",
+            "realizes": "ScreenApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"submitted\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "org",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "submitted"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Can.AI net ihlalde (kötü dil/sahte belge/malware/tekrar) otomatik reddeder; yoksa 'inReview'. Her ONAY istisnasız insan moderatörden geçer (SYS-REQ-32). Can.AI down → tarama atlanır, öğe doğrudan insan kuyruğuna düşer (TUR3-D12; auto-approve yasak olduğundan güvenli).",
+            "businessNote": "Can.AI ön-kontrol. ASLA otomatik ONAY vermez; yalnız net ihlalde otomatik reddeder (kötü dil/sahte belge/malware/tekrar). İhlal yoksa moderatör kuyruğuna ('inReview') düşer. Her onay mutlaka insan moderatörden geçer (istisnasız).",
+            "edges": [
+                {
+                    "to": "CanAI",
+                    "nature": "call",
+                    "kind": "uncharted"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ApproveApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "ApproveApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/applications/:orgId/approve",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/applications/:orgId/approve\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [
+                    "ProformaInvoice"
+                ],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"inReview\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "org",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Onay → 'approved' + proforma fatura (bilgilendirme; kesin fatura değil) + karar bildirimi (tek işlem). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidApplicationState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "RejectApplication",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "RejectApplication",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/applications/:orgId/reject",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/applications/:orgId/reject\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"inReview\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "org",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Yazılı gerekçe + 60 gün düzeltme penceresi (sonunda otomatik silinir). Ara hatırlatma kapsam dışı (R2). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "Yazılı gerekçe verilir. 60 gün düzeltme penceresi başlar (sonunda otomatik silinir). Süre-içi ara hatırlatma R2 kararıyla KAPSAM DIŞI.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidApplicationState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ActivateOrganization",
+            "module": "OrgManagement",
+            "visibility": "internal",
+            "realizes": "ActivateOrganization",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    },
+                    {
+                        "name": "transactionId",
+                        "type": "String",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "financial",
+                        "retention": "10y"
+                    }
+                }
+            ],
+            "serving": [],
+            "roles": [],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [
+                    "Invoice"
+                ],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"approved\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "org",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "TUR3-B4: aynı 'ödendi' iki kez → tek aktivasyon/tek fatura (transactionId damgası). TUR3-E14: kart verisi ASLA saklanmaz — yalnız cardToken + sonuç (ICD IF-20/21). lockedRate yalnız iç gelir takibi (satış fiyatını etkilemez, geriye dönük sabit). İçerik yayını OrganizationActivated olayı ile Campaign.PublishContent'e köprülenir (dayanıklı, TUR3-D9). Denetim-izi (audit) tutulur — kategori: financial (10y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "Self-serve: dış Ödeme Gateway (3D Secure) webhook'u 'ödendi' der → org Aktif. Fatura ödeme anında doğar; o günkü ECB kuru lockedRate'e kilitlenir (yalnız iç gelir takibi, satış fiyatını etkilemez, geriye dönük sabit).",
+            "edges": [
+                {
+                    "to": "Campaign",
+                    "nature": "perform",
+                    "kind": "call"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidApplicationState"
+            ],
+            "idempotent": {
+                "keys": [
+                    "transactionId"
+                ]
+            },
+            "emits": [
+                "OrganizationActivated"
+            ],
+            "pagination": null
+        },
+        {
+            "id": "MarkEnterprisePaid",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "MarkEnterprisePaid",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "financial",
+                        "retention": "10y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/enterprise/:orgId/mark-paid",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/enterprise/:orgId/mark-paid\")"
+                }
+            ],
+            "roles": [
+                "AccountManager"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [
+                    "Invoice"
+                ],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"approved\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "org",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "TUR3-B5: ikinci 'Ödendi' işaretleme zaten aktif → engellenir, ikinci fatura oluşmaz (rule status=approved doğal no-op). SAP hataları Temsilci (insan) müdahalesi gerektirir. Denetim-izi (audit) tutulur — kategori: financial (10y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "Kurumsal: fatura/tahsilat dışarıda (SAP + Temsilci). Sisteme yalnız 'Ödendi' elle işaretlenir → org Aktif.",
+            "edges": [
+                {
+                    "to": "Campaign",
+                    "nature": "perform",
+                    "kind": "call"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidApplicationState"
+            ],
+            "idempotent": {
+                "keys": [
+                    "orgId"
+                ]
+            },
+            "emits": [
+                "OrganizationActivated"
+            ],
+            "pagination": null
+        },
+        {
+            "id": "SuspendOnPaymentFail",
+            "module": "OrgManagement",
+            "visibility": "internal",
+            "realizes": "SuspendOnPaymentFail",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"active\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "org",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "TUR2-A2: ikinci 'başarısız' webhook zaten paused → etkisiz (rule status=active doğal no-op). 5 gün içinde ödenirse RecoverOrganization ile kesintisiz Aktif'e döner; içerik hiç inmediği için yeniden-yayın yok.",
+            "businessNote": "Ödeme başarısız webhook'u → org 'paused' (grace). İÇERİK YAYINDA KALIR (yayından inme grace SONUNDA). 5 gün İÇİNDE ödenirse RecoverOrganization ile kesintisiz Aktif'e döner.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": {
+                "keys": [
+                    "orgId"
+                ]
+            },
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "RecoverOrganization",
+            "module": "OrgManagement",
+            "visibility": "internal",
+            "realizes": "RecoverOrganization",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "org.status = \"paused\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "org",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "paused"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "J3: grace içinde ödeme gelince otomatik Aktif (elle onay yok).",
+            "businessNote": "J3: grace içinde ödeme gelince otomatik Aktif (elle onay yok). İçerik hiç inmediği için yeniden-yayın adımı yok.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ExpireOrganizations",
+            "module": "OrgManagement",
+            "visibility": "internal",
+            "realizes": "ExpireOrganizations",
+            "signature": {
+                "params": [],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "trigger",
+                    "name": "cron",
+                    "args": {
+                        "schedule": "0 2 * * *"
+                    }
+                }
+            ],
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [
+                    "Organization"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "C2: grace-DOLAN paused org'lar 'expired' (tarih-şimdi filtresi 'where' ile ifade edilemez, note). OrganizationExpired olayı → Campaign.WithdrawContent + Distribution.DeactivatePremiumLogo (Q1; dayanıklı, TUR3-D10).",
+            "businessNote": "C2: 5 günlük grace DOLAN paused organizasyonlar 'expired' → içerik iner. Q1 kararı: Premium Logo da bu deaktivasyonla otomatik iner (MBSE'de yok, eklendi).",
+            "edges": [
+                {
+                    "to": "Campaign",
+                    "nature": "perform",
+                    "kind": "call"
+                },
+                {
+                    "to": "Distribution",
+                    "nature": "perform",
+                    "kind": "call"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [
+                "OrganizationExpired"
+            ],
+            "pagination": null
+        },
+        {
+            "id": "PurgeRejectedApplications",
+            "module": "OrgManagement",
+            "visibility": "internal",
+            "realizes": "PurgeRejectedApplications",
+            "signature": {
+                "params": [],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "trigger",
+                    "name": "cron",
+                    "args": {
+                        "schedule": "0 2 * * *"
+                    }
+                }
+            ],
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [],
+                "deletes": [
+                    "Organization"
+                ]
+            },
+            "validation": [],
+            "rule": [],
+            "note": "B2: 60 gün DOLAN 'rejected' başvurular silinir (insan eli gerekmez). Süre-dolum filtresi note ile taşınır.",
+            "businessNote": "B2: 60 gün DOLAN reddedilmiş başvurular otomatik silinir (insan eli gerekmez).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "CreateBrandProfile",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "CreateBrandProfile",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "BrandId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/applications/:orgId/brand-profile",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/applications/:orgId/brand-profile\")"
+                }
+            ],
+            "roles": [
+                "Applicant"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "BrandProfile"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Marka profili yalnız marka başvurusunda (ajansta YOK). D1: onaylı profil güncellemeleri de ortak moderasyondan geçer.",
+            "businessNote": "Marka profili adımı yalnız marka başvurusunda var; ajans başvurusunda YOK. Onaylı profil güncellemeleri de ortak moderasyondan geçer (D1).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ViewProforma",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "ViewProforma",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "ProformaInvoice"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/orgs/:orgId/proforma",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/orgs/:orgId/proforma\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "ProformaInvoice"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "M1: 'ödeme bekliyor' ekranında isteğe bağlı indirilir. Paket + konum ücreti + %20 KDV; bilgilendirme amaçlı.",
+            "businessNote": "M1: 'ödeme bekliyor' ekranında isteğe bağlı indirilir (otomatik e-posta yok). Paket + konum ücreti + %20 KDV; ödeme sonrası kesin faturadan ayrı, bilgilendirme amaçlı.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ListPendingApplications",
+            "module": "OrgManagement",
+            "visibility": "exposed",
+            "realizes": "ListPendingApplications",
+            "signature": {
+                "params": [],
+                "returns": "Organization"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/moderation/applications/pending"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/moderation/applications/pending\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Organization"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Kuyruk 'inReview' filtreli (when result-filter). TUR3-G18/G19: sayfa 25, en eski önce (FIFO). Denetim-izi (audit): kişisel-veri içeren başvuruya erişim izlenir — kim/ne zaman (TUR3-E15).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "cursor",
+                "keys": [
+                    {
+                        "field": "createdAt",
+                        "direction": "asc"
+                    },
+                    {
+                        "field": "id",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 25
+            }
+        },
+        {
+            "id": "CreateCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "CreateCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "CampaignId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/campaigns"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/campaigns\")"
+                }
+            ],
+            "roles": [
+                "ClientEditor"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Campaign"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "H3/J4 ÖN-KOŞUL: kampanya oluşturma yalnız org 'active' iken (paused/expired KAPALI). Çapraz-varlık koşulu (org OrgManagement'ta) → 'where' ile ifade edilemez, note. Taslak kalıcı, süre sınırı yok.",
+            "businessNote": "ÖN-KOŞUL (H3/J4, üç turda pekişen kesin kural): kampanya oluşturma/gönderme yalnız organizasyon 'active' iken açıktır; 'paused' (grace dahil)/'expired' iken KAPALI. Çapraz-varlık koşulu olduğu için 'where' ile ifade edilemez, note ile taşınır. Taslak kalıcıdır, süre sınırı yok.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "OrgNotActive"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "AgencyCreateCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "AgencyCreateCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "CampaignId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/agency/campaigns"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/agency/campaigns\")"
+                }
+            ],
+            "roles": [
+                "AgencyUser"
+            ],
+            "ownership": "delegatedClient",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Campaign"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Ajans, devredilen kapsam Editör+ ise müşteri adına oluşturur (kapsam kontrolü her istekte).",
+            "businessNote": "Ajans, devredilen kapsam Editör+ ise müşteri adına kampanya oluşturur.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "OrgNotActive"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "UpdateCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "UpdateCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "PATCH"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/campaigns/:campaignId",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(PATCH, \"/campaigns/:campaignId\")"
+                }
+            ],
+            "roles": [
+                "ClientEditor"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"draft\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "camp",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "draft"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": null,
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "SubmitCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "SubmitCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/campaigns/:campaignId/submit",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/campaigns/:campaignId/submit\")"
+                }
+            ],
+            "roles": [
+                "ClientEditor"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"draft\" and camp.endDate >= camp.startDate",
+                    "ast": {
+                        "node": "and",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "camp",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": ">=",
+                            "left": {
+                                "path": [
+                                    "camp",
+                                    "endDate"
+                                ]
+                            },
+                            "right": {
+                                "path": [
+                                    "camp",
+                                    "startDate"
+                                ]
+                            }
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "ÖN-KOŞUL org 'active' (cross-module, note). Gönderince DONAR. Kupon kodu org içinde tekil (Q3; AI doğrular; cross-varlık → note). Ardından ScreenCampaign (same-module).",
+            "businessNote": "ÖN-KOŞUL: org 'active' olmalı (bkz CreateCampaign notu). Gönderince kampanya DONAR. Kupon kodu organizasyon içinde tekil olmalı (Q3 kararı; AI kupon kurallarını doğrular). endDate >= startDate (Q3 kararı) 'where' ile zorlanır.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState",
+                "InvalidCampaignDates"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ScreenCampaign",
+            "module": "Campaign",
+            "visibility": "internal",
+            "realizes": "ScreenCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"pendingReview\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "camp",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "pendingReview"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Can.AI (metin/link/kupon/görsel-şablon). İhlal yoksa 'inReview'; net ihlalde otomatik red (→'draft'). Asla otomatik onay. Can.AI down → doğrudan insan kuyruğu (TUR3-D12).",
+            "businessNote": "Can.AI ön-kontrol (metin/link güvenliği/kupon/görsel-şablon). İhlal yoksa 'inReview'; net ihlalde otomatik red (→ 'draft'). Asla otomatik onay.",
+            "edges": [
+                {
+                    "to": "CanAI",
+                    "nature": "call",
+                    "kind": "uncharted"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ApproveCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "ApproveCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/campaigns/:campaignId/approve",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/campaigns/:campaignId/approve\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"inReview\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "camp",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "A4: onaylı kampanya kullanıcıca iptal/geri çekilemez (kilitli). Kaldırma yalnız Acil Kaldır. Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "Onaylı kampanya kullanıcıca iptal/geri çekilemez — kilitli (A4). Kaldırma yalnız Acil Kaldır (moderatör/admin).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "RejectCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "RejectCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/campaigns/:campaignId/reject",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/campaigns/:campaignId/reject\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"inReview\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "camp",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Red → 'draft', kilit açılır; yeniden gönderim SINIRSIZ. AI-red ile insan-red kullanıcı gözünde aynı (panel+e-posta gerekçe). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "Red → doğrudan 'draft', kilit açılır; yeniden gönderim sayı/süre SINIRSIZ (60 gün kuralı kampanyaya uygulanmaz). AI-red ile insan-red kullanıcı gözünde aynı (panel+e-posta gerekçe).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ActivateDueCampaigns",
+            "module": "Campaign",
+            "visibility": "internal",
+            "realizes": "ActivateDueCampaigns",
+            "signature": {
+                "params": [],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "trigger",
+                    "name": "cron",
+                    "args": {
+                        "schedule": "0 2 * * *"
+                    }
+                }
+            ],
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "C3: 'approved' + başlangıç tarihi gelen → 'active' (tarih-şimdi karşılaştırması note ile taşınır). Ardından PublishContent (same-module iç orkestrasyon).",
+            "businessNote": "C3: başlangıç tarihi GELEN onaylı kampanyalar otomatik Aktif (tarih-şimdi karşılaştırması 'where' ile ifade edilemez, note ile taşınır).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "EndDueCampaigns",
+            "module": "Campaign",
+            "visibility": "internal",
+            "realizes": "EndDueCampaigns",
+            "signature": {
+                "params": [],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "trigger",
+                    "name": "cron",
+                    "args": {
+                        "schedule": "0 2 * * *"
+                    }
+                }
+            ],
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "C3: 'active' + bitiş tarihi geçen → 'past'. Ardından WithdrawContent (same-module).",
+            "businessNote": "C3: bitiş tarihi GEÇEN aktif kampanyalar otomatik 'past'.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "PauseCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "PauseCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/campaigns/:campaignId/pause",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/campaigns/:campaignId/pause\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"active\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "camp",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Yayından iner (WithdrawContent, same-module). Tarih aralığındaysa ResumeCampaign ile Aktif'e döner; duraklatmışken bitiş geçerse doğrudan 'past'.",
+            "businessNote": "Duraklatılan kampanya tarih aralığındaysa ResumeCampaign ile Aktif'e döner; duraklatmışken bitiş geçerse doğrudan 'past'. Yayından iner (E1 'active' şartı düşer).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "PauseCampaignEnterprise",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "PauseCampaignEnterprise",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/enterprise/campaigns/:campaignId/pause",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/enterprise/campaigns/:campaignId/pause\")"
+                }
+            ],
+            "roles": [
+                "AccountManager"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"active\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "camp",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": null,
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ResumeCampaign",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "ResumeCampaign",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/campaigns/:campaignId/resume",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/campaigns/:campaignId/resume\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"paused\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "camp",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "paused"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Aktif'e döner → PublishContent (same-module).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "EmergencyRemoveByAdmin",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "EmergencyRemoveByAdmin",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/admin/campaigns/:campaignId/emergency-remove",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/admin/campaigns/:campaignId/emergency-remove\")"
+                }
+            ],
+            "roles": [
+                "InternalAdmin"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"active\" or camp.status = \"approved\"",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "camp",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "active"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "camp",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "approved"
+                            }
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "A5 KALICI: 'emergencyRemoved'dan geçiş yok, bir daha yayına dönmez. Ardından WithdrawContent (≤2dk, TUR3-A2). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "EmergencyRemoveByModerator",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "EmergencyRemoveByModerator",
+            "signature": {
+                "params": [
+                    {
+                        "name": "campaignId",
+                        "type": "CampaignId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/moderation/campaigns/:campaignId/emergency-remove",
+                            "params": [
+                                "campaignId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/moderation/campaigns/:campaignId/emergency-remove\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "camp.status = \"active\" or camp.status = \"approved\"",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "camp",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "active"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "camp",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "approved"
+                            }
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "A5 KALICI. Ardından WithdrawContent (≤2dk acil, TUR3-A2). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "A5: KALICI — 'emergencyRemoved'dan başka duruma geçiş yok, bir daha yayına dönmez.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidCampaignState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "PublishContent",
+            "module": "Campaign",
+            "visibility": "internal",
+            "realizes": "PublishContent",
+            "signature": {
+                "params": [],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "E1 üç-yönlü gate (kampanya+org+POI durumu; 3 module → cross-module, note). E3: Trumore=kampanya+POI+banner, Togg=kampanya+POI+premium logo; hiçbir surface'e fiyat/paket gitmez. E4: olay-bazlı tekil güncelleme (önbellekli servis). Normal içeriği Trumore/Togg ÇEKER (pull). Yayına çıkış ≤5dk (TUR3-A1). Same-module tetikleyiciler: ActivateDueCampaigns/ResumeCampaign/MarkEnterprisePaid; cross-module (org-aktivasyon) OrganizationActivated olayı ile (dayanıklı, TUR3-D9).",
+            "businessNote": "E1: dışarı yalnız (kampanya 'active' + org 'active' + ilgili POI 'approved') üçünü birden karşılayan içerik gider. O1: self-serve kampanya org'un TÜM onaylı POI'lerinde (poiScope=global, seçenek yok); kurumsal seçili POI(ler). E3: Trumore=kampanya+POI+banner; Togg=kampanya+POI+premium logo; hiçbir surface'e fiyat/paket gitmez. E4: olay-bazlı tekil güncelleme (önbellekli servis), toptan yenileme değil.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "WithdrawContent",
+            "module": "Campaign",
+            "visibility": "internal",
+            "realizes": "WithdrawContent",
+            "signature": {
+                "params": [],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [
+                    "Campaign"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "E2: kaldır sinyali. TUR3-A2 hedefleri: standart inme ≤15dk, acil ≤2dk. Trumore/Togg önbellek tazeliği ≤10dk (TUR3-A3). TUR3-D10: teknik aksaklıkta içerik sessizce yayında kalmaz — yeniden dene, garanti indir (Distribution 'Update complete' guard'ı uyumlu). Same-module tetikleyiciler: PauseCampaign/EndDueCampaigns/EmergencyRemove*; cross-module (org-kapanma) OrganizationExpired olayı ile (dayanıklı).",
+            "businessNote": "E2: kampanya bitti/duraklatıldı/acil-kaldırıldı/org kapandı → 'kaldır' sinyali. Somut gecikme taahhüdü (en geç X) MBSE'de YOK ('sessizce kaldırılır').",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ListPendingCampaigns",
+            "module": "Campaign",
+            "visibility": "exposed",
+            "realizes": "ListPendingCampaigns",
+            "signature": {
+                "params": [],
+                "returns": "Campaign"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/moderation/campaigns/pending"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/moderation/campaigns/pending\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "Campaign"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Kuyruk 'inReview' filtreli (when result-filter). TUR3-G18/G19: sayfa 25, en eski önce (FIFO).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "cursor",
+                "keys": [
+                    {
+                        "field": "createdAt",
+                        "direction": "asc"
+                    },
+                    {
+                        "field": "id",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 25
+            }
+        },
+        {
+            "id": "CreatePOI",
+            "module": "POIManagement",
+            "visibility": "exposed",
+            "realizes": "CreatePOI",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "PoiId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/pois"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/pois\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "POI"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "H1: paket poiLimit dolmuşsa yeni ekleme ENGELLENİR (paket-yükselt ekranı, otomatik ücret yok). Sayım-bazlı çapraz-varlık (Package OrgManagement/InternalAdmin) → 'where' ile ifade edilemez, note. Kurumsalda limit yok. Editör POI ekleyemez (yalnız Admin/AccountManager).",
+            "businessNote": "H1: paket poiLimit'i dolmuşsa yeni ekleme ENGELLENİR (paket-yükselt ekranı; otomatik ücret yok). Kurumsalda limit yok. Editör POI ekleyemez (yalnız Admin/AccountManager).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "PoiLimitReached"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "UpdatePOI",
+            "module": "POIManagement",
+            "visibility": "exposed",
+            "realizes": "UpdatePOI",
+            "signature": {
+                "params": [
+                    {
+                        "name": "poiId",
+                        "type": "PoiId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "PATCH"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/pois/:poiId",
+                            "params": [
+                                "poiId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(PATCH, \"/pois/:poiId\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "POI"
+                ],
+                "creates": [],
+                "updates": [
+                    "POI"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "poi.status = \"approved\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "poi",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "K2: onaylı POI düzenlenince otomatik yeniden moderasyona düşer ('submitted' → ScreenPOI).",
+            "businessNote": "K2: onaylı POI düzenlenince otomatik yeniden moderasyona düşer (doğrudan güncellenmez).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidPOIState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "DeletePOI",
+            "module": "POIManagement",
+            "visibility": "exposed",
+            "realizes": "DeletePOI",
+            "signature": {
+                "params": [
+                    {
+                        "name": "poiId",
+                        "type": "PoiId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "DELETE"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/pois/:poiId",
+                            "params": [
+                                "poiId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(DELETE, \"/pois/:poiId\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "POI"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": [
+                    "POI"
+                ]
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "poi.status = \"approved\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "poi",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "O2(a): en az bir Aktif/canlı kampanya bu POI'yi kullanıyorsa silme ENGELLENİR ('önce kampanyaları kaldırın'). Sayım-bazlı çapraz-varlık (Campaign) → 'where' ile ifade edilemez, note. 'Silindi' ayrı durumu yok (bilinçli iş kararı).",
+            "businessNote": "O2 kararı (a): en az bir Aktif/canlı kampanya bu POI'yi kullanıyorsa silme ENGELLENİR ('önce kampanyaları kaldırın'). Sayım-bazlı çapraz-varlık koşulu 'where' ile ifade edilemez; note ile taşınır. MBSE'de 'Silindi' ayrı durumu yok — bu bilinçli iş kararı.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "PoiInUse"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "SubmitPOI",
+            "module": "POIManagement",
+            "visibility": "exposed",
+            "realizes": "SubmitPOI",
+            "signature": {
+                "params": [
+                    {
+                        "name": "poiId",
+                        "type": "PoiId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/pois/:poiId/submit",
+                            "params": [
+                                "poiId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/pois/:poiId/submit\")"
+                }
+            ],
+            "roles": [
+                "ClientAdmin"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "POI"
+                ],
+                "creates": [],
+                "updates": [
+                    "POI"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "poi.status = \"draft\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "poi",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "draft"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Ardından ScreenPOI (same-module).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidPOIState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ScreenPOI",
+            "module": "POIManagement",
+            "visibility": "internal",
+            "realizes": "ScreenPOI",
+            "signature": {
+                "params": [
+                    {
+                        "name": "poiId",
+                        "type": "PoiId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "POI"
+                ],
+                "creates": [],
+                "updates": [
+                    "POI"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "poi.status = \"submitted\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "poi",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "submitted"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Can.AI: koordinat sınır + 500m yarıçap tekrar/duplicate + taksonomi kategori + format. İhlal yoksa 'inReview'. Can.AI down → doğrudan insan kuyruğu (TUR3-D12).",
+            "businessNote": "Can.AI: koordinat sınır + 500m yarıçap tekrar/duplicate + taksonomi kategori + format. İhlal yoksa 'inReview'.",
+            "edges": [
+                {
+                    "to": "CanAI",
+                    "nature": "call",
+                    "kind": "uncharted"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ApprovePOI",
+            "module": "POIManagement",
+            "visibility": "exposed",
+            "realizes": "ApprovePOI",
+            "signature": {
+                "params": [
+                    {
+                        "name": "poiId",
+                        "type": "PoiId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/pois/:poiId/approve",
+                            "params": [
+                                "poiId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/pois/:poiId/approve\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "POI"
+                ],
+                "creates": [],
+                "updates": [
+                    "POI"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "poi.status = \"inReview\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "poi",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidPOIState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "RejectPOI",
+            "module": "POIManagement",
+            "visibility": "exposed",
+            "realizes": "RejectPOI",
+            "signature": {
+                "params": [
+                    {
+                        "name": "poiId",
+                        "type": "PoiId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "moderation",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/pois/:poiId/reject",
+                            "params": [
+                                "poiId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/pois/:poiId/reject\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "POI"
+                ],
+                "creates": [],
+                "updates": [
+                    "POI"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "poi.status = \"inReview\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "poi",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "K3: gerekçe client'a iletilir (kanal panel+e-posta varsayımı; MBSE'de netleşmemiş). Denetim-izi (audit) tutulur — kategori: moderation (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "K3: gerekçe client'a iletilir (kanal MBSE'de netleşmemiş — panel+e-posta varsayımı doğrulanmadı).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "InvalidPOIState"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ListPendingPOIs",
+            "module": "POIManagement",
+            "visibility": "exposed",
+            "realizes": "ListPendingPOIs",
+            "signature": {
+                "params": [],
+                "returns": "POI"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/moderation/pois/pending"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/moderation/pois/pending\")"
+                }
+            ],
+            "roles": [
+                "Moderator"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "POI"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Kuyruk 'inReview' filtreli. TUR3-G18/G19: sayfa 25, en eski önce (FIFO).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "cursor",
+                "keys": [
+                    {
+                        "field": "createdAt",
+                        "direction": "asc"
+                    },
+                    {
+                        "field": "id",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 25
+            }
+        },
+        {
+            "id": "ActivatePremiumLogo",
+            "module": "Distribution",
+            "visibility": "exposed",
+            "realizes": "ActivatePremiumLogo",
+            "signature": {
+                "params": [
+                    {
+                        "name": "orgId",
+                        "type": "OrgId",
+                        "collection": false
+                    }
+                ],
+                "returns": "LogoId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/premium-logo/:orgId/activate",
+                            "params": [
+                                "orgId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/premium-logo/:orgId/activate\")"
+                }
+            ],
+            "roles": [
+                "AccountManager"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "PremiumLogo"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "G2: Togg araç ekranında kalıcı marka logosu, Trumore API üzerinden doğrudan; moderasyon YOK. TUR3-D11: push başarısızsa temsilciye anında hata YOK — arka planda otomatik yeniden dene; kalıcı başarısızlıkta admin'e görünür uyarı (MBSE'de dönüş/hata olayı tanımsız — bu karar eklendi). Doğrulayıcı 'korumasız-erişim' uyarısı BİLİNÇLİ KABUL: MBSE'de premium logo push için caller-side input validation tanımlı değil; dayanıklılık fail-fast doğrulama ile değil retry ile sağlanır (TUR3-D11).",
+            "businessNote": "G2: Togg araç ekranında kalıcı marka logosu. Trumore API'si üzerinden doğrudan; moderasyon YOK. Temsilci aç/kapa yapar.",
+            "edges": [
+                {
+                    "to": "Trumore",
+                    "nature": "call",
+                    "kind": "external"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "DeactivatePremiumLogo",
+            "module": "Distribution",
+            "visibility": "exposed",
+            "realizes": "DeactivatePremiumLogo",
+            "signature": {
+                "params": [
+                    {
+                        "name": "logoId",
+                        "type": "LogoId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/premium-logo/:logoId/deactivate",
+                            "params": [
+                                "logoId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/premium-logo/:logoId/deactivate\")"
+                }
+            ],
+            "roles": [
+                "AccountManager"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [
+                    "PremiumLogo"
+                ],
+                "creates": [],
+                "updates": [
+                    "PremiumLogo"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [
+                {
+                    "text": "logo.status = \"active\"",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "logo",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    },
+                    "guardRef": "where:0"
+                }
+            ],
+            "note": "Elle kapatılır; ayrıca Q1: org kapanınca (OrganizationExpired olayı) otomatik iner (MBSE'de yoktu, eklendi).",
+            "businessNote": "Elle kapatılır; ayrıca ExpireOrganizations org kapanınca otomatik tetikler (Q1).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [
+                "LogoNotActive"
+            ],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "FetchFXRate",
+            "module": "Billing",
+            "visibility": "internal",
+            "realizes": "FetchFXRate",
+            "signature": {
+                "params": [],
+                "returns": "FXRate"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "FXRate"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "C4: ECB'nin herkese açık verisini kazır (özel entegrasyon yok). İç gelir dönüşümü; satış fiyatını etkilemez.",
+            "businessNote": "C4: her gün ECB'den EUR/TL kuru çekilir, o günkü faturaya kilitlenir (iç gelir dönüşümü; satış fiyatını etkilemez).",
+            "edges": [
+                {
+                    "to": "ECB",
+                    "nature": "call",
+                    "kind": "external"
+                }
+            ],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "CreatePackage",
+            "module": "InternalAdmin",
+            "visibility": "exposed",
+            "realizes": "CreatePackage",
+            "signature": {
+                "params": [],
+                "returns": "PackageId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/admin/packages"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/admin/packages\")"
+                }
+            ],
+            "roles": [
+                "InternalAdmin"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Package"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": null,
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "UpdatePackage",
+            "module": "InternalAdmin",
+            "visibility": "exposed",
+            "realizes": "UpdatePackage",
+            "signature": {
+                "params": [
+                    {
+                        "name": "packageId",
+                        "type": "PackageId",
+                        "collection": false
+                    }
+                ],
+                "returns": "Unit"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "PATCH"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/admin/packages/:packageId",
+                            "params": [
+                                "packageId"
+                            ]
+                        }
+                    ],
+                    "raw": "@rest(PATCH, \"/admin/packages/:packageId\")"
+                }
+            ],
+            "roles": [
+                "InternalAdmin"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [],
+                "creates": [],
+                "updates": [
+                    "Package"
+                ],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "G4/Q2(a): fiyat değişikliği YALNIZ yeni abonelik/yenilemelere uygulanır; mevcut müşteri dönem sonuna kadar eski fiyatta.",
+            "businessNote": "G4/Q2 kararı (a): fiyat değişikliği YALNIZ yeni abonelik/yenilemelere uygulanır; mevcut müşteri dönem sonuna kadar eski fiyatta. Paket tanımlarını değiştiren TEK taraf InternalAdmin.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "CreateTaxonomy",
+            "module": "InternalAdmin",
+            "visibility": "exposed",
+            "realizes": "CreateTaxonomy",
+            "signature": {
+                "params": [],
+                "returns": "TaxonomyId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/admin/taxonomy"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/admin/taxonomy\")"
+                }
+            ],
+            "roles": [
+                "InternalAdmin"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "Taxonomy"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Uygun sektör listesi; başvuruda sektör bundan seçilir. Yöneten tek taraf InternalAdmin.",
+            "businessNote": "Uygun sektör listesi/taksonomi. Başvuruda sektör bundan seçilir. Yöneten tek taraf InternalAdmin.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "CreateEnterpriseFeatureSet",
+            "module": "InternalAdmin",
+            "visibility": "exposed",
+            "realizes": "CreateEnterpriseFeatureSet",
+            "signature": {
+                "params": [],
+                "returns": "FeatureSetId"
+            },
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "POST"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/enterprise/feature-sets"
+                        }
+                    ],
+                    "raw": "@rest(POST, \"/enterprise/feature-sets\")"
+                }
+            ],
+            "roles": [
+                "AccountManager"
+            ],
+            "ownership": "any",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "EnterpriseFeatureSet"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "G3: Temsilci internal panelden tanımlayıp kurumsal org'a bağlar. Ayrı onay/moderasyon YOK.",
+            "businessNote": "G3: Temsilci internal panelden tanımlayıp kurumsal org'a bağlar. Ayrı onay/moderasyon adımı YOK — tanımlanınca geçerli.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "IngestAnalytics",
+            "module": "Analytics",
+            "visibility": "internal",
+            "realizes": "IngestAnalytics",
+            "signature": {
+                "params": [],
+                "returns": "Unit"
+            },
+            "serving": [],
+            "roles": [],
+            "ownership": "all",
+            "access": {
+                "reads": [],
+                "creates": [
+                    "AnalyticsEvent"
+                ],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "N1: ham olay (impression/click/routing) Trumore+Togg'a gömülü Countly'den gelir. N2: alım sıklığı MBSE'de tanımsız. TUR3-B6: Countly olayında eventId YOK → tekilleştirme yapılamaz, olduğu gibi sayılır (çift-sayım riski KABUL edildi; ek entegrasyona değmez). R1: kupon kullanımı ölçülmez (görüş alanı dışı).",
+            "businessNote": "N1: ham olay (impression/click/routing) Trumore+Togg'a gömülü 3.taraf Countly SDK'dan gelir — biz ÜRETMEYİZ, toplarız. N2: alım sıklığı (anlık mı toplu mu) MBSE'de TANIMSIZ. R1: kupon kullanımı ölçülmez (mağazada, görüş alanı dışı).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": null
+        },
+        {
+            "id": "ViewAnalytics",
+            "module": "Analytics",
+            "visibility": "exposed",
+            "realizes": "ViewAnalytics",
+            "signature": {
+                "params": [],
+                "returns": "AnalyticsEvent"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "analytics-export",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/analytics"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/analytics\")"
+                }
+            ],
+            "roles": [
+                "ClientViewer"
+            ],
+            "ownership": "own",
+            "access": {
+                "reads": [
+                    "AnalyticsEvent"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "F2/F4: Viewer/Editor/Admin aynı org-seviyesi ekranı görür (extends devralır); yalnız kendi org'u. F3: rapor export var. Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "F2/F4: Viewer/Editor/Admin aynı org-seviyesi ekranı görür (Editor/Admin extends ile devralır); yalnız kendi organizasyonu. Rapor export özelliği de var (F3). Sıralama/hazır dönem filtreleri MBSE'de detaylandırılmadı.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "offset",
+                "keys": [
+                    {
+                        "field": "eventType",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 25
+            }
+        },
+        {
+            "id": "AgencyViewAnalytics",
+            "module": "Analytics",
+            "visibility": "exposed",
+            "realizes": "AgencyViewAnalytics",
+            "signature": {
+                "params": [],
+                "returns": "AnalyticsEvent"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "analytics-export",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/agency/analytics"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/agency/analytics\")"
+                }
+            ],
+            "roles": [
+                "AgencyUser"
+            ],
+            "ownership": "delegatedClient",
+            "access": {
+                "reads": [
+                    "AnalyticsEvent"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Devredilen kapsam analitiği içeriyorsa müşterinin analitiğini görür. Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "Devredilen kapsam analitiği içeriyorsa müşterinin analitiğini görür.",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "offset",
+                "keys": [
+                    {
+                        "field": "eventType",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 25
+            }
+        },
+        {
+            "id": "ViewSystemAnalyticsAM",
+            "module": "Analytics",
+            "visibility": "exposed",
+            "realizes": "ViewSystemAnalyticsAM",
+            "signature": {
+                "params": [],
+                "returns": "AnalyticsEvent"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "analytics-export",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/system-analytics/am"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/system-analytics/am\")"
+                }
+            ],
+            "roles": [
+                "AccountManager"
+            ],
+            "ownership": "all",
+            "access": {
+                "reads": [
+                    "AnalyticsEvent"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": null,
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "offset",
+                "keys": [
+                    {
+                        "field": "eventType",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 25
+            }
+        },
+        {
+            "id": "ViewSystemAnalyticsInternal",
+            "module": "Analytics",
+            "visibility": "exposed",
+            "realizes": "ViewSystemAnalyticsInternal",
+            "signature": {
+                "params": [],
+                "returns": "AnalyticsEvent"
+            },
+            "ext": [
+                {
+                    "ns": "audit",
+                    "name": "logged",
+                    "args": {
+                        "category": "analytics-export",
+                        "retention": "3y"
+                    }
+                }
+            ],
+            "serving": [
+                {
+                    "protocol": "rest",
+                    "args": [
+                        {
+                            "kind": "keyword",
+                            "value": "GET"
+                        },
+                        {
+                            "kind": "string",
+                            "value": "/system-analytics/internal"
+                        }
+                    ],
+                    "raw": "@rest(GET, \"/system-analytics/internal\")"
+                }
+            ],
+            "roles": [
+                "InternalAdmin"
+            ],
+            "ownership": "all",
+            "access": {
+                "reads": [
+                    "AnalyticsEvent"
+                ],
+                "creates": [],
+                "updates": [],
+                "deletes": []
+            },
+            "validation": [],
+            "rule": [],
+            "note": "F2: sistem-geneli görünüm (gelir, moderasyon hacmi, kampanya hacmi). Denetim-izi (audit) tutulur — kategori: analytics-export (3y); kim/ne zaman (TUR3-E15).",
+            "businessNote": "F2: sistem-geneli görünüm (gelir, moderasyon hacmi, kampanya hacmi).",
+            "edges": [],
+            "consistency": {
+                "risk": "strong",
+                "mode": null
+            },
+            "abac": null,
+            "scopes": [],
+            "throws": [],
+            "idempotent": null,
+            "emits": [],
+            "pagination": {
+                "strategy": "offset",
+                "keys": [
+                    {
+                        "field": "eventType",
+                        "direction": "asc"
+                    }
+                ],
+                "size": 25
+            }
+        }
+    ],
+    "entities": [
+        {
+            "id": "UserAccount",
+            "module": "Identity",
+            "realizes": [
+                "UserAccount"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "UserId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "role",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "emailDomain",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "AgencyDelegation",
+            "module": "Identity",
+            "realizes": [],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "DelId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "orgId",
+                    "type": "OrgId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar",
+                    "sourceOfTruth": {
+                        "module": "OrgManagement",
+                        "entity": "Organization"
+                    }
+                },
+                {
+                    "name": "agencyUserId",
+                    "type": "UserId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "accessScope",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "Organization",
+            "module": "OrgManagement",
+            "realizes": [
+                "Organization"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "OrgId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "legalName",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "country",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "sector",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "taxNumber",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "email",
+                    "type": "String",
+                    "collection": false,
+                    "ext": [
+                        {
+                            "ns": "sensitivity",
+                            "name": "tag",
+                            "args": {
+                                "level": "pii"
+                            }
+                        }
+                    ],
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "orgType",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "createdAt",
+                    "type": "Date",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "Invoice",
+            "module": "OrgManagement",
+            "realizes": [
+                "Invoice"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "InvId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "vat",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "lockedRate",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "ProformaInvoice",
+            "module": "OrgManagement",
+            "realizes": [
+                "ProformaInvoice"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "PiId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "vat",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "BrandProfile",
+            "module": "OrgManagement",
+            "realizes": [
+                "BrandProfile"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "BrandId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "brandName",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "Campaign",
+            "module": "Campaign",
+            "realizes": [
+                "Campaign"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "CampaignId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "description",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "bannerUrl",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "link",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "couponCode",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "startDate",
+                    "type": "Date",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "endDate",
+                    "type": "Date",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "poiScope",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "createdAt",
+                    "type": "Date",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": "optimistic"
+        },
+        {
+            "id": "POI",
+            "module": "POIManagement",
+            "realizes": [
+                "POI"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "PoiId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "latitude",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "longitude",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "category",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "createdAt",
+                    "type": "Date",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": "optimistic"
+        },
+        {
+            "id": "PremiumLogo",
+            "module": "Distribution",
+            "realizes": [
+                "PremiumLogo"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "LogoId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "orgId",
+                    "type": "OrgId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar",
+                    "sourceOfTruth": {
+                        "module": "OrgManagement",
+                        "entity": "Organization"
+                    }
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "FXRate",
+            "module": "Billing",
+            "realizes": [
+                "FXRate"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "RateId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "rate",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "fetchedOn",
+                    "type": "Date",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "Package",
+            "module": "InternalAdmin",
+            "realizes": [
+                "Package"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "PackageId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "tier",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "price",
+                    "type": "Decimal",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "poiLimit",
+                    "type": "Int",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "seatLimit",
+                    "type": "Int",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "Taxonomy",
+            "module": "InternalAdmin",
+            "realizes": [
+                "Taxonomy"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "TaxonomyId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "sector",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "EnterpriseFeatureSet",
+            "module": "InternalAdmin",
+            "realizes": [
+                "EnterpriseFeatureSet"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "FeatureSetId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "name",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        },
+        {
+            "id": "AnalyticsEvent",
+            "module": "Analytics",
+            "realizes": [
+                "AnalyticsEvent"
+            ],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "EventId",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "eventType",
+                    "type": "String",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                },
+                {
+                    "name": "count",
+                    "type": "Int",
+                    "collection": false,
+                    "cardinality": "one",
+                    "ref": "scalar"
+                }
+            ],
+            "invariants": [],
+            "concurrency": null
+        }
+    ],
+    "types": [],
+    "errors": [
+        {
+            "id": "EmailDomainMismatch",
+            "module": "Identity",
+            "resultType": "NotValid"
+        },
+        {
+            "id": "SeatLimitReached",
+            "module": "Identity",
+            "resultType": "NotProcessable"
+        },
+        {
+            "id": "InvalidApplicationState",
+            "module": "OrgManagement",
+            "resultType": "NotProcessable"
+        },
+        {
+            "id": "InvalidCampaignState",
+            "module": "Campaign",
+            "resultType": "NotProcessable"
+        },
+        {
+            "id": "InvalidCampaignDates",
+            "module": "Campaign",
+            "resultType": "NotValid"
+        },
+        {
+            "id": "OrgNotActive",
+            "module": "Campaign",
+            "resultType": "NotProcessable"
+        },
+        {
+            "id": "InvalidPOIState",
+            "module": "POIManagement",
+            "resultType": "NotProcessable"
+        },
+        {
+            "id": "PoiLimitReached",
+            "module": "POIManagement",
+            "resultType": "NotProcessable"
+        },
+        {
+            "id": "PoiInUse",
+            "module": "POIManagement",
+            "resultType": "NotProcessable"
+        },
+        {
+            "id": "LogoNotActive",
+            "module": "Distribution",
+            "resultType": "NotProcessable"
+        }
+    ],
+    "events": [
+        {
+            "id": "OrganizationActivated",
+            "module": "OrgManagement",
+            "payload": [
+                {
+                    "name": "orgId",
+                    "type": "OrgId",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "OrganizationExpired",
+            "module": "OrgManagement",
+            "payload": [
+                {
+                    "name": "orgId",
+                    "type": "OrgId",
+                    "collection": false
+                }
+            ]
+        }
+    ],
+    "subscriptions": [
+        {
+            "event": {
+                "module": "OrgManagement",
+                "name": "OrganizationActivated"
+            },
+            "consumer": {
+                "module": "Campaign",
+                "op": "PublishContent"
+            }
+        },
+        {
+            "event": {
+                "module": "OrgManagement",
+                "name": "OrganizationExpired"
+            },
+            "consumer": {
+                "module": "Campaign",
+                "op": "WithdrawContent"
+            }
+        },
+        {
+            "event": {
+                "module": "OrgManagement",
+                "name": "OrganizationExpired"
+            },
+            "consumer": {
+                "module": "Distribution",
+                "op": "DeactivatePremiumLogo"
+            }
+        }
+    ],
+    "externals": [
+        {
+            "name": "ECB",
+            "generated": false,
+            "operations": [
+                {
+                    "id": "GetRate",
+                    "signature": {
+                        "params": [
+                            {
+                                "name": "base",
+                                "type": "String",
+                                "collection": false
+                            },
+                            {
+                                "name": "quote",
+                                "type": "String",
+                                "collection": false
+                            }
+                        ],
+                        "returns": "Decimal"
+                    },
+                    "serving": [],
+                    "validation": []
+                }
+            ]
+        },
+        {
+            "name": "Trumore",
+            "generated": false,
+            "operations": [
+                {
+                    "id": "PushPremiumLogo",
+                    "signature": {
+                        "params": [
+                            {
+                                "name": "logoId",
+                                "type": "LogoId",
+                                "collection": false
+                            }
+                        ],
+                        "returns": "Unit"
+                    },
+                    "serving": [],
+                    "validation": []
+                }
+            ]
+        }
+    ],
+    "uncharted": [
+        {
+            "name": "CanAI",
+            "generated": false,
+            "deployable": null,
+            "operations": [
+                {
+                    "id": "Screen",
+                    "signature": {
+                        "params": [
+                            {
+                                "name": "itemId",
+                                "type": "String",
+                                "collection": false
+                            },
+                            {
+                                "name": "itemType",
+                                "type": "String",
+                                "collection": false
+                            }
+                        ],
+                        "returns": "Risk"
+                    },
+                    "serving": [],
+                    "validation": []
+                }
+            ],
+            "entities": [],
+            "types": []
+        }
+    ],
+    "callEdges": [
+        {
+            "from": "ScreenApplication",
+            "to": {
+                "system": "CanAI",
+                "op": "Screen"
+            },
+            "kind": "uncharted",
+            "crossModule": false,
+            "consistency": "eventual",
+            "compensate": null
+        },
+        {
+            "from": "ScreenCampaign",
+            "to": {
+                "system": "CanAI",
+                "op": "Screen"
+            },
+            "kind": "uncharted",
+            "crossModule": false,
+            "consistency": "eventual",
+            "compensate": null
+        },
+        {
+            "from": "ScreenPOI",
+            "to": {
+                "system": "CanAI",
+                "op": "Screen"
+            },
+            "kind": "uncharted",
+            "crossModule": false,
+            "consistency": "eventual",
+            "compensate": null
+        },
+        {
+            "from": "ActivatePremiumLogo",
+            "to": {
+                "system": "Trumore",
+                "op": "PushPremiumLogo"
+            },
+            "kind": "external",
+            "crossModule": false,
+            "consistency": null,
+            "compensate": null
+        },
+        {
+            "from": "FetchFXRate",
+            "to": {
+                "system": "ECB",
+                "op": "GetRate"
+            },
+            "kind": "external",
+            "crossModule": false,
+            "consistency": "eventual",
+            "compensate": null
+        }
+    ],
+    "coverage": {
+        "unrealizedBusinessOps": [],
+        "uncoveredEntities": []
+    },
+    "guarantees": [
+        {
+            "id": "ModerationDecisionRequiresPendingItem",
+            "text": "Bir moderasyon onay/red kararı yalnız hâlâ 'inceleme' durumundaki bir öğeye uygulanır; iki moderatör aynı öğeyi işlerse ilk karar kazanır, ikinci karar durum artık 'inReview' olmadığı için reddedilir (TUR3-C7)",
+            "traces": [],
+            "obligationCount": 6,
+            "obligations": [
+                {
+                    "kind": "guard",
+                    "op": {
+                        "system": "OrgManagement",
+                        "op": "ApproveApplication"
+                    },
+                    "guard": "where:0"
+                },
+                {
+                    "kind": "guard",
+                    "op": {
+                        "system": "OrgManagement",
+                        "op": "RejectApplication"
+                    },
+                    "guard": "where:0"
+                },
+                {
+                    "kind": "guard",
+                    "op": {
+                        "system": "Campaign",
+                        "op": "ApproveCampaign"
+                    },
+                    "guard": "where:0"
+                },
+                {
+                    "kind": "guard",
+                    "op": {
+                        "system": "Campaign",
+                        "op": "RejectCampaign"
+                    },
+                    "guard": "where:0"
+                },
+                {
+                    "kind": "guard",
+                    "op": {
+                        "system": "POIManagement",
+                        "op": "ApprovePOI"
+                    },
+                    "guard": "where:0"
+                },
+                {
+                    "kind": "guard",
+                    "op": {
+                        "system": "POIManagement",
+                        "op": "RejectPOI"
+                    },
+                    "guard": "where:0"
+                }
+            ]
+        }
+    ]
+}

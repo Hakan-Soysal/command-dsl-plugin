@@ -73,6 +73,67 @@ Anlamlı, benzersiz PascalCase ID: `SubmitRequest`, `ApproveRequest`,
 `CreatePurchaseOrder`. Akış/süreç adlarıyla **çakışmamalı** (tek isim uzayı).
 Keyword olmayan ad seç (`schedule`, `process` vb. yasak).
 
+## Dinleme dedektörü — belirsizlik yakala, EARS'la sor
+Çeviriden önce **dinle**: düz cümle çoğu zaman aktörü, koşulu veya hata-dalını
+*söylemez*. Aşağıdaki dedektör **soruyu TETİKLER; cevabı ASLA doldurmaz** (büyü
+yok — ilke-1). Skorlama yok, LLM-benzerlik yok; yalnız KAPALI kip-listesine bakılır.
+
+**4 kapalı dedektör kategorisi:**
+
+| # | Kategori | Kapalı kip-listesi (TR + EN) | Ne kaçırılıyor → sor |
+|---|---|---|---|
+| 1 | Öznesiz-edilgen | "…gider · …oluşturulur · …onaylanır · …gönderilir" · *is sent / is created / gets approved* | Aktör yok → "bunu HANGİ aktör yapıyor?" (Adım 1) |
+| 2 | Belirsiz niceleyici | "genelde · bazen · çoğunlukla · duruma göre · gerekirse" · *usually / sometimes / as needed* | Dallanma gizli → "hangi koşulda böyle, hangisinde değil?" (Adım 6 / either-or) |
+| 3 | Örtük gereksinim | "…olmalı · …lazım · …gerekir · sağlanmalı" · *should / must / needs to* | Kural var, biçimi yok → **yalnız SORU üretir, cevabı asla türetme** (ilke-1); teyitle Adım 6 guard'ına |
+| 4 | Kapsam-boşluğu | "kaydı · talebi · siparişi" (kimin? belirsiz) · *the record / the request* | Ownership yok → "kimin kaydı — kendi / ilişki / herhangi?" (Adım 3) |
+
+Bir dedektör soru ürettiyse → hibrit-onay kuyruğuna. Cevaplanmayan kategori = sessiz-eksik.
+
+**GEÇİCİ EARS 5-kalıbı (çerçeve — SAKLANMAZ):** her operation için şu 5 aday-soruyu
+tara. Bunlar yalnız *eksik-bilgiyi açığa çıkaran geçici çerçevedir*; teyitli cevap
+ANINDA construct'a düşer ve **EARS cümlesi hiçbir yere yazılmaz** — "EARS = saklanan
+artefakt" reddedildi (structural-first, ilke-2; saklanırsa ikinci bir hakikat-kaynağı
+doğar, DSL ile drift eder).
+
+1. **"X olduğunda?"** → tetikleyici / başarı-yolu → Adım 7 `on success do`
+2. **"X hatalıysa / sağlanmazsa?"** → hata-dalı → Adım 6 guard (`where` / `only if`) — aşağıdaki taksonomi-mercekine
+3. **"Y durumu açıkken farklı mı?"** → duruma-bağlı dal → `only when` / either-or
+4. **"Sürekli mi geçerli?"** → değişmez ön-koşul → `only if` / calendar
+5. **"İstenmeyen ne?"** → yasak / negatif-yol → note veya guard'ın ret-tarafı
+
+**IF-kalıbı → 6'lı result-taksonomi merceği (sınıflandırma, construct DEĞİL):**
+2. kalıbın ("hatalıysa?") cevabını, kullanıcının default KAPALI 6'lı sonuç-taksonomisinin
+bir *koluna* yerleştir — yalnız hangi hata-dalının **cevapsız** kaldığını görmek için.
+Yapısal ev yine `where` / `only if` guard'ı ya da note'tur; bu mercek gramer EKLEMEZ
+(ilke-4). Business-elicitation'da anlamlı kollar:
+
+- **Yetki yok** ("izni olmayan denerse?") → *Not Authorized* → ownership / `<ilişki>'s` kapsamı (Adım 3)
+- **Girdi geçersiz** ("eksik/yanlış alanla gelirse?") → *Not Valid* → note / aday-alan sorusu
+- **İş-kuralı engeli** ("bakiye yetmezse / durum uygun değilse?") → *Not Processable* → `where` / `only if` guard
+
+**Cevapsız kol = ★-eksik** (Pre-Emit süpürmesinde teşhir). Taksonominin tam tanımı
+ve wire-kod eşlemesi tech-katmanının konusudur; burada yalnız *hangi kolun
+sorulmadığını* işaretler.
+
+**Türkçe normal-form geri-okuma:** teyitli her cevabı DSL'i göstermeden düz cümleyle
+geri oku — kalıp: *"… olduğunda sistem … yapacak; … ise reddedecek. Doğru mu?"*
+(çalışan örnek: bu dosyanın sonundaki **Tam örnek** geri-okuması). Geri-okuma yalnız
+teyit içindir, saklanmaz.
+
+## Ölçülebilir başarı-ölçütü aday-sorusu
+Operation'ın *davranışının doğru* olması ile *ürünün başarılı* olması ayrı şeylerdir:
+çeviri birincisini garanti eder, ikincisini etmez. Elicitation'da bir kez şunu sor —
+**"bunun işe yaradığını nasıl ÖLÇECEĞİZ?"** (technology-agnostik, ölçülebilir-sonuç
+aday-sorusu).
+
+- Yalnız **ölçülebilir** cevap yapısallaşır (note / Envanter SC-adayı olarak). Örn:
+  "onay süresi 2 günden aza insin", "reddedilen talep oranı < %5".
+- **Ölçülemeyen SC KOYULMAZ** (correctness-over-completeness — ilke-3): "kullanıcı
+  memnun olsun" ölçüte dönüşmez → ya somutlaştır ("memnuniyet ≥ 4/5"), ya da hiç yazma.
+  Yarım / temenni-SC = yanlış-alan.
+- Bu bir MD-dilimidir; birinci-sınıf `SuccessCriteria` construct'ı gramer-kuyruğundadır
+  (pilot-koşullu) — şimdilik note taşır.
+
 ## Tür-uygunluk denetimi (kendi kontrolün — T1-T4)
 Çevirdikten sonra doğrula:
 - **Sorguda** `only during` / `only if` / `schedule` / `calculate` / `on success`

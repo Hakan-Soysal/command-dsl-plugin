@@ -1,0 +1,3998 @@
+{
+    "operations": [
+        {
+            "id": "ActivateDueCampaigns",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "activates",
+                "ownership": "all",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "C3: başlangıç tarihi GELEN onaylı kampanyalar otomatik Aktif (tarih-şimdi karşılaştırması 'where' ile ifade edilemez, note ile taşınır).",
+            "schedule": {
+                "unit": "day",
+                "time": null
+            },
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'approved'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'active'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "active"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "PublishContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ActivateOrganization",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "activates",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Self-serve: dış Ödeme Gateway (3D Secure) webhook'u 'ödendi' der → org Aktif. Fatura ödeme anında doğar; o günkü ECB kuru lockedRate'e kilitlenir (yalnız iç gelir takibi, satış fiyatını etkilemez, geriye dönük sabit).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'approved'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'active'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "active"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "create",
+                    "target": "Invoice",
+                    "source": "Organization"
+                },
+                {
+                    "kind": "perform",
+                    "target": "PublishContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Invoice",
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [
+                "AgencyOnboardingProcess",
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ActivatePremiumLogo",
+            "kind": "command",
+            "signature": {
+                "actor": "AccountManager",
+                "verb": "creates",
+                "ownership": "any",
+                "resource": "PremiumLogo"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "G2: Togg araç ekranında kalıcı marka logosu. Trumore API'si üzerinden doğrudan; moderasyon YOK. Temsilci aç/kapa yapar.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "PremiumLogo",
+                        "status"
+                    ],
+                    "text": "'active'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "active"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "PremiumLogo"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "AgencyCreateCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "AgencyUser",
+                "verb": "creates",
+                "ownership": "delegatedClient",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Ajans, devredilen kapsam Editör+ ise müşteri adına kampanya oluşturur.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'draft'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "draft"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "AgencyViewAnalytics",
+            "kind": "query",
+            "signature": {
+                "actor": "AgencyUser",
+                "verb": "lists",
+                "ownership": "delegatedClient",
+                "resource": "AnalyticsEvent"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Devredilen kapsam analitiği içeriyorsa müşterinin analitiğini görür.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "AnalyticsEvent"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ApproveApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "approves",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'approved'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "approved"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "create",
+                    "target": "ProformaInvoice",
+                    "source": "Organization"
+                },
+                {
+                    "kind": "send",
+                    "message": "ApplicationDecisionNotice",
+                    "recipient": [
+                        "Organization",
+                        "owner"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization",
+                    "ProformaInvoice"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "ApplicationModeration"
+            ],
+            "processes": [
+                "AgencyOnboardingProcess",
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ApproveCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "approves",
+                "ownership": "any",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Onaylı kampanya kullanıcıca iptal/geri çekilemez — kilitli (A4). Kaldırma yalnız Acil Kaldır (moderatör/admin).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'approved'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "approved"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "send",
+                    "message": "CampaignDecisionNotice",
+                    "recipient": [
+                        "Campaign",
+                        "owner"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CampaignModeration"
+            ],
+            "processes": [
+                "CampaignProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ApprovePOI",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "approves",
+                "ownership": "any",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "POI.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "POI",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "POI",
+                        "status"
+                    ],
+                    "text": "'approved'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "approved"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "send",
+                    "message": "POIDecisionNotice",
+                    "recipient": [
+                        "POI",
+                        "owner"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "POI"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "POIModeration"
+            ],
+            "processes": [
+                "POIProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreateAgencyApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "AgencyApplicant",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Ajans başvurusu. orgType=agency; POI ve marka profili adımı YOK. Sabit yıllık ücret 12.000 TL (5 koltuk dahil, ek koltuk 1.200 TL/yıl).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'draft'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "draft"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "AgencyOnboarding"
+            ],
+            "processes": [
+                "AgencyOnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreateApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "Applicant",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Marka self-serve başvurusu. orgType=client, başlangıç durumu 'draft'.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'draft'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "draft"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "ApplicationOnboarding"
+            ],
+            "processes": [
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreateBrandProfile",
+            "kind": "command",
+            "signature": {
+                "actor": "Applicant",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "BrandProfile"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Marka profili adımı yalnız marka başvurusunda var; ajans başvurusunda YOK. Onaylı profil güncellemeleri de ortak moderasyondan geçer (D1).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "BrandProfile"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "ApplicationOnboarding"
+            ],
+            "processes": [
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreateCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientEditor",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "ÖN-KOŞUL (H3/J4, üç turda pekişen kesin kural): kampanya oluşturma/gönderme yalnız organizasyon 'active' iken açıktır; 'paused' (grace dahil)/'expired' iken KAPALI. Çapraz-varlık koşulu olduğu için 'where' ile ifade edilemez, note ile taşınır. Taslak kalıcıdır, süre sınırı yok.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'draft'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "draft"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CampaignAuthoring"
+            ],
+            "processes": [
+                "CampaignProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreateEnterpriseApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "AccountManager",
+                "verb": "creates",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Kurumsal başvuru — Temsilci müşteri adına elle girer. Aynı adım iskeleti; konum limiti yok, kademe Ecosystem/Enterprise. Temsilci müşteriyi self-serve forma da davet edebilir.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'draft'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "draft"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreateEnterpriseFeatureSet",
+            "kind": "command",
+            "signature": {
+                "actor": "AccountManager",
+                "verb": "creates",
+                "ownership": "any",
+                "resource": "EnterpriseFeatureSet"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "G3: Temsilci internal panelden tanımlayıp kurumsal org'a bağlar. Ayrı onay/moderasyon adımı YOK — tanımlanınca geçerli.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "EnterpriseFeatureSet"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreatePackage",
+            "kind": "command",
+            "signature": {
+                "actor": "InternalAdmin",
+                "verb": "creates",
+                "ownership": "any",
+                "resource": "Package"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Package"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreatePOI",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "H1: paket poiLimit'i dolmuşsa yeni ekleme ENGELLENİR (paket-yükselt ekranı; otomatik ücret yok). Kurumsalda limit yok. Editör POI ekleyemez (yalnız Admin/AccountManager).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "POI",
+                        "status"
+                    ],
+                    "text": "'draft'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "draft"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "POI"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "POIManagement"
+            ],
+            "processes": [
+                "POIProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "CreateTaxonomy",
+            "kind": "command",
+            "signature": {
+                "actor": "InternalAdmin",
+                "verb": "creates",
+                "ownership": "any",
+                "resource": "Taxonomy"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Uygun sektör listesi/taksonomi. Başvuruda sektör bundan seçilir. Yöneten tek taraf InternalAdmin.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Taxonomy"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "DeactivatePremiumLogo",
+            "kind": "command",
+            "signature": {
+                "actor": "AccountManager",
+                "verb": "deactivates",
+                "ownership": "any",
+                "resource": "PremiumLogo"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Elle kapatılır; ayrıca ExpireOrganizations org kapanınca otomatik tetikler (Q1).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "PremiumLogo.status = 'active'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "PremiumLogo",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "PremiumLogo",
+                        "status"
+                    ],
+                    "text": "'inactive'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "inactive"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "PremiumLogo"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "DelegateToAgency",
+            "kind": "command",
+            "signature": null,
+            "delegation": {
+                "operation": "grant",
+                "actor": "ClientAdmin",
+                "permission": "write",
+                "ownership": "own",
+                "resource": "Campaign",
+                "grantee": "AgencyUser",
+                "duration": null
+            },
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "A3: kapsam müşteriye göre değişir (Admin/Editor/Viewer); aynı ajans A müşterisinde geniş, B'de salt-görüntü olabilir. delegatedClient ilişkisini bu devir doldurur (D3).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "DeletePOI",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "deletes",
+                "ownership": "own",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "O2 kararı (a): en az bir Aktif/canlı kampanya bu POI'yi kullanıyorsa silme ENGELLENİR ('önce kampanyaları kaldırın'). Sayım-bazlı çapraz-varlık koşulu 'where' ile ifade edilemez; note ile taşınır. MBSE'de 'Silindi' ayrı durumu yok — bu bilinçli iş kararı.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "POI.status = 'approved'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "POI",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "POI"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "EmergencyRemoveByAdmin",
+            "kind": "command",
+            "signature": {
+                "actor": "InternalAdmin",
+                "verb": "removes",
+                "ownership": "any",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'active' or Campaign.status = 'approved'",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Campaign",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "active"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Campaign",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "approved"
+                            }
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'emergencyRemoved'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "emergencyRemoved"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "WithdrawContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "EmergencyRemoveByModerator",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "removes",
+                "ownership": "any",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "A5: KALICI — 'emergencyRemoved'dan başka duruma geçiş yok, bir daha yayına dönmez.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'active' or Campaign.status = 'approved'",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Campaign",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "active"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Campaign",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "approved"
+                            }
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'emergencyRemoved'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "emergencyRemoved"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "WithdrawContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "EndDueCampaigns",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "ends",
+                "ownership": "all",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "C3: bitiş tarihi GEÇEN aktif kampanyalar otomatik 'past'.",
+            "schedule": {
+                "unit": "day",
+                "time": null
+            },
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'active'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'past'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "past"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "WithdrawContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ExpireOrganizations",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "deactivates",
+                "ownership": "all",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "C2: 5 günlük grace DOLAN paused organizasyonlar 'expired' → içerik iner. Q1 kararı: Premium Logo da bu deaktivasyonla otomatik iner (MBSE'de yok, eklendi).",
+            "schedule": {
+                "unit": "day",
+                "time": null
+            },
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'paused'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "paused"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'expired'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "expired"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "WithdrawContent"
+                },
+                {
+                    "kind": "perform",
+                    "target": "DeactivatePremiumLogo"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "FetchFXRate",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "creates",
+                "ownership": "all",
+                "resource": "FXRate"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "C4: her gün ECB'den EUR/TL kuru çekilir, o günkü faturaya kilitlenir (iç gelir dönüşümü; satış fiyatını etkilemez).",
+            "schedule": {
+                "unit": "day",
+                "time": "03:00"
+            },
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "FXRate"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "IngestAnalytics",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "creates",
+                "ownership": "all",
+                "resource": "AnalyticsEvent"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "N1: ham olay (impression/click/routing) Trumore+Togg'a gömülü 3.taraf Countly SDK'dan gelir — biz ÜRETMEYİZ, toplarız. N2: alım sıklığı (anlık mı toplu mu) MBSE'de TANIMSIZ. R1: kupon kullanımı ölçülmez (mağazada, görüş alanı dışı).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "AnalyticsEvent"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "InviteUser",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "UserAccount"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "H2: e-posta ile davet. Standart pakette 2 koltuk (1'i Admin zorunlu), kurumsalda sınırsız. Limit dolunca davet ENGELLENİR; ek koltuk ödemesi onaylanınca engel kalkar (otomatik ücret yok). Girişler dış TruID üzerinden (kimlik altyapısı kapsam dışı).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "UserAccount"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ListPendingApplications",
+            "kind": "query",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "lists",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "when:0",
+                    "kind": "when",
+                    "role": "result-filter",
+                    "text": "Organization.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Organization"
+                ]
+            },
+            "flows": [
+                "ApplicationModeration"
+            ],
+            "processes": [
+                "AgencyOnboardingProcess",
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ListPendingCampaigns",
+            "kind": "query",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "lists",
+                "ownership": "any",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "when:0",
+                    "kind": "when",
+                    "role": "result-filter",
+                    "text": "Campaign.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Campaign"
+                ]
+            },
+            "flows": [
+                "CampaignModeration"
+            ],
+            "processes": [
+                "CampaignProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ListPendingPOIs",
+            "kind": "query",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "lists",
+                "ownership": "any",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "when:0",
+                    "kind": "when",
+                    "role": "result-filter",
+                    "text": "POI.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "POI",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "POI"
+                ]
+            },
+            "flows": [
+                "POIModeration"
+            ],
+            "processes": [
+                "POIProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "MarkEnterprisePaid",
+            "kind": "command",
+            "signature": {
+                "actor": "AccountManager",
+                "verb": "activates",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Kurumsal: fatura/tahsilat dışarıda (SAP + Temsilci). Sisteme yalnız 'Ödendi' elle işaretlenir → org Aktif.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'approved'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'active'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "active"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "create",
+                    "target": "Invoice",
+                    "source": "Organization"
+                },
+                {
+                    "kind": "perform",
+                    "target": "PublishContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Invoice",
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "PauseCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "pauses",
+                "ownership": "own",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Duraklatılan kampanya tarih aralığındaysa ResumeCampaign ile Aktif'e döner; duraklatmışken bitiş geçerse doğrudan 'past'. Yayından iner (E1 'active' şartı düşer).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'active'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'paused'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "paused"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "WithdrawContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "PauseCampaignEnterprise",
+            "kind": "command",
+            "signature": {
+                "actor": "AccountManager",
+                "verb": "pauses",
+                "ownership": "any",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'active'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'paused'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "paused"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "WithdrawContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "PublishContent",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "publishes",
+                "ownership": "all",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "E1: dışarı yalnız (kampanya 'active' + org 'active' + ilgili POI 'approved') üçünü birden karşılayan içerik gider. O1: self-serve kampanya org'un TÜM onaylı POI'lerinde (poiScope=global, seçenek yok); kurumsal seçili POI(ler). E3: Trumore=kampanya+POI+banner; Togg=kampanya+POI+premium logo; hiçbir surface'e fiyat/paket gitmez. E4: olay-bazlı tekil güncelleme (önbellekli servis), toptan yenileme değil.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "PurgeRejectedApplications",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "deletes",
+                "ownership": "all",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "B2: 60 gün DOLAN reddedilmiş başvurular otomatik silinir (insan eli gerekmez).",
+            "schedule": {
+                "unit": "day",
+                "time": null
+            },
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'rejected'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "rejected"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "RecoverOrganization",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "resumes",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "J3: grace içinde ödeme gelince otomatik Aktif (elle onay yok). İçerik hiç inmediği için yeniden-yayın adımı yok.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'paused'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "paused"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'active'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "active"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "RejectApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "rejects",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Yazılı gerekçe verilir. 60 gün düzeltme penceresi başlar (sonunda otomatik silinir). Süre-içi ara hatırlatma R2 kararıyla KAPSAM DIŞI.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'rejected'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "rejected"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "send",
+                    "message": "ApplicationDecisionNotice",
+                    "recipient": [
+                        "Organization",
+                        "owner"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "ApplicationModeration"
+            ],
+            "processes": [
+                "AgencyOnboardingProcess",
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "RejectCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "rejects",
+                "ownership": "any",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Red → doğrudan 'draft', kilit açılır; yeniden gönderim sayı/süre SINIRSIZ (60 gün kuralı kampanyaya uygulanmaz). AI-red ile insan-red kullanıcı gözünde aynı (panel+e-posta gerekçe).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'draft'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "draft"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "send",
+                    "message": "CampaignDecisionNotice",
+                    "recipient": [
+                        "Campaign",
+                        "owner"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CampaignModeration"
+            ],
+            "processes": [
+                "CampaignProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "RejectPOI",
+            "kind": "command",
+            "signature": {
+                "actor": "Moderator",
+                "verb": "rejects",
+                "ownership": "any",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "K3: gerekçe client'a iletilir (kanal MBSE'de netleşmemiş — panel+e-posta varsayımı doğrulanmadı).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "POI.status = 'inReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "POI",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "inReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "POI",
+                        "status"
+                    ],
+                    "text": "'rejected'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "rejected"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "send",
+                    "message": "POIDecisionNotice",
+                    "recipient": [
+                        "POI",
+                        "owner"
+                    ]
+                }
+            ],
+            "access": {
+                "writes": [
+                    "POI"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "POIModeration"
+            ],
+            "processes": [
+                "POIProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ResumeCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "resumes",
+                "ownership": "own",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'paused'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "paused"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'active'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "active"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "PublishContent"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "RevokeAgency",
+            "kind": "command",
+            "signature": null,
+            "delegation": {
+                "operation": "revoke",
+                "actor": "ClientAdmin",
+                "permission": "write",
+                "ownership": "own",
+                "resource": "Campaign",
+                "grantee": "AgencyUser",
+                "duration": null
+            },
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "D2/L1: geri alma ANINDA etkili. Ajansın yarım bıraktığı taslak kampanyalar L1 kararıyla OLDUĞU GİBİ kalır (silinmez); müşterinin kendi ekibi sürdürebilir. Otomatik süre-dolumu YOK (yalnız elle).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ScreenApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "updates",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Can.AI ön-kontrol. ASLA otomatik ONAY vermez; yalnız net ihlalde otomatik reddeder (kötü dil/sahte belge/malware/tekrar). İhlal yoksa moderatör kuyruğuna ('inReview') düşer. Her onay mutlaka insan moderatörden geçer (istisnasız).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'submitted'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "submitted"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'inReview'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "inReview"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "ApplicationOnboarding",
+                "AgencyOnboarding"
+            ],
+            "processes": [
+                "AgencyOnboardingProcess",
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ScreenCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "updates",
+                "ownership": "any",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Can.AI ön-kontrol (metin/link güvenliği/kupon/görsel-şablon). İhlal yoksa 'inReview'; net ihlalde otomatik red (→ 'draft'). Asla otomatik onay.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'pendingReview'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "pendingReview"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'inReview'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "inReview"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CampaignAuthoring"
+            ],
+            "processes": [
+                "CampaignProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ScreenPOI",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "updates",
+                "ownership": "any",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Can.AI: koordinat sınır + 500m yarıçap tekrar/duplicate + taksonomi kategori + format. İhlal yoksa 'inReview'.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "POI.status = 'submitted'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "POI",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "submitted"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "POI",
+                        "status"
+                    ],
+                    "text": "'inReview'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "inReview"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "POI"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "POIManagement"
+            ],
+            "processes": [
+                "POIProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "SubmitAgencyApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "AgencyApplicant",
+                "verb": "submits",
+                "ownership": "own",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'draft' or Organization.status = 'rejected'",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Organization",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Organization",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "rejected"
+                            }
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'submitted'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "submitted"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "ScreenApplication"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "AgencyOnboarding"
+            ],
+            "processes": [
+                "AgencyOnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "SubmitApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "Applicant",
+                "verb": "submits",
+                "ownership": "own",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'draft' or Organization.status = 'rejected'",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Organization",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Organization",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "rejected"
+                            }
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'submitted'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "submitted"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "ScreenApplication"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "ApplicationOnboarding"
+            ],
+            "processes": [
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "SubmitCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientEditor",
+                "verb": "submits",
+                "ownership": "own",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "ÖN-KOŞUL: org 'active' olmalı (bkz CreateCampaign notu). Gönderince kampanya DONAR. Kupon kodu organizasyon içinde tekil olmalı (Q3 kararı; AI kupon kurallarını doğrular). endDate >= startDate (Q3 kararı) 'where' ile zorlanır.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'draft' and Campaign.endDate >= Campaign.startDate",
+                    "ast": {
+                        "node": "and",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Campaign",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": ">=",
+                            "left": {
+                                "path": [
+                                    "Campaign",
+                                    "endDate"
+                                ]
+                            },
+                            "right": {
+                                "path": [
+                                    "Campaign",
+                                    "startDate"
+                                ]
+                            }
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Campaign",
+                        "status"
+                    ],
+                    "text": "'pendingReview'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "pendingReview"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "ScreenCampaign"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CampaignAuthoring"
+            ],
+            "processes": [
+                "CampaignProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "SubmitPOI",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "submits",
+                "ownership": "own",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "POI.status = 'draft'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "POI",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "draft"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "POI",
+                        "status"
+                    ],
+                    "text": "'submitted'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "submitted"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "ScreenPOI"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "POI"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "POIManagement"
+            ],
+            "processes": [
+                "POIProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "SuspendOnPaymentFail",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "pauses",
+                "ownership": "any",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Ödeme başarısız webhook'u → org 'paused' (grace). İÇERİK YAYINDA KALIR (yayından inme grace SONUNDA). 5 gün İÇİNDE ödenirse RecoverOrganization ile kesintisiz Aktif'e döner.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'active'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Organization",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "active"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Organization",
+                        "status"
+                    ],
+                    "text": "'paused'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "paused"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "UpdateApplication",
+            "kind": "command",
+            "signature": {
+                "actor": "Applicant",
+                "verb": "updates",
+                "ownership": "own",
+                "resource": "Organization"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Reddedilen başvuru AYNI kayıt üzerinden 60 gün içinde düzeltilip yeniden gönderilir (yeni başvuru açılmaz).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Organization.status = 'draft' or Organization.status = 'rejected'",
+                    "ast": {
+                        "node": "or",
+                        "left": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Organization",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "draft"
+                            }
+                        },
+                        "right": {
+                            "node": "cmp",
+                            "op": "=",
+                            "left": {
+                                "path": [
+                                    "Organization",
+                                    "status"
+                                ]
+                            },
+                            "right": {
+                                "kind": "string",
+                                "value": "rejected"
+                            }
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Organization"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "ApplicationOnboarding"
+            ],
+            "processes": [
+                "OnboardingProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "UpdateCampaign",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientEditor",
+                "verb": "updates",
+                "ownership": "own",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "Campaign.status = 'draft'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "Campaign",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "draft"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [
+                "CampaignAuthoring"
+            ],
+            "processes": [
+                "CampaignProcess"
+            ],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "UpdatePackage",
+            "kind": "command",
+            "signature": {
+                "actor": "InternalAdmin",
+                "verb": "updates",
+                "ownership": "any",
+                "resource": "Package"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "G4/Q2 kararı (a): fiyat değişikliği YALNIZ yeni abonelik/yenilemelere uygulanır; mevcut müşteri dönem sonuna kadar eski fiyatta. Paket tanımlarını değiştiren TEK taraf InternalAdmin.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Package"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "UpdatePOI",
+            "kind": "command",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "updates",
+                "ownership": "own",
+                "resource": "POI"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "K2: onaylı POI düzenlenince otomatik yeniden moderasyona düşer (doğrudan güncellenmez).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "POI.status = 'approved'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "POI",
+                                "status"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "approved"
+                        }
+                    }
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "POI",
+                        "status"
+                    ],
+                    "text": "'submitted'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "submitted"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "ScreenPOI"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "POI"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ViewAnalytics",
+            "kind": "query",
+            "signature": {
+                "actor": "ClientViewer",
+                "verb": "lists",
+                "ownership": "own",
+                "resource": "AnalyticsEvent"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "F2/F4: Viewer/Editor/Admin aynı org-seviyesi ekranı görür (Editor/Admin extends ile devralır); yalnız kendi organizasyonu. Rapor export özelliği de var (F3). Sıralama/hazır dönem filtreleri MBSE'de detaylandırılmadı.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "AnalyticsEvent"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ViewProforma",
+            "kind": "query",
+            "signature": {
+                "actor": "ClientAdmin",
+                "verb": "reads",
+                "ownership": "own",
+                "resource": "ProformaInvoice"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "M1: 'ödeme bekliyor' ekranında isteğe bağlı indirilir (otomatik e-posta yok). Paket + konum ücreti + %20 KDV; ödeme sonrası kesin faturadan ayrı, bilgilendirme amaçlı.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "ProformaInvoice"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ViewSystemAnalyticsAM",
+            "kind": "query",
+            "signature": {
+                "actor": "AccountManager",
+                "verb": "lists",
+                "ownership": "all",
+                "resource": "AnalyticsEvent"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "AnalyticsEvent"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "ViewSystemAnalyticsInternal",
+            "kind": "query",
+            "signature": {
+                "actor": "InternalAdmin",
+                "verb": "lists",
+                "ownership": "all",
+                "resource": "AnalyticsEvent"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "F2: sistem-geneli görünüm (gelir, moderasyon hacmi, kampanya hacmi).",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "AnalyticsEvent"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        },
+        {
+            "id": "WithdrawContent",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "withdraws",
+                "ownership": "all",
+                "resource": "Campaign"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "E2: kampanya bitti/duraklatıldı/acil-kaldırıldı/org kapandı → 'kaldır' sinyali. Somut gecikme taahhüdü (en geç X) MBSE'de YOK ('sessizce kaldırılır').",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Campaign"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "BrandedPin"
+        }
+    ],
+    "entities": [
+        {
+            "id": "AnalyticsEvent",
+            "name": "AnalyticsEvent",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "eventType",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "count",
+                    "type": "Int",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "BrandProfile",
+            "name": "BrandProfile",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "brandName",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Campaign",
+            "name": "Campaign",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "description",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "bannerUrl",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "link",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "couponCode",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "startDate",
+                    "type": "Date",
+                    "collection": false
+                },
+                {
+                    "name": "endDate",
+                    "type": "Date",
+                    "collection": false
+                },
+                {
+                    "name": "poiScope",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "EnterpriseFeatureSet",
+            "name": "EnterpriseFeatureSet",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "FXRate",
+            "name": "FXRate",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "rate",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "fetchedOn",
+                    "type": "Date",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Invoice",
+            "name": "Invoice",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "vat",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "lockedRate",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Organization",
+            "name": "Organization",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "legalName",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "country",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "sector",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "taxNumber",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "email",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "orgType",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Package",
+            "name": "Package",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "tier",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "price",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "poiLimit",
+                    "type": "Int",
+                    "collection": false
+                },
+                {
+                    "name": "seatLimit",
+                    "type": "Int",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "POI",
+            "name": "POI",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "latitude",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "longitude",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "category",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "PremiumLogo",
+            "name": "PremiumLogo",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "status",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "ProformaInvoice",
+            "name": "ProformaInvoice",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "amount",
+                    "type": "Decimal",
+                    "collection": false
+                },
+                {
+                    "name": "vat",
+                    "type": "Decimal",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Taxonomy",
+            "name": "Taxonomy",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "sector",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "UserAccount",
+            "name": "UserAccount",
+            "domain": "BrandedPin",
+            "fields": [
+                {
+                    "name": "role",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "emailDomain",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        }
+    ],
+    "flows": [
+        {
+            "id": "ApplicationOnboarding",
+            "actor": "Applicant",
+            "note": "Marka adayının başvuru yolculuğu. Ajans varyantında marka profili/konum yok.",
+            "items": [
+                {
+                    "type": "step",
+                    "name": "Create",
+                    "target": "CreateApplication",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "step",
+                    "name": "Edit",
+                    "target": "UpdateApplication",
+                    "optional": true,
+                    "repeat": false,
+                    "using": "Create"
+                },
+                {
+                    "type": "step",
+                    "name": "Brand",
+                    "target": "CreateBrandProfile",
+                    "optional": true,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "outside",
+                    "text": "ülkeye göre gerekli belgeleri yükler"
+                },
+                {
+                    "type": "step",
+                    "name": "Submit",
+                    "target": "SubmitApplication",
+                    "optional": false,
+                    "repeat": false,
+                    "using": "Create"
+                },
+                {
+                    "type": "abandon",
+                    "text": "taslağı bırakıp sonra devam edebilir (henüz gönderilmemiş taslakta süre sınırı yok)"
+                }
+            ]
+        },
+        {
+            "id": "AgencyOnboarding",
+            "actor": "AgencyApplicant",
+            "note": "Ajans başvurusu — POI/marka profili adımı yok; sabit yıllık ücret.",
+            "items": [
+                {
+                    "type": "step",
+                    "name": "Create",
+                    "target": "CreateAgencyApplication",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "outside",
+                    "text": "ülkeye göre gerekli belgeleri yükler"
+                },
+                {
+                    "type": "step",
+                    "name": "Submit",
+                    "target": "SubmitAgencyApplication",
+                    "optional": false,
+                    "repeat": false,
+                    "using": "Create"
+                },
+                {
+                    "type": "abandon",
+                    "text": "taslağı bırakabilir"
+                }
+            ]
+        },
+        {
+            "id": "CampaignAuthoring",
+            "actor": "ClientEditor",
+            "note": "Kampanya hazırlama. ÖN-KOŞUL: org 'active'. Taslak kalıcı.",
+            "items": [
+                {
+                    "type": "step",
+                    "name": "Create",
+                    "target": "CreateCampaign",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "step",
+                    "name": "Edit",
+                    "target": "UpdateCampaign",
+                    "optional": true,
+                    "repeat": true,
+                    "using": "Create"
+                },
+                {
+                    "type": "step",
+                    "name": "Submit",
+                    "target": "SubmitCampaign",
+                    "optional": false,
+                    "repeat": false,
+                    "using": "Create"
+                },
+                {
+                    "type": "abandon",
+                    "text": "taslak kampanyayı bırakıp sonra devam edebilir"
+                }
+            ]
+        },
+        {
+            "id": "CampaignModeration",
+            "actor": "Moderator",
+            "note": "Ortak moderasyon motoru. Moderatör kuyruktan işi üstlenir (müşteri ekranında görünmez, 'inReview' olarak gösterilir); moderatörler arası devir TASARLANMADI.",
+            "items": [
+                {
+                    "type": "step",
+                    "name": "List",
+                    "target": "ListPendingCampaigns",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "either",
+                    "branches": [
+                        [
+                            {
+                                "type": "step",
+                                "name": "Approve",
+                                "target": "ApproveCampaign",
+                                "optional": false,
+                                "repeat": false,
+                                "using": null
+                            }
+                        ],
+                        [
+                            {
+                                "type": "step",
+                                "name": "Reject",
+                                "target": "RejectCampaign",
+                                "optional": false,
+                                "repeat": false,
+                                "using": null
+                            }
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ApplicationModeration",
+            "actor": "Moderator",
+            "note": "Başvuru moderasyonu — kampanya/POI ile aynı motor/kalıp.",
+            "items": [
+                {
+                    "type": "step",
+                    "name": "List",
+                    "target": "ListPendingApplications",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "either",
+                    "branches": [
+                        [
+                            {
+                                "type": "step",
+                                "name": "Approve",
+                                "target": "ApproveApplication",
+                                "optional": false,
+                                "repeat": false,
+                                "using": null
+                            }
+                        ],
+                        [
+                            {
+                                "type": "step",
+                                "name": "Reject",
+                                "target": "RejectApplication",
+                                "optional": false,
+                                "repeat": false,
+                                "using": null
+                            }
+                        ]
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "POIManagement",
+            "actor": "ClientAdmin",
+            "note": "Konum ekleme (yalnız Admin/AccountManager). poiLimit ön-koşulu (H1).",
+            "items": [
+                {
+                    "type": "step",
+                    "name": "Create",
+                    "target": "CreatePOI",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "step",
+                    "name": "Submit",
+                    "target": "SubmitPOI",
+                    "optional": false,
+                    "repeat": false,
+                    "using": "Create"
+                },
+                {
+                    "type": "abandon",
+                    "text": "taslak konumu bırakabilir"
+                }
+            ]
+        },
+        {
+            "id": "POIModeration",
+            "actor": "Moderator",
+            "note": null,
+            "items": [
+                {
+                    "type": "step",
+                    "name": "List",
+                    "target": "ListPendingPOIs",
+                    "optional": false,
+                    "repeat": false,
+                    "using": null
+                },
+                {
+                    "type": "either",
+                    "branches": [
+                        [
+                            {
+                                "type": "step",
+                                "name": "Approve",
+                                "target": "ApprovePOI",
+                                "optional": false,
+                                "repeat": false,
+                                "using": null
+                            }
+                        ],
+                        [
+                            {
+                                "type": "step",
+                                "name": "Reject",
+                                "target": "RejectPOI",
+                                "optional": false,
+                                "repeat": false,
+                                "using": null
+                            }
+                        ]
+                    ]
+                }
+            ]
+        }
+    ],
+    "processes": [
+        {
+            "id": "OnboardingProcess",
+            "entity": "Organization",
+            "note": "Üç giriş varyantı (marka self-serve / ajans / kurumsal-elle) aynı moderasyon havuzuna düşer. Ödeme dışarıda (Gateway/SAP); aktivasyon ödeme onayıyla tetiklenir. El değiştirme: Applicant → Moderator → System.",
+            "items": [
+                {
+                    "type": "stage",
+                    "name": "Apply",
+                    "stageKind": "flow",
+                    "flow": "ApplicationOnboarding",
+                    "by": "Applicant"
+                },
+                {
+                    "type": "stage",
+                    "name": "Screen",
+                    "stageKind": "operation",
+                    "target": "ScreenApplication"
+                },
+                {
+                    "type": "stage",
+                    "name": "Review",
+                    "stageKind": "flow",
+                    "flow": "ApplicationModeration",
+                    "by": "Moderator"
+                },
+                {
+                    "type": "stage",
+                    "name": "Activate",
+                    "stageKind": "operation",
+                    "target": "ActivateOrganization"
+                }
+            ]
+        },
+        {
+            "id": "AgencyOnboardingProcess",
+            "entity": "Organization",
+            "note": "Ajans onboarding — marka başvurusuyla AYNI moderasyon/aktivasyon motorunu paylaşır (C1/M2); yalnız giriş formu ve fiyatlandırma (sabit yıllık) farklı. El değiştirme: AgencyApplicant → Moderator → System.",
+            "items": [
+                {
+                    "type": "stage",
+                    "name": "Apply",
+                    "stageKind": "flow",
+                    "flow": "AgencyOnboarding",
+                    "by": "AgencyApplicant"
+                },
+                {
+                    "type": "stage",
+                    "name": "Screen",
+                    "stageKind": "operation",
+                    "target": "ScreenApplication"
+                },
+                {
+                    "type": "stage",
+                    "name": "Review",
+                    "stageKind": "flow",
+                    "flow": "ApplicationModeration",
+                    "by": "Moderator"
+                },
+                {
+                    "type": "stage",
+                    "name": "Activate",
+                    "stageKind": "operation",
+                    "target": "ActivateOrganization"
+                }
+            ]
+        },
+        {
+            "id": "CampaignProcess",
+            "entity": "Campaign",
+            "note": "Kampanya onaya kadar. Yayına çıkma ('active') ve geçmişe düşme ('past') ZAMANLANMIŞ/otomatik (ActivateDueCampaigns/EndDueCampaigns) — süreç etabı DEĞİL, ayrı arka plan. El değiştirme: ClientEditor → Moderator.",
+            "items": [
+                {
+                    "type": "stage",
+                    "name": "Author",
+                    "stageKind": "flow",
+                    "flow": "CampaignAuthoring",
+                    "by": "ClientEditor"
+                },
+                {
+                    "type": "stage",
+                    "name": "Screen",
+                    "stageKind": "operation",
+                    "target": "ScreenCampaign"
+                },
+                {
+                    "type": "stage",
+                    "name": "Review",
+                    "stageKind": "flow",
+                    "flow": "CampaignModeration",
+                    "by": "Moderator"
+                }
+            ]
+        },
+        {
+            "id": "POIProcess",
+            "entity": "POI",
+            "note": "Konum onay süreci. El değiştirme: ClientAdmin → Moderator.",
+            "items": [
+                {
+                    "type": "stage",
+                    "name": "Add",
+                    "stageKind": "flow",
+                    "flow": "POIManagement",
+                    "by": "ClientAdmin"
+                },
+                {
+                    "type": "stage",
+                    "name": "Screen",
+                    "stageKind": "operation",
+                    "target": "ScreenPOI"
+                },
+                {
+                    "type": "stage",
+                    "name": "Review",
+                    "stageKind": "flow",
+                    "flow": "POIModeration",
+                    "by": "Moderator"
+                }
+            ]
+        }
+    ],
+    "relations": [
+        {
+            "id": "delegatedClient",
+            "source": "AgencyUser",
+            "target": "Organization"
+        }
+    ],
+    "actors": [
+        {
+            "id": "AccountManager",
+            "extends": null
+        },
+        {
+            "id": "AgencyApplicant",
+            "extends": null
+        },
+        {
+            "id": "AgencyUser",
+            "extends": null
+        },
+        {
+            "id": "Applicant",
+            "extends": null
+        },
+        {
+            "id": "ClientAdmin",
+            "extends": "ClientEditor"
+        },
+        {
+            "id": "ClientEditor",
+            "extends": "ClientViewer"
+        },
+        {
+            "id": "ClientViewer",
+            "extends": null
+        },
+        {
+            "id": "InternalAdmin",
+            "extends": null
+        },
+        {
+            "id": "Moderator",
+            "extends": null
+        },
+        {
+            "id": "System",
+            "extends": null
+        }
+    ],
+    "rules": [],
+    "calendars": [],
+    "verbs": [
+        "activates",
+        "approves",
+        "deactivates",
+        "ends",
+        "pauses",
+        "publishes",
+        "rejects",
+        "removes",
+        "resumes",
+        "submits",
+        "withdraws"
+    ],
+    "domains": [
+        "BrandedPin"
+    ],
+    "meta": {
+        "schemaVersion": 3,
+        "hasErrors": false,
+        "errorCount": 0
+    }
+}

@@ -1,0 +1,466 @@
+# ============================================================
+# Branded Pin Advertising Platform — İş Analizi (CommandDSL)
+# Trumore mobil + Togg araç ekranı haritalarında markalı reklam
+# (pin/banner/kupon) satın alma & yönetimi. Tek modül, dependency-order:
+# foundation -> operation -> flow -> process.
+# KAYNAK: yalnız görüşme transkripti (MBSE dokümanına erişim YOK).
+# ============================================================
+domain BrandedPin
+
+# --- Aktörler (rol hiyerarşisi: Viewer <- Editor <- Admin strict-superset) ---
+actor Applicant                          # kayıtlı-olmayan marka adayı
+actor AgencyApplicant                    # kayıtlı-olmayan ajans adayı
+actor ClientViewer                       # salt görüntü (kampanya/POI/analitik)
+actor ClientEditor extends ClientViewer  # + kampanya oluştur/düzenle
+actor ClientAdmin extends ClientEditor   # + POI/kullanıcı/fatura yönetimi
+actor AgencyUser                         # müşteri adına, devredilen kapsamda
+actor Moderator                          # ortak moderasyon kuyruğu (kilitsiz)
+actor AccountManager                     # kurumsal müşteri temsilcisi
+actor InternalAdmin                      # sistem geneli tam yetki
+actor System                             # arka plan (event + zamanlanmış)
+
+# --- İlişki: ajansa devredilen müşteri organizasyonu ---
+relation delegatedClient of AgencyUser with Organization
+
+# --- Kayıtlar (entity) ---
+entity Organization {
+    legalName: String
+    country: String
+    sector: String
+    taxNumber: String
+    email: String
+    orgType: String          # client | agency | enterprise
+    status: String
+}
+entity BrandProfile {
+    brandName: String
+}
+entity POI {
+    latitude: Decimal
+    longitude: Decimal
+    category: String
+    status: String
+}
+entity Campaign {
+    description: String
+    bannerUrl: String
+    link: String
+    couponCode: String
+    startDate: Date
+    endDate: Date
+    poiScope: String         # O1: self-serve=global(tüm onaylı POI) | enterprise=seçili
+    status: String
+}
+entity UserAccount {
+    role: String
+    emailDomain: String
+}
+entity Package {
+    tier: String             # Local/Metro/Region/Ecosystem/Enterprise
+    price: Decimal
+    poiLimit: Int
+    seatLimit: Int
+}
+entity Invoice {
+    amount: Decimal
+    vat: Decimal
+    lockedRate: Decimal
+    status: String
+}
+entity ProformaInvoice {
+    amount: Decimal
+    vat: Decimal
+}
+entity FXRate {
+    rate: Decimal
+    fetchedOn: Date
+}
+entity Taxonomy {
+    sector: String
+}
+entity EnterpriseFeatureSet {
+    name: String
+}
+entity PremiumLogo {
+    status: String
+}
+entity AnalyticsEvent {
+    eventType: String        # impression | click | routing
+    count: Int
+}
+
+# --- Alan-özel fiiller (standart-dışı) ---
+verb submits
+verb approves
+verb rejects
+verb activates
+verb deactivates
+verb pauses
+verb resumes
+verb publishes
+verb withdraws
+verb removes
+verb ends
+
+# ============================================================
+# İŞLEM KATALOĞU
+# ============================================================
+
+# --- Başvuru / Onboarding (üç varyant, tek moderasyon havuzu) ---
+CreateApplication: Applicant creates own Organization
+note """Marka self-serve başvurusu. orgType=client, başlangıç durumu 'draft'."""
+on success do
+    calculate Organization.status = 'draft'
+
+UpdateApplication: Applicant updates own Organization where Organization.status = 'draft' or Organization.status = 'rejected'
+note """Reddedilen başvuru AYNI kayıt üzerinden 60 gün içinde düzeltilip yeniden gönderilir (yeni başvuru açılmaz)."""
+
+SubmitApplication: Applicant submits own Organization where Organization.status = 'draft' or Organization.status = 'rejected'
+on success do
+    calculate Organization.status = 'submitted'
+    perform ScreenApplication
+
+CreateBrandProfile: Applicant creates own BrandProfile
+note """Marka profili adımı yalnız marka başvurusunda var; ajans başvurusunda YOK. Onaylı profil güncellemeleri de ortak moderasyondan geçer (D1)."""
+
+CreateAgencyApplication: AgencyApplicant creates own Organization
+note """Ajans başvurusu. orgType=agency; POI ve marka profili adımı YOK. Sabit yıllık ücret 12.000 TL (5 koltuk dahil, ek koltuk 1.200 TL/yıl)."""
+on success do
+    calculate Organization.status = 'draft'
+
+SubmitAgencyApplication: AgencyApplicant submits own Organization where Organization.status = 'draft' or Organization.status = 'rejected'
+on success do
+    calculate Organization.status = 'submitted'
+    perform ScreenApplication
+
+CreateEnterpriseApplication: AccountManager creates any Organization
+note """Kurumsal başvuru — Temsilci müşteri adına elle girer. Aynı adım iskeleti; konum limiti yok, kademe Ecosystem/Enterprise. Temsilci müşteriyi self-serve forma da davet edebilir."""
+on success do
+    calculate Organization.status = 'draft'
+
+# --- Ortak moderasyon motoru (Can.AI ön-kontrol → moderatör kararı) ---
+ScreenApplication: System updates any Organization where Organization.status = 'submitted'
+note """Can.AI ön-kontrol. ASLA otomatik ONAY vermez; yalnız net ihlalde otomatik reddeder (kötü dil/sahte belge/malware/tekrar). İhlal yoksa moderatör kuyruğuna ('inReview') düşer. Her onay mutlaka insan moderatörden geçer (istisnasız)."""
+on success do
+    calculate Organization.status = 'inReview'
+
+ListPendingApplications: Moderator lists any Organization
+only when Organization.status = 'inReview'
+
+ApproveApplication: Moderator approves any Organization where Organization.status = 'inReview'
+on success do
+    calculate Organization.status = 'approved'
+    create ProformaInvoice from Organization
+    send ApplicationDecisionNotice to Organization.owner
+
+RejectApplication: Moderator rejects any Organization where Organization.status = 'inReview'
+note """Yazılı gerekçe verilir. 60 gün düzeltme penceresi başlar (sonunda otomatik silinir). Süre-içi ara hatırlatma R2 kararıyla KAPSAM DIŞI."""
+on success do
+    calculate Organization.status = 'rejected'
+    send ApplicationDecisionNotice to Organization.owner
+
+# --- Ödeme / Aktivasyon / Faturalama (tahsilat platform dışında) ---
+ActivateOrganization: System activates any Organization where Organization.status = 'approved'
+note """Self-serve: dış Ödeme Gateway (3D Secure) webhook'u 'ödendi' der → org Aktif. Fatura ödeme anında doğar; o günkü ECB kuru lockedRate'e kilitlenir (yalnız iç gelir takibi, satış fiyatını etkilemez, geriye dönük sabit)."""
+on success do
+    calculate Organization.status = 'active'
+    create Invoice from Organization
+    perform PublishContent
+
+MarkEnterprisePaid: AccountManager activates any Organization where Organization.status = 'approved'
+note """Kurumsal: fatura/tahsilat dışarıda (SAP + Temsilci). Sisteme yalnız 'Ödendi' elle işaretlenir → org Aktif."""
+on success do
+    calculate Organization.status = 'active'
+    create Invoice from Organization
+    perform PublishContent
+
+ViewProforma: ClientAdmin reads own ProformaInvoice
+note """M1: 'ödeme bekliyor' ekranında isteğe bağlı indirilir (otomatik e-posta yok). Paket + konum ücreti + %20 KDV; ödeme sonrası kesin faturadan ayrı, bilgilendirme amaçlı."""
+
+# --- Ödeme aksaması → grace (5 gün) → deaktivasyon (J1 çözümü: (a)) ---
+SuspendOnPaymentFail: System pauses any Organization where Organization.status = 'active'
+note """Ödeme başarısız webhook'u → org 'paused' (grace). İÇERİK YAYINDA KALIR (yayından inme grace SONUNDA). 5 gün İÇİNDE ödenirse RecoverOrganization ile kesintisiz Aktif'e döner."""
+on success do
+    calculate Organization.status = 'paused'
+
+RecoverOrganization: System resumes any Organization where Organization.status = 'paused'
+note """J3: grace içinde ödeme gelince otomatik Aktif (elle onay yok). İçerik hiç inmediği için yeniden-yayın adımı yok."""
+on success do
+    calculate Organization.status = 'active'
+
+# --- Kampanya yaşam döngüsü ---
+CreateCampaign: ClientEditor creates own Campaign
+note """ÖN-KOŞUL (H3/J4, üç turda pekişen kesin kural): kampanya oluşturma/gönderme yalnız organizasyon 'active' iken açıktır; 'paused' (grace dahil)/'expired' iken KAPALI. Çapraz-varlık koşulu olduğu için 'where' ile ifade edilemez, note ile taşınır. Taslak kalıcıdır, süre sınırı yok."""
+on success do
+    calculate Campaign.status = 'draft'
+
+UpdateCampaign: ClientEditor updates own Campaign where Campaign.status = 'draft'
+
+SubmitCampaign: ClientEditor submits own Campaign where Campaign.status = 'draft' and Campaign.endDate >= Campaign.startDate
+note """ÖN-KOŞUL: org 'active' olmalı (bkz CreateCampaign notu). Gönderince kampanya DONAR. Kupon kodu organizasyon içinde tekil olmalı (Q3 kararı; AI kupon kurallarını doğrular). endDate >= startDate (Q3 kararı) 'where' ile zorlanır."""
+on success do
+    calculate Campaign.status = 'pendingReview'
+    perform ScreenCampaign
+
+ScreenCampaign: System updates any Campaign where Campaign.status = 'pendingReview'
+note """Can.AI ön-kontrol (metin/link güvenliği/kupon/görsel-şablon). İhlal yoksa 'inReview'; net ihlalde otomatik red (→ 'draft'). Asla otomatik onay."""
+on success do
+    calculate Campaign.status = 'inReview'
+
+ListPendingCampaigns: Moderator lists any Campaign
+only when Campaign.status = 'inReview'
+
+ApproveCampaign: Moderator approves any Campaign where Campaign.status = 'inReview'
+note """Onaylı kampanya kullanıcıca iptal/geri çekilemez — kilitli (A4). Kaldırma yalnız Acil Kaldır (moderatör/admin)."""
+on success do
+    calculate Campaign.status = 'approved'
+    send CampaignDecisionNotice to Campaign.owner
+
+RejectCampaign: Moderator rejects any Campaign where Campaign.status = 'inReview'
+note """Red → doğrudan 'draft', kilit açılır; yeniden gönderim sayı/süre SINIRSIZ (60 gün kuralı kampanyaya uygulanmaz). AI-red ile insan-red kullanıcı gözünde aynı (panel+e-posta gerekçe)."""
+on success do
+    calculate Campaign.status = 'draft'
+    send CampaignDecisionNotice to Campaign.owner
+
+PauseCampaign: ClientAdmin pauses own Campaign where Campaign.status = 'active'
+note """Duraklatılan kampanya tarih aralığındaysa ResumeCampaign ile Aktif'e döner; duraklatmışken bitiş geçerse doğrudan 'past'. Yayından iner (E1 'active' şartı düşer)."""
+on success do
+    calculate Campaign.status = 'paused'
+    perform WithdrawContent
+
+PauseCampaignEnterprise: AccountManager pauses any Campaign where Campaign.status = 'active'
+on success do
+    calculate Campaign.status = 'paused'
+    perform WithdrawContent
+
+ResumeCampaign: ClientAdmin resumes own Campaign where Campaign.status = 'paused'
+on success do
+    calculate Campaign.status = 'active'
+    perform PublishContent
+
+EmergencyRemoveByModerator: Moderator removes any Campaign where Campaign.status = 'active' or Campaign.status = 'approved'
+note """A5: KALICI — 'emergencyRemoved'dan başka duruma geçiş yok, bir daha yayına dönmez."""
+on success do
+    calculate Campaign.status = 'emergencyRemoved'
+    perform WithdrawContent
+
+EmergencyRemoveByAdmin: InternalAdmin removes any Campaign where Campaign.status = 'active' or Campaign.status = 'approved'
+on success do
+    calculate Campaign.status = 'emergencyRemoved'
+    perform WithdrawContent
+
+# --- Konum (POI) yaşam döngüsü ---
+CreatePOI: ClientAdmin creates own POI
+note """H1: paket poiLimit'i dolmuşsa yeni ekleme ENGELLENİR (paket-yükselt ekranı; otomatik ücret yok). Kurumsalda limit yok. Editör POI ekleyemez (yalnız Admin/AccountManager)."""
+on success do
+    calculate POI.status = 'draft'
+
+SubmitPOI: ClientAdmin submits own POI where POI.status = 'draft'
+on success do
+    calculate POI.status = 'submitted'
+    perform ScreenPOI
+
+ScreenPOI: System updates any POI where POI.status = 'submitted'
+note """Can.AI: koordinat sınır + 500m yarıçap tekrar/duplicate + taksonomi kategori + format. İhlal yoksa 'inReview'."""
+on success do
+    calculate POI.status = 'inReview'
+
+ListPendingPOIs: Moderator lists any POI
+only when POI.status = 'inReview'
+
+ApprovePOI: Moderator approves any POI where POI.status = 'inReview'
+on success do
+    calculate POI.status = 'approved'
+    send POIDecisionNotice to POI.owner
+
+RejectPOI: Moderator rejects any POI where POI.status = 'inReview'
+note """K3: gerekçe client'a iletilir (kanal MBSE'de netleşmemiş — panel+e-posta varsayımı doğrulanmadı)."""
+on success do
+    calculate POI.status = 'rejected'
+    send POIDecisionNotice to POI.owner
+
+UpdatePOI: ClientAdmin updates own POI where POI.status = 'approved'
+note """K2: onaylı POI düzenlenince otomatik yeniden moderasyona düşer (doğrudan güncellenmez)."""
+on success do
+    calculate POI.status = 'submitted'
+    perform ScreenPOI
+
+DeletePOI: ClientAdmin deletes own POI where POI.status = 'approved'
+note """O2 kararı (a): en az bir Aktif/canlı kampanya bu POI'yi kullanıyorsa silme ENGELLENİR ('önce kampanyaları kaldırın'). Sayım-bazlı çapraz-varlık koşulu 'where' ile ifade edilemez; note ile taşınır. MBSE'de 'Silindi' ayrı durumu yok — bu bilinçli iş kararı."""
+
+# --- Kullanıcı / koltuk ---
+InviteUser: ClientAdmin creates own UserAccount
+note """H2: e-posta ile davet. Standart pakette 2 koltuk (1'i Admin zorunlu), kurumsalda sınırsız. Limit dolunca davet ENGELLENİR; ek koltuk ödemesi onaylanınca engel kalkar (otomatik ücret yok). Girişler dış TruID üzerinden (kimlik altyapısı kapsam dışı)."""
+
+# --- Ajans yetki devri (grant/revoke — çalışma-anı) ---
+DelegateToAgency: ClientAdmin grants write own Campaign to AgencyUser
+note """A3: kapsam müşteriye göre değişir (Admin/Editor/Viewer); aynı ajans A müşterisinde geniş, B'de salt-görüntü olabilir. delegatedClient ilişkisini bu devir doldurur (D3)."""
+
+RevokeAgency: ClientAdmin revokes write own Campaign from AgencyUser
+note """D2/L1: geri alma ANINDA etkili. Ajansın yarım bıraktığı taslak kampanyalar L1 kararıyla OLDUĞU GİBİ kalır (silinmez); müşterinin kendi ekibi sürdürebilir. Otomatik süre-dolumu YOK (yalnız elle)."""
+
+AgencyCreateCampaign: AgencyUser creates delegatedClient's Campaign
+note """Ajans, devredilen kapsam Editör+ ise müşteri adına kampanya oluşturur."""
+on success do
+    calculate Campaign.status = 'draft'
+
+AgencyViewAnalytics: AgencyUser lists delegatedClient's AnalyticsEvent
+note """Devredilen kapsam analitiği içeriyorsa müşterinin analitiğini görür."""
+
+# --- Analitik (Countly dış kaynak) ---
+IngestAnalytics: System creates all AnalyticsEvent
+note """N1: ham olay (impression/click/routing) Trumore+Togg'a gömülü 3.taraf Countly SDK'dan gelir — biz ÜRETMEYİZ, toplarız. N2: alım sıklığı (anlık mı toplu mu) MBSE'de TANIMSIZ. R1: kupon kullanımı ölçülmez (mağazada, görüş alanı dışı)."""
+
+ViewAnalytics: ClientViewer lists own AnalyticsEvent
+note """F2/F4: Viewer/Editor/Admin aynı org-seviyesi ekranı görür (Editor/Admin extends ile devralır); yalnız kendi organizasyonu. Rapor export özelliği de var (F3). Sıralama/hazır dönem filtreleri MBSE'de detaylandırılmadı."""
+
+ViewSystemAnalyticsInternal: InternalAdmin lists all AnalyticsEvent
+note """F2: sistem-geneli görünüm (gelir, moderasyon hacmi, kampanya hacmi)."""
+
+ViewSystemAnalyticsAM: AccountManager lists all AnalyticsEvent
+
+# --- Dağıtım (Trumore/Togg'a besleme) ---
+PublishContent: System publishes all Campaign
+note """E1: dışarı yalnız (kampanya 'active' + org 'active' + ilgili POI 'approved') üçünü birden karşılayan içerik gider. O1: self-serve kampanya org'un TÜM onaylı POI'lerinde (poiScope=global, seçenek yok); kurumsal seçili POI(ler). E3: Trumore=kampanya+POI+banner; Togg=kampanya+POI+premium logo; hiçbir surface'e fiyat/paket gitmez. E4: olay-bazlı tekil güncelleme (önbellekli servis), toptan yenileme değil."""
+
+WithdrawContent: System withdraws all Campaign
+note """E2: kampanya bitti/duraklatıldı/acil-kaldırıldı/org kapandı → 'kaldır' sinyali. Somut gecikme taahhüdü (en geç X) MBSE'de YOK ('sessizce kaldırılır')."""
+
+# --- Zamanlanmış işler (yalnız System; hiçbir flow/process'te geçmez) ---
+FetchFXRate: System creates all FXRate
+note """C4: her gün ECB'den EUR/TL kuru çekilir, o günkü faturaya kilitlenir (iç gelir dönüşümü; satış fiyatını etkilemez)."""
+schedule: every day at 03:00
+
+ActivateDueCampaigns: System activates all Campaign where Campaign.status = 'approved'
+note """C3: başlangıç tarihi GELEN onaylı kampanyalar otomatik Aktif (tarih-şimdi karşılaştırması 'where' ile ifade edilemez, note ile taşınır)."""
+schedule: every day
+on success do
+    calculate Campaign.status = 'active'
+    perform PublishContent
+
+EndDueCampaigns: System ends all Campaign where Campaign.status = 'active'
+note """C3: bitiş tarihi GEÇEN aktif kampanyalar otomatik 'past'."""
+schedule: every day
+on success do
+    calculate Campaign.status = 'past'
+    perform WithdrawContent
+
+ExpireOrganizations: System deactivates all Organization where Organization.status = 'paused'
+note """C2: 5 günlük grace DOLAN paused organizasyonlar 'expired' → içerik iner. Q1 kararı: Premium Logo da bu deaktivasyonla otomatik iner (MBSE'de yok, eklendi)."""
+schedule: every day
+on success do
+    calculate Organization.status = 'expired'
+    perform WithdrawContent
+    perform DeactivatePremiumLogo
+
+PurgeRejectedApplications: System deletes all Organization where Organization.status = 'rejected'
+note """B2: 60 gün DOLAN reddedilmiş başvurular otomatik silinir (insan eli gerekmez)."""
+schedule: every day
+
+# --- Kurumsal özel yetenekler + Premium Logo (moderasyonsuz) ---
+CreateEnterpriseFeatureSet: AccountManager creates any EnterpriseFeatureSet
+note """G3: Temsilci internal panelden tanımlayıp kurumsal org'a bağlar. Ayrı onay/moderasyon adımı YOK — tanımlanınca geçerli."""
+
+ActivatePremiumLogo: AccountManager creates any PremiumLogo
+note """G2: Togg araç ekranında kalıcı marka logosu. Trumore API'si üzerinden doğrudan; moderasyon YOK. Temsilci aç/kapa yapar."""
+on success do
+    calculate PremiumLogo.status = 'active'
+
+DeactivatePremiumLogo: AccountManager deactivates any PremiumLogo where PremiumLogo.status = 'active'
+note """Elle kapatılır; ayrıca ExpireOrganizations org kapanınca otomatik tetikler (Q1)."""
+on success do
+    calculate PremiumLogo.status = 'inactive'
+
+# --- İç yönetim (yalnız InternalAdmin) ---
+CreatePackage: InternalAdmin creates any Package
+UpdatePackage: InternalAdmin updates any Package
+note """G4/Q2 kararı (a): fiyat değişikliği YALNIZ yeni abonelik/yenilemelere uygulanır; mevcut müşteri dönem sonuna kadar eski fiyatta. Paket tanımlarını değiştiren TEK taraf InternalAdmin."""
+
+CreateTaxonomy: InternalAdmin creates any Taxonomy
+note """Uygun sektör listesi/taksonomi. Başvuruda sektör bundan seçilir. Yöneten tek taraf InternalAdmin."""
+
+# ============================================================
+# AKIŞLAR (tek aktör, adım adım)
+# ============================================================
+
+flow ApplicationOnboarding for Applicant
+    note """Marka adayının başvuru yolculuğu. Ajans varyantında marka profili/konum yok."""
+    step Create: CreateApplication
+    step Edit: UpdateApplication optional using Create
+    step Brand: CreateBrandProfile optional
+    outside "ülkeye göre gerekli belgeleri yükler"
+    step Submit: SubmitApplication using Create
+    abandon anytime "taslağı bırakıp sonra devam edebilir (henüz gönderilmemiş taslakta süre sınırı yok)"
+
+flow AgencyOnboarding for AgencyApplicant
+    note """Ajans başvurusu — POI/marka profili adımı yok; sabit yıllık ücret."""
+    step Create: CreateAgencyApplication
+    outside "ülkeye göre gerekli belgeleri yükler"
+    step Submit: SubmitAgencyApplication using Create
+    abandon anytime "taslağı bırakabilir"
+
+flow CampaignAuthoring for ClientEditor
+    note """Kampanya hazırlama. ÖN-KOŞUL: org 'active'. Taslak kalıcı."""
+    step Create: CreateCampaign
+    step Edit: UpdateCampaign optional repeat using Create
+    step Submit: SubmitCampaign using Create
+    abandon anytime "taslak kampanyayı bırakıp sonra devam edebilir"
+
+flow CampaignModeration for Moderator
+    note """Ortak moderasyon motoru. Moderatör kuyruktan işi üstlenir (müşteri ekranında görünmez, 'inReview' olarak gösterilir); moderatörler arası devir TASARLANMADI."""
+    step List: ListPendingCampaigns
+    either
+        step Approve: ApproveCampaign
+    or
+        step Reject: RejectCampaign
+
+flow ApplicationModeration for Moderator
+    note """Başvuru moderasyonu — kampanya/POI ile aynı motor/kalıp."""
+    step List: ListPendingApplications
+    either
+        step Approve: ApproveApplication
+    or
+        step Reject: RejectApplication
+
+flow POIManagement for ClientAdmin
+    note """Konum ekleme (yalnız Admin/AccountManager). poiLimit ön-koşulu (H1)."""
+    step Create: CreatePOI
+    step Submit: SubmitPOI using Create
+    abandon anytime "taslak konumu bırakabilir"
+
+flow POIModeration for Moderator
+    step List: ListPendingPOIs
+    either
+        step Approve: ApprovePOI
+    or
+        step Reject: RejectPOI
+
+# ============================================================
+# SÜREÇLER (çok aktör, el değiştirme)
+# ============================================================
+
+process OnboardingProcess of Organization
+    note """Üç giriş varyantı (marka self-serve / ajans / kurumsal-elle) aynı moderasyon havuzuna düşer. Ödeme dışarıda (Gateway/SAP); aktivasyon ödeme onayıyla tetiklenir. El değiştirme: Applicant → Moderator → System."""
+    stage Apply: flow ApplicationOnboarding by Applicant
+    stage Screen: ScreenApplication
+    stage Review: flow ApplicationModeration by Moderator
+    stage Activate: ActivateOrganization
+
+process AgencyOnboardingProcess of Organization
+    note """Ajans onboarding — marka başvurusuyla AYNI moderasyon/aktivasyon motorunu paylaşır (C1/M2); yalnız giriş formu ve fiyatlandırma (sabit yıllık) farklı. El değiştirme: AgencyApplicant → Moderator → System."""
+    stage Apply: flow AgencyOnboarding by AgencyApplicant
+    stage Screen: ScreenApplication
+    stage Review: flow ApplicationModeration by Moderator
+    stage Activate: ActivateOrganization
+
+process CampaignProcess of Campaign
+    note """Kampanya onaya kadar. Yayına çıkma ('active') ve geçmişe düşme ('past') ZAMANLANMIŞ/otomatik (ActivateDueCampaigns/EndDueCampaigns) — süreç etabı DEĞİL, ayrı arka plan. El değiştirme: ClientEditor → Moderator."""
+    stage Author: flow CampaignAuthoring by ClientEditor
+    stage Screen: ScreenCampaign
+    stage Review: flow CampaignModeration by Moderator
+
+process POIProcess of POI
+    note """Konum onay süreci. El değiştirme: ClientAdmin → Moderator."""
+    stage Add: flow POIManagement by ClientAdmin
+    stage Screen: ScreenPOI
+    stage Review: flow POIModeration by Moderator

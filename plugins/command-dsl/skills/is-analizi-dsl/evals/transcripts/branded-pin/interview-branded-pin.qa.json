@@ -1,0 +1,3670 @@
+{
+  "meta": {
+    "dsl": "qa",
+    "schemaVersion": 1,
+    "merged": true,
+    "sources": [
+      "interview-branded-pin.qa"
+    ],
+    "hasErrors": false,
+    "errorCount": 0
+  },
+  "coverage": {
+    "operations": [
+      {
+        "id": "Analytics.AgencyViewAnalytics",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "devredilmiş-kapsam analitik görüntüleme happy-path'i kritik-dışı"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "rol yolu P1 jenerik-kimlik testleriyle kapsanır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "ajans devredilmemiş müşterinin analitiğini göremez"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Analytics.IngestAnalytics",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Analytics.ViewAnalytics",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Analytics.ViewSystemAnalyticsAM",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Analytics.ViewSystemAnalyticsInternal",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Billing.FetchFXRate",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.ActivateDueCampaigns",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.AgencyCreateCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "devredilmiş-kapsam happy-path'i kritik-dışı; kritik olan yetki-reddi test edildi"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "OrgNotActive"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "org-aktif ön-koşulu CreateCampaign'de zaten kritik test edildi; ajans yolu aynı kuralı paylaşır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "rol yolu P1 jenerik-kimlik testleriyle kapsanır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "ajans devredilmemiş müşteri için kampanya oluşturamaz"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Campaign.ApproveCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "moderatör onay happy-path'i CampaignProcess yaşam-döngüsü kapsamında; kritik olan race-guard test edildi"
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "ikinci moderatör kararı geri çevrilir (ilk karar kazanır)"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "durum-hatası guard where:0 ile örtüşür; race testinde ikinci-karar reddi bu sınıfı zaten sergiler"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "yalnız Moderator kuralı P1 jenerik-kimlik + rol-matrisiyle kapsanır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "ownership any → P1 jenerik-kimlik kapsamında"
+          }
+        ]
+      },
+      {
+        "id": "Campaign.CreateCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "kampanya taslağı happy-path'i kritik-dışı; kritik ön-koşul (org-aktif) test edildi"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "OrgNotActive"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "askıdaki org kampanya oluşturamaz"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "rol yolu P1 jenerik-kimlik + rol-matrisi testleriyle kapsanır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "kendi-org kısıtı P1 jenerik-kimlik testleriyle kapsanır"
+          }
+        ]
+      },
+      {
+        "id": "Campaign.EmergencyRemoveByAdmin",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.EmergencyRemoveByModerator",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.EndDueCampaigns",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.ListPendingCampaigns",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.PauseCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.PauseCampaignEnterprise",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.PublishContent",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.RejectCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.ResumeCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.ScreenCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "kampanya taraması insan kuyruğuna düşer, otomatik onaylanmaz"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "yanlış-durum yolu kritik-dışı"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "@internal orkestrasyon; ownership any → P1 kapsamında"
+          }
+        ]
+      },
+      {
+        "id": "Campaign.SubmitCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignDates"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.UpdateCampaign",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidCampaignState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Campaign.WithdrawContent",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Distribution.ActivatePremiumLogo",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Distribution.DeactivatePremiumLogo",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "LogoNotActive"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Identity.DelegateToAgency",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "Identity.InviteUser",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "davet happy-path'i kritik-dışı; kritik olan iki engel (domain/koltuk) test edildi"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "EmailDomainMismatch"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "yanlış alan adlı davet reddedilir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "SeatLimitReached"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "koltuk limiti dolunca davet reddedilir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "yanlış-rol yolu üretici jenerik-kimlik testleriyle (P1) kapsanır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "kendi-org davet kısıtı P1 jenerik-kimlik testleriyle kapsanır; kritik değil"
+          }
+        ]
+      },
+      {
+        "id": "Identity.RevokeAgency",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "InternalAdmin.CreateEnterpriseFeatureSet",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "InternalAdmin.CreatePackage",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "InternalAdmin.CreateTaxonomy",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "InternalAdmin.UpdatePackage",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.ActivateOrganization",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "çift ödeme webhook'u tek fatura üretir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "yanlış-durum ('approved' değil) yolu kritik-dışı; idempotency etki-assert'i öncelikli"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidApplicationState"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "durum-hatası yolu kritik-dışı; şimdilik ertelenir"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "@internal webhook; ownership any → P1 jenerik-kimlik kapsamında"
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.ApproveApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "ortak moderasyon motoru (LG-SS-05); ilk-karar-kazanır ApproveCampaign temsili testiyle kanıtlandı (görüşme 3a)"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidApplicationState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.CreateAgencyApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.CreateApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.CreateBrandProfile",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.CreateEnterpriseApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.ExpireOrganizations",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.ListPendingApplications",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.MarkEnterprisePaid",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "kurumsal ilk-aktivasyon happy-path'i given-call ile dolaylı koşuluyor; ayrı kritik test gerekmez"
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "kurumsal ikinci 'ödendi' ikinci fatura üretmez"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidApplicationState"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "durum-hatası yolu kritik-dışı"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "yalnız AccountManager kuralı P1 jenerik-kimlik + rol-matrisiyle kapsanır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "ownership any → P1 jenerik-kimlik kapsamında"
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.PurgeRejectedApplications",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.RecoverOrganization",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.RejectApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidApplicationState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.ScreenApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "başvuru taraması insan kuyruğuna düşer, otomatik onaylanmaz"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "yanlış-durum ('submitted' değil) yolu kritik-dışı"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "@internal orkestrasyon; ownership any → P1 kapsamında"
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.SubmitAgencyApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidApplicationState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.SubmitApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidApplicationState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.SuspendOnPaymentFail",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "ilk suspend happy-path'i given-call ile dolaylı koşuluyor"
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "ikinci ödeme-başarısız bildirimi durumu bozmaz"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "@internal webhook; ownership any → P1 jenerik-kimlik kapsamında"
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.UpdateApplication",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidApplicationState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "OrgManagement.ViewProforma",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.ApprovePOI",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidPOIState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.CreatePOI",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "konum ekleme happy-path'i kritik-dışı; kritik olan limit-engeli test edildi"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "PoiLimitReached"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "konum limiti dolunca ekleme reddedilir"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "Editör POI ekleyemez kuralı P1 jenerik-kimlik + rol-matrisi testleriyle kapsanır"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "kendi-org kısıtı P1 jenerik-kimlik testleriyle kapsanır"
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.DeletePOI",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "PoiInUse"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.ListPendingPOIs",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.RejectPOI",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidPOIState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.ScreenPOI",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "konum taraması insan kuyruğuna düşer, otomatik onaylanmaz"
+              }
+            ]
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "yanlış-durum yolu kritik-dışı"
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "waived",
+            "coveredBy": [],
+            "until": "2026-12-31",
+            "reason": "@internal orkestrasyon; ownership any → P1 kapsamında"
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.SubmitPOI",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidPOIState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      },
+      {
+        "id": "POIManagement.UpdatePOI",
+        "tech": "interview-branded-pin.tcdsl",
+        "branches": [
+          {
+            "branch": {
+              "kind": "success"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "ruleGuard",
+              "id": "where:0"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "error",
+              "id": "InvalidPOIState"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "roles"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          },
+          {
+            "branch": {
+              "kind": "notAuthorized",
+              "via": "ownership"
+            },
+            "status": "uncovered",
+            "coveredBy": []
+          }
+        ]
+      }
+    ],
+    "flows": [
+      {
+        "id": "AgencyOnboarding",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "ApplicationModeration",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "ApplicationOnboarding",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "CampaignAuthoring",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "CampaignModeration",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "POIManagement",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "POIModeration",
+        "status": "uncovered",
+        "coveredBy": []
+      }
+    ],
+    "processes": [
+      {
+        "id": "AgencyOnboardingProcess",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "CampaignProcess",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "OnboardingProcess",
+        "status": "uncovered",
+        "coveredBy": []
+      },
+      {
+        "id": "POIProcess",
+        "status": "uncovered",
+        "coveredBy": []
+      }
+    ],
+    "guarantees": [
+      {
+        "id": "ModerationDecisionRequiresPendingItem",
+        "tech": "interview-branded-pin.tcdsl",
+        "text": "Bir moderasyon onay/red kararı yalnız hâlâ 'inceleme' durumundaki bir öğeye uygulanır; iki moderatör aynı öğeyi işlerse ilk karar kazanır, ikinci karar durum artık 'inReview' olmadığı için reddedilir (TUR3-C7)",
+        "traces": [],
+        "status": "covered",
+        "obligations": [
+          {
+            "kind": "guard",
+            "op": "OrgManagement.ApproveApplication",
+            "guard": "where:0",
+            "testable": true,
+            "status": "waived",
+            "coveredBy": []
+          },
+          {
+            "kind": "guard",
+            "op": "OrgManagement.RejectApplication",
+            "guard": "where:0",
+            "testable": true,
+            "status": "waived",
+            "coveredBy": []
+          },
+          {
+            "kind": "guard",
+            "op": "Campaign.ApproveCampaign",
+            "guard": "where:0",
+            "testable": true,
+            "status": "covered",
+            "coveredBy": [
+              {
+                "file": "interview-branded-pin.qa",
+                "test": "ikinci moderatör kararı geri çevrilir (ilk karar kazanır)"
+              }
+            ]
+          },
+          {
+            "kind": "guard",
+            "op": "Campaign.RejectCampaign",
+            "guard": "where:0",
+            "testable": true,
+            "status": "waived",
+            "coveredBy": []
+          },
+          {
+            "kind": "guard",
+            "op": "POIManagement.ApprovePOI",
+            "guard": "where:0",
+            "testable": true,
+            "status": "waived",
+            "coveredBy": []
+          },
+          {
+            "kind": "guard",
+            "op": "POIManagement.RejectPOI",
+            "guard": "where:0",
+            "testable": true,
+            "status": "waived",
+            "coveredBy": []
+          }
+        ]
+      }
+    ]
+  },
+  "files": [
+    {
+      "meta": {
+        "dsl": "qa",
+        "schemaVersion": 1,
+        "source": "interview-branded-pin.qa"
+      },
+      "uses": {
+        "tech": [
+          "interview-branded-pin.tcdsl"
+        ],
+        "flows": "interview-branded-pin.operations.json"
+      },
+      "personas": [
+        {
+          "id": "admin",
+          "binding": {
+            "kind": "actor",
+            "actor": "ClientAdmin"
+          }
+        },
+        {
+          "id": "editor",
+          "binding": {
+            "kind": "actor",
+            "actor": "ClientEditor"
+          }
+        },
+        {
+          "id": "accountManager",
+          "binding": {
+            "kind": "actor",
+            "actor": "AccountManager"
+          }
+        },
+        {
+          "id": "moderator",
+          "binding": {
+            "kind": "actor",
+            "actor": "Moderator"
+          }
+        },
+        {
+          "id": "moderator2",
+          "binding": {
+            "kind": "actor",
+            "actor": "Moderator"
+          }
+        },
+        {
+          "id": "agencyUser",
+          "binding": {
+            "kind": "actor",
+            "actor": "AgencyUser"
+          }
+        },
+        {
+          "id": "internalAdmin",
+          "binding": {
+            "kind": "actor",
+            "actor": "InternalAdmin"
+          }
+        }
+      ],
+      "datasets": [],
+      "tests": [
+        {
+          "title": "yanlış alan adlı davet reddedilir",
+          "operation": "Identity.InviteUser",
+          "covers": {
+            "kind": "error",
+            "id": "EmailDomainMismatch"
+          },
+          "expectedOutcome": {
+            "class": "NotValid",
+            "error": "EmailDomainMismatch"
+          },
+          "actor": "admin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "email": {
+                  "kind": "literal",
+                  "value": "admin@acme.com"
+                },
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "active"
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                },
+                "inviteeEmail": {
+                  "kind": "literal",
+                  "value": "outsider@other.com"
+                }
+              }
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "koltuk limiti dolunca davet reddedilir",
+          "operation": "Identity.InviteUser",
+          "covers": {
+            "kind": "error",
+            "id": "SeatLimitReached"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "error": "SeatLimitReached"
+          },
+          "actor": "admin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "email": {
+                  "kind": "literal",
+                  "value": "admin@acme.com"
+                },
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "active"
+                }
+              }
+            },
+            {
+              "kind": "seed",
+              "bind": "pkg",
+              "count": 1,
+              "entity": "InternalAdmin.Package",
+              "values": {
+                "tier": {
+                  "kind": "literal",
+                  "value": "standard"
+                },
+                "price": {
+                  "kind": "literal",
+                  "value": 0
+                },
+                "poiLimit": {
+                  "kind": "literal",
+                  "value": 5
+                },
+                "seatLimit": {
+                  "kind": "literal",
+                  "value": 2
+                }
+              }
+            },
+            {
+              "kind": "seed",
+              "bind": null,
+              "count": 2,
+              "entity": "Identity.UserAccount",
+              "values": {
+                "role": {
+                  "kind": "literal",
+                  "value": "member"
+                },
+                "emailDomain": {
+                  "kind": "literal",
+                  "value": "acme.com"
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                },
+                "inviteeEmail": {
+                  "kind": "literal",
+                  "value": "newuser@acme.com"
+                }
+              }
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "konum limiti dolunca ekleme reddedilir",
+          "operation": "POIManagement.CreatePOI",
+          "covers": {
+            "kind": "error",
+            "id": "PoiLimitReached"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "error": "PoiLimitReached"
+          },
+          "actor": "admin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "active"
+                }
+              }
+            },
+            {
+              "kind": "seed",
+              "bind": "pkg",
+              "count": 1,
+              "entity": "InternalAdmin.Package",
+              "values": {
+                "tier": {
+                  "kind": "literal",
+                  "value": "standard"
+                },
+                "price": {
+                  "kind": "literal",
+                  "value": 0
+                },
+                "poiLimit": {
+                  "kind": "literal",
+                  "value": 1
+                },
+                "seatLimit": {
+                  "kind": "literal",
+                  "value": 2
+                }
+              }
+            },
+            {
+              "kind": "seed",
+              "bind": null,
+              "count": 1,
+              "entity": "POIManagement.POI",
+              "values": {
+                "status": {
+                  "kind": "literal",
+                  "value": "approved"
+                },
+                "category": {
+                  "kind": "literal",
+                  "value": "store"
+                },
+                "latitude": {
+                  "kind": "literal",
+                  "value": 40.9
+                },
+                "longitude": {
+                  "kind": "literal",
+                  "value": 29.1
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                }
+              }
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "askıdaki org kampanya oluşturamaz",
+          "operation": "Campaign.CreateCampaign",
+          "covers": {
+            "kind": "error",
+            "id": "OrgNotActive"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "error": "OrgNotActive"
+          },
+          "actor": "editor",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "paused"
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "Campaign.Campaign",
+              "mode": "absent",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "draft"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "çift ödeme webhook'u tek fatura üretir",
+          "operation": "OrgManagement.ActivateOrganization",
+          "covers": {
+            "kind": "success"
+          },
+          "expectedOutcome": {
+            "class": "Success"
+          },
+          "actor": "internalAdmin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "approved"
+                }
+              }
+            },
+            {
+              "kind": "call",
+              "operation": "OrgManagement.ActivateOrganization",
+              "actor": "internalAdmin",
+              "input": {
+                "dataset": null,
+                "overrides": {},
+                "values": {
+                  "orgId": {
+                    "kind": "seedRef",
+                    "seed": "o1"
+                  },
+                  "transactionId": {
+                    "kind": "literal",
+                    "value": "tx-1"
+                  }
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                },
+                "transactionId": {
+                  "kind": "literal",
+                  "value": "tx-1"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "OrgManagement.Invoice",
+              "mode": "count",
+              "count": 1,
+              "conds": []
+            },
+            {
+              "kind": "state",
+              "entity": "OrgManagement.Organization",
+              "mode": "exists",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "active"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "kurumsal ikinci 'ödendi' ikinci fatura üretmez",
+          "operation": "OrgManagement.MarkEnterprisePaid",
+          "covers": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "guard": "where:0"
+          },
+          "actor": "accountManager",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "approved"
+                }
+              }
+            },
+            {
+              "kind": "call",
+              "operation": "OrgManagement.MarkEnterprisePaid",
+              "actor": "accountManager",
+              "input": {
+                "dataset": null,
+                "overrides": {},
+                "values": {
+                  "orgId": {
+                    "kind": "seedRef",
+                    "seed": "o1"
+                  }
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "OrgManagement.Invoice",
+              "mode": "count",
+              "count": 1,
+              "conds": []
+            }
+          ]
+        },
+        {
+          "title": "ikinci ödeme-başarısız bildirimi durumu bozmaz",
+          "operation": "OrgManagement.SuspendOnPaymentFail",
+          "covers": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "guard": "where:0"
+          },
+          "actor": "internalAdmin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "active"
+                }
+              }
+            },
+            {
+              "kind": "call",
+              "operation": "OrgManagement.SuspendOnPaymentFail",
+              "actor": "internalAdmin",
+              "input": {
+                "dataset": null,
+                "overrides": {},
+                "values": {
+                  "orgId": {
+                    "kind": "seedRef",
+                    "seed": "o1"
+                  }
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "OrgManagement.Organization",
+              "mode": "exists",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "paused"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "ikinci moderatör kararı geri çevrilir (ilk karar kazanır)",
+          "operation": "Campaign.ApproveCampaign",
+          "covers": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "expectedOutcome": {
+            "class": "NotProcessable",
+            "guard": "where:0"
+          },
+          "actor": "moderator2",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "c1",
+              "count": 1,
+              "entity": "Campaign.Campaign",
+              "values": {
+                "status": {
+                  "kind": "literal",
+                  "value": "inReview"
+                },
+                "poiScope": {
+                  "kind": "literal",
+                  "value": "global"
+                }
+              }
+            },
+            {
+              "kind": "call",
+              "operation": "Campaign.ApproveCampaign",
+              "actor": "moderator",
+              "input": {
+                "dataset": null,
+                "overrides": {},
+                "values": {
+                  "campaignId": {
+                    "kind": "seedRef",
+                    "seed": "c1"
+                  }
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "campaignId": {
+                  "kind": "seedRef",
+                  "seed": "c1"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "Campaign.Campaign",
+              "mode": "exists",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "approved"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "başvuru taraması insan kuyruğuna düşer, otomatik onaylanmaz",
+          "operation": "OrgManagement.ScreenApplication",
+          "covers": {
+            "kind": "success"
+          },
+          "expectedOutcome": {
+            "class": "Success"
+          },
+          "actor": "internalAdmin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "submitted"
+                }
+              }
+            }
+          ],
+          "stubs": [
+            {
+              "target": "CanAI.Screen",
+              "behavior": "returns",
+              "values": {
+                "score": {
+                  "kind": "literal",
+                  "value": 0
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "OrgManagement.Organization",
+              "mode": "exists",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "inReview"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "state",
+              "entity": "OrgManagement.Organization",
+              "mode": "absent",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "approved"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "kampanya taraması insan kuyruğuna düşer, otomatik onaylanmaz",
+          "operation": "Campaign.ScreenCampaign",
+          "covers": {
+            "kind": "success"
+          },
+          "expectedOutcome": {
+            "class": "Success"
+          },
+          "actor": "internalAdmin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "c1",
+              "count": 1,
+              "entity": "Campaign.Campaign",
+              "values": {
+                "status": {
+                  "kind": "literal",
+                  "value": "pendingReview"
+                },
+                "poiScope": {
+                  "kind": "literal",
+                  "value": "global"
+                }
+              }
+            }
+          ],
+          "stubs": [
+            {
+              "target": "CanAI.Screen",
+              "behavior": "returns",
+              "values": {
+                "score": {
+                  "kind": "literal",
+                  "value": 0
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "campaignId": {
+                  "kind": "seedRef",
+                  "seed": "c1"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "Campaign.Campaign",
+              "mode": "exists",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "inReview"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "state",
+              "entity": "Campaign.Campaign",
+              "mode": "absent",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "approved"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "konum taraması insan kuyruğuna düşer, otomatik onaylanmaz",
+          "operation": "POIManagement.ScreenPOI",
+          "covers": {
+            "kind": "success"
+          },
+          "expectedOutcome": {
+            "class": "Success"
+          },
+          "actor": "internalAdmin",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "poi",
+              "count": 1,
+              "entity": "POIManagement.POI",
+              "values": {
+                "status": {
+                  "kind": "literal",
+                  "value": "submitted"
+                },
+                "category": {
+                  "kind": "literal",
+                  "value": "store"
+                },
+                "latitude": {
+                  "kind": "literal",
+                  "value": 40.9
+                },
+                "longitude": {
+                  "kind": "literal",
+                  "value": 29.1
+                }
+              }
+            }
+          ],
+          "stubs": [
+            {
+              "target": "CanAI.Screen",
+              "behavior": "returns",
+              "values": {
+                "score": {
+                  "kind": "literal",
+                  "value": 0
+                }
+              }
+            }
+          ],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "poiId": {
+                  "kind": "seedRef",
+                  "seed": "poi"
+                }
+              }
+            }
+          },
+          "asserts": [
+            {
+              "kind": "state",
+              "entity": "POIManagement.POI",
+              "mode": "exists",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "inReview"
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "state",
+              "entity": "POIManagement.POI",
+              "mode": "absent",
+              "count": null,
+              "conds": [
+                {
+                  "field": "status",
+                  "op": "=",
+                  "value": {
+                    "kind": "string",
+                    "value": "approved"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "ajans devredilmemiş müşteri için kampanya oluşturamaz",
+          "operation": "Campaign.AgencyCreateCampaign",
+          "covers": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "expectedOutcome": {
+            "class": "NotAuthorized"
+          },
+          "actor": "agencyUser",
+          "time": null,
+          "given": [
+            {
+              "kind": "seed",
+              "bind": "o1",
+              "count": 1,
+              "entity": "OrgManagement.Organization",
+              "values": {
+                "orgType": {
+                  "kind": "literal",
+                  "value": "client"
+                },
+                "status": {
+                  "kind": "literal",
+                  "value": "active"
+                }
+              }
+            }
+          ],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {
+                "orgId": {
+                  "kind": "seedRef",
+                  "seed": "o1"
+                }
+              }
+            }
+          },
+          "asserts": []
+        },
+        {
+          "title": "ajans devredilmemiş müşterinin analitiğini göremez",
+          "operation": "Analytics.AgencyViewAnalytics",
+          "covers": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "expectedOutcome": {
+            "class": "NotAuthorized"
+          },
+          "actor": "agencyUser",
+          "time": null,
+          "given": [],
+          "stubs": [],
+          "when": {
+            "kind": "call",
+            "input": {
+              "dataset": null,
+              "overrides": {},
+              "values": {}
+            }
+          },
+          "asserts": []
+        }
+      ],
+      "scenarios": [],
+      "waives": [
+        {
+          "operation": "OrgManagement.ApproveApplication",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "ortak moderasyon motoru (LG-SS-05); ilk-karar-kazanır ApproveCampaign temsili testiyle kanıtlandı (görüşme 3a)"
+        },
+        {
+          "operation": "OrgManagement.RejectApplication",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+        },
+        {
+          "operation": "Campaign.RejectCampaign",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+        },
+        {
+          "operation": "POIManagement.ApprovePOI",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+        },
+        {
+          "operation": "POIManagement.RejectPOI",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+        },
+        {
+          "operation": "Identity.InviteUser",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "davet happy-path'i kritik-dışı; kritik olan iki engel (domain/koltuk) test edildi"
+        },
+        {
+          "operation": "Identity.InviteUser",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "yanlış-rol yolu üretici jenerik-kimlik testleriyle (P1) kapsanır"
+        },
+        {
+          "operation": "Identity.InviteUser",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "kendi-org davet kısıtı P1 jenerik-kimlik testleriyle kapsanır; kritik değil"
+        },
+        {
+          "operation": "POIManagement.CreatePOI",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "konum ekleme happy-path'i kritik-dışı; kritik olan limit-engeli test edildi"
+        },
+        {
+          "operation": "POIManagement.CreatePOI",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "Editör POI ekleyemez kuralı P1 jenerik-kimlik + rol-matrisi testleriyle kapsanır"
+        },
+        {
+          "operation": "POIManagement.CreatePOI",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "kendi-org kısıtı P1 jenerik-kimlik testleriyle kapsanır"
+        },
+        {
+          "operation": "Campaign.CreateCampaign",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "kampanya taslağı happy-path'i kritik-dışı; kritik ön-koşul (org-aktif) test edildi"
+        },
+        {
+          "operation": "Campaign.CreateCampaign",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "rol yolu P1 jenerik-kimlik + rol-matrisi testleriyle kapsanır"
+        },
+        {
+          "operation": "Campaign.CreateCampaign",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "kendi-org kısıtı P1 jenerik-kimlik testleriyle kapsanır"
+        },
+        {
+          "operation": "OrgManagement.ActivateOrganization",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "yanlış-durum ('approved' değil) yolu kritik-dışı; idempotency etki-assert'i öncelikli"
+        },
+        {
+          "operation": "OrgManagement.ActivateOrganization",
+          "branch": {
+            "kind": "error",
+            "id": "InvalidApplicationState"
+          },
+          "until": "2026-12-31",
+          "reason": "durum-hatası yolu kritik-dışı; şimdilik ertelenir"
+        },
+        {
+          "operation": "OrgManagement.ActivateOrganization",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "@internal webhook; ownership any → P1 jenerik-kimlik kapsamında"
+        },
+        {
+          "operation": "OrgManagement.MarkEnterprisePaid",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "kurumsal ilk-aktivasyon happy-path'i given-call ile dolaylı koşuluyor; ayrı kritik test gerekmez"
+        },
+        {
+          "operation": "OrgManagement.MarkEnterprisePaid",
+          "branch": {
+            "kind": "error",
+            "id": "InvalidApplicationState"
+          },
+          "until": "2026-12-31",
+          "reason": "durum-hatası yolu kritik-dışı"
+        },
+        {
+          "operation": "OrgManagement.MarkEnterprisePaid",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "yalnız AccountManager kuralı P1 jenerik-kimlik + rol-matrisiyle kapsanır"
+        },
+        {
+          "operation": "OrgManagement.MarkEnterprisePaid",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "ownership any → P1 jenerik-kimlik kapsamında"
+        },
+        {
+          "operation": "OrgManagement.SuspendOnPaymentFail",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "ilk suspend happy-path'i given-call ile dolaylı koşuluyor"
+        },
+        {
+          "operation": "OrgManagement.SuspendOnPaymentFail",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "@internal webhook; ownership any → P1 jenerik-kimlik kapsamında"
+        },
+        {
+          "operation": "Campaign.ApproveCampaign",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "moderatör onay happy-path'i CampaignProcess yaşam-döngüsü kapsamında; kritik olan race-guard test edildi"
+        },
+        {
+          "operation": "Campaign.ApproveCampaign",
+          "branch": {
+            "kind": "error",
+            "id": "InvalidCampaignState"
+          },
+          "until": "2026-12-31",
+          "reason": "durum-hatası guard where:0 ile örtüşür; race testinde ikinci-karar reddi bu sınıfı zaten sergiler"
+        },
+        {
+          "operation": "Campaign.ApproveCampaign",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "yalnız Moderator kuralı P1 jenerik-kimlik + rol-matrisiyle kapsanır"
+        },
+        {
+          "operation": "Campaign.ApproveCampaign",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "ownership any → P1 jenerik-kimlik kapsamında"
+        },
+        {
+          "operation": "OrgManagement.ScreenApplication",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "yanlış-durum ('submitted' değil) yolu kritik-dışı"
+        },
+        {
+          "operation": "OrgManagement.ScreenApplication",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "@internal orkestrasyon; ownership any → P1 kapsamında"
+        },
+        {
+          "operation": "Campaign.ScreenCampaign",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "yanlış-durum yolu kritik-dışı"
+        },
+        {
+          "operation": "Campaign.ScreenCampaign",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "@internal orkestrasyon; ownership any → P1 kapsamında"
+        },
+        {
+          "operation": "POIManagement.ScreenPOI",
+          "branch": {
+            "kind": "ruleGuard",
+            "id": "where:0"
+          },
+          "until": "2026-12-31",
+          "reason": "yanlış-durum yolu kritik-dışı"
+        },
+        {
+          "operation": "POIManagement.ScreenPOI",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "ownership"
+          },
+          "until": "2026-12-31",
+          "reason": "@internal orkestrasyon; ownership any → P1 kapsamında"
+        },
+        {
+          "operation": "Campaign.AgencyCreateCampaign",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "devredilmiş-kapsam happy-path'i kritik-dışı; kritik olan yetki-reddi test edildi"
+        },
+        {
+          "operation": "Campaign.AgencyCreateCampaign",
+          "branch": {
+            "kind": "error",
+            "id": "OrgNotActive"
+          },
+          "until": "2026-12-31",
+          "reason": "org-aktif ön-koşulu CreateCampaign'de zaten kritik test edildi; ajans yolu aynı kuralı paylaşır"
+        },
+        {
+          "operation": "Campaign.AgencyCreateCampaign",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "rol yolu P1 jenerik-kimlik testleriyle kapsanır"
+        },
+        {
+          "operation": "Analytics.AgencyViewAnalytics",
+          "branch": {
+            "kind": "success"
+          },
+          "until": "2026-12-31",
+          "reason": "devredilmiş-kapsam analitik görüntüleme happy-path'i kritik-dışı"
+        },
+        {
+          "operation": "Analytics.AgencyViewAnalytics",
+          "branch": {
+            "kind": "notAuthorized",
+            "via": "roles"
+          },
+          "until": "2026-12-31",
+          "reason": "rol yolu P1 jenerik-kimlik testleriyle kapsanır"
+        }
+      ]
+    }
+  ]
+}

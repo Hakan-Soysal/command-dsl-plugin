@@ -1,0 +1,260 @@
+// ============================================================================
+// BrandedPin — KRİTİK-DAL backend QA (odaklı). Görüşmede "mutlaka kanıtla" denen
+// dalları GERÇEK ihlal-girdisi + etki-assert'i ile test eder; kalan dallar tek-satır
+// gerekçeli waive (kapsanmamış dal = kabul edilen WARNING). Dal-uzayı kaynağı: tech.
+// ============================================================================
+qa "BrandedPin — kritik-dal backend testleri (odaklı)"
+
+uses tech "./interview-branded-pin.tcdsl"
+uses flows "./interview-branded-pin.operations.json"
+
+// ── Kimlikler: yalnız testlerin kullandığı rolemap actor'ları (persona-şişmesi yok) ──
+persona admin: ClientAdmin            // InviteUser / CreatePOI çağıran
+persona editor: ClientEditor          // CreateCampaign çağıran
+persona accountManager: AccountManager
+persona moderator: Moderator          // ilk moderatör (race)
+persona moderator2: Moderator         // ikinci moderatör (race — ilk-karar-kazanır)
+persona agencyUser: AgencyUser        // devredilmemiş kapsam denemesi
+persona internalAdmin: InternalAdmin  // System/@internal ops (ownership any → herhangi kimlik kabul)
+
+// ── Can.AI ön-kontrol ops uncharted CanAI.Screen çağırır → stub ZORUNLU (QA-07) ──
+defaults for ScreenApplication { as internalAdmin  stub CanAI.Screen returns { score: 0 } }
+defaults for ScreenCampaign    { as internalAdmin  stub CanAI.Screen returns { score: 0 } }
+defaults for ScreenPOI         { as internalAdmin  stub CanAI.Screen returns { score: 0 } }
+
+// ============================================================================
+// GRUP 1 — SINIR/PAKET KURALLARI (para/paket kaçağı → mutlaka kanıtla)
+// ============================================================================
+
+// InviteUser dalları: Success · error EmailDomainMismatch · error SeatLimitReached
+// · NotAuthorized(roles) · NotAuthorized(ownership)
+
+// 1b — kurumsal e-posta eşleşmesi: yanlış alan adı reddedilir (GERÇEK trigger: girdi
+// e-postasının domain'i org'unkiyle uyuşmaz → EmailDomainMismatch).
+test "yanlış alan adlı davet reddedilir" of InviteUser covers error EmailDomainMismatch {
+    as admin
+    given { seed o1 = Organization { email: "admin@acme.com", orgType: "client", status: "active" } }
+    when call with { orgId: o1, inviteeEmail: "outsider@other.com" }
+}
+
+// 1a — koltuk limiti: standart 2 koltuk dolu → davet ENGELLENİR. Not (karar #8):
+// UserAccount'ta orgId FK'sı yok; koltuk sayımı note-düzeyi → seed NİYETİ kurar,
+// yapısal-trigger değil. Domain eşleşir (acme.com) ki hata SeatLimit olsun.
+test "koltuk limiti dolunca davet reddedilir" of InviteUser covers error SeatLimitReached {
+    as admin
+    given {
+        seed o1 = Organization { email: "admin@acme.com", orgType: "client", status: "active" }
+        seed pkg = Package { tier: "standard", price: 0, poiLimit: 5, seatLimit: 2 }
+        seed 2 UserAccount { role: "member", emailDomain: "acme.com" }
+    }
+    when call with { orgId: o1, inviteeEmail: "newuser@acme.com" }
+}
+
+// CreatePOI dalları: Success · error PoiLimitReached · NotAuthorized(roles) · NotAuthorized(ownership)
+// 1c — konum limiti: paket poiLimit dolu → yeni konum ENGELLENİR. Not (karar #8):
+// POI'de orgId/Package FK'sı yok; sayım note-düzeyi → seed NİYETİ kurar.
+test "konum limiti dolunca ekleme reddedilir" of CreatePOI covers error PoiLimitReached {
+    as admin
+    given {
+        seed o1 = Organization { orgType: "client", status: "active" }
+        seed pkg = Package { tier: "standard", price: 0, poiLimit: 1, seatLimit: 2 }
+        seed POI { status: "approved", category: "store", latitude: 40.9, longitude: 29.1 }
+    }
+    when call with { orgId: o1 }
+}
+
+// ============================================================================
+// GRUP — KAMPANYA ÖN-KOŞULU (org aktif değilken kampanya açılamaz)
+// ============================================================================
+
+// CreateCampaign dalları: Success · error OrgNotActive · NotAuthorized(roles) · NotAuthorized(ownership)
+// 1e — org 'paused/expired' iken kampanya oluşturma ENGELLENİR + etki: kampanya oluşmaz.
+test "askıdaki org kampanya oluşturamaz" of CreateCampaign covers error OrgNotActive {
+    as editor
+    given { seed o1 = Organization { orgType: "client", status: "paused" } }
+    when call with { orgId: o1 }
+    then { state Campaign absent { status = "draft" } }
+}
+
+// ============================================================================
+// GRUP 2 — PARA/ÖDEME: ÇİFT-BİLDİRİM IDEMPOTENCY (etki: TEK fatura/aktivasyon)
+// ============================================================================
+
+// ActivateOrganization: idempotent by transactionId. Çift 'ödendi' webhook → TEK
+// aktivasyon/TEK fatura. Etki-assert'i (state Invoice count 1) yürütme-yolundan
+// bağımsız garantiyi kanıtlar.
+test "çift ödeme webhook'u tek fatura üretir" of ActivateOrganization covers Success {
+    as internalAdmin
+    given {
+        seed o1 = Organization { orgType: "client", status: "approved" }
+        call ActivateOrganization as internalAdmin with { orgId: o1, transactionId: "tx-1" }
+    }
+    when call with { orgId: o1, transactionId: "tx-1" }
+    then {
+        state Invoice count 1
+        state Organization exists { status = "active" }
+    }
+}
+
+// MarkEnterprisePaid: idempotent by orgId; ikinci 'Ödendi' zaten aktif → rule
+// status=approved doğal no-op (NotProcessable). Etki: TEK fatura (count 1).
+test "kurumsal ikinci 'ödendi' ikinci fatura üretmez" of MarkEnterprisePaid covers guard "where:0" {
+    as accountManager
+    given {
+        seed o1 = Organization { orgType: "client", status: "approved" }
+        call MarkEnterprisePaid as accountManager with { orgId: o1 }
+    }
+    when call with { orgId: o1 }
+    then { state Invoice count 1 }
+}
+
+// SuspendOnPaymentFail: idempotent by orgId; ikinci 'başarısız' zaten paused → rule
+// status=active doğal no-op. Etki: durum 'paused' bozulmaz.
+test "ikinci ödeme-başarısız bildirimi durumu bozmaz" of SuspendOnPaymentFail covers guard "where:0" {
+    as internalAdmin
+    given {
+        seed o1 = Organization { orgType: "client", status: "active" }
+        call SuspendOnPaymentFail as internalAdmin with { orgId: o1 }
+    }
+    when call with { orgId: o1 }
+    then { state Organization exists { status = "paused" } }
+}
+
+// ============================================================================
+// GRUP 3 — MODERASYON YARIŞI: İLK-KARAR-KAZANIR (guarantee: tek ortak motor)
+// ============================================================================
+
+// ApproveCampaign guard where:0 (status=inReview). İki moderatör aynı öğeyi işler:
+// ilk karar geçerli (approved), ikinci karar öğe artık inReview olmadığı için geri
+// çevrilir (NotProcessable). Etki: kayıt ilk karara göre durur (approved, dokunulmaz).
+// Bilinçli seçim: op-test + given-call (2 aktör), realizes-process yerine — görüşme
+// tek temsili öğe tipini (kampanya) kabul etti; ortak motor (LG-SS-05) diğerlerini temsil eder.
+test "ikinci moderatör kararı geri çevrilir (ilk karar kazanır)" of ApproveCampaign covers guard "where:0" {
+    as moderator2
+    given {
+        seed c1 = Campaign { status: "inReview", poiScope: "global" }
+        call ApproveCampaign as moderator with { campaignId: c1 }
+    }
+    when call with { campaignId: c1 }
+    then { state Campaign exists { status = "approved" } }
+}
+
+// ============================================================================
+// GRUP 6 — CAN.AI GÜVENLİ-DAVRANIŞ: ASLA OTOMATİK ONAY
+// ============================================================================
+
+// ScreenApplication/Campaign/POI'nin modellenmiş TEK başarı-etkisi 'inReview' (insan
+// kuyruğu). Tech'te otomatik-onay YOLU HİÇ YOK → 'asla-otomatik-onay' yapısal. absent
+// { status='approved' } bunu CanAI up/down'dan BAĞIMSIZ kanıtlar (etki CanAI sonucuna
+// dallanmıyor). NOT: CanAI-DOWN failure yolu compensate'siz → kapalı-küme dışı, ayrı
+// test EDİLEMEZ; kanıtlanan yapısal 'yalnız-inReview' güvencesidir.
+test "başvuru taraması insan kuyruğuna düşer, otomatik onaylanmaz" of ScreenApplication covers Success {
+    given { seed o1 = Organization { orgType: "client", status: "submitted" } }
+    when call with { orgId: o1 }
+    then {
+        state Organization exists { status = "inReview" }
+        state Organization absent { status = "approved" }
+    }
+}
+
+test "kampanya taraması insan kuyruğuna düşer, otomatik onaylanmaz" of ScreenCampaign covers Success {
+    given { seed c1 = Campaign { status: "pendingReview", poiScope: "global" } }
+    when call with { campaignId: c1 }
+    then {
+        state Campaign exists { status = "inReview" }
+        state Campaign absent { status = "approved" }
+    }
+}
+
+test "konum taraması insan kuyruğuna düşer, otomatik onaylanmaz" of ScreenPOI covers Success {
+    given { seed poi = POI { status: "submitted", category: "store", latitude: 40.9, longitude: 29.1 } }
+    when call with { poiId: poi }
+    then {
+        state POI exists { status = "inReview" }
+        state POI absent { status = "approved" }
+    }
+}
+
+// ============================================================================
+// GRUP 5 — BAŞKASININ VERİSİ / AJANS-DEVRİ KAPSAMI (delegatedClient)
+// ============================================================================
+
+// AgencyCreateCampaign: roles AgencyUser + ownership delegatedClient (2 mekanizma →
+// niteleyici zorunlu). Devredilmemiş org için ajans kampanya oluşturamaz (AgencyDelegation
+// seed EDİLMEDİ → delegatedClient kapısı GERÇEKTEN reddeder).
+test "ajans devredilmemiş müşteri için kampanya oluşturamaz" of AgencyCreateCampaign covers NotAuthorized ownership {
+    as agencyUser
+    given { seed o1 = Organization { orgType: "client", status: "active" } }
+    when call with { orgId: o1 }
+}
+
+// AgencyViewAnalytics: ownership delegatedClient. Devredilmemiş müşterinin analitiğini
+// ajans göremez (delegation yok → reddedilir). Analitik/pano izolasyonu (görüşme 5a).
+test "ajans devredilmemiş müşterinin analitiğini göremez" of AgencyViewAnalytics covers NotAuthorized ownership {
+    as agencyUser
+    when call with { }
+}
+
+// ============================================================================
+// WAIVE — kalan dallar (gerekçeli). Guarantee 5 kardeş guard'ı (ortak motor temsili),
+// dokunulan ops'un test-edilmemiş dalları, jenerik-kimlik yetki yolları (P1).
+// ============================================================================
+
+// -- Moderation guarantee: ApproveCampaign temsili test edildi; diğer 5 guard aynı
+//    jenerik state machine (LG-SS-05) — ilk-karar-kazanır yapısal olarak paylaşılır.
+waive ApproveApplication covers guard "where:0" until "2026-12-31" because "ortak moderasyon motoru (LG-SS-05); ilk-karar-kazanır ApproveCampaign temsili testiyle kanıtlandı (görüşme 3a)"
+waive RejectApplication  covers guard "where:0" until "2026-12-31" because "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+waive RejectCampaign     covers guard "where:0" until "2026-12-31" because "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+waive ApprovePOI         covers guard "where:0" until "2026-12-31" because "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+waive RejectPOI          covers guard "where:0" until "2026-12-31" because "aynı jenerik moderasyon state machine; ilk-karar-kazanır ApproveCampaign ile temsil edilir"
+
+// -- InviteUser: kritik iki hata test edildi; happy-path + yetki yolları erteleniyor.
+waive InviteUser covers Success until "2026-12-31" because "davet happy-path'i kritik-dışı; kritik olan iki engel (domain/koltuk) test edildi"
+waive InviteUser covers NotAuthorized roles until "2026-12-31" because "yanlış-rol yolu üretici jenerik-kimlik testleriyle (P1) kapsanır"
+waive InviteUser covers NotAuthorized ownership until "2026-12-31" because "kendi-org davet kısıtı P1 jenerik-kimlik testleriyle kapsanır; kritik değil"
+
+// -- CreatePOI
+waive CreatePOI covers Success until "2026-12-31" because "konum ekleme happy-path'i kritik-dışı; kritik olan limit-engeli test edildi"
+waive CreatePOI covers NotAuthorized roles until "2026-12-31" because "Editör POI ekleyemez kuralı P1 jenerik-kimlik + rol-matrisi testleriyle kapsanır"
+waive CreatePOI covers NotAuthorized ownership until "2026-12-31" because "kendi-org kısıtı P1 jenerik-kimlik testleriyle kapsanır"
+
+// -- CreateCampaign
+waive CreateCampaign covers Success until "2026-12-31" because "kampanya taslağı happy-path'i kritik-dışı; kritik ön-koşul (org-aktif) test edildi"
+waive CreateCampaign covers NotAuthorized roles until "2026-12-31" because "rol yolu P1 jenerik-kimlik + rol-matrisi testleriyle kapsanır"
+waive CreateCampaign covers NotAuthorized ownership until "2026-12-31" because "kendi-org kısıtı P1 jenerik-kimlik testleriyle kapsanır"
+
+// -- ActivateOrganization: idempotency Success test edildi; kalan dallar erteleniyor.
+waive ActivateOrganization covers guard "where:0" until "2026-12-31" because "yanlış-durum ('approved' değil) yolu kritik-dışı; idempotency etki-assert'i öncelikli"
+waive ActivateOrganization covers error InvalidApplicationState until "2026-12-31" because "durum-hatası yolu kritik-dışı; şimdilik ertelenir"
+waive ActivateOrganization covers NotAuthorized ownership until "2026-12-31" because "@internal webhook; ownership any → P1 jenerik-kimlik kapsamında"
+
+// -- MarkEnterprisePaid: guard (ikinci-ödendi) test edildi.
+waive MarkEnterprisePaid covers Success until "2026-12-31" because "kurumsal ilk-aktivasyon happy-path'i given-call ile dolaylı koşuluyor; ayrı kritik test gerekmez"
+waive MarkEnterprisePaid covers error InvalidApplicationState until "2026-12-31" because "durum-hatası yolu kritik-dışı"
+waive MarkEnterprisePaid covers NotAuthorized roles until "2026-12-31" because "yalnız AccountManager kuralı P1 jenerik-kimlik + rol-matrisiyle kapsanır"
+waive MarkEnterprisePaid covers NotAuthorized ownership until "2026-12-31" because "ownership any → P1 jenerik-kimlik kapsamında"
+
+// -- SuspendOnPaymentFail
+waive SuspendOnPaymentFail covers Success until "2026-12-31" because "ilk suspend happy-path'i given-call ile dolaylı koşuluyor"
+waive SuspendOnPaymentFail covers NotAuthorized ownership until "2026-12-31" because "@internal webhook; ownership any → P1 jenerik-kimlik kapsamında"
+
+// -- ApproveCampaign (race guard test edildi)
+waive ApproveCampaign covers Success until "2026-12-31" because "moderatör onay happy-path'i CampaignProcess yaşam-döngüsü kapsamında; kritik olan race-guard test edildi"
+waive ApproveCampaign covers error InvalidCampaignState until "2026-12-31" because "durum-hatası guard where:0 ile örtüşür; race testinde ikinci-karar reddi bu sınıfı zaten sergiler"
+waive ApproveCampaign covers NotAuthorized roles until "2026-12-31" because "yalnız Moderator kuralı P1 jenerik-kimlik + rol-matrisiyle kapsanır"
+waive ApproveCampaign covers NotAuthorized ownership until "2026-12-31" because "ownership any → P1 jenerik-kimlik kapsamında"
+
+// -- Screen ops (Success/never-auto-approve test edildi)
+waive ScreenApplication covers guard "where:0" until "2026-12-31" because "yanlış-durum ('submitted' değil) yolu kritik-dışı"
+waive ScreenApplication covers NotAuthorized ownership until "2026-12-31" because "@internal orkestrasyon; ownership any → P1 kapsamında"
+waive ScreenCampaign covers guard "where:0" until "2026-12-31" because "yanlış-durum yolu kritik-dışı"
+waive ScreenCampaign covers NotAuthorized ownership until "2026-12-31" because "@internal orkestrasyon; ownership any → P1 kapsamında"
+waive ScreenPOI covers guard "where:0" until "2026-12-31" because "yanlış-durum yolu kritik-dışı"
+waive ScreenPOI covers NotAuthorized ownership until "2026-12-31" because "@internal orkestrasyon; ownership any → P1 kapsamında"
+
+// -- Ajans ops (delegatedClient ownership test edildi)
+waive AgencyCreateCampaign covers Success until "2026-12-31" because "devredilmiş-kapsam happy-path'i kritik-dışı; kritik olan yetki-reddi test edildi"
+waive AgencyCreateCampaign covers error OrgNotActive until "2026-12-31" because "org-aktif ön-koşulu CreateCampaign'de zaten kritik test edildi; ajans yolu aynı kuralı paylaşır"
+waive AgencyCreateCampaign covers NotAuthorized roles until "2026-12-31" because "rol yolu P1 jenerik-kimlik testleriyle kapsanır"
+waive AgencyViewAnalytics covers Success until "2026-12-31" because "devredilmiş-kapsam analitik görüntüleme happy-path'i kritik-dışı"
+waive AgencyViewAnalytics covers NotAuthorized roles until "2026-12-31" because "rol yolu P1 jenerik-kimlik testleriyle kapsanır"

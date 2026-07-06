@@ -45,6 +45,41 @@ delta**yı (sapmayı) taşır. İki ilke skill'in tüm tasarımını dayatır:
 karar-eksenini kapatır (bkz. faz başlıklarındaki "kapatır" satırı). Sorduğun her soru bir
 bütünlük kuralını discharge eder — bu, "tutarlılık > sözdizimi" ilkesinin keyfi-olmayan iskeleti.
 
+## Değişmezler (v1 — parafraz YASAK, harfiyen taşınır)
+
+Bu blok fazlardan bağımsızdır: **fazlar "ne zaman", değişmezler "her zaman"**.
+Uzun/çok-fazlı oturumda aşınırlar; bu yüzden faz-sınırında, emit öncesinde ve her
+hata-düzeltme döngüsünden sonra **harfiyen** yeniden okunur (parafraz = anchor-drift).
+
+1. **Büyü yok — her şey authored.** Skill SORAR, cevabı UYDURMAZ. Boşluğu örtük
+   yetkiyle doldurma; **çıkarım soru üretir, cevap üretmez.**
+2. **ÇİFT-SIFIR.** Emit ancak 0-error VE 0-sessiz-eksik ile geçer: ★-süpürme
+   yapılmış, güvenlik-değeri (yetki/hassasiyet genişliği) teşhir edilmiş, sınır-devri —
+   başka aktör/modül/ekrana el-değiştirme — sorulmuş olmalı.
+3. **Warning = çözülmemiş soru.** Skill warning'i kendi uydurduğu düzeltmeyle
+   kapatamaz — kapanış authored: sor→düzelt / gerekçeli-kabul / yanlış-pozitif
+   göster. Sessiz auto-fix YASAK.
+4. **Structural-first.** Yapısal çözülebilen yapısal kalır; yalnız gerçek
+   serbest-proza `note`. Yorumlar makinece anlamsızdır.
+5. **Gate ≠ niyet.** Gate'ler yalnız MEKANİĞİ kanıtlar; niyet-uyumunun tek
+   otoritesi KULLANICIDIR — hiçbir gate-geçişi AskUser'ı iptal edemez.
+
+## In-flight öz-denetim (bahane → çürütme · red-flags)
+
+Bir değişmezi (★-süpürme, güvenlik-teşhiri, geri-okuma) atlamak için içten gelen
+gerekçeye karşı — Gate ÇIKIŞTA kilitler, bu blok SÜREÇ-İÇİNDE, Gate'e varmadan düzeltir:
+
+| Atlatma bahanesi | Çürütme |
+|---|---|
+| "Bu proje basit, Envanter'e gerek yok" | Basitlik ★-süpürmeyi kaldırmaz; ★ yine sorulur ya da örtük-kapandığı gösterilir. |
+| "Kullanıcı acele ediyor" | ÇİFT-SIFIR hiçbir tempoda kısalmaz; hız = daha az laf, daha az soru DEĞİL. |
+| "Cevabı tahmin edebiliyorum" | Tahmin = çıkarım; çıkarım cevap değil SORU üretir (Değişmez-1). |
+| "Bunu sonra hallederiz" | Ertelenen ★ authored-kayıt olur (durum=beklemede), sessizce düşmez. |
+
+**Red flags (kendini yakala):** ★-soru atlandı · faz-sırası bozuldu · kullanıcıya
+sorulmadan clause dolduruldu · warning sessiz kapatıldı · gate-geçti diye AskUser
+atlandı. Biri olduysa DUR, adını koy, düzelt.
+
 ## Altın kurallar (her oturumda geçerli)
 
 - **DSL-jargonu gösterme.** "consistency mode", "ABAC", "saga", "sourceOfTruth", "deployable"

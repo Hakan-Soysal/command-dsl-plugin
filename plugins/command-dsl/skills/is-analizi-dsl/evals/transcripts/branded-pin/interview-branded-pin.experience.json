@@ -1,0 +1,3119 @@
+{
+  "mode": "linked",
+  "contract": {
+    "business": "./interview-branded-pin.operations.json",
+    "tech": "./interview-branded-pin.manifest.json"
+  },
+  "shared": null,
+  "experiences": [
+    {
+      "name": "PublicOnboarding",
+      "audience": [
+        "Applicant",
+        "AgencyApplicant"
+      ],
+      "deliveryDefault": "remote-only",
+      "entryScreen": "BasvuruSecim",
+      "resultDefaults": [
+        {
+          "result": "NotAuthenticated",
+          "handler": {
+            "verb": "banner",
+            "text": "Oturum sona erdi — TruID ile yeniden giriş yapın"
+          }
+        },
+        {
+          "result": "NotAuthorized",
+          "handler": {
+            "verb": "banner",
+            "text": "Bu işlem için yetkiniz yok"
+          }
+        },
+        {
+          "result": "NotValid",
+          "handler": {
+            "verb": "inline-errors"
+          }
+        },
+        {
+          "result": "NotProcessable",
+          "handler": {
+            "verb": "toast",
+            "text": "İşlem şu an gerçekleştirilemedi",
+            "retry": false
+          }
+        },
+        {
+          "result": "ServerError",
+          "handler": {
+            "verb": "toast",
+            "text": "Bir hata oluştu",
+            "retry": true
+          }
+        }
+      ],
+      "usesInterfaces": [
+        {
+          "name": "CreateApplication",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "legalName",
+              "type": null
+            },
+            {
+              "name": "country",
+              "type": null
+            },
+            {
+              "name": "sector",
+              "type": null
+            },
+            {
+              "name": "taxNumber",
+              "type": null
+            },
+            {
+              "name": "corporateEmail",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "orgId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreateApplication",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "CreateApplication"
+          }
+        },
+        {
+          "name": "CreateBrandProfile",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "brandId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreateBrandProfile",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "CreateBrandProfile"
+          }
+        },
+        {
+          "name": "SubmitApplication",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "SubmitApplication",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "SubmitApplication"
+          }
+        },
+        {
+          "name": "CreateAgencyApplication",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "legalName",
+              "type": null
+            },
+            {
+              "name": "country",
+              "type": null
+            },
+            {
+              "name": "corporateEmail",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "orgId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreateAgencyApplication",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "CreateAgencyApplication"
+          }
+        },
+        {
+          "name": "SubmitAgencyApplication",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "SubmitAgencyApplication",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "SubmitAgencyApplication"
+          }
+        }
+      ],
+      "screens": [
+        {
+          "name": "BasvuruSecim",
+          "title": "Başvuru Türü",
+          "persona": null,
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "GitMarkaBasvuru",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "MarkaBasvuru",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitAjansBasvuru",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "AjansBasvuru",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "MarkaBasvuru",
+          "title": "Marka Başvurusu",
+          "persona": "Applicant",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "form",
+                  "submits": {
+                    "op": "CreateApplication",
+                    "args": [],
+                    "mechanic": "remote"
+                  },
+                  "loads": null,
+                  "alias": null,
+                  "fields": [
+                    {
+                      "name": "legalName",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "country",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "sector",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "taxNumber",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "corporateEmail",
+                      "validation": {
+                        "required": true
+                      }
+                    }
+                  ],
+                  "steps": [],
+                  "rules": [],
+                  "resultHandlers": [
+                    {
+                      "result": "Success",
+                      "handler": {
+                        "verb": "navigate",
+                        "screen": "MarkaBasvuruTamamla",
+                        "args": [
+                          {
+                            "name": null,
+                            "expr": {
+                              "path": [
+                                "orgId"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "MarkaBasvuruTamamla",
+          "title": "Marka Profili & Gönderim",
+          "persona": "Applicant",
+          "params": [
+            {
+              "name": "orgId"
+            }
+          ],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "form",
+                  "submits": {
+                    "op": "CreateBrandProfile",
+                    "args": [],
+                    "mechanic": "remote"
+                  },
+                  "loads": null,
+                  "alias": null,
+                  "fields": [],
+                  "steps": [],
+                  "rules": [],
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "SubmitApplication",
+                  "command": {
+                    "op": "SubmitApplication",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": true,
+                  "confirmText": "Başvuru gönderilsin mi? Gönderdikten sonra düzenleme yalnız reddedilirse (60 gün) açılır.",
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "AjansBasvuru",
+          "title": "Ajans Başvurusu",
+          "persona": "AgencyApplicant",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "form",
+                  "submits": {
+                    "op": "CreateAgencyApplication",
+                    "args": [],
+                    "mechanic": "remote"
+                  },
+                  "loads": null,
+                  "alias": null,
+                  "fields": [
+                    {
+                      "name": "legalName",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "country",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "corporateEmail",
+                      "validation": {
+                        "required": true
+                      }
+                    }
+                  ],
+                  "steps": [],
+                  "rules": [],
+                  "resultHandlers": [
+                    {
+                      "result": "Success",
+                      "handler": {
+                        "verb": "navigate",
+                        "screen": "AjansBasvuruTamamla",
+                        "args": [
+                          {
+                            "name": null,
+                            "expr": {
+                              "path": [
+                                "orgId"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "AjansBasvuruTamamla",
+          "title": "Ajans Başvurusu — Gönderim",
+          "persona": "AgencyApplicant",
+          "params": [
+            {
+              "name": "orgId"
+            }
+          ],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "SubmitAgencyApplication",
+                  "command": {
+                    "op": "SubmitAgencyApplication",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": true,
+                  "confirmText": "Başvuru gönderilsin mi?",
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        }
+      ],
+      "flows": [
+        {
+          "name": "MarkaBasvuruYolu",
+          "realizes": "ApplicationOnboarding",
+          "steps": [
+            "BasvuruSecim",
+            "MarkaBasvuru",
+            "MarkaBasvuruTamamla"
+          ]
+        },
+        {
+          "name": "AjansBasvuruYolu",
+          "realizes": "AgencyOnboarding",
+          "steps": [
+            "BasvuruSecim",
+            "AjansBasvuru",
+            "AjansBasvuruTamamla"
+          ]
+        }
+      ],
+      "navigation": [],
+      "clientState": [],
+      "whenDeltas": []
+    },
+    {
+      "name": "ClientApp",
+      "audience": [
+        "ClientAdmin",
+        "ClientEditor",
+        "ClientViewer",
+        "AgencyUser"
+      ],
+      "deliveryDefault": "remote-only",
+      "entryScreen": "MarkaPanosu",
+      "resultDefaults": [
+        {
+          "result": "NotAuthenticated",
+          "handler": {
+            "verb": "banner",
+            "text": "Oturum sona erdi — TruID ile yeniden giriş yapın"
+          }
+        },
+        {
+          "result": "NotAuthorized",
+          "handler": {
+            "verb": "banner",
+            "text": "Bu işlem için yetkiniz yok"
+          }
+        },
+        {
+          "result": "NotValid",
+          "handler": {
+            "verb": "inline-errors"
+          }
+        },
+        {
+          "result": "NotProcessable",
+          "handler": {
+            "verb": "toast",
+            "text": "İşlem şu an gerçekleştirilemedi",
+            "retry": false
+          }
+        },
+        {
+          "result": "ServerError",
+          "handler": {
+            "verb": "toast",
+            "text": "Bir hata oluştu",
+            "retry": true
+          }
+        }
+      ],
+      "usesInterfaces": [
+        {
+          "name": "ViewAnalytics",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "eventType",
+                "type": null
+              },
+              {
+                "name": "count",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ViewAnalytics",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Analytics",
+            "op": "ViewAnalytics"
+          }
+        },
+        {
+          "name": "AgencyViewAnalytics",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "eventType",
+                "type": null
+              },
+              {
+                "name": "count",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "AgencyViewAnalytics",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Analytics",
+            "op": "AgencyViewAnalytics"
+          }
+        },
+        {
+          "name": "ViewProforma",
+          "opKind": "query",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "amount",
+                "type": null
+              },
+              {
+                "name": "vat",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ViewProforma",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "ViewProforma"
+          }
+        },
+        {
+          "name": "InviteUser",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            },
+            {
+              "name": "inviteeEmail",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "userId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "InviteUser",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Identity",
+            "op": "InviteUser"
+          }
+        },
+        {
+          "name": "CreateCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "campaignId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreateCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "CreateCampaign"
+          }
+        },
+        {
+          "name": "AgencyCreateCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "campaignId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "AgencyCreateCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "AgencyCreateCampaign"
+          }
+        },
+        {
+          "name": "UpdateCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "campaignId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "UpdateCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "UpdateCampaign"
+          }
+        },
+        {
+          "name": "SubmitCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "campaignId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "SubmitCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "SubmitCampaign"
+          }
+        },
+        {
+          "name": "PauseCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "campaignId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "PauseCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "PauseCampaign"
+          }
+        },
+        {
+          "name": "ResumeCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "campaignId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "ResumeCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "ResumeCampaign"
+          }
+        },
+        {
+          "name": "CreatePOI",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "poiId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreatePOI",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "POIManagement",
+            "op": "CreatePOI"
+          }
+        },
+        {
+          "name": "UpdatePOI",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "poiId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "UpdatePOI",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "POIManagement",
+            "op": "UpdatePOI"
+          }
+        },
+        {
+          "name": "SubmitPOI",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "poiId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "SubmitPOI",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "POIManagement",
+            "op": "SubmitPOI"
+          }
+        },
+        {
+          "name": "DeletePOI",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "poiId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "DeletePOI",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "POIManagement",
+            "op": "DeletePOI"
+          }
+        }
+      ],
+      "screens": [
+        {
+          "name": "MarkaPanosu",
+          "title": "Marka Panosu",
+          "persona": null,
+          "params": [],
+          "regions": [
+            {
+              "name": "Menu",
+              "role": "navigation",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "GitAnalitik",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "Analitik",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitKampanya",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "KampanyaOlustur",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitKonum",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "KonumEkle",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitEkip",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "EkipDavet",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitOdeme",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "OdemeBekliyor",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitAjansAnalitik",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "AgencyUser"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "AjansAnalitik",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "Analitik",
+          "title": "Analitik",
+          "persona": "ClientViewer",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "ViewAnalytics",
+                    "args": []
+                  },
+                  "mechanic": "remote",
+                  "refreshable": true,
+                  "pagination": {
+                    "intent": "pager"
+                  },
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "eventType",
+                      "count"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [
+                    {
+                      "state": "empty",
+                      "delta": [
+                        {
+                          "verb": "banner",
+                          "text": "Henüz analitik verisi yok"
+                        }
+                      ]
+                    }
+                  ],
+                  "uiEvents": [],
+                  "actions": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "ViewAnalytics"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        },
+        {
+          "name": "AjansAnalitik",
+          "title": "Ajans — Müşteri Analitiği",
+          "persona": "AgencyUser",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "AgencyViewAnalytics",
+                    "args": []
+                  },
+                  "mechanic": "remote",
+                  "refreshable": true,
+                  "pagination": {
+                    "intent": "pager"
+                  },
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "eventType",
+                      "count"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [
+                    {
+                      "state": "empty",
+                      "delta": [
+                        {
+                          "verb": "banner",
+                          "text": "Bu müşteri için analitik verisi yok"
+                        }
+                      ]
+                    }
+                  ],
+                  "uiEvents": [],
+                  "actions": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "AgencyViewAnalytics"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        },
+        {
+          "name": "KampanyaOlustur",
+          "title": "Yeni Kampanya",
+          "persona": "ClientEditor",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "CreateCampaign",
+                  "command": {
+                    "op": "CreateCampaign",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": [
+                    {
+                      "result": "Success",
+                      "handler": {
+                        "verb": "navigate",
+                        "screen": "KampanyaDetay",
+                        "args": [
+                          {
+                            "name": null,
+                            "expr": {
+                              "path": [
+                                "campaignId"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                {
+                  "kind": "action",
+                  "name": "AgencyCreateCampaign",
+                  "command": {
+                    "op": "AgencyCreateCampaign",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "AgencyUser"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": [
+                    {
+                      "result": "Success",
+                      "handler": {
+                        "verb": "navigate",
+                        "screen": "KampanyaDetay",
+                        "args": [
+                          {
+                            "name": null,
+                            "expr": {
+                              "path": [
+                                "campaignId"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "KampanyaDetay",
+          "title": "Kampanya",
+          "persona": "ClientEditor",
+          "params": [
+            {
+              "name": "campaignId"
+            }
+          ],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "UpdateCampaign",
+                  "command": {
+                    "op": "UpdateCampaign",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "SubmitCampaign",
+                  "command": {
+                    "op": "SubmitCampaign",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": true,
+                  "confirmText": "Kampanya onaya gönderilsin mi? Onaylanınca DÜZENLENEMEZ ve İPTAL EDİLEMEZ (yalnız duraklatma / acil kaldırma).",
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "PauseCampaign",
+                  "command": {
+                    "op": "PauseCampaign",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": true,
+                  "confirmText": "Kampanya duraklatılsın mı? Yayından iner.",
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": [
+                    {
+                      "result": "NotProcessable",
+                      "handler": {
+                        "verb": "toast",
+                        "text": "Kampanya şu an duraklatılamaz (aktif değil)",
+                        "retry": false
+                      }
+                    }
+                  ]
+                },
+                {
+                  "kind": "action",
+                  "name": "ResumeCampaign",
+                  "command": {
+                    "op": "ResumeCampaign",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "KonumEkle",
+          "title": "Yeni Konum",
+          "persona": "ClientAdmin",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "CreatePOI",
+                  "command": {
+                    "op": "CreatePOI",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": [
+                    {
+                      "result": "NotProcessable",
+                      "handler": {
+                        "verb": "toast",
+                        "text": "Konum limiti dolu — ek kapasite için hesap yöneticinizle görüşün (self-serve yükseltme yok)",
+                        "retry": false
+                      }
+                    },
+                    {
+                      "result": "Success",
+                      "handler": {
+                        "verb": "navigate",
+                        "screen": "KonumDetay",
+                        "args": [
+                          {
+                            "name": null,
+                            "expr": {
+                              "path": [
+                                "poiId"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "KonumDetay",
+          "title": "Konum",
+          "persona": "ClientAdmin",
+          "params": [
+            {
+              "name": "poiId"
+            }
+          ],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "SubmitPOI",
+                  "command": {
+                    "op": "SubmitPOI",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "UpdatePOI",
+                  "command": {
+                    "op": "UpdatePOI",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "DeletePOI",
+                  "command": {
+                    "op": "DeletePOI",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": true,
+                  "confirmText": "Konum silinsin mi?",
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": [
+                    {
+                      "result": "NotProcessable",
+                      "handler": {
+                        "verb": "toast",
+                        "text": "Bu konum canlı bir kampanyada kullanılıyor — önce ilgili kampanyaları kaldırın",
+                        "retry": false
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "EkipDavet",
+          "title": "Ekip Daveti",
+          "persona": "ClientAdmin",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "form",
+                  "submits": {
+                    "op": "InviteUser",
+                    "args": [],
+                    "mechanic": "remote"
+                  },
+                  "loads": null,
+                  "alias": null,
+                  "fields": [
+                    {
+                      "name": "inviteeEmail",
+                      "validation": {
+                        "required": true
+                      }
+                    }
+                  ],
+                  "steps": [],
+                  "rules": [],
+                  "resultHandlers": [
+                    {
+                      "result": "NotValid",
+                      "handler": {
+                        "verb": "inline-errors"
+                      }
+                    },
+                    {
+                      "result": "NotProcessable",
+                      "handler": {
+                        "verb": "toast",
+                        "text": "Koltuk limiti dolu — ek koltuk için hesap yöneticinizle görüşün",
+                        "retry": false
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "OdemeBekliyor",
+          "title": "Ödeme Bekliyor",
+          "persona": "ClientAdmin",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "detail",
+                  "query": {
+                    "op": "ViewProforma",
+                    "args": [
+                      {
+                        "name": "orgId",
+                        "expr": {
+                          "path": [
+                            "session",
+                            "orgId"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "mechanic": "remote",
+                  "refreshable": false,
+                  "pagination": null,
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "amount",
+                      "vat"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [],
+                  "uiEvents": [],
+                  "actions": []
+                },
+                {
+                  "kind": "action",
+                  "name": "DurumuYenile",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "ViewProforma"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        }
+      ],
+      "flows": [
+        {
+          "name": "KampanyaHazirla",
+          "realizes": "CampaignAuthoring",
+          "steps": [
+            "KampanyaOlustur",
+            "KampanyaDetay"
+          ]
+        },
+        {
+          "name": "KonumYonet",
+          "realizes": "POIManagement",
+          "steps": [
+            "KonumEkle",
+            "KonumDetay"
+          ]
+        }
+      ],
+      "navigation": [],
+      "clientState": [],
+      "whenDeltas": []
+    },
+    {
+      "name": "InternalPanel",
+      "audience": [
+        "Moderator",
+        "AccountManager",
+        "InternalAdmin"
+      ],
+      "deliveryDefault": "remote-only",
+      "entryScreen": "IcPano",
+      "resultDefaults": [
+        {
+          "result": "NotAuthenticated",
+          "handler": {
+            "verb": "banner",
+            "text": "Oturum sona erdi — TruID ile yeniden giriş yapın"
+          }
+        },
+        {
+          "result": "NotAuthorized",
+          "handler": {
+            "verb": "banner",
+            "text": "Bu işlem için yetkiniz yok"
+          }
+        },
+        {
+          "result": "NotValid",
+          "handler": {
+            "verb": "inline-errors"
+          }
+        },
+        {
+          "result": "NotProcessable",
+          "handler": {
+            "verb": "toast",
+            "text": "İşlem şu an gerçekleştirilemedi",
+            "retry": false
+          }
+        },
+        {
+          "result": "ServerError",
+          "handler": {
+            "verb": "toast",
+            "text": "Bir hata oluştu",
+            "retry": true
+          }
+        }
+      ],
+      "usesInterfaces": [
+        {
+          "name": "ListPendingApplications",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "legalName",
+                "type": null
+              },
+              {
+                "name": "sector",
+                "type": null
+              },
+              {
+                "name": "status",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ListPendingApplications",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "ListPendingApplications"
+          }
+        },
+        {
+          "name": "ApproveApplication",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "ApproveApplication",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "ApproveApplication"
+          }
+        },
+        {
+          "name": "RejectApplication",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "RejectApplication",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "RejectApplication"
+          }
+        },
+        {
+          "name": "ListPendingCampaigns",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "description",
+                "type": null
+              },
+              {
+                "name": "status",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ListPendingCampaigns",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "ListPendingCampaigns"
+          }
+        },
+        {
+          "name": "ApproveCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "campaignId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "ApproveCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "ApproveCampaign"
+          }
+        },
+        {
+          "name": "RejectCampaign",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "campaignId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "RejectCampaign",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Campaign",
+            "op": "RejectCampaign"
+          }
+        },
+        {
+          "name": "ListPendingPOIs",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "category",
+                "type": null
+              },
+              {
+                "name": "status",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ListPendingPOIs",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "POIManagement",
+            "op": "ListPendingPOIs"
+          }
+        },
+        {
+          "name": "ApprovePOI",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "poiId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "ApprovePOI",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "POIManagement",
+            "op": "ApprovePOI"
+          }
+        },
+        {
+          "name": "RejectPOI",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "poiId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "RejectPOI",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "POIManagement",
+            "op": "RejectPOI"
+          }
+        },
+        {
+          "name": "CreateEnterpriseApplication",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "legalName",
+              "type": null
+            },
+            {
+              "name": "country",
+              "type": null
+            },
+            {
+              "name": "sector",
+              "type": null
+            },
+            {
+              "name": "taxNumber",
+              "type": null
+            },
+            {
+              "name": "corporateEmail",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "orgId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreateEnterpriseApplication",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "CreateEnterpriseApplication"
+          }
+        },
+        {
+          "name": "MarkEnterprisePaid",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": null,
+          "realizes": {
+            "op": "MarkEnterprisePaid",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "OrgManagement",
+            "op": "MarkEnterprisePaid"
+          }
+        },
+        {
+          "name": "ActivatePremiumLogo",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "orgId",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "logoId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ActivatePremiumLogo",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Distribution",
+            "op": "ActivatePremiumLogo"
+          }
+        },
+        {
+          "name": "CreateEnterpriseFeatureSet",
+          "opKind": "command",
+          "in": [],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "featureSetId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreateEnterpriseFeatureSet",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "InternalAdmin",
+            "op": "CreateEnterpriseFeatureSet"
+          }
+        },
+        {
+          "name": "ViewSystemAnalyticsAM",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "eventType",
+                "type": null
+              },
+              {
+                "name": "count",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ViewSystemAnalyticsAM",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Analytics",
+            "op": "ViewSystemAnalyticsAM"
+          }
+        },
+        {
+          "name": "CreatePackage",
+          "opKind": "command",
+          "in": [],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "packageId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreatePackage",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "InternalAdmin",
+            "op": "CreatePackage"
+          }
+        },
+        {
+          "name": "CreateTaxonomy",
+          "opKind": "command",
+          "in": [],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "taxonomyId",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "CreateTaxonomy",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "InternalAdmin",
+            "op": "CreateTaxonomy"
+          }
+        },
+        {
+          "name": "ViewSystemAnalyticsInternal",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "eventType",
+                "type": null
+              },
+              {
+                "name": "count",
+                "type": null
+              }
+            ]
+          },
+          "results": null,
+          "realizes": {
+            "op": "ViewSystemAnalyticsInternal",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Analytics",
+            "op": "ViewSystemAnalyticsInternal"
+          }
+        }
+      ],
+      "screens": [
+        {
+          "name": "IcPano",
+          "title": "İç Panel",
+          "persona": null,
+          "params": [],
+          "regions": [
+            {
+              "name": "Menu",
+              "role": "navigation",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "GitBasvuruKuyrugu",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "Moderator"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "BasvuruKuyrugu",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitKampanyaKuyrugu",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "Moderator"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "KampanyaKuyrugu",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitKonumKuyrugu",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "Moderator"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "KonumKuyrugu",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitKurumsal",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "AccountManager"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "KurumsalCalisma",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitAnalitikAM",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "AccountManager"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "SistemAnalitikAM",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitTanimlar",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "InternalAdmin"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "Tanimlar",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "GitAnalitikAdmin",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": {
+                    "expr": {
+                      "node": "cmp",
+                      "op": "=",
+                      "left": {
+                        "path": [
+                          "currentUser",
+                          "role"
+                        ]
+                      },
+                      "right": {
+                        "kind": "string",
+                        "value": "InternalAdmin"
+                      }
+                    },
+                    "uxOnly": true
+                  },
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "SistemAnalitikAdmin",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "BasvuruKuyrugu",
+          "title": "Bekleyen Başvurular",
+          "persona": "Moderator",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "ListPendingApplications",
+                    "args": []
+                  },
+                  "mechanic": "remote",
+                  "refreshable": true,
+                  "pagination": {
+                    "intent": "infinite"
+                  },
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "legalName",
+                      "sector",
+                      "status"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [
+                    {
+                      "state": "empty",
+                      "delta": [
+                        {
+                          "verb": "banner",
+                          "text": "Kuyruk boş"
+                        }
+                      ]
+                    }
+                  ],
+                  "uiEvents": [],
+                  "actions": [
+                    {
+                      "kind": "action",
+                      "name": "ApproveApplication",
+                      "command": {
+                        "op": "ApproveApplication",
+                        "mechanic": "remote"
+                      },
+                      "clientOnly": false,
+                      "confirm": false,
+                      "confirmText": null,
+                      "visibleWhen": null,
+                      "invalidates": [
+                        "ListPendingApplications"
+                      ],
+                      "set": [],
+                      "navigation": null,
+                      "resultHandlers": []
+                    },
+                    {
+                      "kind": "action",
+                      "name": "RejectApplication",
+                      "command": {
+                        "op": "RejectApplication",
+                        "mechanic": "remote"
+                      },
+                      "clientOnly": false,
+                      "confirm": true,
+                      "confirmText": "Başvuru reddedilsin mi? Yazılı gerekçe iletilir (60 gün düzeltme penceresi).",
+                      "visibleWhen": null,
+                      "invalidates": [
+                        "ListPendingApplications"
+                      ],
+                      "set": [],
+                      "navigation": null,
+                      "resultHandlers": [
+                        {
+                          "result": "NotProcessable",
+                          "handler": {
+                            "verb": "toast",
+                            "text": "Bu öğe başka bir moderatör tarafından işlendi (artık incelemede değil)",
+                            "retry": false
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "ListPendingApplications"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        },
+        {
+          "name": "KampanyaKuyrugu",
+          "title": "Bekleyen Kampanyalar",
+          "persona": "Moderator",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "ListPendingCampaigns",
+                    "args": []
+                  },
+                  "mechanic": "remote",
+                  "refreshable": true,
+                  "pagination": {
+                    "intent": "infinite"
+                  },
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "description",
+                      "status"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [
+                    {
+                      "state": "empty",
+                      "delta": [
+                        {
+                          "verb": "banner",
+                          "text": "Kuyruk boş"
+                        }
+                      ]
+                    }
+                  ],
+                  "uiEvents": [],
+                  "actions": [
+                    {
+                      "kind": "action",
+                      "name": "ApproveCampaign",
+                      "command": {
+                        "op": "ApproveCampaign",
+                        "mechanic": "remote"
+                      },
+                      "clientOnly": false,
+                      "confirm": false,
+                      "confirmText": null,
+                      "visibleWhen": null,
+                      "invalidates": [
+                        "ListPendingCampaigns"
+                      ],
+                      "set": [],
+                      "navigation": null,
+                      "resultHandlers": []
+                    },
+                    {
+                      "kind": "action",
+                      "name": "RejectCampaign",
+                      "command": {
+                        "op": "RejectCampaign",
+                        "mechanic": "remote"
+                      },
+                      "clientOnly": false,
+                      "confirm": true,
+                      "confirmText": "Kampanya reddedilsin mi? Gerekçe panel + e-posta ile iletilir (yeniden gönderim sınırsız).",
+                      "visibleWhen": null,
+                      "invalidates": [
+                        "ListPendingCampaigns"
+                      ],
+                      "set": [],
+                      "navigation": null,
+                      "resultHandlers": [
+                        {
+                          "result": "NotProcessable",
+                          "handler": {
+                            "verb": "toast",
+                            "text": "Bu öğe başka bir moderatör tarafından işlendi (artık incelemede değil)",
+                            "retry": false
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "ListPendingCampaigns"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        },
+        {
+          "name": "KonumKuyrugu",
+          "title": "Bekleyen Konumlar",
+          "persona": "Moderator",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "ListPendingPOIs",
+                    "args": []
+                  },
+                  "mechanic": "remote",
+                  "refreshable": true,
+                  "pagination": {
+                    "intent": "infinite"
+                  },
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "category",
+                      "status"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [
+                    {
+                      "state": "empty",
+                      "delta": [
+                        {
+                          "verb": "banner",
+                          "text": "Kuyruk boş"
+                        }
+                      ]
+                    }
+                  ],
+                  "uiEvents": [],
+                  "actions": [
+                    {
+                      "kind": "action",
+                      "name": "ApprovePOI",
+                      "command": {
+                        "op": "ApprovePOI",
+                        "mechanic": "remote"
+                      },
+                      "clientOnly": false,
+                      "confirm": false,
+                      "confirmText": null,
+                      "visibleWhen": null,
+                      "invalidates": [
+                        "ListPendingPOIs"
+                      ],
+                      "set": [],
+                      "navigation": null,
+                      "resultHandlers": []
+                    },
+                    {
+                      "kind": "action",
+                      "name": "RejectPOI",
+                      "command": {
+                        "op": "RejectPOI",
+                        "mechanic": "remote"
+                      },
+                      "clientOnly": false,
+                      "confirm": true,
+                      "confirmText": "Konum reddedilsin mi? Gerekçe client'a iletilir.",
+                      "visibleWhen": null,
+                      "invalidates": [
+                        "ListPendingPOIs"
+                      ],
+                      "set": [],
+                      "navigation": null,
+                      "resultHandlers": [
+                        {
+                          "result": "NotProcessable",
+                          "handler": {
+                            "verb": "toast",
+                            "text": "Bu öğe başka bir moderatör tarafından işlendi (artık incelemede değil)",
+                            "retry": false
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "ListPendingPOIs"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        },
+        {
+          "name": "KurumsalCalisma",
+          "title": "Kurumsal Kurulum",
+          "persona": "AccountManager",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "form",
+                  "submits": {
+                    "op": "CreateEnterpriseApplication",
+                    "args": [],
+                    "mechanic": "remote"
+                  },
+                  "loads": null,
+                  "alias": null,
+                  "fields": [
+                    {
+                      "name": "legalName",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "country",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "sector",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "taxNumber",
+                      "validation": {
+                        "required": true
+                      }
+                    },
+                    {
+                      "name": "corporateEmail",
+                      "validation": {
+                        "required": true
+                      }
+                    }
+                  ],
+                  "steps": [],
+                  "rules": [],
+                  "resultHandlers": [
+                    {
+                      "result": "Success",
+                      "handler": {
+                        "verb": "navigate",
+                        "screen": "KurumsalOrg",
+                        "args": [
+                          {
+                            "name": null,
+                            "expr": {
+                              "path": [
+                                "orgId"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "KurumsalOrg",
+          "title": "Kurumsal Müşteri",
+          "persona": "AccountManager",
+          "params": [
+            {
+              "name": "orgId"
+            }
+          ],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "MarkEnterprisePaid",
+                  "command": {
+                    "op": "MarkEnterprisePaid",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": true,
+                  "confirmText": "Bu müşteri aktif edilecek ('Ödendi' işaretlenecek). Emin misiniz?",
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "ActivatePremiumLogo",
+                  "command": {
+                    "op": "ActivatePremiumLogo",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "CreateEnterpriseFeatureSet",
+                  "command": {
+                    "op": "CreateEnterpriseFeatureSet",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "Tanimlar",
+          "title": "Tanımlar (Paket & Sektör)",
+          "persona": "InternalAdmin",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "action",
+                  "name": "CreatePackage",
+                  "command": {
+                    "op": "CreatePackage",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                },
+                {
+                  "kind": "action",
+                  "name": "CreateTaxonomy",
+                  "command": {
+                    "op": "CreateTaxonomy",
+                    "mechanic": "remote"
+                  },
+                  "clientOnly": false,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": null,
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "SistemAnalitikAM",
+          "title": "Sistem Analitiği (Temsilci)",
+          "persona": "AccountManager",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "ViewSystemAnalyticsAM",
+                    "args": []
+                  },
+                  "mechanic": "remote",
+                  "refreshable": true,
+                  "pagination": {
+                    "intent": "pager"
+                  },
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "eventType",
+                      "count"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [
+                    {
+                      "state": "empty",
+                      "delta": [
+                        {
+                          "verb": "banner",
+                          "text": "Veri yok"
+                        }
+                      ]
+                    }
+                  ],
+                  "uiEvents": [],
+                  "actions": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "ViewSystemAnalyticsAM"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        },
+        {
+          "name": "SistemAnalitikAdmin",
+          "title": "Sistem Analitiği (Yönetim)",
+          "persona": "InternalAdmin",
+          "params": [],
+          "regions": [
+            {
+              "name": "Icerik",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "ViewSystemAnalyticsInternal",
+                    "args": []
+                  },
+                  "mechanic": "remote",
+                  "refreshable": true,
+                  "pagination": {
+                    "intent": "pager"
+                  },
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "eventType",
+                      "count"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [
+                    {
+                      "state": "empty",
+                      "delta": [
+                        {
+                          "verb": "banner",
+                          "text": "Veri yok"
+                        }
+                      ]
+                    }
+                  ],
+                  "uiEvents": [],
+                  "actions": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "ViewSystemAnalyticsInternal"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        }
+      ],
+      "flows": [
+        {
+          "name": "BasvuruModerasyon",
+          "realizes": "ApplicationModeration",
+          "steps": [
+            "BasvuruKuyrugu"
+          ]
+        },
+        {
+          "name": "KampanyaModerasyon",
+          "realizes": "CampaignModeration",
+          "steps": [
+            "KampanyaKuyrugu"
+          ]
+        },
+        {
+          "name": "KonumModerasyon",
+          "realizes": "POIModeration",
+          "steps": [
+            "KonumKuyrugu"
+          ]
+        }
+      ],
+      "navigation": [],
+      "clientState": [],
+      "whenDeltas": []
+    }
+  ],
+  "meta": {
+    "hasErrors": false,
+    "errorCount": 0
+  }
+}

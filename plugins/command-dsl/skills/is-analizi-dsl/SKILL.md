@@ -43,6 +43,41 @@ Bu yapı iki ilkeyi dayatır ve skill'in tüm tasarımı bunlardan çıkar:
    flow'a bağlanmalı; `by` aktörü flow'un `for` aktörüyle eşleşmeli; tip/kural
    uyumlu olmalı. Emit'ten önce bunu denetlersin (bkz. `references/consistency-and-emit.md`).
 
+## Değişmezler (v1 — parafraz YASAK, harfiyen taşınır)
+
+Bu blok fazlardan bağımsızdır: **fazlar "ne zaman", değişmezler "her zaman"**.
+Uzun/çok-fazlı oturumda aşınırlar; bu yüzden faz-sınırında, emit öncesinde ve her
+hata-düzeltme döngüsünden sonra **harfiyen** yeniden okunur (parafraz = anchor-drift).
+
+1. **Büyü yok — her şey authored.** Skill SORAR, cevabı UYDURMAZ. Boşluğu örtük
+   yetkiyle doldurma; **çıkarım soru üretir, cevap üretmez.**
+2. **ÇİFT-SIFIR.** Emit ancak 0-error VE 0-sessiz-eksik ile geçer: ★-süpürme
+   yapılmış, güvenlik-değeri (yetki/hassasiyet genişliği) teşhir edilmiş, sınır-devri —
+   başka aktör/modül/ekrana el-değiştirme — sorulmuş olmalı.
+3. **Warning = çözülmemiş soru.** Skill warning'i kendi uydurduğu düzeltmeyle
+   kapatamaz — kapanış authored: sor→düzelt / gerekçeli-kabul / yanlış-pozitif
+   göster. Sessiz auto-fix YASAK.
+4. **Structural-first.** Yapısal çözülebilen yapısal kalır; yalnız gerçek
+   serbest-proza `note`. Yorumlar makinece anlamsızdır.
+5. **Gate ≠ niyet.** Gate'ler yalnız MEKANİĞİ kanıtlar; niyet-uyumunun tek
+   otoritesi KULLANICIDIR — hiçbir gate-geçişi AskUser'ı iptal edemez.
+
+## In-flight öz-denetim (bahane → çürütme · red-flags)
+
+Bir değişmezi (★-süpürme, güvenlik-teşhiri, geri-okuma) atlamak için içten gelen
+gerekçeye karşı — Gate ÇIKIŞTA kilitler, bu blok SÜREÇ-İÇİNDE, Gate'e varmadan düzeltir:
+
+| Atlatma bahanesi | Çürütme |
+|---|---|
+| "Bu proje basit, Envanter'e gerek yok" | Basitlik ★-süpürmeyi kaldırmaz; ★ yine sorulur ya da örtük-kapandığı gösterilir. |
+| "Kullanıcı acele ediyor" | ÇİFT-SIFIR hiçbir tempoda kısalmaz; hız = daha az laf, daha az soru DEĞİL. |
+| "Cevabı tahmin edebiliyorum" | Tahmin = çıkarım; çıkarım cevap değil SORU üretir (Değişmez-1). |
+| "Bunu sonra hallederiz" | Ertelenen ★ authored-kayıt olur (durum=beklemede), sessizce düşmez. |
+
+**Red flags (kendini yakala):** ★-soru atlandı · faz-sırası bozuldu · kullanıcıya
+sorulmadan clause dolduruldu · warning sessiz kapatıldı · gate-geçti diye AskUser
+atlandı. Biri olduysa DUR, adını koy, düzelt.
+
 ## Altın kurallar (her oturumda geçerli)
 
 - **Kullanıcıya jargon gösterme.** "ownership", "4'lü imza", "calculate",
@@ -55,13 +90,40 @@ Bu yapı iki ilkeyi dayatır ve skill'in tüm tasarımı bunlardan çıkar:
   boşa iş yapmamak ve yanlış anlamayı erken yakalamak için.
 - **Anti-pattern guard'ları aktif tut.** Her katmanın tipik hatası var; aşağıda
   her fazda işaretli. Bunları sessizce yakala ve kullanıcıya nazikçe sor.
-- **Birinci-sınıf olmayan iş-kuralını `note` ile yakala.** DSL'in formalize edemediği
-  ama işe-ait bir kural/kısıt/dikkat-noktası (ör. "onay 48 saat içinde yapılmalı",
-  karmaşık bir istisna) gelirse **kaybetme** — ilgili operation/flow/process'e
-  `note """…"""` ile yaz (`#` yorumu derlemede atılır; `note` makinece taşınır → alt
-  katmanlara/geliştiriciye ulaşır). Ayrım: gerçek **iş-kuralı → note**; saf proje-yönetimi
-  (paydaş-siyaseti, fizibilite, maliyet, milestone) `.cdsl`'e GİRMEZ — bunlar aile-üstüdür.
-- **Onaylanmamış hiçbir şeyi emit etme.** Doküman/DSL üretimi en sondadır.
+- **Birinci-sınıf olmayan iş-kuralını `note` ile yakala** (Değişmez-4'ün uygulaması).
+  DSL'in formalize edemediği ama işe-ait bir kural/kısıt/dikkat-noktası (ör. "onay 48
+  saat içinde yapılmalı", karmaşık bir istisna) gelirse **kaybetme** — ilgili
+  operation/flow/process'e `note """…"""` ile yaz (`#` yorumu derlemede atılır; `note`
+  makinece taşınır → alt katmanlara/geliştiriciye ulaşır). Ayrım: gerçek **iş-kuralı →
+  note**; saf proje-yönetimi (paydaş-siyaseti, fizibilite, maliyet, milestone) `.cdsl`'e
+  GİRMEZ — bunlar aile-üstüdür.
+- **Üretim en sondadır.** Doküman/DSL üretimi en son adımdır; onay eksikse emit yok —
+  bu ÇİFT-SIFIR'ın (Değişmez-2) sonucudur, ayrı bir kural değil.
+
+### Karar-triyaj & sınırlar (hibrit-onay rafinmanı)
+
+Hibrit onay içinde her açık kararı **triyajla** — ama KRİTİK sınır: triyaj yalnız
+**mekanik/çeviri** kararları içindir. **Authored iş-içeriği** (kural, ownership, durum,
+yapı) geri-alınabilir olsa BİLE asla "kendin çöz" sınıfına girmez — büyü-yok mutlaktır,
+geri-alınabilirlik onu gevşetmez (Değişmez-1).
+- **Mekanik + geri-alınabilir + düşük-etki** (jargon→düz dil, iskelet-ID, isimlendirme,
+  deterministik emit/rapor) → kendin çöz, kararı deftere teşhir et (sonra
+  geçersiz-kılınabilir); onay için durma, boşuna soru sorma.
+- **Authored iş-içeriği VEYA güvenlik-etkili** (kural/ownership/durum/yan-etki;
+  ownership genişliği, hassasiyet/yetki, veri-maruziyeti) → **SOR / ESKALE et**, asla
+  kendin çözme (Değişmez-1 + "Ne sormadım?" sweep-2). Geri-alınabilirlik bunu değiştirmez.
+
+**Üç-kademeli sınır (Boundaries):**
+- **Always** (sormadan yap): jargonu düz dile çevir, iskelet-ID üret, deterministik
+  emit/rapor koştur.
+- **Ask-First** (önce sor): ownership seçimi, durum-geçişi, otomatik yan-etki (`perform`/
+  `send`), sınır-devri (handoff).
+- **Never** (asla yapma): cevabı uydur, warning'i sessiz kapat, onaysız emit et, gate'i
+  kendin feragat et.
+
+**Netleştirme döngü-kesici:** aynı noktada **3 başarısız netleştirme** olduysa DUR —
+döngüye devam etme; **blocker'ı adlandır** ("Şu karar olmadan ilerleyemiyorum, çünkü…")
+ve kullanıcıya net bir seçenek kümesi sun.
 
 ## Başlamadan
 
@@ -75,12 +137,33 @@ Ton: sıcak, sade, yönlendirici. Örnek açılış:
 Sonra dört fazı sırayla yürüt; Faz 3'ten sonra emit'ten önce ön-gereksinim
 kapanışını (Faz 3.5) çalıştır.
 
-**Sessiz-eksik disiplini (her faz + emit).** Faz'lar zorunlu ekseni (aktör/işlem/akış) kapatır; ama
-**opsiyonel** iş-kuralları (guard'lar, `calculate` durum-geçişi, `perform` zinciri, `schedule`,
-ilişki-ownership, akış dallanması…) sorulmazsa sessizce yok sayılır — doğrulayıcı bunu YAKALAMAZ.
-Dinlerken `references/dsl-reference.md` **Yetenek Envanteri**nin "sinyal" kolonunu tara (kullanıcı
-"gece otomatik çalışır" der, `schedule`'ı *sen* bilirsin); eşleşmeyi aday-soru olarak kuyruğa al
-(hibrit onay). Emit'ten önce **★** satırlarını süpür → "Emit öncesi — Tutarlılık self-check".
+**Sessiz-eksik disiplini → ElicitationState (her faz + emit).** Faz'lar zorunlu ekseni
+(aktör/işlem/akış) kapatır; ama **opsiyonel** iş-kuralları (guard'lar, `calculate` durum-geçişi,
+`perform` zinciri, `schedule`, ilişki-ownership, akış dallanması…) sorulmazsa sessizce yok sayılır —
+doğrulayıcı bunu YAKALAMAZ. Bu yüzden her opsiyonel sinyal hafızada değil, **açık bir durum-kaydında**
+yaşar:
+
+- **ElicitationState kaydı:** `{sinyal; hedefConstruct; risk (★/○); durum: cevaplandı | atlandı |
+  beklemede}`. Dinlerken `references/dsl-reference.md` **Yetenek Envanteri**nin "sinyal" kolonunu tara
+  (kullanıcı "gece otomatik çalışır" der, `schedule`'ı *sen* bilirsin) ve eşleşen her sinyali bu kayıt
+  olarak kuyruğa al. **★-süpürme artık ezberden Envanter gezme değil, MEKANİK sorgudur:** "durum=beklemede
+  ∧ risk=★ kaydı var mı?" — varsa emit geçemez (Değişmez-2, ÇİFT-SIFIR).
+- **İki-modlu soru (tek-soru-tek-cevap):** cevabı **önerebiliyorsan** → toplu öner + tek onay (hibrit
+  onay). Öneremiyorsan (gerçek bilinmeyen) → **tek soru sor, cevabı bekle** — birden çok bilinmeyeni tek
+  mesaja yığma.
+- **Kapalı komut paleti** (yalnız bunlar; palet-dışı komut uydurma yok): `/durum` açık kayıtları
+  dökümler · `/geri` son onayı geri alır · `/neden` bir kaydın gerekçesini gösterir · `/atla` bir sinyali
+  **authored-atlama** olarak kapatır (durum=atlandı; kim/neden yazılır). Declared-skip (`/atla`) ≠
+  sessiz-eksik: atlanan kayıt ★-süpürmede yine teşhir edilir, sessizce düşmez.
+
+**Oturum karar-defteri (disk = otorite).** ElicitationState ve her hibrit-onay, çalışma-dizinindeki
+**oturum karar-defterine** yazılır — uzun oturumda LLM-hafızası aşınır, dosya otoritedir. **Kadans:** her
+faz-geçişinde ve emit'ten önce defteri **DİSKTEN yeniden oku** (hafızadan değil); cevaplanmış soru tekrar
+sorulmaz (yalnız "geçen sefer X demiştiniz, hâlâ geçerli mi?" teyidi). Ertelenen/atlanan sorular
+kategori-tablosunda (Resolved / Deferred / Clear / Outstanding) **kalıcı iz** bırakır → ★-süpürme ve kör
+kabul-gözlemcisi bu tabloyu okur. Defterin DEĞİŞMEZ sınırları, girdi-şeması ve deferred-tablo formatı:
+**`references/session-ledger.md`** (anayasa + format orada; yalnız süreç-durumu, domain-gerçeği DEĞİL;
+content-hash damgası — wall-clock timestamp YASAK).
 
 ---
 
@@ -126,6 +209,17 @@ servis, iade gibi 5 ayrı süreci tek çatıya toplama eğilimi olur. Sınırı 
 
 **Toplu öner + onayla.** Süreç referans-only'dir; burada sadece isim/sınır/aktör
 netleşir, içi sonraki fazlarda dolar. Detay: `references/dsl-reference.md` (§4).
+
+**Başarı ölçütü (ölçülebilir SC) — büyük-resimle aynı anda sor.** Davranışın **doğru**
+olması ("onaylanınca durum değişir") ile ürünün **başarılı** olması ("onay süresi 2
+günden 2 saate iner") ayrı şeylerdir. Süreç sınırları netleşince bir de bunu sor:
+> "Bu işi başardığımızı NASIL ölçeceğiz — hangi somut, ölçülebilir sonuç?"
+
+Teyitli, **ölçülebilir** cevap yapısal SC-adayı olur (ilgili process'e `note` ya da
+Envanter kaydı). **ÖLÇÜLEMEYEN başarı ifadesi ("kullanıcılar mutlu olur") yapısallaşmaz**
+— ya ölçülebilir biçime indir ("haftalık aktif kullanıcı ≥ X"), ya `note` olarak bırak, ya
+hiç yazma (correctness-over-completeness; ölçülemeyeni uydurma). Op-düzeyi ölçüt-yakalama:
+`references/operation-translation.md`.
 
 ---
 
@@ -240,11 +334,12 @@ düzelt, tekrar denetle.
 
 **"Ne sormadım?" geçidi — ÇİFT-SIFIR (0-tutarsızlık VE 0-sessiz-eksik).** Tutarlılık tek başına
 YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyonel guard / `calculate` /
-`perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). Üç süpürme:
-1. **Sessiz-eksik (★ süpürmesi):** `references/dsl-reference.md` **Yetenek Envanteri**nin **★**
-   satırlarını gez; sorulmamış her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu sor
-   ("Bu işlemin bir ön-koşulu var mı? / Onaylanınca durum değişiyor mu? / Otomatik tetiklenen bir
-   şey var mı?"). Hiçbir ★'ı sessizce atlama.
+`perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). Dört süpürme:
+1. **Sessiz-eksik (★ süpürmesi):** ElicitationState/defter üzerinde **MEKANİK sorgu** çalıştır —
+   "durum=beklemede ∧ risk=★ kaydı var mı?" (Yetenek Envanteri'ni ezberden gezme; kayıt-tablosunu
+   sorgula). Kalan her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu sor ("Bu işlemin bir
+   ön-koşulu var mı? / Onaylanınca durum değişiyor mu? / Otomatik tetiklenen bir şey var mı?"). Hiçbir
+   ★'ı sessizce atlama.
 2. **Sessiz-yanlış (teşhir):** zorunlu **ownership** yanlış-değerle de tutarlı görünür — `any` /
    `public` genişliği güvenlik-kritiktir. Seçtiğin ownership'i sessiz emit etme: "Bu işlemi herkes
    (any) yapabiliyor — kendi kaydıyla (own) sınırlı olmalı mı?" diye açıkça onaylat.
@@ -252,6 +347,12 @@ YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyo
    tüketiyor mu? El-değiştirme (handoff) açık mı — process `stage … by <aktör>` / `perform` / sonraki
    flow adımı — yoksa "öteki taraf halleder" diye sessiz mi varsayılıyor? Çok-aktör süreçte el
    değiştiren her aktörün payı modellenmelidir.
+4. **Kör kabul-gözlemcisi (defter ↔ DSL):** oturum karar-defterinden (bkz. `references/session-ledger.md`)
+   kullanıcının **onayladığı** kuralların listesini **DSL'e BAKMADAN, DOSYADAN** çıkar; emit edilecek
+   `.cdsl` ile karşılaştır; her fark = warning = çözülmemiş-soru → hibrit-onaya taşı. Gözlemci **ASLA
+   "geçti" damgası VERMEZ** — soru-üreticidir, hakem değil (pass-otoritesi deterministik validator +
+   kullanıcı; aksi Değişmez-5 ihlali — gate≠niyet, niyet-otoritesi kullanıcıdır). Defter diske düzenli yazılmadıysa gözlemci boş-kümeyle "fark yok"
+   der = sahte-sıfır; bu yüzden defter-kadansı (bkz. "Oturum karar-defteri") bu süpürmenin ön-koşuludur.
 
 **Kalan warning = çözülmemiş soru (üçüncü hâl — tutarsızlık değil, sessiz-eksik değil).** Warning'i
 skill KENDİ uydurduğu düzeltmeyle kapatamaz — çözüm **authored**'dır (büyü yok). Meşru kapanış üç:

@@ -15,16 +15,16 @@ QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kaps
 
 **★★** = en yüksek (kapsam sayılır, ihlal doğrulanmaz) · **★** = yüksek · **○** = orta
 
-| Derinlik | Ne zaman gerekli (sinyal) | Faz | Risk |
-|---|---|---|---|
-| Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8) | 4 | ★★ |
-| `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ |
-| `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ |
-| `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ |
-| `waive … until` (süreli) | dalı kapsamak yerine waive ediyorsan süre koydun mu? `until`'siz waive = **kalıcı sessiz boşluk** | 2 | ★ |
-| senaryo `realizes flow/process` (yaşam döngüsü) | çok-adımlı / çok-aktör akış var mı? presence-coverage | 5 | ○ (warning-routed) |
-| `page` assert'leri (paginated) | sayfalı sorguda jenerik ötesi sayfa-özel veri doğrulaması gerekli mi? | 4 | ○ |
-| stub `returns` gerçekçiliği | dış çağrı sonucu testin sonucunu etkiliyorsa `returns` içeriği gerçeği yansıtmalı | 3 | ○ |
+| Derinlik | Ne zaman gerekli (sinyal) | Faz | Risk | Atlanırsa (adlandırılmış mod) |
+|---|---|---|---|---|
+| Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8) | 4 | ★★ | **yalancı-kapsam (tetiklemeyen-negatif)** — dal "covered" sayılır ama ihlal hiç tetiklenmez; yetkisiz/hatalı yol sessizce geçebilir |
+| `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ | **doğrulanmamış-etki** — dönüş doğru ama kalıcı etki (kayıt/event/dış-çağrı) hiç assert'lenmez; sığ-yeşil test |
+| `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ | **koşulmayan-zaman-dalı** — zaman-koşullu dal "covered" ama zaman ilerletilmediğinden hiç koşmaz |
+| `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ | **kurulumsuz-dal** — ön-durum (mevcut kayıt/başkasının kaydı/limit-aşımı) kurulmadığından dal gerçekten tetiklenmez |
+| `waive … until` (süreli) | dalı kapsamak yerine waive ediyorsan süre koydun mu? `until`'siz waive = **kalıcı sessiz boşluk** | 2 | ★ | **kalıcı-sessiz-boşluk (bayat-istisna)** — süresiz waive; kapsanmayan dal kalıcı olarak sessizce muaf kalır |
+| senaryo `realizes flow/process` (yaşam döngüsü) | çok-adımlı / çok-aktör akış var mı? presence-coverage | 5 | ○ (warning-routed) | **kapsanmayan-yaşamdöngüsü** — çok-adım/çok-aktör akış senaryosu yok; uçtan-uca dizi doğrulanmaz |
+| `page` assert'leri (paginated) | sayfalı sorguda jenerik ötesi sayfa-özel veri doğrulaması gerekli mi? | 4 | ○ | **doğrulanmamış-sayfa** — sayfalı sorguda jenerik ötesi sayfa-özel veri assert'lenmez |
+| stub `returns` gerçekçiliği | dış çağrı sonucu testin sonucunu etkiliyorsa `returns` içeriği gerçeği yansıtmalı | 3 | ○ | **gerçekdışı-stub** — dış-çağrı sonucu gerçeği yansıtmaz; test yanlış öncül üstünde yeşil verir |
 
 ## 1. Kök + uses ikilisi (§2, karar #2/#20)
 
