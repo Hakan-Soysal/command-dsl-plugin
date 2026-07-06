@@ -53,6 +53,16 @@ bütünlük kuralını discharge eder — bu, "tutarlılık > sözdizimi" ilkesi
   `calls Stripe.Charge compensate with Stripe.Refund`'a çevirirsin. "Havale, hesabın bakiyesi
   yeterliyse geçer" → `access { reads Account as src by from }` + `rule { amount <= src.balance }`.
   "Limit kontrolü için risk-module'üne bakmalı" → `calls Risk.GetLimit as cap` + `rule { amount <= cap }`.
+- **⭐ Jargon-gizlemenin İSTİSNASI = kavram-koçluğu.** Bazı teknik eksenler kullanıcının iş-cümlesinden
+  TÜRETİLEMEZ, çünkü kavramın var olduğunu bilmez (OAuth scope, idempotency, optimistic-locking, PKCE…).
+  Böyle bir eksende ne **sessizce atla** (spec eksik kalır) ne de **jargon dök**. Üçüncü yol: **düz-dille
+  açıkla + neden BU app için önemli + hangi SOYUT kararı istiyorsun** — sonra kararı al; teknik terimi yine
+  SEN türetip DSL'e yazarsın. Örn: *"İki üye aynı son koltuğa aynı anda basarsa çift-rezervasyon olabilir;
+  'aynı kişi bir derse bir kez' güvencesini koyalım mı?"* (idempotency). *"Bazı kullanıcıları sadece-okumaya
+  kısıtlamak ister misin?"* (scope). **KURAL KORUNUR:** çıktı (manifest) hâlâ SOYUT + sağlayıcı-nötr'dür —
+  provider adı / secret / PKCE / konsol-ekran-yolu manifest'e GİRMEZ. Bunlar **runtime kararı**dır; kurulum
+  el-tutması `spec-context`'in CLAUDE.md'sine ve `behavior-gate` runtime-input'una aittir (canlı-dökümanla,
+  ekran-yolu gömmeden). **Kavramı öğret, soyut kararı çıkar; kurulumu downstream'e bırak.**
 - **Hibrit onay.** Her fazda önce **toplu öneri** (kısa liste), sonra tek soruyla onay.
   Kullanıcı bir öğeye takılırsa orada derinleş. Onay almadan alt faza inme.
 - **Güvenlik-zayıflatan her eksende MUTLAKA sor.** ownership genişletme, roles yetki-aşımı,
@@ -173,7 +183,11 @@ access verme (warning); iş'in salt-okunur saydığı entity'yi tech'te mutasyon
 - "**Kimin kaydı** üzerinde?" → `ownership own|any|all|public|<relation>` (satır-düzeyi).
 - "Bir **öznitelik koşulu** var mı (ör. sadece kendi bölgesindeki kayıt)?" → `permit when
   resource.* … actor.*` (ABAC).
-- OAuth kapsamı gerekiyorsa → `scope "…"`.
+- OAuth kapsamı gerekiyorsa → `scope "…"`. **Kavram-koçluğuyla çıkar** (kullanıcı "scope"u bilmeyebilir):
+  *"Giriş yapmış bir uygulamanın neyi yapabileceğini sınırlamak ister misin — ör. bu işlemi yalnız belirli
+  yetkiye sahip token'lar çağırabilsin?"* → soyut `scope`. **Provider / secret / PKCE / konsol-ekranı
+  manifest'e GİRMEZ** (runtime kararı → `spec-context` CLAUDE.md'si scope-varsa bunları canlı-dökümanla
+  el-tutar; ekran-yolu gömmez).
 
 **⚠ Anti-pattern — Yetki gevşetme:** ownership'i iş'ten geniş yapma (`own`→`any`), roller
 yetkili aktör kümesini aşma. Bunlar **güvenlik-zayıflatma warning**'i — her birini açıkça onaylat.

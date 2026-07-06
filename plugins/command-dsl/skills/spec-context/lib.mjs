@@ -52,6 +52,24 @@ export function renderClaudeMd({ ops, entities }, header) {
     L.push('## Entity Invariant\'ları (app state\'i HER ZAMAN sağlamalı)', '');
     for (const e of entWithInv) { L.push(`### ${e.id}`); for (const t of e.invariants) L.push(`- \`${t}\` — bu özelliği daima koru`); L.push(''); }
   }
+  // OAuth scope kurulumu — RUNTIME rehberi (yalnız scope-sınırlı op varsa). Manifest sağlayıcı-nötr
+  // kalır; provider/secret/PKCE runtime kararıdır. Statik metin (byte-stable); ekran-yolu GÖMÜLMEZ.
+  if (ops.some((o) => o.scopes.length)) {
+    L.push(
+      '## OAuth Scope Kurulumu (RUNTIME — implementasyon anında; spec sağlayıcı-nötr)', '',
+      '> Yukarıdaki bazı operasyonlar **scope** ile yetki-sınırlı. Scope\'lar **çalışma-zamanında bir OAuth',
+      '> sağlayıcısı** ile uygulanır — bu bir implementasyon/runtime kararıdır; spec (manifest) bunu KASITLI',
+      '> olarak sağlayıcı-nötr bırakır. Vibecode/çalıştırma anında:', '',
+      '- Bir **OAuth provider** seç (ihtiyacına göre; bu spec belirli bir provider dayatmaz).',
+      '- `client id` / `client secret` değerlerini provider\'ının **GÜNCEL** dökümanından al — bu dosya',
+      '  provider konsol-ekranlarını KASITLI olarak tarif etmez (konsollar sık değişir → bayat-yönlendirme',
+      '  riski). Güncel dökümana bak (gerekirse Context7/web ile çek). Secret\'ı **repoya COMMIT ETME**',
+      '  (env / secret-store).',
+      '- **PKCE**\'yi provider\'ının önerdiği gibi ayarla (SPA/native istemcilerde genelde PKCE-açık).',
+      '- Scope-sınırlı işaretlenen her operasyonda, runtime\'da **token\'ın gerekli scope\'a sahip olduğunu',
+      '  doğrula**; yoksa **reddet** (bu, yukarıdaki "Yetki (ZORUNLU zorla)" satırının runtime karşılığıdır).',
+      '');
+  }
   return L.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
 }
 function opCard(op) {
@@ -92,6 +110,15 @@ function selftest() {
   chk('render invariant section', md.includes('sum of entries.amount = total'), true);
   chk('render NO timestamp/manifest-dump', /serving|pagination|builtAt|\d{4}-\d\d-\d\dT/.test(md), false); // negatif: dökme/timestamp yok
   chk('header no timestamp', /\d{4}-\d\d-\d\dT/.test(provenanceHeader('a', 'b')), false);
+  // OAuth scope kurulumu: scope YOK (gift-card fixture) → bölüm YOK (negatif)
+  chk('NO scope section when no scopes', md.includes('OAuth Scope Kurulumu'), false);
+  // scope VAR → bölüm çıkar (pozitif) + provider-nötr (belirli provider adı YOK) + secret-commit uyarısı
+  const mScoped = { operations: [{ id: 'Pay', module: 'Bil', roles: ['User'], scopes: ['payments:write'], validation: [], rule: [], throws: [] }], entities: [] };
+  const mdScoped = renderClaudeMd(extractObligations(mScoped), provenanceHeader('x', 'y'));
+  chk('scope section appears when scoped', mdScoped.includes('OAuth Scope Kurulumu'), true);
+  chk('scope section names NO specific provider', /Auth0|Okta|Cognito|Keycloak/.test(mdScoped), false); // sağlayıcı-nötr
+  chk('scope section warns commit-etme', mdScoped.includes('COMMIT ETME'), true);
+  chk('scope section byte-stable', renderClaudeMd(extractObligations(mScoped), provenanceHeader('x', 'y')) === mdScoped, true);
   // negatif: bozuk manifest throw
   let threw = false; try { extractObligations({ operations: 'x' }); } catch { threw = true; }
   chk('extract throws on malformed', threw, true);

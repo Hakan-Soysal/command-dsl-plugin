@@ -19,3 +19,18 @@
 
 ### Ledger
 - `sum of entries.amount = total` — bu özelliği daima koru
+
+## OAuth Scope Kurulumu (RUNTIME — implementasyon anında; spec sağlayıcı-nötr)
+
+> Yukarıdaki bazı operasyonlar **scope** ile yetki-sınırlı. Scope'lar **çalışma-zamanında bir OAuth
+> sağlayıcısı** ile uygulanır — bu bir implementasyon/runtime kararıdır; spec (manifest) bunu KASITLI
+> olarak sağlayıcı-nötr bırakır. Vibecode/çalıştırma anında:
+
+- Bir **OAuth provider** seç (ihtiyacına göre; bu spec belirli bir provider dayatmaz).
+- `client id` / `client secret` değerlerini provider'ının **GÜNCEL** dökümanından al — bu dosya
+  provider konsol-ekranlarını KASITLI olarak tarif etmez (konsollar sık değişir → bayat-yönlendirme
+  riski). Güncel dökümana bak (gerekirse Context7/web ile çek). Secret'ı **repoya COMMIT ETME**
+  (env / secret-store).
+- **PKCE**'yi provider'ının önerdiği gibi ayarla (SPA/native istemcilerde genelde PKCE-açık).
+- Scope-sınırlı işaretlenen her operasyonda, runtime'da **token'ın gerekli scope'a sahip olduğunu
+  doğrula**; yoksa **reddet** (bu, yukarıdaki "Yetki (ZORUNLU zorla)" satırının runtime karşılığıdır).
