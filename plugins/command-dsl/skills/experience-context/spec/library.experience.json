@@ -1,0 +1,534 @@
+{
+  "mode": "linked",
+  "contract": {
+    "business": "./library.operations.json",
+    "tech": "./library.manifest.json"
+  },
+  "shared": {
+    "usesInterfaces": [
+      {
+        "name": "Login",
+        "opKind": "command",
+        "in": [
+          {
+            "name": "email",
+            "type": null
+          },
+          {
+            "name": "password",
+            "type": null
+          }
+        ],
+        "out": {
+          "cardinality": "single",
+          "fields": [
+            {
+              "name": "token",
+              "type": null
+            }
+          ]
+        },
+        "results": [
+          "Success",
+          "NotAuthenticated",
+          "ServerError"
+        ],
+        "realizes": null,
+        "remoteSource": null
+      }
+    ],
+    "types": [],
+    "screens": [
+      {
+        "name": "Login",
+        "title": "Giriş",
+        "persona": null,
+        "params": [],
+        "regions": [
+          {
+            "name": "main",
+            "role": "focus",
+            "collapseWhen": null,
+            "children": [],
+            "components": [
+              {
+                "kind": "form",
+                "submits": {
+                  "op": "Login",
+                  "args": [],
+                  "mechanic": "remote"
+                },
+                "loads": null,
+                "alias": null,
+                "fields": [
+                  {
+                    "name": "email",
+                    "validation": {
+                      "required": true
+                    }
+                  },
+                  {
+                    "name": "password",
+                    "validation": {
+                      "required": true
+                    }
+                  }
+                ],
+                "steps": [],
+                "rules": [],
+                "resultHandlers": []
+              }
+            ],
+            "targetEscapes": []
+          }
+        ],
+        "whenDeltas": [],
+        "uiEvents": [],
+        "clientState": []
+      }
+    ]
+  },
+  "experiences": [
+    {
+      "name": "MemberApp",
+      "audience": [
+        "Member"
+      ],
+      "deliveryDefault": "offline-first",
+      "entryScreen": "MyLoans",
+      "resultDefaults": [
+        {
+          "result": "NotAuthenticated",
+          "handler": {
+            "verb": "navigate",
+            "screen": "Login",
+            "args": []
+          }
+        },
+        {
+          "result": "ServerError",
+          "handler": {
+            "verb": "toast",
+            "text": "Bir sorun oluştu",
+            "retry": true
+          }
+        },
+        {
+          "result": "NotValid",
+          "handler": {
+            "verb": "inline-errors"
+          }
+        }
+      ],
+      "usesInterfaces": [
+        {
+          "name": "ListLoans",
+          "opKind": "query",
+          "in": [],
+          "out": {
+            "cardinality": "list",
+            "fields": [
+              {
+                "name": "id",
+                "type": null
+              },
+              {
+                "name": "title",
+                "type": null
+              },
+              {
+                "name": "dueDate",
+                "type": null
+              }
+            ]
+          },
+          "results": [
+            "Success",
+            "NotAuthenticated",
+            "ServerError"
+          ],
+          "realizes": {
+            "op": "ListMyLoans",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Lending",
+            "op": "ListLoansOp"
+          }
+        },
+        {
+          "name": "BookInfo",
+          "opKind": "query",
+          "in": [
+            {
+              "name": "id",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "id",
+                "type": null
+              },
+              {
+                "name": "title",
+                "type": null
+              },
+              {
+                "name": "author",
+                "type": null
+              },
+              {
+                "name": "available",
+                "type": null
+              }
+            ]
+          },
+          "results": [
+            "Success",
+            "NotAuthenticated",
+            "ServerError"
+          ],
+          "realizes": {
+            "op": "ReadBookDetail",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Lending",
+            "op": "ReadBookOp"
+          }
+        },
+        {
+          "name": "BorrowBook",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "isbn",
+              "type": null
+            },
+            {
+              "name": "copies",
+              "type": null
+            }
+          ],
+          "out": {
+            "cardinality": "single",
+            "fields": [
+              {
+                "name": "loanId",
+                "type": null
+              }
+            ]
+          },
+          "results": [
+            "Success",
+            "NotValid",
+            "ServerError"
+          ],
+          "realizes": {
+            "op": "BorrowCopy",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Lending",
+            "op": "BorrowOp"
+          }
+        },
+        {
+          "name": "ReturnBook",
+          "opKind": "command",
+          "in": [
+            {
+              "name": "loanId",
+              "type": null
+            }
+          ],
+          "out": null,
+          "results": [
+            "Success",
+            "NotAuthenticated",
+            "NotProcessable",
+            "ServerError"
+          ],
+          "realizes": {
+            "op": "ReturnCopy",
+            "source": "authored"
+          },
+          "remoteSource": {
+            "module": "Lending",
+            "op": "ReturnOp"
+          }
+        }
+      ],
+      "screens": [
+        {
+          "name": "MyLoans",
+          "title": "Ödünç Aldıklarım",
+          "persona": "Member",
+          "params": [],
+          "regions": [
+            {
+              "name": "main",
+              "role": "primary",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "list",
+                  "query": {
+                    "op": "ListLoans",
+                    "args": []
+                  },
+                  "mechanic": "cache",
+                  "refreshable": true,
+                  "pagination": null,
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "title",
+                      "dueDate"
+                    ],
+                    "source": "authored"
+                  },
+                  "whenDeltas": [],
+                  "uiEvents": [
+                    {
+                      "trigger": {
+                        "kind": "activate",
+                        "target": null
+                      },
+                      "actions": [
+                        {
+                          "do": "navigate",
+                          "screen": "BookDetail",
+                          "args": [
+                            {
+                              "name": null,
+                              "expr": {
+                                "path": [
+                                  "row",
+                                  "id"
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "kind": "action",
+                      "name": "ReturnBook",
+                      "command": {
+                        "op": "ReturnBook",
+                        "mechanic": "remote"
+                      },
+                      "clientOnly": false,
+                      "confirm": true,
+                      "confirmText": "Kitap iade edilsin mi?",
+                      "visibleWhen": null,
+                      "invalidates": [
+                        "ListLoans"
+                      ],
+                      "set": [],
+                      "navigation": null,
+                      "resultHandlers": [
+                        {
+                          "result": "NotProcessable",
+                          "handler": {
+                            "verb": "toast",
+                            "text": "Bu kitap iade edilemez",
+                            "retry": false
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "action",
+                  "name": "Borrow",
+                  "command": null,
+                  "clientOnly": true,
+                  "confirm": false,
+                  "confirmText": null,
+                  "visibleWhen": null,
+                  "invalidates": [],
+                  "set": [],
+                  "navigation": {
+                    "screen": "BorrowBook",
+                    "args": []
+                  },
+                  "resultHandlers": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [
+            {
+              "state": "offline",
+              "delta": [
+                {
+                  "verb": "banner",
+                  "text": "Çevrimdışı — son eşitlenen liste"
+                }
+              ]
+            }
+          ],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "BorrowBook",
+          "title": "Kitap Ödünç Al",
+          "persona": "Member",
+          "params": [],
+          "regions": [
+            {
+              "name": "main",
+              "role": null,
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "form",
+                  "submits": {
+                    "op": "BorrowBook",
+                    "args": [],
+                    "mechanic": "remote"
+                  },
+                  "loads": null,
+                  "alias": null,
+                  "fields": [
+                    {
+                      "name": "isbn",
+                      "validation": {
+                        "required": true,
+                        "pattern": "^[0-9-]{10,17}$"
+                      }
+                    },
+                    {
+                      "name": "copies",
+                      "validation": {
+                        "required": true,
+                        "min": 1,
+                        "max": 5
+                      }
+                    }
+                  ],
+                  "steps": [],
+                  "rules": [],
+                  "resultHandlers": [
+                    {
+                      "result": "Success",
+                      "handler": {
+                        "verb": "navigate",
+                        "screen": "MyLoans",
+                        "args": []
+                      }
+                    }
+                  ]
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [],
+          "clientState": []
+        },
+        {
+          "name": "BookDetail",
+          "title": "Kitap Detayı",
+          "persona": "Member",
+          "params": [
+            {
+              "name": "bookId"
+            }
+          ],
+          "regions": [
+            {
+              "name": "main",
+              "role": "focus",
+              "collapseWhen": null,
+              "children": [],
+              "components": [
+                {
+                  "kind": "detail",
+                  "query": {
+                    "op": "BookInfo",
+                    "args": [
+                      {
+                        "name": "id",
+                        "expr": {
+                          "path": [
+                            "bookId"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "mechanic": "cache",
+                  "refreshable": false,
+                  "pagination": null,
+                  "alias": null,
+                  "show": {
+                    "fields": [
+                      "id",
+                      "title",
+                      "author",
+                      "available"
+                    ],
+                    "source": "default-all-out-fields"
+                  },
+                  "whenDeltas": [],
+                  "uiEvents": [],
+                  "actions": []
+                }
+              ],
+              "targetEscapes": []
+            }
+          ],
+          "whenDeltas": [],
+          "uiEvents": [
+            {
+              "trigger": {
+                "kind": "enter"
+              },
+              "actions": [
+                {
+                  "do": "refresh",
+                  "targets": [
+                    "BookInfo"
+                  ]
+                }
+              ]
+            }
+          ],
+          "clientState": []
+        }
+      ],
+      "flows": [
+        {
+          "name": "Gezinme",
+          "realizes": "BorrowJourney",
+          "steps": [
+            "MyLoans",
+            "BorrowBook"
+          ]
+        }
+      ],
+      "navigation": [],
+      "clientState": [],
+      "whenDeltas": []
+    }
+  ],
+  "meta": {
+    "hasErrors": false,
+    "errorCount": 0
+  }
+}
