@@ -101,10 +101,14 @@ write-akışı). **2×2 blinded vibecoder (sonnet) + adversarial yargıç → DE
 SALT-OKUNUR halüsine etti (MarkEnterprisePaid/ActivatePremiumLogo/CreateEnterpriseFeatureSet write'ları YOK) +
 ajans-başvuru formuna yanlış zorunlu-alanlar dayattı; CLAUDE.md kolu gerçek yükümlülükleri kurdu.
 **Değer GERÇEK ama KOŞULLU:** (a) rol-görünürlük gibi 'bariz' yükümlülüğü düz-brief de çıkarır — delta orada
-DEĞİL; (b) emitter'ın KÖR NOKTALARI (buton state-machine koşulları, tam-CRUD listeleme) CLAUDE.md koluna
-miras kalıp bazı ekranda düz-brief'ten ZAYIF üretti → **follow-up emitter-iyileştirmesi** (state-condition +
-CRUD-tamlık emit'i). Karşıt kalır: `spec-context` (backend) authz/invariant taşır → o da değerli.
-Kanıt: bu turun `exp-value-probe` workflow'u + `frontend-wedge-plan/` (VERDICT.md · VERDICT-2.md).
+DEĞİL; (b) yargıcın bazı ekranda B'yi düz-brief'ten zayıf bulduğu yer (Pause paused-kampanyada görünür kalır;
+Tanimlar list'siz) **EMİTTER-BUG DEĞİL** — ölçüldü: emitter `.experience.json`'daki `visibleWhen`'i SADIK emit
+eder (9 role-koşulu var), ama state-geçiş butonlarına (Pause/Resume/Submit/Delete/MarkEnterprisePaid…)
+state-koşulu KAYNAKTA hiç authored EDİLMEMİŞTİR (emitter olmayanı emit etmez — büyü-yok). Gerçek gap UPSTREAM:
+**frontend-analiz elicitation** — "state-geçiş butonu ne zaman görünsün?" + oluşturulanın görüntüleme/liste
+yüzeyi (CRUD-tamlık) → frontend Yetenek-Envanteri/★-süpürmeye aday (visible-when'i STATE için de kullan).
+Karşıt kalır: `spec-context` (backend) authz/invariant taşır → o da değerli.
+Kanıt: bu turun `exp-value-probe` workflow'u + component-düzeyi visibleWhen ölçümü + `frontend-wedge-plan/`.
 
 ## Kaynak / tasarım
 
