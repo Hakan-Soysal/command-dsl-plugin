@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `9cdbb74d0d27` · src `166e343c353d` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `d67e2ea231d3` · src `1712c0af75a5` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -24,6 +24,7 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `invariant` (entity) | "her zaman / asla / negatif olamaz / hep şu koşul geçerli kalmalı" | 2 | ★ | **denetlenmeyen-değişmez** — her-zaman-geçerli kural zorlanmaz; entity yasak duruma (negatif bakiye vb.) girebilir |
 | `concurrency optimistic` (entity) | "aynı kaydı iki kişi aynı anda düzenler; son yazan öncekini ezmesin" | 2 | ★ | **kayıp-güncelleme (lost-update)** — eşzamanlı iki yazımdan sonraki, öncekini sessizce ezer |
 | `sourceOfTruth` (field) | "başka modülün/servisin kaydına bağlı; asıl kaynağı orada" | 2 | ★ | **kaynak-drifti** — asıl-kaynak işaretlenmez; yerel kopya otorite sanılır, gerçek kaynaktan sapar |
+| `refinement` (field) | "yaş/limit 13-120 arası; durum şu 3 değerden biri; kapalı-liste/aralık" | 2 | ★ | **denetlenmeyen-domain** — alan-değeri izinli aralık/küme dışına çıkar; NotValid payload'ı üretilemez |
 | `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ | **izlenemez-değişiklik** — kim-ne-zaman izi tutulmaz; denetim/uyum kaydı oluşmaz |
 | `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ | **ölçülemez-işlem** — sayaç/metrik yayılmaz; işlem gözlemlenemez |
 | `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ | **öznitelik-yetki-aşımı** — bölge/departman koşulu düşer; aktör kapsam-dışı kayda erişir |
@@ -39,6 +40,8 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `guarantee … traces` (top) | "çapraz-kesen güvence + üst-akış gereksinim ID'si (REQ-…)" | 8 | ○ | **izlenemez-güvence** — çapraz-kesen güvence ve üst-akış gereksinim bağı (REQ-…) kaybolur |
 
 **`note` disiplini (structural-first):** yapısal karşılığı olanı note'a atma (hassas→`@sensitivity`, çapraz-kesen güvence→`guarantee`); note yalnız **yapısal karşılığı OLMAYAN** için. Saf proje-yönetimi (maliyet/milestone) hiç girmez.
+
+**Boundary aday-soru (refinement'lı alan):** bir alanda `in <lo>..<hi>` aralık veya `in {A|B|C}` küme refinement'ı belirlenince, aday-soru kuyruğuna **boundary-value** sorusunu ekle — sınır **min-1 / min / max / max+1** dört noktasında beklenen davranışı sor (sınır dahil mi hariç mi; sınır-dışı değer hangi `NotValid` payload'ını üretmeli). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ**: aralığın uçlarını ve sınır-dışı red-sözleşmesini kullanıcıdan al, uydurma.
 
 ---
 
