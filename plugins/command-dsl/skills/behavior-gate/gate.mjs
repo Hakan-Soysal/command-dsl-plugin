@@ -240,4 +240,14 @@ function selftest() {
 }
 
 if (process.argv.includes('--selftest')) selftest();
+else if (process.argv.includes('--help') || process.argv.includes('-h') || !process.argv.slice(2).find((a) => !a.startsWith('--'))) {
+  console.log(
+    'behavior-gate — tier-1 davranışsal kapı (DENEYSEL · ADVISORY; "tutarlı" sertifikası vermez)\n' +
+    '\nKullanım:\n' +
+    '  node ${CLAUDE_SKILL_DIR}/gate.mjs <app-dir>                                  # default spec/manifest.json + adapter.json\n' +
+    '  node ${CLAUDE_SKILL_DIR}/gate.mjs --spec=<manifest.json> --adapter=<adapter.json> <app-dir>\n' +
+    '  node ${CLAUDE_SKILL_DIR}/gate.mjs --selftest                                 # saf-fonksiyon testleri\n' +
+    '\nÇıktı: kapsama-birincil rapor — her yükümlülük realized / proven-fail / DARK (DARK ≠ pass).\n' +
+    '<app-dir> ZORUNLU (çalıştırılabilir vibecoded app dizini). Verilmezse bu mesaj gösterilir.');
+}
 else main(process.argv.slice(2).find((a) => !a.startsWith('--')));

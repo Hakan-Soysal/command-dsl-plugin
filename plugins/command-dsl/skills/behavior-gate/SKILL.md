@@ -84,12 +84,12 @@ Girdi: bir `manifest.json` (tech) + çalıştırılabilir vibecoded app dizini. 
 - `gaps.json`'ı kullanıcıya BATCHED FORM olarak sun: her boşluk için `why` + `evidence` + `proposable`
   (varsa güvenli test-değeri) + `skipConsequence`. `proposable = null` → must-ASK; değilse öneri + onay.
 - Cevapları `answers.json`'a topla (skip = `null`). Sonra çalıştır:
-  `node resolve.mjs --base=adapter.json --gaps=gaps.json --answers=answers.json --out=resolved-adapter.json`.
+  `node ${CLAUDE_SKILL_DIR}/resolve.mjs --base=adapter.json --gaps=gaps.json --answers=answers.json --out=resolved-adapter.json`.
 - Graceful degradation: skip → absent → o obligation DARK (ASLA sessiz pass). Provenance:
   `user-provided | auto-proposed | absent`.
 
 ### Step 3 — Gate (sür + kapsama raporu)
-- Çalıştır: `node gate.mjs --spec=<manifest.json> --adapter=resolved-adapter.json <app-dir>`.
+- Çalıştır: `node ${CLAUDE_SKILL_DIR}/gate.mjs --spec=<manifest.json> --adapter=resolved-adapter.json <app-dir>`.
 - ⭐ Adapter = İDDİA; gate her eşlemeyi pozitif + negatif kontrolle DOĞRULAR (yanlış eşleme → DARK,
   false-green DEĞİL). "Akışta artık olması" adapter'ı GÜVENİLİR yapmaz; gate PORT gibi iç-sözleşmelerine
   defansif sahip çıkar (discovery bunları bilmez — §6.2 dersi).
@@ -115,9 +115,9 @@ Girdi: bir `manifest.json` (tech) + çalıştırılabilir vibecoded app dizini. 
 ## Kullanım
 
 ```
-node gate.mjs <app-dir>                              # default spec/manifest.json + adapter.json'ı okur
-node gate.mjs --spec=<manifest.json> --adapter=<adapter.json> <app-dir>   # path-arg (turnkey akışta kullanılan)
-node gate.mjs --selftest                             # saf-fonksiyon deriver/evaluator/classify testleri
+node ${CLAUDE_SKILL_DIR}/gate.mjs <app-dir>                              # default spec/manifest.json + adapter.json'ı okur
+node ${CLAUDE_SKILL_DIR}/gate.mjs --spec=<manifest.json> --adapter=<adapter.json> <app-dir>   # path-arg (turnkey akışta kullanılan)
+node ${CLAUDE_SKILL_DIR}/gate.mjs --selftest                             # saf-fonksiyon deriver/evaluator/classify testleri
 ```
 
 `spec/manifest.json` + `adapter.json` = girdi sözleşmesi; `evals/app-correct` (3/3 realized) +

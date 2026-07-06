@@ -36,10 +36,13 @@ yetki eksenlerine / invariant'lara **baştan** tutarlı kalır. Sen kod yazmaz/�
 ## Kullanım
 
 ```
-node spec-context.mjs <manifest.json> --out <backend-dizini>   # <dizin>/CLAUDE.md üretir
-node spec-context.mjs --version                                # tool damgası (spec-context/1)
-node lib.mjs --selftest                                        # saf-fonksiyon testleri
+node ${CLAUDE_SKILL_DIR}/spec-context.mjs <manifest.json> --out <backend-dizini>   # <dizin>/CLAUDE.md üretir
+node ${CLAUDE_SKILL_DIR}/spec-context.mjs --version                                # tool damgası (spec-context/1)
+node ${CLAUDE_SKILL_DIR}/lib.mjs --selftest                                        # saf-fonksiyon testleri
 ```
+
+`${CLAUDE_SKILL_DIR}` = bu skill'in dizini (CWD-bağımsız; her zaman vardır). **Göreli/çıplak yol kullanma**
+(`node spec-context.mjs` vibecoder'ın proje-dizininden çalışırsa dosyayı bulamaz — aile konvansiyonu).
 
 `--out` bir **DİZİN**dir (dosya-adı değil): araç o dizinin altına `CLAUDE.md` yazar. Vibecoder'ın
 backend/ dizinini hedefle. Girdi bozuk/şema-dışıysa araç **hiçbir şey yazmadan** exit 1 verir (gate).
