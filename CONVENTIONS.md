@@ -71,6 +71,14 @@ skills/<skill>/
   `build.<x>.mjs` canlı grammar deposundan (**read-only**) tazeler. Bayatlık = İKİ parmak izi:
   `grammarHash` (grammar) + `srcHash` (validation mantığı) — `--version` ikisini basar; biri
   kaynakla uyuşmazsa bundle bayattır → yeniden build.
+- **Otomatik bayatlık-denetimi (meta-fix E, 2026-07-08):** `scripts/check-skill-staleness.mjs
+  [<CommandDSL-yolu>]` — 4 skil'in bundle hash'ini (İKİ parmak izi), envanter-damgasını VE
+  içerik-kapsamasını (gramerdeki keyword ref-doküman'da öğretiliyor mu) **CANLI gramere karşı**
+  denetler. Eski manuel-karşılaştırma bundle'a çıpalıydı (bundle+damga birlikte kayınca yanlış
+  "taze"); bu araç canlı CommandDSL'e çıpalar → aylarca-sessiz drift biter. **Tetik:** CommandDSL'in
+  `.githooks/pre-push`'u (kardeş plugin'i denetler; `scripts/install-hooks.sh` ile kurulur) — gramer
+  push'undan ÖNCE stale bundle push'u durdurur. Gramer/validator değişince DoD: aile-eşzamanlı
+  rebuild + referans/envanter + `check-skill-staleness` yeşil.
 
 ## 5. Capability deseni (ön-kapı / router skill'ler)
 
