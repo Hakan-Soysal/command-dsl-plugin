@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `d67e2ea231d3` · src `1712c0af75a5` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `437f0bc58e66` · src `32a0602af0ef` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -25,6 +25,7 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `concurrency optimistic` (entity) | "aynı kaydı iki kişi aynı anda düzenler; son yazan öncekini ezmesin" | 2 | ★ | **kayıp-güncelleme (lost-update)** — eşzamanlı iki yazımdan sonraki, öncekini sessizce ezer |
 | `sourceOfTruth` (field) | "başka modülün/servisin kaydına bağlı; asıl kaynağı orada" | 2 | ★ | **kaynak-drifti** — asıl-kaynak işaretlenmez; yerel kopya otorite sanılır, gerçek kaynaktan sapar |
 | `refinement` (field) | "yaş/limit 13-120 arası; durum şu 3 değerden biri; kapalı-liste/aralık" | 2 | ★ | **denetlenmeyen-domain** — alan-değeri izinli aralık/küme dışına çıkar; NotValid payload'ı üretilemez |
+| `refinement` (op param) + `violations[]` | "bu parametrenin izinli aralığı/kümesi var; sınır-dışı değer NotValid dönmeli — kural kimliğiyle" | 3 | ★ | **sentezlenmeyen-ihlal-payload** — param'a refinement yazılmazsa `violations[]` (ruleId/field/domain, manifest `op.violations`) hiç üretilmez; üreteç/tüketici sınır-dışı red'i kural-bazlı (NotValid ruleId) kuramaz, gevşek/elle doğrulamaya düşer |
 | `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ | **izlenemez-değişiklik** — kim-ne-zaman izi tutulmaz; denetim/uyum kaydı oluşmaz |
 | `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ | **ölçülemez-işlem** — sayaç/metrik yayılmaz; işlem gözlemlenemez |
 | `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ | **öznitelik-yetki-aşımı** — bölge/departman koşulu düşer; aktör kapsam-dışı kayda erişir |
