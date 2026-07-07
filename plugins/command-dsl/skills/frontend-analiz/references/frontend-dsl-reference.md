@@ -20,7 +20,7 @@ Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listele
 | `refreshable` / `invalidates` / `on enter refresh` (tazeleme) | "veri bayatlamasın / yazınca liste güncellensin / elle yenile" | 5 | ★ | **bayat-veri** — yazımdan sonra liste tazelenmez; kullanıcı eski veriyi görür |
 | `field { required\|min\|max\|pattern }` + form `rule` (validation) | "şu alan zorunlu / şu formatta / çapraz-alan kuralı (offline'da yerel doğrula)" | 6 | ★ | **doğrulanmamış-girdi** — geçersiz/eksik alan istemcide yakalanmaz; hatalı veri backend'e gider (offline'da hiç yakalanmaz) |
 | `confirm ["metin"]` (yıkıcı aksiyon) | "silmeden/iptal etmeden önce sorsun / geri alınamaz eylem" | 6 | ★ | **kazara-yıkıcı-eylem** — geri-alınamaz eylem onaysız tetiklenir |
-| `visible-when` (koşullu görünürlük — ROL / client-state) | "bu buton yalnız yöneticide (rol) / seçili sekmede / filtreye göre görünsün" (UX — güvenlik DEĞİL; izinli path-kökleri: currentUser·session·ekran-param·state/derived·row) | 4/7 | ★ | **koşulsuz-görünür-öğe** — koşula bağlı öğe her rolde/client-durumda görünür (rol-tarafı güvenlik açığı DEĞİL — yetki backend'de zorlanır). ⚠ SUNUCU entity-durumu (`campaign.status`) visible-when path-kökü DEĞİL → **geçersiz-durum-eylemi** (Pause paused-kampanyada görünür) ŞU AN İFADE EDİLEMEZ; ihtiyacı `note`+üstakışa taşı — **grammar-pilot adayı** |
+| `visible-when` (koşullu görünürlük — ROL / client-state / **kayıt-durumu**) | "bu buton yalnız yöneticide (rol) / seçili sekmede / filtreye göre / **sipariş 'pending'ken** görünsün" (UX — güvenlik DEĞİL; izinli path-kökleri: currentUser·session·ekran-param·state/derived·row) | 4/7 | ★ | **koşulsuz-görünür-öğe** — koşula bağlı öğe her rolde/client-durumda görünür (rol-tarafı güvenlik açığı DEĞİL — yetki backend'de zorlanır). ✅ SUNUCU entity-durumu (geçersiz-durum-eylemi: Pause/Cancel) ifade edilir — (A) eylemi kaydı yükleyen **list/detail gövdesine** koy → `visible-when: row.status = '…'` (öğe-bağlamı; Karar #51 Fork A, tercih); (B) ayrı region/ekran-seviyesindeyse ekrandaki detail/value kaydına ADIYLA → `visible-when: <detailAdı>.status = '…'` (Fork B; `list` hariç — çok-satırlı) |
 | `paginated infinite\|pager` (list) | "liste çok uzun / sayfa sayfa / sonsuz kaydır" | 4 | ★ (warning-routed) | **sınırsız-liste-yükü** — uzun liste tek seferde çizilir; kayma/bellek çöküşü |
 | `when empty` / `when loading` (query yaşamdöngüsü) | "yüklenirken / hiç kayıt yokken ekranda ne görünsün" | 4 | ○ | **boş/donuk-ekran** — yükleme veya kayıtsız durumda ekran boş kalır; kullanıcı takıldı sanır |
 | UI-event: `on enter/leave` · `timer/interval` · `activate/secondary` | "ekrana girince / N sn sonra / periyodik / uzun-bas / sağ-tık" | 7 | ○ | **tetiklenmeyen-arayüz-olayı** — ekrana-giriş/zamanlayıcı/uzun-bas eylemi bağlanmaz; etkileşim gerçekleşmez |
@@ -131,7 +131,7 @@ action New -> screen NewOrder                 # client-only (ad hiçbir uses-com
 
 - **list/detail/value yalnız QUERY'ye** bağlanır; `list`↔liste-out, `detail`/`value`↔tekil-out
   (uyumsuzluk error). Arg kaynakları: ekran-param, `session.*`, `currentUser.*`, state,
-  literal; list-satır bağlamında `row.*`.
+  literal; öğe-bağlamında (list-satırı VE detail tek-kayıt) `row.*`.
 - **`as <ad>`**: aynı op'u bir ekranda ≥2 bileşen kullanınca ZORUNLU (ad-çakışması error).
 - **`show a, b`** (list/detail): görüntü-şekli; yazılmazsa default = TÜM out-alanları
   beyan sırasıyla (üreteç tahmin etmez — belgeli default).

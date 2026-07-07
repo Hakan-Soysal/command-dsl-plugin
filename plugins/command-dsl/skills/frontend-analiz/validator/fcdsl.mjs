@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-e5764dfe0cec", grammarHash: "e5764dfe0cec", frontendSrcHash: "a4f0d2a6d1fa", commit: "6cdeae5", builtAt: "2026-07-02T14:28:54+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", frontendSrcHash: "9ac3ee2c6a62", commit: "4a62049", builtAt: "2026-07-06T23:21:37+03:00", langium: "4.2.4" };
   }
 });
 
@@ -32191,6 +32191,7 @@ function isFormComponent(item) {
 }
 var FormField = {
   $type: "FormField",
+  decorations: "decorations",
   field: "field",
   rules: "rules"
 };
@@ -32417,6 +32418,7 @@ var RoleAttr = {
 };
 var Screen = {
   $type: "Screen",
+  decorations: "decorations",
   members: "members",
   name: "name",
   params: "params",
@@ -33028,6 +33030,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
     FormField: {
       name: FormField.$type,
       properties: {
+        decorations: {
+          name: FormField.decorations,
+          defaultValue: []
+        },
         field: {
           name: FormField.field,
           referenceType: ShapeField.$type
@@ -33405,6 +33411,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
     Screen: {
       name: Screen.$type,
       properties: {
+        decorations: {
+          name: Screen.decorations,
+          defaultValue: []
+        },
         members: {
           name: Screen.members,
           defaultValue: []
@@ -35506,6 +35516,19 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
         "$type": "Group",
         "elements": [
           {
+            "$type": "Assignment",
+            "feature": "decorations",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@7"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
             "$type": "Keyword",
             "value": "screen"
           },
@@ -36675,6 +36698,19 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
       "definition": {
         "$type": "Group",
         "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "decorations",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@7"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
           {
             "$type": "Keyword",
             "value": "field"
@@ -39163,6 +39199,47 @@ function loadBusiness(contractPath, documentUri) {
     return null;
   }
 }
+function decorationOfExt(ext) {
+  let sensitive = null, encrypted = false;
+  for (const e of ext ?? []) {
+    if (e.ns === "sensitivity" && e.name === "tag") {
+      const lvl = e.args?.level;
+      sensitive = typeof lvl === "string" ? lvl : "";
+    } else if (e.ns === "crypto" && e.name === "encrypted") {
+      encrypted = true;
+    }
+  }
+  return { sensitive, encrypted };
+}
+function resolveOutFieldDecoration(techOps, tech, fieldName) {
+  let resolvable = false, inReturn = false, sensitive = null, encrypted = false;
+  for (const op of techOps) {
+    const dec = tech.decorationsOfType(op.returns);
+    if (!dec) continue;
+    resolvable = true;
+    const fd = dec.get(fieldName);
+    if (fd) {
+      inReturn = true;
+      if (fd.sensitive != null) sensitive = fd.sensitive;
+      if (fd.encrypted) encrypted = true;
+    }
+  }
+  const decoration = sensitive != null || encrypted ? { sensitive, encrypted } : null;
+  return { decoration, resolvable, inReturn };
+}
+function resolveInFieldDecoration(techOps, fieldName) {
+  let inParams = false, sensitive = null, encrypted = false;
+  for (const op of techOps) {
+    const fd = op.paramDeco.get(fieldName);
+    if (fd) {
+      inParams = true;
+      if (fd.sensitive != null) sensitive = fd.sensitive;
+      if (fd.encrypted) encrypted = true;
+    }
+  }
+  const decoration = sensitive != null || encrypted ? { sensitive, encrypted } : null;
+  return { decoration, resolvable: techOps.length > 0, inParams };
+}
 var techTextProvider;
 function loadTech(techPath, documentUri) {
   const uri = resolveContractUri(techPath, documentUri);
@@ -39173,6 +39250,8 @@ function loadTech(techPath, documentUri) {
     const byId = /* @__PURE__ */ new Map();
     const byRealizes = /* @__PURE__ */ new Map();
     for (const o of json.operations ?? []) {
+      const paramDeco = /* @__PURE__ */ new Map();
+      for (const p of o.signature?.params ?? []) paramDeco.set(p.name, decorationOfExt(p.ext));
       const op = {
         id: o.id,
         module: o.module ?? "",
@@ -39181,7 +39260,9 @@ function loadTech(techPath, documentUri) {
         throws: o.throws ?? [],
         validation: o.validation ?? [],
         pagination: o.pagination ?? null,
-        serving: o.serving ?? []
+        serving: o.serving ?? [],
+        returns: o.signature?.returns ?? "",
+        paramDeco
       };
       byId.set(`${op.module}.${op.id}`, op);
       if (op.realizes) {
@@ -39191,11 +39272,18 @@ function loadTech(techPath, documentUri) {
       }
     }
     const errIndex = new Map((json.errors ?? []).map((e) => [`${e.module}.${e.id}`, e.resultType]));
+    const decoByType = /* @__PURE__ */ new Map();
+    for (const d of [...json.entities ?? [], ...json.types ?? []]) {
+      const fm = /* @__PURE__ */ new Map();
+      for (const f of d.fields ?? []) fm.set(f.name, decorationOfExt(f.ext));
+      decoByType.set(d.id, fm);
+    }
     return {
       uri,
       byId,
       byRealizes,
-      resultTypeOf: (module2, err) => errIndex.get(`${module2}.${err}`) ?? null
+      resultTypeOf: (module2, err) => errIndex.get(`${module2}.${err}`) ?? null,
+      decorationsOfType: (typeName) => decoByType.get(typeName) ?? null
     };
   } catch {
     return null;
@@ -39335,6 +39423,7 @@ function registerFrontendValidationChecks(services) {
     DetailComponent: [v.checkDataComponent],
     ValueComponent: [v.checkDataComponent],
     FormComponent: [v.checkForm],
+    FormField: [v.checkFormField],
     ActionComponent: [v.checkAction],
     ResultHandler: [v.checkResultHandler],
     UiEvent: [v.checkUiEvent],
@@ -39421,11 +39510,14 @@ function checkPathRootsIn(expr, node, accept, opts) {
   for (const s of exp?.members.filter(isStateDecl) ?? []) roots.add(stateNameOf(s));
   if (opts.rowAllowed) roots.add("row");
   for (const r of opts.extraRoots ?? []) roots.add(r);
+  for (const c of screen ? componentsOfScreen(screen) : []) {
+    if (isDetailComponent(c) || isValueComponent(c)) roots.add(effectiveName(c));
+  }
   for (const p of pathsOf(expr)) {
     if (p.segments.length < 2) continue;
     const root2 = p.segments[0];
     if (!roots.has(root2)) {
-      accept("error", `Bilinmeyen path k\xF6k\xFC '${root2}' \u2014 izinli k\xF6kler: session, currentUser, ekran-param, state/derived adlar\u0131${opts.rowAllowed ? ", row" : ""}${opts.extraRoots ? ", ba\u011Flam alanlar\u0131" : ""}.`, { node: p });
+      accept("error", `Bilinmeyen path k\xF6k\xFC '${root2}' \u2014 izinli k\xF6kler: session, currentUser, ekran-param, state/derived adlar\u0131, ekran-kayd\u0131 (detail/value ad\u0131)${opts.rowAllowed ? ", row" : ""}${opts.extraRoots ? ", ba\u011Flam alanlar\u0131" : ""}.`, { node: p });
     }
   }
 }
@@ -39441,6 +39533,33 @@ function dupsBy(items, key) {
     (seen.get(k) ?? seen.set(k, []).get(k)).push(it);
   }
   return [...seen.values()].filter((g) => g.length > 1).flat();
+}
+var UI_DECORATIONS = {
+  readonly: ["field"],
+  hidden: ["field"],
+  emphasis: ["field", "screen"]
+};
+function checkDecorations(decorations, site, accept) {
+  const seen = /* @__PURE__ */ new Set();
+  for (const d of decorations) {
+    if (d.ns !== "ui") {
+      accept("error", `Bilinmeyen dekorasyon namespace'i '@${d.ns}.*' \u2014 yaln\u0131z \xE7ekirdek-yorumlu '@ui.*' desteklenir (\u01305-lift kapal\u0131 k\xFCme; frontend-authored dekorasyon).`, { node: d, property: "ns" });
+      continue;
+    }
+    const sites = UI_DECORATIONS[d.name];
+    if (!sites) {
+      accept("error", `Bilinmeyen '@ui.${d.name}' dekorasyonu \u2014 izinli: ${Object.keys(UI_DECORATIONS).map((n) => `@ui.${n}`).join(", ")}.`, { node: d, property: "name" });
+      continue;
+    }
+    if (!sites.includes(site)) {
+      accept("error", `'@ui.${d.name}' bu site'da ge\xE7ersiz (${site}) \u2014 izinli site(ler): ${sites.join(", ")}.`, { node: d, property: "name" });
+    }
+    if (d.args.length > 0) {
+      accept("warning", `'@ui.${d.name}' arg\xFCman almaz; verilenler yok say\u0131l\u0131r.`, { node: d, property: "name" });
+    }
+    if (seen.has(d.name)) accept("warning", `'@ui.${d.name}' bu \xF6\u011Fede yinelenmi\u015F.`, { node: d, property: "name" });
+    seen.add(d.name);
+  }
 }
 var FrontendDslValidator = class {
   constructor(documents2) {
@@ -39612,6 +39731,23 @@ var FrontendDslValidator = class {
         accept("warning", `Results divergence: contract \u015Funlar\u0131 \xFCretebilir ama authored results'ta yok: ${missing.join(", ")}.`, { node: u, property: "results" });
       }
     }
+    if (techOps.length > 0) {
+      for (const f of u.outputs) {
+        const { resolvable, inReturn } = resolveOutFieldDecoration(techOps, tech, f.name);
+        if (resolvable && !inReturn) {
+          accept("warning", `Out-field '${f.name}' realize-eden tech-op'un d\xF6n\xFC\u015F-tipinde yok \u2014 hassasiyet/\u015Fifreleme dekorasyonu do\u011Frulanamad\u0131 (isim-hizas\u0131 k\u0131r\u0131k; olas\u0131 maskesiz veri).`, { node: f, property: "name" });
+        }
+      }
+      const opHasSensParam = techOps.some((o) => [...o.paramDeco.values()].some((d) => d.sensitive != null || d.encrypted));
+      if (opHasSensParam) {
+        for (const f of u.inputs) {
+          const { inParams } = resolveInFieldDecoration(techOps, f.name);
+          if (!inParams) {
+            accept("warning", `In-field '${f.name}' hassas-param ta\u015F\u0131yan tech-op'un param'lar\u0131nda yok \u2014 dekorasyon do\u011Frulanamad\u0131 (isim-hizas\u0131 k\u0131r\u0131k; olas\u0131 korumas\u0131z PII giri\u015Fi).`, { node: f, property: "name" });
+          }
+        }
+      }
+    }
   };
   /** #39 B7 shared-persona yasağı + #35 persona cross-check + #38 component ad-çakışması. */
   checkScreen = (screen, accept) => {
@@ -39626,6 +39762,11 @@ var FrontendDslValidator = class {
     for (const c of dupsBy(comps, effectiveName)) {
       accept("error", `Component ad\u0131 '${effectiveName(c)}' bu ekranda birden \xE7ok kez kullan\u0131l\u0131yor \u2014 'as <ad>' ile ay\u0131r\u0131n (karar #38).`, { node: c });
     }
+    checkDecorations(screen.decorations, "screen", accept);
+  };
+  /** İ5-lift: form-field @ui.* dekorasyonu (readonly/hidden/emphasis). */
+  checkFormField = (f, accept) => {
+    checkDecorations(f.decorations, "field", accept);
   };
   /** #24 cardinality + kind (list/detail/value). */
   checkDataComponent = (c, accept) => {
@@ -39895,6 +40036,9 @@ function createFrontendDslServices(context) {
 
 // src/frontend/experience.ts
 init_define_BUILD_INFO();
+function uiDecorations(decorations, site) {
+  return decorations.filter((d) => d.ns === "ui" && UI_DECORATIONS[d.name]?.includes(site)).map((d) => d.name);
+}
 var ARITH = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
 function serializeExpr(e) {
   if (isBinary(e)) return { node: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
@@ -39955,17 +40099,21 @@ function experienceJson(exp, business, tech, documents2) {
 }
 function usesJson(u, business, tech) {
   const realized = business ? realizedBizOpId(u, business) : null;
+  const techOps = realized && tech ? tech.byRealizes.get(realized.id) ?? [] : [];
   let remoteSource = null;
   if (realized && tech) {
-    const exposed = (tech.byRealizes.get(realized.id) ?? []).find((o) => o.visibility === "exposed");
+    const exposed = techOps.find((o) => o.visibility === "exposed");
     if (exposed) remoteSource = { module: exposed.module, op: exposed.id };
   }
   const hasOut = u.outputs.length > 0 || u.outList;
   return {
     name: u.name,
     opKind: u.kind,
-    in: u.inputs.map(fieldJson),
-    out: hasOut ? { cardinality: u.outList ? "list" : "single", fields: u.outputs.map(fieldJson) } : null,
+    // in-field'lara tech PARAM dekorasyonu join'lenir (form-capture PII/şifreli girdi → güvenli-input);
+    in: u.inputs.map((f) => inFieldJson(f, techOps, tech)),
+    // out-field'lara tech dönüş-tipi dekorasyonu (sensitivity/crypto) join'lenir — TECH-sahipli, frontend
+    // yeniden-beyan etmez; hedef-adaptör maskeleme/güvenli-render için okur (render KAPSAM-DIŞI=üretici).
+    out: hasOut ? { cardinality: u.outList ? "list" : "single", fields: u.outputs.map((f) => outFieldJson(f, techOps, tech)) } : null,
     results: u.results.length > 0 ? [...u.results] : null,
     realizes: realized ? { op: realized.id, source: realized.source } : null,
     remoteSource
@@ -39974,7 +40122,26 @@ function usesJson(u, business, tech) {
 function fieldJson(f) {
   return { name: f.name, type: f.type ?? null };
 }
+function outFieldJson(f, techOps, tech) {
+  const base = fieldJson(f);
+  if (!tech || techOps.length === 0) return base;
+  return withDecoration(base, resolveOutFieldDecoration(techOps, tech, f.name).decoration);
+}
+function inFieldJson(f, techOps, tech) {
+  const base = fieldJson(f);
+  if (!tech || techOps.length === 0) return base;
+  return withDecoration(base, resolveInFieldDecoration(techOps, f.name).decoration);
+}
+function withDecoration(base, decoration) {
+  if (!decoration) return base;
+  return {
+    ...base,
+    ...decoration.sensitive != null ? { sensitive: decoration.sensitive } : {},
+    ...decoration.encrypted ? { encrypted: true } : {}
+  };
+}
 function screenJson(s, documents2) {
+  const decorations = uiDecorations(s.decorations, "screen");
   return {
     name: s.name,
     title: s.title != null ? strip(s.title) : null,
@@ -39983,7 +40150,8 @@ function screenJson(s, documents2) {
     regions: s.members.filter(isRegion).map((r) => regionJson(r, documents2)),
     whenDeltas: s.members.filter(isWhenBlock).map(whenJson),
     uiEvents: s.members.filter(isUiEvent).map(uiEventJson),
-    clientState: s.members.filter(isStateDecl).map((st) => stateJson(st, "screen"))
+    clientState: s.members.filter(isStateDecl).map((st) => stateJson(st, "screen")),
+    ...decorations.length ? { decorations } : {}
   };
 }
 function regionJson(r, documents2) {
@@ -40053,7 +40221,8 @@ function formFieldJson(ff) {
     else if (isMinRule(r)) validation.min = r.value;
     else if (isPatternRule(r)) validation.pattern = r.value.replace(/^['"]|['"]$/g, "");
   }
-  return { name: ff.field.$refText, validation };
+  const decorations = uiDecorations(ff.decorations, "field");
+  return { name: ff.field.$refText, validation, ...decorations.length ? { decorations } : {} };
 }
 function actionJson(a2, documents2) {
   const uses = resolveActionUses(a2, documents2);

@@ -1,9 +1,9 @@
 {
   "source": "CommandDSL",
-  "grammarVersion": "frontend-v1.x-e5764dfe0cec",
-  "grammarHash": "e5764dfe0cec",
-  "frontendSrcHash": "a4f0d2a6d1fa",
-  "commit": "6cdeae5",
-  "builtAt": "2026-07-02T14:28:54+03:00",
+  "grammarVersion": "frontend-v1.x-bfeb6db74b94",
+  "grammarHash": "bfeb6db74b94",
+  "frontendSrcHash": "9ac3ee2c6a62",
+  "commit": "4a62049",
+  "builtAt": "2026-07-06T23:21:37+03:00",
   "langium": "4.2.4"
 }

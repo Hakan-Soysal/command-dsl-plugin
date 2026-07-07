@@ -69,6 +69,8 @@ experience CustomerApp {
         show total, status                                     # görüntü-şekli (#23)
         on activate -> screen OrderDetail(row.id)              # satır-nav (hedefsiz activate = bu component)
         action CancelOrder remote {                            # satır-aksiyonu
+          visible-when: row.status = 'pending'                 # SUNUCU entity-durumu → satır-bağlamı row (#38 öğe-bağlamı;
+                                                               # realizes CancelPendingOrder ile uyum: pending değilse buton yok)
           confirm "Sipariş iptal edilsin mi?"                  # opsiyonel diyalog metni (#47)
           invalidates: [ListOrders]                            # yazma sonrası tazeleme (#16)
           on NotProcessable toast "Bu sipariş artık iptal edilemez"

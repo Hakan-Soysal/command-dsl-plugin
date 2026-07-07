@@ -106,6 +106,11 @@ yap ya listeye dön. (Temp-id ileri faz — vaat etme.)
   (metinsiz = adaptör-standart — P12; bunu söyle).
 - "Bu düğme herkese mi görünsün?" → visible-when + **her seferinde**: "bu görünürlük
   kuralı kolaylıktır, güvenlik değil — asıl engel sunucuda."
+- "Bu eylem **kaydın durumuna** bağlı mı? (İptal yalnız 'pending'ken, Duraklat yalnız
+  'çalışıyor'ken)" → EVET ise: (a) eylemi kaydı yükleyen **list/detail gövdesine** koy →
+  `visible-when: row.<alan> = '<değer>'` (Fork A, tercih — manifest temiz nest'ler); ya da
+  (b) ayrı region/ekran-seviyesindeyse ekrandaki detail/value kaydına ADIYLA →
+  `visible-when: <detailAdı>.<alan> = '<değer>'` (Fork B; `list` hariç). SKILL Faz 7.
 - "Kullanıcının cihazında hatırlanacak bir şey var mı (filtre seçimi, taslak, sepet)?"
   → persisted state; oturumluk mu → state; hesaplanan mı → derived.
 
