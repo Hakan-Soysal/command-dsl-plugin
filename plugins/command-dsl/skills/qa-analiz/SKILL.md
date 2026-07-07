@@ -226,6 +226,7 @@ ETME — yalnız testlerin gerçekten kullanacağı kimlikler; ama yetki-testler
 
 **⚠ Anti-pattern — Waive kaçışı (iki yönlü):** waive bir sus düğmesi değildir; gerekçe
 ZORUNLU ve anlamlı olmalı ("vaktimiz yok" kabul edilmez → `until` ile erteleme yaz).
+**`because` gerekçesini LLM DOLDURAMAZ — authored'dır**: skill gerekçeyi kullanıcıdan alır, kendi uydurmaz (büyü yok); tüm waive'ler qa raporunda konsolide teşhir edilir (durum: aktif/süresi-yakın/dolmuş).
 Tersi de tuzak: her dala mekanik test yazdırma — tek-rollü op'un NotAuthorized'ı P1
 jenerik-kimlik kapsamında waive edilebilir (spec §7 exemplar deseni).
 **Kapatır:** coverage/strict (S6 + `--strict` yükseltmesi), karşılıksız-hedef
