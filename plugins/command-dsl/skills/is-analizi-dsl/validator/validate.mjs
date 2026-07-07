@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "v3.x-b75a56181dad", grammarHash: "b75a56181dad", commit: "6cdeae5", builtAt: "2026-07-02T14:28:54+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "v3.x-77493a5ddfa9", grammarHash: "77493a5ddfa9", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00", langium: "4.2.4" };
   }
 });
 
@@ -32200,6 +32200,17 @@ var LimitFilter = {
 function isLimitFilter(item) {
   return reflection2.isInstance(item, LimitFilter.$type);
 }
+var Measurable = {
+  $type: "Measurable"
+};
+var MeasureClause = {
+  $type: "MeasureClause",
+  metric: "metric",
+  op: "op",
+  target: "target",
+  unit: "unit",
+  window: "window"
+};
 var Model = {
   $type: "Model",
   elements: "elements",
@@ -32241,6 +32252,16 @@ var OrderByFilter = {
 };
 function isOrderByFilter(item) {
   return reflection2.isInstance(item, OrderByFilter.$type);
+}
+var OutcomeDef = {
+  $type: "OutcomeDef",
+  covers: "covers",
+  measures: "measures",
+  name: "name",
+  note: "note"
+};
+function isOutcomeDef(item) {
+  return reflection2.isInstance(item, OutcomeDef.$type);
 }
 var OutsideNote = {
   $type: "OutsideNote",
@@ -32754,7 +32775,7 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
           name: FlowDef.note
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [Element.$type, Measurable.$type]
     },
     FlowItem: {
       name: FlowItem.$type,
@@ -32867,6 +32888,32 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [OperationClause.$type]
     },
+    Measurable: {
+      name: Measurable.$type,
+      properties: {},
+      superTypes: []
+    },
+    MeasureClause: {
+      name: MeasureClause.$type,
+      properties: {
+        metric: {
+          name: MeasureClause.metric
+        },
+        op: {
+          name: MeasureClause.op
+        },
+        target: {
+          name: MeasureClause.target
+        },
+        unit: {
+          name: MeasureClause.unit
+        },
+        window: {
+          name: MeasureClause.window
+        }
+      },
+      superTypes: []
+    },
     Model: {
       name: Model.$type,
       properties: {
@@ -32934,7 +32981,7 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
           name: OperationDecl.success
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [Element.$type, Measurable.$type]
     },
     OrderByFilter: {
       name: OrderByFilter.$type,
@@ -32947,6 +32994,27 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
         }
       },
       superTypes: [OperationClause.$type]
+    },
+    OutcomeDef: {
+      name: OutcomeDef.$type,
+      properties: {
+        covers: {
+          name: OutcomeDef.covers,
+          defaultValue: [],
+          referenceType: Measurable.$type
+        },
+        measures: {
+          name: OutcomeDef.measures,
+          defaultValue: []
+        },
+        name: {
+          name: OutcomeDef.name
+        },
+        note: {
+          name: OutcomeDef.note
+        }
+      },
+      superTypes: [Element.$type]
     },
     OutsideNote: {
       name: OutsideNote.$type,
@@ -33008,7 +33076,7 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
           name: ProcessDef.note
         }
       },
-      superTypes: [Element.$type]
+      superTypes: [Element.$type, Measurable.$type]
     },
     ProcessItem: {
       name: ProcessItem.$type,
@@ -33307,7 +33375,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -33390,7 +33458,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@45"
+              "$ref": "#/rules@48"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@41"
             },
             "arguments": []
           }
@@ -33417,7 +33492,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33445,7 +33520,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33473,7 +33548,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33497,7 +33572,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -33552,14 +33627,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@67"
+              "$ref": "#/rules@70"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@66"
+              "$ref": "#/rules@69"
             },
             "arguments": []
           }
@@ -33586,7 +33661,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33607,7 +33682,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -33631,7 +33706,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -33662,7 +33737,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33707,7 +33782,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33742,7 +33817,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33804,7 +33879,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -33848,7 +33923,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -33887,7 +33962,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -33929,7 +34004,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -33959,7 +34034,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -33984,7 +34059,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@41"
+                    "$ref": "#/rules@44"
                   },
                   "arguments": []
                 }
@@ -34016,7 +34091,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -34064,7 +34139,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -34088,7 +34163,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -34110,7 +34185,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@59"
+                    "$ref": "#/rules@62"
                   },
                   "arguments": []
                 }
@@ -34142,7 +34217,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -34190,7 +34265,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -34214,7 +34289,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -34267,7 +34342,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@67"
+              "$ref": "#/rules@70"
             },
             "arguments": []
           },
@@ -34351,7 +34426,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@62"
+                      "$ref": "#/rules@65"
                     },
                     "arguments": []
                   },
@@ -34380,7 +34455,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34415,7 +34490,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -34507,7 +34582,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@58"
+                    "$ref": "#/rules@61"
                   },
                   "arguments": []
                 }
@@ -34558,7 +34633,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@65"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -34642,7 +34717,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@52"
+                    "$ref": "#/rules@55"
                   },
                   "arguments": []
                 }
@@ -34674,7 +34749,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@41"
+                    "$ref": "#/rules@44"
                   },
                   "arguments": []
                 }
@@ -34702,12 +34777,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@45"
+                    "$ref": "#/rules@48"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -34729,12 +34804,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@45"
+                        "$ref": "#/rules@48"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@67"
+                          "$ref": "#/rules@70"
                         },
                         "arguments": []
                       },
@@ -34807,7 +34882,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@66"
                   },
                   "arguments": []
                 }
@@ -34834,7 +34909,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@60"
+              "$ref": "#/rules@63"
             },
             "arguments": []
           },
@@ -34854,7 +34929,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@61"
+              "$ref": "#/rules@64"
             },
             "arguments": []
           }
@@ -34926,7 +35001,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -34957,7 +35032,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@58"
+                "$ref": "#/rules@61"
               },
               "arguments": []
             }
@@ -34973,7 +35048,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@54"
+                "$ref": "#/rules@57"
               },
               "arguments": []
             }
@@ -35001,7 +35076,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@41"
+                    "$ref": "#/rules@44"
                   },
                   "arguments": []
                 }
@@ -35032,7 +35107,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35048,7 +35123,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@58"
+                "$ref": "#/rules@61"
               },
               "arguments": []
             }
@@ -35081,7 +35156,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -35105,7 +35180,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -35136,7 +35211,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35157,7 +35232,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -35171,7 +35246,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@60"
+                  "$ref": "#/rules@63"
                 },
                 "arguments": []
               },
@@ -35189,7 +35264,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@69"
+                        "$ref": "#/rules@72"
                       },
                       "arguments": []
                     }
@@ -35213,7 +35288,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@61"
+                  "$ref": "#/rules@64"
                 },
                 "arguments": []
               }
@@ -35290,7 +35365,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35311,7 +35386,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -35358,7 +35433,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -35397,7 +35472,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@67"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -35448,7 +35523,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@73"
               },
               "arguments": []
             }
@@ -35480,7 +35555,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@73"
               },
               "arguments": []
             }
@@ -35550,7 +35625,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@60"
+              "$ref": "#/rules@63"
             },
             "arguments": []
           },
@@ -35570,7 +35645,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@61"
+              "$ref": "#/rules@64"
             },
             "arguments": []
           }
@@ -35597,7 +35672,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35621,7 +35696,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -35638,7 +35713,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@60"
+                  "$ref": "#/rules@63"
                 },
                 "arguments": []
               },
@@ -35656,7 +35731,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@69"
+                        "$ref": "#/rules@72"
                       },
                       "arguments": []
                     }
@@ -35680,7 +35755,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@61"
+                  "$ref": "#/rules@64"
                 },
                 "arguments": []
               }
@@ -35736,7 +35811,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35767,7 +35842,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@67"
+                          "$ref": "#/rules@70"
                         },
                         "arguments": []
                       },
@@ -35791,7 +35866,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@67"
+                          "$ref": "#/rules@70"
                         },
                         "arguments": []
                       },
@@ -35813,7 +35888,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -35892,7 +35967,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@60"
+              "$ref": "#/rules@63"
             },
             "arguments": []
           },
@@ -35912,9 +35987,273 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@61"
+              "$ref": "#/rules@64"
             },
             "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "OutcomeDef",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "outcome"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@70"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "measures",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@42"
+              },
+              "arguments": []
+            },
+            "cardinality": "+"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "covers"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "covers",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/types@1"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@70"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "covers",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "CrossReference",
+                      "type": {
+                        "$ref": "#/types@1"
+                      },
+                      "terminal": {
+                        "$type": "RuleCall",
+                        "rule": {
+                          "$ref": "#/rules@70"
+                        },
+                        "arguments": []
+                      },
+                      "deprecatedSyntax": false,
+                      "isMulti": false
+                    }
+                  }
+                ],
+                "cardinality": "*"
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "note"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "note",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@72"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "MeasureClause",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "measure"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "metric",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@71"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "op",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@43"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "target",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@68"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "unit"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "unit",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@71"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "within"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "window",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@62"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "CompareOp",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "="
+          },
+          {
+            "$type": "Keyword",
+            "value": "!="
+          },
+          {
+            "$type": "Keyword",
+            "value": ">"
+          },
+          {
+            "$type": "Keyword",
+            "value": "<"
+          },
+          {
+            "$type": "Keyword",
+            "value": ">="
+          },
+          {
+            "$type": "Keyword",
+            "value": "<="
           }
         ]
       },
@@ -35928,7 +36267,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@42"
+          "$ref": "#/rules@45"
         },
         "arguments": []
       },
@@ -35949,7 +36288,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@43"
+              "$ref": "#/rules@46"
             },
             "arguments": []
           },
@@ -35981,7 +36320,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@43"
+                    "$ref": "#/rules@46"
                   },
                   "arguments": []
                 }
@@ -36008,7 +36347,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@44"
+              "$ref": "#/rules@47"
             },
             "arguments": []
           },
@@ -36040,7 +36379,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@44"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -36074,7 +36413,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@41"
+                  "$ref": "#/rules@44"
                 },
                 "arguments": []
               },
@@ -36087,7 +36426,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@52"
+              "$ref": "#/rules@55"
             },
             "arguments": []
           }
@@ -36114,7 +36453,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -36137,7 +36476,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@49"
                   },
                   "arguments": []
                 }
@@ -36156,7 +36495,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@46"
+                        "$ref": "#/rules@49"
                       },
                       "arguments": []
                     }
@@ -36178,7 +36517,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@47"
+                "$ref": "#/rules@50"
               },
               "arguments": []
             }
@@ -36197,7 +36536,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -36243,7 +36582,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -36265,7 +36604,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@67"
+                        "$ref": "#/rules@70"
                       },
                       "arguments": []
                     }
@@ -36297,7 +36636,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@62"
+                      "$ref": "#/rules@65"
                     },
                     "arguments": []
                   },
@@ -36318,7 +36657,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@67"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -36341,7 +36680,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@67"
+                        "$ref": "#/rules@70"
                       },
                       "arguments": []
                     }
@@ -36363,7 +36702,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@48"
+          "$ref": "#/rules@51"
         },
         "arguments": []
       },
@@ -36384,7 +36723,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@49"
+              "$ref": "#/rules@52"
             },
             "arguments": []
           },
@@ -36416,7 +36755,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@49"
+                    "$ref": "#/rules@52"
                   },
                   "arguments": []
                 }
@@ -36443,7 +36782,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@50"
+              "$ref": "#/rules@53"
             },
             "arguments": []
           },
@@ -36475,7 +36814,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@50"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -36509,7 +36848,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@47"
+                  "$ref": "#/rules@50"
                 },
                 "arguments": []
               },
@@ -36522,14 +36861,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@51"
+              "$ref": "#/rules@54"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@52"
+              "$ref": "#/rules@55"
             },
             "arguments": []
           }
@@ -36566,7 +36905,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -36582,7 +36921,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@41"
+                "$ref": "#/rules@44"
               },
               "arguments": []
             }
@@ -36606,7 +36945,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@58"
+                "$ref": "#/rules@61"
               },
               "arguments": []
             }
@@ -36616,33 +36955,11 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "feature": "op",
             "operator": "=",
             "terminal": {
-              "$type": "Alternatives",
-              "elements": [
-                {
-                  "$type": "Keyword",
-                  "value": "="
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "!="
-                },
-                {
-                  "$type": "Keyword",
-                  "value": ">"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "<"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": ">="
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "<="
-                }
-              ]
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@43"
+              },
+              "arguments": []
             }
           },
           {
@@ -36652,7 +36969,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@56"
               },
               "arguments": []
             }
@@ -36686,7 +37003,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -36710,7 +37027,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@59"
+                    "$ref": "#/rules@62"
                   },
                   "arguments": []
                 }
@@ -36734,7 +37051,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@65"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -36758,7 +37075,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@58"
+                    "$ref": "#/rules@61"
                   },
                   "arguments": []
                 }
@@ -36777,7 +37094,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@55"
+          "$ref": "#/rules@58"
         },
         "arguments": []
       },
@@ -36798,7 +37115,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@56"
+              "$ref": "#/rules@59"
             },
             "arguments": []
           },
@@ -36839,7 +37156,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@56"
+                    "$ref": "#/rules@59"
                   },
                   "arguments": []
                 }
@@ -36866,7 +37183,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@57"
+              "$ref": "#/rules@60"
             },
             "arguments": []
           },
@@ -36907,7 +37224,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@60"
                   },
                   "arguments": []
                 }
@@ -36941,7 +37258,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@54"
+                  "$ref": "#/rules@57"
                 },
                 "arguments": []
               },
@@ -36968,7 +37285,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@65"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -36992,7 +37309,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -37024,7 +37341,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@58"
+                    "$ref": "#/rules@61"
                   },
                   "arguments": []
                 }
@@ -37048,7 +37365,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@58"
+                    "$ref": "#/rules@61"
                   },
                   "arguments": []
                 }
@@ -37074,7 +37391,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -37093,7 +37410,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@67"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -37130,7 +37447,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@65"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -37188,7 +37505,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@64"
+                    "$ref": "#/rules@67"
                   },
                   "arguments": []
                 }
@@ -37383,6 +37700,33 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "$type": "SimpleType",
             "typeRef": {
               "$ref": "#/rules@9"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "$type": "Type",
+      "name": "Measurable",
+      "type": {
+        "$type": "UnionType",
+        "types": [
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@28"
+            }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@18"
+            }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@36"
             }
           }
         ]
@@ -37993,6 +38337,73 @@ function deriveStateChain(p, input) {
   return { axis: axisList, stages };
 }
 
+// src/shared/note-lint.ts
+init_define_BUILD_INFO();
+var AMBIGUOUS_NOTE_CODE = "note.ambiguous";
+var EARS_NOTE_CODE = "note.ears-shape";
+var REFINEMENT_NOTE_CODE = "note.refinement-shape";
+var UNCERTAINTY_WORDS = [
+  "belki",
+  "olabilir",
+  "galiba",
+  "san\u0131r\u0131m",
+  "muhtemelen",
+  "genelde",
+  "genellikle",
+  "bazen",
+  "\xE7o\u011Funlukla",
+  "herhalde",
+  "gerekebilir",
+  "olas\u0131",
+  "sanki",
+  "maybe",
+  "might",
+  "may",
+  "should",
+  "probably",
+  "usually",
+  "sometimes",
+  "perhaps",
+  "possibly",
+  "typically",
+  "generally",
+  "could"
+];
+var B = String.raw`(?<![\p{L}\p{N}])`;
+var E = String.raw`(?![\p{L}\p{N}])`;
+var UNCERTAINTY_RE = new RegExp(`${B}(?:${UNCERTAINTY_WORDS.join("|")})${E}`, "iu");
+var EARS_TRIGGER_RE = new RegExp(`${B}(?:oldu\u011Funda|oldu\u011Fu zaman|durumunda|when|iken)${E}`, "iu");
+var EARS_OBLIGATION_RE = new RegExp(`(?:(?:meli|mal\u0131)${E}|${B}(?:shall|gerekir|zorunlu)${E})`, "iu");
+var REFINEMENT_RANGE_RE = /\d+\s*\.\.\s*\d+/;
+var REFINEMENT_UNION_RE = /\{[^}]*\|[^}]*\}/;
+function detectNoteLint(text) {
+  if (!text || text.trim() === "") return [];
+  const hits = [];
+  const amb = text.match(UNCERTAINTY_RE);
+  if (amb) {
+    hits.push({
+      code: AMBIGUOUS_NOTE_CODE,
+      severity: "warning",
+      message: `Belirsiz kip notta: "${amb[0]}" kesinlik ta\u015F\u0131m\u0131yor \u2014 \xE7\xF6z\xFClmemi\u015F soru mu? Netle\u015Ftir ya da yap\u0131sal kurala \xE7evir (gerek\xE7e/kural authored, LLM doldurmaz).`
+    });
+  }
+  if (EARS_TRIGGER_RE.test(text) && EARS_OBLIGATION_RE.test(text)) {
+    hits.push({
+      code: EARS_NOTE_CODE,
+      severity: "info",
+      message: `EARS-\u015Fekilli not (tetik + y\xFCk\xFCml\xFCl\xFCk): bu serbest-proza de\u011Fil, yap\u0131sal kural olabilir \u2014 yap\u0131salla\u015Ft\u0131r\u0131lmal\u0131 m\u0131? (karar authored)`
+    });
+  }
+  if (REFINEMENT_RANGE_RE.test(text) || REFINEMENT_UNION_RE.test(text)) {
+    hits.push({
+      code: REFINEMENT_NOTE_CODE,
+      severity: "info",
+      message: `Refinement-\u015Fekilli not (aral\u0131k/k\xFCme): F3.1 range/union gramer aday\u0131 \u2014 yap\u0131sal k\u0131s\u0131t m\u0131? (talep-kan\u0131t\u0131)`
+    });
+  }
+  return hits;
+}
+
 // src/language/validation.ts
 var KNOWN_VERBS = [
   "creates",
@@ -38030,6 +38441,7 @@ function registerValidationChecks(services) {
     AbandonNote: validator.checkAbandon,
     ProcessDef: [validator.checkProcessBody, validator.checkNote],
     RuleDef: [validator.checkNote, validator.checkRuleReads],
+    OutcomeDef: [validator.checkOutcome, validator.checkNote],
     StageDef: validator.checkStage,
     AnyOrderBlock: validator.checkAnyOrder,
     StringExpr: validator.checkStringExpr
@@ -38122,8 +38534,8 @@ var CommandDslValidator = class {
       for (const el of imported.elements) {
         const name = el.name;
         if (!name) continue;
-        if (isOperationDecl(el) || isFlowDef(el) || isProcessDef(el) || isRuleDef(el)) {
-          const kind = isOperationDecl(el) ? "i\u015Flem" : isFlowDef(el) ? "ak\u0131\u015F" : isProcessDef(el) ? "s\xFCre\xE7" : "kural";
+        if (isOperationDecl(el) || isFlowDef(el) || isProcessDef(el) || isRuleDef(el) || isOutcomeDef(el)) {
+          const kind = isOperationDecl(el) ? "i\u015Flem" : isFlowDef(el) ? "ak\u0131\u015F" : isProcessDef(el) ? "s\xFCre\xE7" : isRuleDef(el) ? "kural" : "\xF6l\xE7\xFCt";
           if (!canonical.has(name)) canonical.set(name, kind);
           importedOrigin.set(name, origin);
         } else {
@@ -38160,6 +38572,9 @@ var CommandDslValidator = class {
         shared2 = true;
       } else if (isRuleDef(el)) {
         kind = "kural";
+        shared2 = true;
+      } else if (isOutcomeDef(el)) {
+        kind = "\xF6l\xE7\xFCt";
         shared2 = true;
       }
       if (!kind || !el.name) continue;
@@ -38377,12 +38792,18 @@ var CommandDslValidator = class {
   }
   /** ADR-0005: not tanımlı ama boş → uyarı. İçerik aksi halde doğrulanmaz. */
   checkNote(node, accept) {
-    if (node.note !== void 0 && node.note.trim() === "") {
+    const note = node.note;
+    if (note === void 0) return;
+    if (note.trim() === "") {
       accept(
         "warning",
         'Bo\u015F not: silin ya da i\xE7erik yaz\u0131n (note """...""").',
         { node, property: "note" }
       );
+      return;
+    }
+    for (const hit of detectNoteLint(note)) {
+      accept(hit.severity, hit.message, { node, property: "note", code: hit.code });
     }
   }
   /**
@@ -38608,6 +39029,36 @@ var CommandDslValidator = class {
         `Kar\u015F\u0131la\u015Ft\u0131rma bir alanla bitmeli; '${cmp.left.segments.join(".")}' bir ${res.finalKind === "entity" ? "entity" : "akt\xF6r"}`,
         { node: cmp, property: "left" }
       );
+    }
+  }
+  /**
+   * F3.6 (ADR-0037) — başarı ölçütü semantiği. Ölçülebilirliğin ŞEKLİ
+   * gramerce zorlanır (≥1 measure + comparator + sayı); bu denetim yalnız
+   * metriğin PROZA-kimliğinin boş olmadığını ve aynı outcome içinde metrik
+   * etiketinin yinelenmediğini güvenceler (boş/yinelenen etiket = anlamsız
+   * ölçüt). covers çözümü linker'ın işidir (çözülmeyen → linker error).
+   */
+  checkOutcome(outcome, accept) {
+    const seen = /* @__PURE__ */ new Set();
+    for (const m of outcome.measures) {
+      const label = (m.metric ?? "").trim();
+      if (label.length === 0) {
+        accept(
+          "warning",
+          `\xD6l\xE7\xFCt '${outcome.name}': measure metrik-etiketi bo\u015F \u2014 \xF6l\xE7\xFClen niceli\u011Fi adland\u0131r\u0131n (\xF6r. 'signup completion rate')`,
+          { node: m, property: "metric" }
+        );
+        continue;
+      }
+      const key = label.toLocaleLowerCase("tr");
+      if (seen.has(key)) {
+        accept(
+          "warning",
+          `\xD6l\xE7\xFCt '${outcome.name}': '${label}' metri\u011Fi birden \xE7ok kez \xF6l\xE7\xFCl\xFCyor \u2014 tek e\u015Fik b\u0131rak\u0131n veya metrikleri ay\u0131rt edin`,
+          { node: m, property: "metric" }
+        );
+      }
+      seen.add(key);
     }
   }
   /** Aktör genelleştirmesi döngü içeremez (A extends B extends A) */

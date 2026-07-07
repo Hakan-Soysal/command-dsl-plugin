@@ -1,8 +1,8 @@
 {
   "source": "CommandDSL",
-  "grammarVersion": "frontend-v1.x-e5764dfe0cec",
-  "grammarHash": "e5764dfe0cec",
-  "srcHash": "6c469b509842",
-  "commit": "ddaa1b8",
-  "builtAt": "2026-07-03T10:19:33+03:00"
+  "grammarVersion": "frontend-v1.x-bfeb6db74b94",
+  "grammarHash": "bfeb6db74b94",
+  "srcHash": "a9c756943d61",
+  "commit": "27ff90b",
+  "builtAt": "2026-07-07T23:30:00+03:00"
 }

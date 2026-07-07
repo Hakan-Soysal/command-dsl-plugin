@@ -7,7 +7,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `e5764dfe0cec` · src `a4f0d2a6d1fa` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `bfeb6db74b94` · src `d9b8d6a148df` · commit `27ff90b` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 
 Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listeler (zorunlular — experience/screen/uses/region — faz+validator'ca zorlanır). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → eşleşme aday-soru kuyruğuna girer (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok). `entry` ve result-handler-tamlığı zaten validator-warning'idir (sessiz değil) → burada yok; warning geldiğinde ikinci-tur soru olarak ele al.
 
@@ -20,15 +20,16 @@ Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listele
 | `refreshable` / `invalidates` / `on enter refresh` (tazeleme) | "veri bayatlamasın / yazınca liste güncellensin / elle yenile" | 5 | ★ | **bayat-veri** — yazımdan sonra liste tazelenmez; kullanıcı eski veriyi görür |
 | `field { required\|min\|max\|pattern }` + form `rule` (validation) | "şu alan zorunlu / şu formatta / çapraz-alan kuralı (offline'da yerel doğrula)" | 6 | ★ | **doğrulanmamış-girdi** — geçersiz/eksik alan istemcide yakalanmaz; hatalı veri backend'e gider (offline'da hiç yakalanmaz) |
 | `confirm ["metin"]` (yıkıcı aksiyon) | "silmeden/iptal etmeden önce sorsun / geri alınamaz eylem" | 6 | ★ | **kazara-yıkıcı-eylem** — geri-alınamaz eylem onaysız tetiklenir |
-| `visible-when` (koşullu görünürlük — ROL / client-state / **kayıt-durumu**) | "bu buton yalnız yöneticide (rol) / seçili sekmede / filtreye göre / **sipariş 'pending'ken** görünsün" (UX — güvenlik DEĞİL; izinli path-kökleri: currentUser·session·ekran-param·state/derived·row) | 4/7 | ★ | **koşulsuz-görünür-öğe** — koşula bağlı öğe her rolde/client-durumda görünür (rol-tarafı güvenlik açığı DEĞİL — yetki backend'de zorlanır). ✅ SUNUCU entity-durumu (geçersiz-durum-eylemi: Pause/Cancel) ifade edilir — (A) eylemi kaydı yükleyen **list/detail gövdesine** koy → `visible-when: row.status = '…'` (öğe-bağlamı; Karar #51 Fork A, tercih); (B) ayrı region/ekran-seviyesindeyse ekrandaki detail/value kaydına ADIYLA → `visible-when: <detailAdı>.status = '…'` (Fork B; `list` hariç — çok-satırlı) |
+| `visible-when` (koşullu görünürlük — ROL / client-state / **kayıt-durumu**) | "bu buton yalnız yöneticide (rol) / seçili sekmede / filtreye göre / **sipariş 'pending'ken** görünsün" (UX — güvenlik DEĞİL; izinli path-kökleri: currentUser·session·ekran-param·state/derived·ekran-kaydı[detail/value adı]·row) | 4/7 | ★ | **koşulsuz-görünür-öğe** — koşula bağlı öğe her rolde/client-durumda görünür (rol-tarafı güvenlik açığı DEĞİL — yetki backend'de zorlanır). ✅ SUNUCU entity-durumu (geçersiz-durum-eylemi: Pause/Cancel) ifade edilir — (A) eylemi kaydı yükleyen **list/detail gövdesine** koy → `visible-when: row.status = '…'` (öğe-bağlamı; Karar #51 Fork A, tercih); (B) ayrı region/ekran-seviyesindeyse ekrandaki detail/value kaydına ADIYLA → `visible-when: <detailAdı>.status = '…'` (Fork B; `list` hariç — çok-satırlı) |
 | `paginated infinite\|pager` (list) | "liste çok uzun / sayfa sayfa / sonsuz kaydır" | 4 | ★ (warning-routed) | **sınırsız-liste-yükü** — uzun liste tek seferde çizilir; kayma/bellek çöküşü |
 | `when empty` / `when loading` (query yaşamdöngüsü) | "yüklenirken / hiç kayıt yokken ekranda ne görünsün" | 4 | ○ | **boş/donuk-ekran** — yükleme veya kayıtsız durumda ekran boş kalır; kullanıcı takıldı sanır |
 | UI-event: `on enter/leave` · `timer/interval` · `activate/secondary` | "ekrana girince / N sn sonra / periyodik / uzun-bas / sağ-tık" | 7 | ○ | **tetiklenmeyen-arayüz-olayı** — ekrana-giriş/zamanlayıcı/uzun-bas eylemi bağlanmaz; etkileşim gerçekleşmez |
 | `persisted state` (kalıcı client-state) | "kapatıp açınca kaybolmasın (sepet, taslak)" | 5 | ○ | **kaybolan-taslak** — kapat-aç'ta client-state (sepet/taslak) sıfırlanır |
 | `show a, b` (görüntü-şekli) | "listede/detayda yalnız şu alanlar görünsün" | 4 | ○ | **belirsiz-alan-izdüşümü** — hangi alanların görüneceği tanımsız; varsayılana/tümüne düşer |
 | `step` (form wizard) | "adım adım form / sihirbaz" | 6 | ○ | **çökmüş-sihirbaz** — adımlı form tek sayfaya iner; uzun form bir arada gelir |
+| `@ui.readonly` / `@ui.hidden` (field) · `@ui.emphasis` (field+screen) | "bu alan **salt-okunur** görünsün / formda **gizli** olsun / **vurgulu** çıksın" (frontend-yazarı sunum-ipucu; UX — backend-gerçeği DEĞİL) | 4/6 | ○ | **kayıp-sunum-ipucu** — alan/ekran salt-okunur/gizli/vurgu niyeti manifest'e taşınmaz; üreteç düz-alan üretir (kullanıcı düzenlenmemesi gereken alanı düzenler / gizli alan görünür) |
 
-**Not:** field-decoration (`@ui.*` / backend-hassas→maske) bu bundle'da YOK (grammar `e5764dfe0cec` desteklemiyor — probe'lu doğrulandı) → envantere GİRMEZ; gerektiğinde `#` yorumla kaynak-içi anılır (SKILL Altın kural).
+**Not:** frontend-yazarı `@ui.*` dekorasyonu bu bundle'da **VAR** (grammar `bfeb6db74b94`; `decorations+=Annotation` — Screen:131 + FormField:190; probe'la doğrulandı → manifest `decorations: [...]` emit eder). Kapalı çekirdek-yorumlu küme: `@ui.readonly`·`@ui.hidden` (yalnız field-site), `@ui.emphasis` (field+screen). `@bogus.*` = bilinmeyen namespace **error**; yanlış-site (ör. `@ui.readonly` screen'de) **error**; argüman verilirse **warning** (yok sayılır). Render: hidden→«gizli» · readonly→«okunur» · emphasis→«vurgu». **AYRI concern:** backend-hassas `@sensitivity`/`@crypto`→maske %100 **tech-driven** kalır (frontend re-declare ETMEZ; [[manifest-mapping-not-superset]] tek-kaynak) — o köprü hâlâ üstakışta, `@ui.*` onun yerine geçmez.
 
 ## 1. Model kökü
 
@@ -133,6 +134,16 @@ action New -> screen NewOrder                 # client-only (ad hiçbir uses-com
   (uyumsuzluk error). Arg kaynakları: ekran-param, `session.*`, `currentUser.*`, state,
   literal; öğe-bağlamında (list-satırı VE detail tek-kayıt) `row.*`.
 - **`as <ad>`**: aynı op'u bir ekranda ≥2 bileşen kullanınca ZORUNLU (ad-çakışması error).
+  **Alias-gölgeleme yasağı (error):** `detail`/`value` ekran-kaydı adı (`as <alias>` ya da
+  op-adı) rezerve bir path-kökünü (`session`·`currentUser`·`row`·ekran-param·state/derived)
+  GÖLGELEYEMEZ — `detail X as session` gibi bir ad `session.y`'yi ekran-kaydı mı store mu
+  belirsiz kılar (checkScreen). Farklı ad ver.
+- **`@ui.*` dekorasyonu** (frontend-yazarı sunum-ipucu; İ5-lift kapalı küme): field-önüne
+  `@ui.readonly` / `@ui.hidden`, field VEYA screen-önüne `@ui.emphasis` yazılır
+  (`@ui.readonly field email` · `@ui.emphasis screen X`). Manifest `decorations: [...]`
+  emit eder (hidden→«gizli»·readonly→«okunur»·emphasis→«vurgu»). Bilinmeyen namespace
+  (`@bogus.*`) veya yanlış-site (screen'de `@ui.readonly`) = error; argüman = warning
+  (yok sayılır). Backend-hassas maske DEĞİL (o `@sensitivity`→tech-driven; bkz. Envanter Not'u).
 - **`show a, b`** (list/detail): görüntü-şekli; yazılmazsa default = TÜM out-alanları
   beyan sırasıyla (üreteç tahmin etmez — belgeli default).
 - **`paginated infinite|pager`** yalnız list; niyet ZORUNLU (çıplak `paginated` yok).
@@ -206,6 +217,11 @@ derived toplam = sum of items.price   # saf ifade; oto-recompute; girdi yüklenm
 - Kapsam lexical: experience-düzeyi = global, screen-düzeyi = yerel. Mutasyon açık
   (`set` — sessiz two-way binding yok). Aggregate sözdizimi `sum of x.y` (fonksiyon
   çağrısı `sum(...)` DEĞİL).
+- **`state init` / `derived` ifadesi de kapalı path-kök setine tabidir (error)** — "saf
+  ifade" serbest değil: `derived x = campaign.status` gibi **bilinmeyen kök** sessizce
+  geçmez, hata verir (checkStateExpr — visible-when emsali). İzinli kökler: `session`·
+  `currentUser`·ekran-param·state/derived·ekran-kaydı (detail/value adı). **`row` HARİÇ**
+  (state experience/screen düzeyi; satır-öğe bağlamı değil — `rowAllowed:false`).
 
 ## 11. Navigasyon & flow (karar #8/#21)
 

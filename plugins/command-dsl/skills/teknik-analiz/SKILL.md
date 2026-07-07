@@ -179,6 +179,13 @@ ise sınır oradadır.
   Opsiyonel/authored (sert-gate değil) — hassas görüneni **işaretsiz bırakma**; sor ve açıkça yaz
   (büyü yok). Sınıflandırma modelli; **saklama/silme gerçeklemesi** üreteç-politikasıdır (sorulursa
   söyle, DSL'e mekanik yazma; kalıcı bir kural notu gerekiyorsa op-`note`'a düşür).
+- "Bu alanın **izinli değer-uzayı** dar mı — sayısal bir **aralık** (yaş 13-120, öncelik 1-5) ya da
+  **kapalı bir küme/durum listesi** (durum ∈ {Taslak, Gönderildi})?" → alan-sonu `in <lo>..<hi>` (range,
+  yalnız sayısal tip) veya `in {A|B|C}` (union, String/enum). **Sinyal soruyu TETİKLER, değer-uzayını
+  UYDURMA — uçları/kümeyi kullanıcıdan al.** ⚠ Alanın tipi bir **enum** ise union üyeleri o enum'un
+  **alt-kümesi** olmalı (enum-dışı değer → `union-not-in-enum` error); range yalnız sayısal, union
+  yalnız String/enum tiptedir (§Refinement). Sınır belirlenince **boundary-value** aday-sorusunu da ekle
+  (min-1/min/max/max+1; sınır dahil mi, sınır-dışı hangi `NotValid` payload'ını üretir).
 
 **⚠ Anti-pattern — Sınır-aşan navigasyon:** cross-module entity-tipli alan (error) veya
 cross-module entity üzerinden path navigasyonu (error). Modül verisi internal; cross-module
@@ -193,7 +200,12 @@ veri yalnız `calls` ile akar.
 **Amaç:** Her iş işlemini teknik bir operation'a çevirmek — **açık imza** (iş'ten türetilemez).
 **Elicit et:**
 - "Bu işlem teknik olarak hangi girdileri alır, ne döner?" → `operation Ad(p: Tip, …): Dönüş
-  realizes BizOp`.
+  realizes BizOp`. **Param adları tekil olmalı** (`checkParamUniqueness` → dup=error).
+- "Bir **girdi-parametresinin** izinli aralığı/kümesi var mı (miktar 1-100, tür ∈ {A,B})?" → param-sonu
+  `in <lo>..<hi>` / `in {A|B|C}` (Field ile aynı tip-uyumu; §Refinement). Bu, sınır-dışı değerin
+  **NotValid (400) hata-gövdesini** makine-okunur biçimde şekillendiren **`op.violations[]`**'a
+  (`ruleId=<param>.<kind>`) derive edilir → üreteç/tüketici red'i kural-kimliğiyle kurar (elle-doğrulamaya
+  düşmez). Değer-uzayını **sor, uydurma**; taksonomi eşlemesi (ihlal→NotValid) Faz 5'te teyit edilir.
 - "Hangi kayıtları okuyor / yaratıyor / güncelliyor / siliyor?" → `access { reads … creates …
   updates … deletes … }`. Komut/sorgu ayrımı access'ten türer (write-sınıfı varsa komut).
 - "Bu işlemin çağrılması **denetim/uyum kaydı** gerektiriyor mu (finansal işlem, kişisel-veri

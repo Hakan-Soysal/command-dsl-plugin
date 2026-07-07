@@ -210,15 +210,24 @@ servis, iade gibi 5 ayrı süreci tek çatıya toplama eğilimi olur. Sınırı 
 **Toplu öner + onayla.** Süreç referans-only'dir; burada sadece isim/sınır/aktör
 netleşir, içi sonraki fazlarda dolar. Detay: `references/dsl-reference.md` (§4).
 
-**Başarı ölçütü (ölçülebilir SC) — büyük-resimle aynı anda sor.** Davranışın **doğru**
+**Başarı ölçütü (`outcome`) — büyük-resimle aynı anda sor.** Davranışın **doğru**
 olması ("onaylanınca durum değişir") ile ürünün **başarılı** olması ("onay süresi 2
 günden 2 saate iner") ayrı şeylerdir. Süreç sınırları netleşince bir de bunu sor:
 > "Bu işi başardığımızı NASIL ölçeceğiz — hangi somut, ölçülebilir sonuç?"
 
-Teyitli, **ölçülebilir** cevap yapısal SC-adayı olur (ilgili process'e `note` ya da
-Envanter kaydı). **ÖLÇÜLEMEYEN başarı ifadesi ("kullanıcılar mutlu olur") yapısallaşmaz**
-— ya ölçülebilir biçime indir ("haftalık aktif kullanıcı ≥ X"), ya `note` olarak bırak, ya
-hiç yazma (correctness-over-completeness; ölçülemeyeni uydurma). Op-düzeyi ölçüt-yakalama:
+Ölçülebilir bir cevap gelince **tek soruyla bırakma — `outcome` alanlarına dekompoze et**
+(jargon gösterme, düz dille sor). Cevabı şu dört parçaya oturt:
+- **metrik + eşik** ("hangi rakama iniyor/çıkıyor? eşik ne?") → `measure '<metrik>' <op> <sayı>`
+- **birim** ("bu ne cinsinden — gün, saat, yüzde?") → `unit '<birim>'`
+- **zaman penceresi** ("hangi süre içinde ölçülüyor — 30 günde mi?") → `within <süre>` (opsiyonel)
+- **kapsam** ("bu hangi akışı / süreci / işlemi ölçüyor?") → `covers <flow|process|op>`
+
+Teyitli, **ölçülebilir** cevap birinci-sınıf bir **`outcome`**'a iner (top-level construct,
+op'un içine gömülü değil; `covers` ile ilgili process/flow/op'a bağlanır — sözdizimi
+`references/dsl-reference.md` §11). **ÖLÇÜLEMEYEN başarı ifadesi ("kullanıcılar mutlu olur")
+yapısallaşmaz** — ya ölçülebilir biçime indir ("haftalık aktif kullanıcı ≥ X"), ya `note`
+olarak bırak (eşik/pencere çıkmayan yarı-ölçülebilir hâl), ya hiç yazma
+(correctness-over-completeness; ölçülemeyeni uydurma). Op-düzeyi ölçüt-yakalama:
 `references/operation-translation.md`.
 
 ---
@@ -264,6 +273,14 @@ Bu çeviri en hassas iş olduğu için **adım adım prosedürü ayrı dosyada**
 `references/operation-translation.md` — her operation'da onu izle. Özetle:
 - Eksik kuralları **kullanıcıya düz dille** sor: "Yönetici herkesin mi, sadece
   kendi ekibinin mi talebini onaylar?" "Onayın bir sınırı var mı (mesai/tutar)?"
+- **Tekrar eden / gezinen ön-koşulu `rule`'a yükselt.** Bir ön-koşul `only if`'in
+  **tek karşılaştırma** sınırını aşıyorsa — aynı kural birden çok işlemde geçiyor,
+  bir ilişki gezmesi gerekiyor ("yöneticinin şubesindeki …"), ya da "böyle bir kayıt
+  VAR mı / YOK mu" (`exists`) sorusu içeriyorsa — bunu adlandırılmış bir `rule`'a
+  çıkar ve ilgili işlemlere `requires <RuleAdı>` ile bağla. Tetik-soruları düz dille:
+  "Bu aynı koşul başka işlemlerde de geçerli mi?" · "Bu kural başka bir kaydın
+  var/yok olmasına mı bakıyor?" (Kullanıcıya `rule`/`exists` deme; düz cümlesinden
+  *sen* türet.) Sözdizimi ve örtük-kök kuralı: `references/dsl-reference.md` §10.
 - **Durum geçişlerini** burada yakala: "onaylanınca durumu ne olur?" →
   `on success do: calculate <Entity>.status = 'onaylandı'`. Durum yaşam döngüsü
   ayrı bir Faz-0 ürünü değildir; bu atamalardan **türetilir**.

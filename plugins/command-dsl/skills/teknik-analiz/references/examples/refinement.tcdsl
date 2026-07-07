@@ -1,0 +1,39 @@
+// Refinement (F3.1b) LINKED exemplar — catalog.operations.json'a bağlı (schemaVersion 3).
+// Değer-uzayı daraltmanın ÜÇ biçimini birlikte gösterir (hepsi GEÇERLİ → 0 error):
+//   (1) FIELD range   : sayısal alanda `in <lo>..<hi>` (Int → REFINEMENT_NUMERIC_TYPES)
+//   (2) FIELD union   : ENUM-tipli alanda `in {A|B|C}` — üyeler enum'un ALT-KÜMESİ olmalı
+//                       (union-not-in-enum kuralı; `{Draft|Submitted}` ⊆ ProposalStatus)
+//   (3) PARAM range/union : op imzasında input-kısıtı → manifest `op.violations[]`
+//                       (`priority.range`, `title.union`) = NotValid (400) gövde-sözleşmesi kaynağı.
+// Geçersiz biçimler (negatif range, sayısal-union, enum-dışı üye, from≥to) KASITLI yok:
+// examples/ 0-error exemplar'dır — geçersiz-case'ler tech-dsl-reference.md prozasında.
+contract './catalog.operations.json'
+
+rolemap {
+  Customer -> Customer
+}
+
+module Proposals {
+
+  // FIELD union'ının üyelik (union-not-in-enum) denetimi için tip aynı module'de declared enum olmalı.
+  enum ProposalStatus { Draft  Submitted  Approved  Rejected }
+
+  // PARAM refinement → manifest `op.violations[]` (ruleId=<param>.<kind>): priority.range + title.union.
+  @rest(POST, "/proposals")
+  operation SubmitProposal(
+      priority: Int in 1..5,                       // param range (Int sayısal → geçerli)
+      title: String in {"rfp" | "quote" | "tender"}  // param union (String skaler → permissive, geçerli)
+  ): ProposalId realizes CreateProposal {
+    roles Customer
+    ownership own
+    access { creates Proposal }
+    note "priority sınır-dışı (0 veya 6) NotValid(400) dönmeli — payload ruleId=priority.range."
+  }
+
+  // FIELD refinement: sayısal range + enum-tipli union (üye alt-kümesi).
+  entity Proposal realizes Proposal {
+    id: ProposalId
+    priority: Int in 1..5                          // field range
+    status: ProposalStatus in {Draft | Submitted}  // field union → {Draft,Submitted} ⊆ ProposalStatus
+  }
+}

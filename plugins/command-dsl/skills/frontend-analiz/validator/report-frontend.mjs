@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-e5764dfe0cec", grammarHash: "e5764dfe0cec", srcHash: "6c469b509842", commit: "ddaa1b8", builtAt: "2026-07-03T10:19:33+03:00" };
+var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", srcHash: "a9c756943d61", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00" };
 
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/report-frontend.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync, readdirSync as readdirSync2, statSync as statSync2, rmSync } from "node:fs";
@@ -10,6 +10,16 @@ import { resolve, join as join2, dirname } from "node:path";
 // src/playground/frontend-salt.ts
 function esc(s) {
   return s.replace(/\|/g, "\u2223").replace(/[{}]/g, " ").replace(/\[/g, "(").replace(/\]/g, ")").replace(/"/g, "\u201D");
+}
+function sensitiveFieldMap(exp) {
+  const m = /* @__PURE__ */ new Map();
+  for (const u of exp?.usesInterfaces ?? []) {
+    const s = /* @__PURE__ */ new Set();
+    for (const f of u.out?.fields ?? []) if (f.sensitive !== void 0 || f.encrypted) s.add(f.name);
+    for (const f of u.in ?? []) if (f.sensitive !== void 0 || f.encrypted) s.add(f.name);
+    if (s.size) m.set(u.name, s);
+  }
+  return m;
 }
 function saltFrames(m) {
   const frames = [];
@@ -31,13 +41,15 @@ function stripLabel(owner, screen) {
 function screenSaltLines(owner, screen, exp) {
   const persona = screen.persona ? `  <i>for ${esc(screen.persona)}</i>` : "";
   const lines = [];
-  const legend = { conditional: false };
+  const legend = { conditional: false, masked: false, sensitiveByOp: sensitiveFieldMap(exp) };
+  const emph = (screen.decorations ?? []).includes("emphasis") ? "\xABvurgu\xBB " : "";
   lines.push("{+");
-  lines.push(`{* <b>${esc(stripLabel(owner, screen))}</b>${persona} }`);
+  lines.push(`{* <b>${emph}${esc(stripLabel(owner, screen))}</b>${persona} }`);
   for (const r of screen.regions) regionLines(r, lines, legend);
   for (const w of screen.whenDeltas) lines.push(...whenLines(w));
   for (const w of exp?.whenDeltas ?? []) lines.push(...whenLines(w, true));
   if (legend.conditional) lines.push("<i>\xB0 ko\u015Fullu g\xF6r\xFCn\xFCr (visible-when \u2014 yaln\u0131z UX)</i>");
+  if (legend.masked) lines.push("<i>\u2022 hassas/\u015Fifreli (tech @sensitivity/@crypto) \u2014 hedef maskeler</i>");
   lines.push("}");
   return lines;
 }
@@ -66,12 +78,12 @@ function componentLines(c, out, legend) {
     case "list":
       return listLines(c, out, legend);
     case "detail":
-      return detailLines(c, out);
+      return detailLines(c, out, legend);
     case "value":
       out.push(`${esc(c.query.op)} | <b>\u2026</b>`);
       return;
     case "form":
-      return formLines(c, out);
+      return formLines(c, out, legend);
     case "action":
       out.push(actionButton(c, legend));
       return;
@@ -82,10 +94,16 @@ function componentLines(c, out, legend) {
 }
 function listLines(c, out, legend) {
   const fields = c.show?.fields ?? [c.query.op];
+  const sens = legend.sensitiveByOp.get(c.query.op);
+  const isSens = (f) => {
+    const s = !!sens?.has(f);
+    if (s) legend.masked = true;
+    return s;
+  };
   out.push("{#");
-  out.push(fields.map((f) => `<b>${esc(f)}</b>`).join(" | "));
-  out.push(fields.map(() => "\u2026").join(" | "));
-  out.push(fields.map(() => "\u2026").join(" | "));
+  out.push(fields.map((f) => `<b>${esc(f)}${isSens(f) ? " \u2022" : ""}</b>`).join(" | "));
+  out.push(fields.map((f) => isSens(f) ? "\u2022\u2022\u2022\u2022" : "\u2026").join(" | "));
+  out.push(fields.map((f) => isSens(f) ? "\u2022\u2022\u2022\u2022" : "\u2026").join(" | "));
   out.push("}");
   const extras = [];
   if (c.refreshable) extras.push("[\u27F3 yenile]");
@@ -95,28 +113,43 @@ function listLines(c, out, legend) {
   for (const a of c.actions) out.push(actionButton(a, legend));
   for (const w of c.whenDeltas) out.push(...whenLines(w));
 }
-function detailLines(c, out) {
+function detailLines(c, out, legend) {
+  const sens = legend.sensitiveByOp.get(c.query.op);
   for (const f of c.show?.fields ?? [c.query.op]) {
-    out.push(`${esc(f)} | <i>\u2026</i>`);
+    const s = !!sens?.has(f);
+    if (s) legend.masked = true;
+    out.push(`${esc(f)}${s ? " \u2022" : ""} | <i>${s ? "\u2022\u2022\u2022\u2022" : "\u2026"}</i>`);
   }
   if (c.refreshable) out.push("[\u27F3 yenile]");
   for (const w of c.whenDeltas) out.push(...whenLines(w));
 }
-function formLines(c, out) {
+function formLines(c, out, legend) {
+  const sens = legend.sensitiveByOp.get(c.submits.op);
+  const fl = (f) => {
+    const s = !!sens?.has(f.name);
+    if (s) legend.masked = true;
+    return fieldLine(f, s);
+  };
   if (c.steps.length > 0) {
     out.push(`{/ ${c.steps.map((s, i) => i === 0 ? `<b>${esc(s.name)}</b>` : esc(s.name)).join(" | ")} }`);
     c.steps.forEach((s, i) => {
       if (i > 0) out.push("--");
-      for (const f of s.fields) out.push(fieldLine(f));
+      for (const f of s.fields) out.push(fl(f));
     });
   }
-  for (const f of c.fields) out.push(fieldLine(f));
+  for (const f of c.fields) out.push(fl(f));
   const mech = c.submits.mechanic ? ` (${c.submits.mechanic})` : "";
   out.push(`[G\xF6nder \u2014 ${esc(c.submits.op)}${mech}]`);
 }
-function fieldLine(f) {
+function fieldLine(f, sensitive) {
+  const deco = new Set(f.decorations ?? []);
   const req = f.validation.required ? "*" : "";
-  return `${esc(f.name)}${req} | "                "`;
+  const name = `${esc(f.name)}${req}`;
+  const label = deco.has("emphasis") ? `<b>${name}</b>` : name;
+  if (deco.has("hidden")) return `<i>${name} \xABgizli\xBB</i>`;
+  if (deco.has("readonly")) return `${label} | <i>\xABokunur\xBB</i>`;
+  if (sensitive) return `${label} \u2022 | "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"`;
+  return `${label} | "                "`;
 }
 function actionButton(a, legend) {
   let label = a.name;

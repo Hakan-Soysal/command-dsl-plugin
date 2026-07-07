@@ -48,6 +48,7 @@ import { createQaServices } from '@qadsl/services';
 import { UNCOVERED_BRANCHES_CODE } from '@qadsl/validation';
 import { isQaModel, type QaModel } from '@qadsl/ast';
 import { emitQaFile, emitMergedQa } from '@qadsl/manifest';
+import { generateWaiverReport, renderWaiverLines } from '@qadsl/waiver-report';
 
 // build.qa.mjs tarafından esbuild `define` ile gömülür.
 declare const __BUILD_INFO__: {
@@ -267,6 +268,25 @@ if (ok && args.merged) {
                 .map(o => o.guard ? `${o.op} guard "${o.guard}"` : o.error ? `${o.op} throws ${o.error}` : o.op);
             log(`    ⚠ ${g.id} [${g.status}] — kapsanmayan: ${gaps.join(', ')}`);
         }
+    }
+    // F3.6 authored SC→senaryo: `satisfies` presence-coverage (kapatılabilir hedef). AUTHORED
+    // niyet — `analyze --outcomes` türetilmiş op-kapsama raporundan AYRI (o mevcut kapsamayı toplar).
+    const ocs = merged.coverage.outcomes;
+    if (ocs.length > 0) {
+        const sat = ocs.filter(o => o.status === 'covered').length;
+        log(`  outcome (authored satisfies): ${ocs.length} · ${sat} karşılanan / ${ocs.length - sat} açık-hedef`);
+        const unsat = ocs.filter(o => o.status === 'uncovered').map(o => o.id);
+        if (unsat.length > 0) log(`    ⚠ karşılanmayan outcome (senaryo yaz): ${unsat.join(', ')}`);
+    }
+    // Waiver gate-teşhiri (F2.2): merged manifest'teki TÜM authored waive'ler. `today`
+    // CANLI (display-only) — merged.json'a yazılmaz, zaman-bağımsız kalır (S13). Enforcement
+    // validator'da (stale-error + süre-dolumu warning); bu yalnız görünürlük.
+    const today = new Date().toISOString().slice(0, 10);
+    const waiverReport = generateWaiverReport(merged, today);
+    if (waiverReport.rows.length > 0) {
+        const c = waiverReport.counts;
+        log(`  waiver'lar: ${waiverReport.rows.length} · ${c['aktif']} aktif / ${c['süresi-yakın']} süresi-yakın / ${c['dolmuş']} dolmuş / ${c['süresiz']} süresiz`);
+        for (const line of renderWaiverLines(waiverReport)) log(line);
     }
 }
 

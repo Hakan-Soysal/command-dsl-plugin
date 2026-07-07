@@ -226,7 +226,7 @@ ETME — yalnız testlerin gerçekten kullanacağı kimlikler; ama yetki-testler
 
 **⚠ Anti-pattern — Waive kaçışı (iki yönlü):** waive bir sus düğmesi değildir; gerekçe
 ZORUNLU ve anlamlı olmalı ("vaktimiz yok" kabul edilmez → `until` ile erteleme yaz).
-**`because` gerekçesini LLM DOLDURAMAZ — authored'dır**: skill gerekçeyi kullanıcıdan alır, kendi uydurmaz (büyü yok); tüm waive'ler qa raporunda konsolide teşhir edilir (durum: aktif/süresi-yakın/dolmuş).
+**`because` gerekçesini LLM DOLDURAMAZ — authored'dır**: skill gerekçeyi kullanıcıdan alır, kendi uydurmaz (büyü yok). **Doğrulayıcı (bundle'da) erteleme-bahanesi taşıyan gerekçeyi yakalar (F2.3):** kapalı bir bahane-listesine (ör. "vaktimiz yok") uyan `because` → warning ("somut risk-argümanı yaz ya da `until` ile koşullu ertele"). Tüm waive'ler merged manifest'te konsolide taşınır; skill'in `qcdsl.mjs` CLI'ı `--merged` özetinde süre-durumu sınıflamasını basar (`waiver'lar: N · aktif / süresi-yakın / dolmuş / süresiz` — F2.2, `today` CANLI/display-only, merged'e yazılmaz). Statik HTML rapor (`report-qa.mjs`) şimdilik her waive'i `reason` + `until` ile satır-içi gösterir (konsolide "Waiver'lar" bölümü canlı playground'da; report-qa portu henüz kapsamıyor).
 Tersi de tuzak: her dala mekanik test yazdırma — tek-rollü op'un NotAuthorized'ı P1
 jenerik-kimlik kapsamında waive edilebilir (spec §7 exemplar deseni).
 **Kapatır:** coverage/strict (S6 + `--strict` yükseltmesi), karşılıksız-hedef
@@ -300,6 +300,14 @@ S4 page yalnız paginated; S9 access-dışı entity warning; İQ11 called hedef 
   şu akışları tanımlıyor: … Hangilerine uçtan-uca senaryo yazalım?"* Kapsanmayanları
   tek tek sor: "senaryo mu ekleyelim, bilinçli kapsam-dışı mı?" (waive flow'a
   UYGULANMAZ — presence uyarısı ancak senaryoyla kapanır ya da belgeli-açık kalır).
+- **Ürün-hedefi (outcome) presence — flow/process'in KARDEŞİ (F3.6, ADR-0037):** operations.json
+  ölçülebilir `outcome`/SuccessCriteria taşıyorsa evreni de SUN: *"İş analizi şu ölçülebilir
+  ürün-hedeflerini tanımlıyor: … **Bu senaryo hangi ürün-hedefini karşılıyor?**"* → senaryoya
+  `satisfies <outcome>` (varsa `realizes flow/process` ile aynı satırda). Karşılanmayan hedefi
+  tek tek sor: "senaryo mu, kapatılabilir açık-hedef mi?" — uyarı **warning-routed** (waive
+  KAPATMAZ; strict'te de error değil). **★ süpürme:** yalnız-**op** kapsayan outcome yalnız
+  `satisfies` ile bağlanabilir (`realizes flow` onu asla covered yapmaz) — es geçme.
+  Kaynak/mekanik: `references/tech-to-qa-translation.md` §G2.
 - Seçilen akış için: "**Hangi adımlar, hangi sırayla? Kim** hangi adımda?" →
   `scenario "…" realizes flow X { as musteri  step s1 = SubmitProposal with … expect
   Success  as yonetici  step ApproveProposal with { id: s1.result.id } expect Success }`
@@ -317,6 +325,8 @@ hata-dalları op-testinde, yaşam döngüsü senaryoda yaşar. Senaryo `expect`'
 sayılır ama `callFailure` senaryoda YOKTUR (S15 — stub'lar senaryo-başı sabittir).
 Bağlanmamış step sonucuna path yazdırma (S3).
 **Kapatır:** flow/process presence-coverage (#23/#24 — strict'te de warning kalır),
+**outcome `satisfies` presence-coverage (F3.6 — kapatılabilir ürün-hedefi; warning-routed,
+waive kapatmaz; bilinmeyen outcome → error)**,
 step kuralları (S3 yalnız-Success binding, S15 senaryo-expect'te callFailure yok,
 S4 `after` yalnız paginated + aynı-op + bağlı hedef, QA-12 stepPath çözümü,
 senaryo-given-call'da `as` zorunlu — F8), fail-fast semantiği (P7 — kullanıcıya bilgi).

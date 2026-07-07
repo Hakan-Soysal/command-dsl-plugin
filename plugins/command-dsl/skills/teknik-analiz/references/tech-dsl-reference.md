@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `437f0bc58e66` · src `32a0602af0ef` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `437f0bc58e66` · src `50e1f51c03e2` · commit `27ff90b` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -106,11 +106,16 @@ entity Order realizes Order {           // realizes: kaba (0..N) business entity
   id: OrderId                            // alan: ad : TypeRef
   lines: list of LineItem                // list of → koleksiyon (to-many)
   total: Money
+  priority: Int in 1..5                  // FIELD refinement — range (sayısal; §Refinement)
+  status: OrderStatus in {Pending|Cancelled}   // FIELD refinement — union (enum alt-kümesi)
   customerId: CustomerId sourceOfTruth(CRM.Customer)   // cross-module bağ (aşağı bkz.)
   invariant total.amount >= 0 as "non-negative"   // entity-düzeyi "her zaman doğru"; `as "..."` = opsiyonel etiket
   concurrency optimistic                 // lost-update koruması (entity başına ≤1)
 }
 ```
+> **Field grameri (sıra sabit):** `name ':' TypeRef (sourceOfTruth)? (refinement)?`. `refinement` =
+> `'in' (range | union)` ve alanın **en sonuna** gelir (varsa `sourceOfTruth`'tan sonra). Kural + tip-uyumu
+> aşağıda **§Refinement**.
 - **Nötr-tipli alanlar** (teknik-only dahil); alan-düzeyi business eşleme YOK (kaba realizes).
 - **`invariant <Expr> ('as' "<etiket>")?`**: path'ler composite `type` ve **intra-module**
   entity-ref'leri gezer; **cross-module entity navigasyonu → error**; `sum of`'suz to-many
@@ -125,6 +130,65 @@ entity Order realizes Order {           // realizes: kaba (0..N) business entity
 **⚠ Cross-module entity-tipli alan YASAK** (`checkCrossModuleEntityField` → error): başka
 module'ün entity'sine alan tutamazsın → **ID-skaler + sourceOfTruth** kullan. Intra-module
 entity-tipli alan serbest.
+
+### Refinement — değer-uzayı daraltma (F3.1b · ADR-0034/0035)
+
+Bir alanın/param'ın taban-tipini (`Int`/`String`/enum) **authored** olarak daraltır. İki biçim
+(gramer: `Refinement: 'in' (range=Range | union=LiteralUnion)`):
+```
+in 13..120              // Range  — from '..' to  (her ikisi NUMBER)
+in {A | B | C}          // LiteralUnion — UnionVal ('|' UnionVal)*; UnionVal = ID | STRING | NUMBER
+```
+
+**`in` = HARD-RESERVE keyword** (ADR-0034 §2): birleşik tech keyword-setine sert eklendi (TokenBuilder
+YAZILMADI — çakışma kanıtı yoktu). **Kabul edilen kısıt:** artık hiçbir `.tcdsl` alanı/param/enum-değeri
+`in` adını alamaz (`to` ve `event`'in daha önce sessizce field/param adı yasakladığı dersin tekrarı önlendi).
+
+**TİP-UYUMU kuralları — TEK-KAYNAK `refinementViolations` (`manifest.ts`; validator + emit aynı helper'ı
+tüketir).** Manifest **yalnız violation'sız (geçerli)** refinement'ı yazar (correctness: yarım/yanlış alan
+YAZILMAZ); **ama validator her ihlal için diagnostic üretir** (geçersiz ≠ sessiz-düşme):
+
+| Biçim | Geçerli tip | İhlal kodu (geçersizde) |
+|---|---|---|
+| `range` (`in lo..hi`) | **sayısal** — `REFINEMENT_NUMERIC_TYPES` = {Int, Integer, Long, Decimal, Float, Double, Number, Money} | sayısal-değil → `range-nonnumeric`; `from` ≥ `to` (**STRICT** — eşit dahil geçersiz) → `range-inverted` |
+| `union` (`in {…}`) | **String-benzeri skaler VEYA declared-enum** (KARAR-1 whitelist) | sayısal tipte → `union-numeric`; boş → `union-empty`; yinelenen değer → `union-dup`; entity/typedecl (yapısal) tipte → `union-nonscalar` |
+| `union` **enum-tipli alanda** | üyeler enum'un **ALT-KÜMESİ** olmalı | enum-üyesi-olmayan değer → `union-not-in-enum` |
+
+- **Enum-üyelik yalnız tip aynı model'de _declared enum_'a çözülünce denetlenir** (`typeUniverseOf`). Bilinmeyen/
+  String skaler tipte union **permissive** (üyelik denetimi yok — literal-string kümesi serbest). Yani "union
+  değerleri enum üyesi olmalı" **yalnız enum-tipli** alanlar için geçerli; String için değil.
+- **Range union'ın _tersi_:** range yalnız sayısalda, union yalnız String/enum'da. Sayısal-union ve non-sayısal-range
+  ikisi de reddedilir (KARAR-1 simetrisi).
+- Manifest şekli: field/param'da `refinement: {kind:"range", from, to}` ya da `{kind:"union", values:[…]}`.
+
+**Param refinement + `violations[]` (ADR-0035):** op imzasındaki param da refinement taşır (§4). Geçerli param
+refinement'ları op-başına **`violations[]`** girişine derive edilir: `{ ruleId, field, domain }`.
+- **`ruleId` şeması = `<param>.<kind>`** (örn. `priority.range`, `title.union`). Op-başına nested olduğundan
+  `<op>.` öneki yok; param adları imza içinde tekil (aşağı `checkParamUniqueness`). Bu, NotValid (400 — request-
+  geçersizliği) **hata-gövdesi sözleşmesi**nin makine-okunur kaynağıdır (üreteç/tüketici sınır-dışı red'i ruleId ile kurar).
+- **guardId-çakışma UYARISI (`checkRuleIdCollision`):** sentezlenen `ruleId`, authored `GuardedExpr` `guardId`
+  string'iyle çakışırsa → **warning** (gate değil; id-namespace'i temiz tut, ad-ayrıştır). Field refinement
+  `violations[]`'a GİRMEZ (yalnız `entities[].fields[].refinement`; op-seviyeye kopyalanmaz — superset tuzağı).
+
+**Param-uniqueness (`checkParamUniqueness`, Operation + BoundaryOp):** imza-içi param adları **tekil** olmalı;
+yinelenen ad → **error** ("parametreler tekil olmalı"). ADR-0035 §4'ün varsayımı (dup ad → dup ruleId + belirsiz imza)
+artık yapısal enforce edilir.
+
+**Return-refinement — bu-dilim-DIŞI (ADR-0035 §1 AMEND):** dönüş-tipine (`returns=TypeRef`) refinement bağlama
+`violations[]` sözleşmesinin DIŞIDIR (ihlali input-değil → NotValid/400-gövdesi taşımaz). Ama **kavramsal-imkânsız
+değil:** skaler-dönüşte range/union bir **response-şeması daraltması**dır (OpenAPI response bounds, branded-client tip,
+postcondition) → **talep-kanıtı eşiğine tabi gelecek gramer-adayı**, kalıcı-dışlama değil. (İlk metnin "kategori-hatası"
+çerçevesi geri çekildi.)
+
+**Bilinen/kabul edilen ifade-gücü kısıtları (ADR-0034 §Bilinen-kısıt):**
+- **Negatif range ifade edilemez:** `terminal NUMBER` (`shared.langium`) İŞARETSİZDİR → `age: Int in -5..5` parse
+  etmez. Gramer-geneli konvansiyon (guard'daki `age > -5` de parse etmez), refinement-tutarsızlığı değil. Talep gelirse
+  minimal yol: kural-lokal `(neg?='-')?` (işaretli-TERMİNAL asla).
+- **Tek-değer sayısal kısıt ifade edilemez:** `in 5..5` → `from<to` STRICT reddeder; sayısal-union yasak. **First-class
+  workaround dilde var:** `validation { x = 5 }` (GuardedExpr, kesin eşitlik). ⚠ `in 5..6` "yaklaşık" workaround YANLIŞ
+  (Int inclusive-okumada 6'yı kabul eder) — yalnız guard-eşitliği doğru.
+
+Çalışan geçerli exemplar: `references/examples/refinement.tcdsl` (field range + enum-union + param range/union → `violations[]`).
 
 ---
 
@@ -154,6 +218,11 @@ operation Recalc(orderId: OrderId): Unit { … }
 ```
 - **İmza açıktır** (iş'ten türetilemez): `(<param>: <TypeRef>, …): <TypeRef>`. `TypeRef` =
   `[list of] <ID>`.
+- **Param refinement** (opsiyonel, en sonda — gramer: `Param: name ':' TypeRef (refinement)?`):
+  `operation SubmitProposal(priority: Int in 1..5, title: String in {"rfp"|"quote"}): … { … }`.
+  Field ile **aynı** tip-uyumu kuralları (§2 Refinement); geçerli param refinement'ları op-başına
+  **`violations[]`** (`{ruleId=<param>.<kind>, field, domain}`; NotValid/400 gövde-sözleşmesi) derive edilir.
+  Param adları **tekil** olmalı (`checkParamUniqueness` → dup=error). Return-tipe refinement bu-dilim-DIŞI (§2 Refinement).
 - `realizes <BizOpID>` (0..1) — linked'de business işlemine bağ. Standalone'da yasak.
 - **Komut/sorgu `access`'ten türer** (`deriveKind`): write-sınıfı access (creates/updates/
   deletes) veya yan-etkili `calls` → **komut**; yoksa **sorgu**.

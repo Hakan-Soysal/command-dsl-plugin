@@ -75,7 +75,9 @@ test "denetim satırı yazılır" of OnProposalSubmitted covers Success {
     then state AuditLine count 1
 }
 
-scenario "teklif yaşam döngüsü" realizes flow ProposalFlow {
+// `satisfies` (F3.6): bu uçtan-uca yaşam döngüsü, iş analizindeki ölçülebilir ürün-hedefini
+// (outcome ProposalThroughput — yalnız-op kapsar, `realizes` ile bağlanamaz) test-kanıtlar.
+scenario "teklif yaşam döngüsü" realizes flow ProposalFlow satisfies ProposalThroughput {
     time "2026-07-02T09:00:00Z"
     as musteri
     step s1 = SubmitProposal with gecerliTeklif expect Success

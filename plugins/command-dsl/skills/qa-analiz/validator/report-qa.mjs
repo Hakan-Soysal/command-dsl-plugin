@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-qa", srcHash: "59cb812fe30a", srcFiles: ["report-qa.src.mts", "report-index.src.mts"], builtAt: "2026-07-03T20:48:54.723Z" };
+var define_BUILD_INFO_default = { tool: "report-qa", srcHash: "ba5a4abc13bc", srcFiles: ["report-qa.src.mts", "report-index.src.mts"], builtAt: "2026-07-07T21:47:57.880Z" };
 
 // report-qa.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync } from "node:fs";
@@ -153,7 +153,8 @@ function validateMerged(x, src) {
         fail(`op ${o.id}: covered dalda coveredBy dizi de\u011Fil`);
     }
   }
-  for (const grp of ["flows", "processes"]) {
+  const groups = Array.isArray(cov.outcomes) ? ["flows", "processes", "outcomes"] : ["flows", "processes"];
+  for (const grp of groups) {
     for (const r of cov[grp]) {
       const rr = r;
       if (typeof rr?.id !== "string") fail(`coverage.${grp}[].id string de\u011Fil`);
@@ -240,13 +241,29 @@ function renderHtml(merged2, title2, sourceLabel) {
   }
   const realizes = [
     ...merged2.coverage.flows.map((f) => ({ ...f, kind: "flow" })),
-    ...merged2.coverage.processes.map((p) => ({ ...p, kind: "process" }))
+    ...merged2.coverage.processes.map((p) => ({ ...p, kind: "process" })),
+    ...(merged2.coverage.outcomes ?? []).map((o) => ({ ...o, kind: "outcome" }))
   ];
   if (realizes.length > 0) {
-    h.push('<h2>Ak\u0131\u015F / S\xFCre\xE7 presence</h2><table class="presence">');
+    h.push('<h2>Ak\u0131\u015F / S\xFCre\xE7 / Outcome presence</h2><table class="presence">');
     for (const r of realizes) {
-      const info = r.status === "covered" ? (r.coveredBy ?? []).map(coverRefLabel).join(" \xB7 ") : `'realizes ${r.kind}' senaryosu yok`;
+      const info = r.status === "covered" ? (r.coveredBy ?? []).map(coverRefLabel).join(" \xB7 ") : r.kind === "outcome" ? `'satisfies' senaryosu yok \u2014 kapat\u0131labilir hedef` : `'realizes ${r.kind}' senaryosu yok`;
       h.push(`<tr><td>${r.kind}</td><td><code>${esc(r.id)}</code></td><td><span class="chip chip-${r.status}">${r.status}</span></td><td class="cov-info">${esc(info)}</td></tr>`);
+    }
+    h.push("</table>");
+  }
+  const waives = merged2.coverage.operations.flatMap((op) => op.branches.filter((b) => b.status === "waived").map((b) => ({ op: op.id, branch: branchLabel(b.branch), reason: b.reason, until: b.until })));
+  if (waives.length > 0) {
+    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+    const soon = new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10);
+    const cls = (u) => !u ? "s\xFCresiz" : u < today ? "dolmu\u015F" : u <= soon ? "s\xFCresi-yak\u0131n" : "aktif";
+    const counts = { "aktif": 0, "s\xFCresi-yak\u0131n": 0, "dolmu\u015F": 0, "s\xFCresiz": 0 };
+    for (const w of waives) counts[cls(w.until)]++;
+    h.push(`<h2>Waiver'lar (${waives.length})</h2>`);
+    h.push(`<p class="meta">${counts["aktif"]} aktif \xB7 ${counts["s\xFCresi-yak\u0131n"]} s\xFCresi-yak\u0131n \xB7 ${counts["dolmu\u015F"]} dolmu\u015F \xB7 ${counts["s\xFCresiz"]} s\xFCresiz</p>`);
+    h.push('<table class="presence"><tr><th>Op</th><th>Dal</th><th>Durum</th><th>until</th><th>Gerek\xE7e</th></tr>');
+    for (const w of waives) {
+      h.push(`<tr><td><code>${esc(w.op)}</code></td><td>${esc(w.branch)}</td><td>${esc(cls(w.until))}</td><td>${esc(w.until ?? "\u2014")}</td><td class="cov-info">${esc(w.reason ?? "")}</td></tr>`);
     }
     h.push("</table>");
   }

@@ -86,6 +86,16 @@
         }
     ],
     "processes": [],
+    "successCriteria": [
+        {
+            "id": "ProposalThroughput",
+            "measures": [
+                { "metric": "onaylanan teklif oranı", "comparator": ">=", "target": 80, "unit": null, "window": null }
+            ],
+            "covers": ["SubmitProposal"],
+            "note": null
+        }
+    ],
     "relations": [],
     "actors": [
         { "id": "Customer", "extends": null },

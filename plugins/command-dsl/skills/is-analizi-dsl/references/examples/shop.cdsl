@@ -48,6 +48,14 @@ entity Refund {
 verb submits
 verb ships
 
+# rule (top-level, yeniden-kullanılabilir op-bağlamlı predikat) — reads + satisfies
+# BoolExpr (skaler cmp + and/or + [not] exists <alias> where <cond>). Kökler
+# (Order = requires eden op'un kaynağı; inv = reads-alias) çağrı yerinde bağlanır.
+rule OrderSubmittable {
+    reads Invoice as inv
+    satisfies Order.total > 0 and not exists inv where Invoice.status = 'open'
+}
+
 # --- Sorgular: reads/lists + public/own + only when + order by + limit to ---
 BrowsePublic: Guest lists public Store
 ViewOrder: Customer reads own Order
@@ -64,7 +72,9 @@ on success do
     calculate Order.total = sum of Order.items.price
     calculate Order.status = 'placed'
 
+# requires (K2-kardeşi): op-clause olarak adlandırılmış rule'a bağlanır
 SubmitOrder: Customer submits own Order where status = 'placed'
+requires OrderSubmittable
 on success do
     calculate Order.status = 'submitted'
 
@@ -168,3 +178,13 @@ process SalesProcess of Order
     and
         stage Loyal: flow Loyalty by Customer
     stage Clean: ArchiveOrder
+
+# --- outcome (ürün başarı ölçütü): measure(comparator+sayı)+unit+within + covers ---
+# covers hedefi business-içi: flow (Fulfil) / process (SalesProcess) / operation
+# (ApproveBigOrder). ≥1 measure ZORUNLU; ölçülemeyen başarı note'a düşer.
+outcome FastFulfilment {
+    measure 'order approval time' <= 2 unit 'hours' within 30 days
+    measure 'rejected order rate' < 5 unit 'percent'
+    covers Fulfil, SalesProcess, ApproveBigOrder
+    note """Ölçülemeyen başarı ("müşteri memnun olur") yapısallaşmaz — note'a düşer."""
+}

@@ -9,7 +9,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `5e7f3ca61106` · src `8803bb50614c` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `9be3e380a32e` · src `aff3ba0d1ab5` · commit `27ff90b` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
@@ -23,6 +23,7 @@ QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kaps
 | `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ | **kurulumsuz-dal** — ön-durum (mevcut kayıt/başkasının kaydı/limit-aşımı) kurulmadığından dal gerçekten tetiklenmez |
 | `waive … until` (süreli) | dalı kapsamak yerine waive ediyorsan süre koydun mu? `until`'siz waive = **kalıcı sessiz boşluk** | 2 | ★ | **kalıcı-sessiz-boşluk (bayat-istisna)** — süresiz waive; kapsanmayan dal kalıcı olarak sessizce muaf kalır |
 | senaryo `realizes flow/process` (yaşam döngüsü) | çok-adımlı / çok-aktör akış var mı? presence-coverage | 5 | ○ (warning-routed) | **kapsanmayan-yaşamdöngüsü** — çok-adım/çok-aktör akış senaryosu yok; uçtan-uca dizi doğrulanmaz |
+| senaryo `satisfies <outcome>` (ürün-hedefi presence) | operations.json'da ölçülebilir `outcome`/SuccessCriteria var mı — özellikle yalnız-**op** kapsayan (o outcome yalnız `satisfies` ile bağlanabilir, `realizes` asla)? her hedef bir senaryoyla karşılanıyor mu? | 5 | ★ (warning-routed; **waive KAPATMAZ**) | **kapsanmayan-ürün-hedefi** — ölçülebilir bir başarı-ölçütü hiçbir senaryoyla `satisfies` edilmiyor; "davranış doğru ama ürün-hedefi test-kanıtsız" (kapatılabilir açık-hedef sessizce kalır) |
 | `page` assert'leri (paginated) | sayfalı sorguda jenerik ötesi sayfa-özel veri doğrulaması gerekli mi? | 4 | ○ | **doğrulanmamış-sayfa** — sayfalı sorguda jenerik ötesi sayfa-özel veri assert'lenmez |
 | stub `returns` gerçekçiliği | dış çağrı sonucu testin sonucunu etkiliyorsa `returns` içeriği gerçeği yansıtmalı | 3 | ○ | **gerçekdışı-stub** — dış-çağrı sonucu gerçeği yansıtmaz; test yanlış öncül üstünde yeşil verir |
 
@@ -244,7 +245,7 @@ then {
 ## 9. Scenario (§3.4, karar #3/#12/#13/#14/#23)
 
 ```
-scenario "teklif yaşam döngüsü" realizes flow ProposalFlow {
+scenario "teklif yaşam döngüsü" realizes flow ProposalFlow satisfies ProposalThroughput {
   time "2026-07-02T09:00:00Z"
   as musteri
   step s1 = SubmitProposal with gecerliTeklif expect Success
@@ -260,6 +261,26 @@ scenario "teklif yaşam döngüsü" realizes flow ProposalFlow {
 
 - `realizes flow <id>` / `realizes process <id>`: uses-flows bağlıysa yazılabilir;
   presence-coverage'a sayılır (#23/#24). Çok-aktör orkestrasyon → `realizes process`.
+- **`satisfies <outcome1>, <outcome2>` (F3.6, ADR-0037 üçüncü-dilim):** senaryonun bir
+  business **ürün-hedefini** (`outcome` / SuccessCriteria) KARŞILADIĞINI bildirir. Düz-ID,
+  `realizes flow` birebir emsali — evren `uses flows`'un `operations.json.successCriteria`
+  id'leridir (cross-ref değil, sentetik). Grammar (qa-dsl.langium:102-113): `realizes`
+  OPSIYONEL + `satisfies` OPSIYONEL, sırası sabit (önce `realizes`, sonra `satisfies`);
+  ikisi de olmayan/yalnız-biri/ikisi-birlikte hepsi geçerli. Çoklu outcome virgülle
+  (`satisfies A, B`; aynı senaryoda `A, A` dedup). Bilinmeyen outcome → **error** (uses-flows
+  bağlı olmalı; `realizes`'ın karşılıksız-hedef kuralıyla aynı).
+  - **Presence-coverage (kapatılabilir hedef):** `satisfies` senaryosu olan outcome
+    **covered**, olmayan **uncovered** = *kapatılabilir yeni ürün-hedefi* (merged
+    `coverage.outcomes[]`; qcdsl özeti "outcome (authored satisfies): N · … karşılanan /
+    … açık-hedef"). Kapsanmayan outcome → tek konsolide **warning** `uses flows` satırında
+    ("'satisfies' senaryosu olmayan outcome'lar … F3.6 — kapatılabilir hedef: …").
+    Bu uyarı **warning-routed**'dur: strict'te de **error'a yükselmez** ve **waive ile
+    KAPANMAZ** (realizes-flow presence emsali) — yalnız bir `satisfies` senaryosuyla ya da
+    belgeli-açık bırakılarak kapanır.
+  - **PIN — neden `satisfies` gerekli:** bir outcome yalnızca bir **op**'u `covers` ediyorsa
+    (senaryo op'u ASLA realize edemez — yalnız flow/process), o outcome'un satisfaction-bağı
+    için TEK yol `satisfies`'tir; `realizes flow` onu asla covered yapamaz (op-kapsayan outcome
+    flows/processes coverage'ında yoktur).
 - `as <persona>` satırı **akış boyunca etkin aktörü değiştirir**.
 - `step [<id> =] <Op> with <girdi> [after <stepId>] expect <dal> [{ assert'ler }]`:
   - Binding: **yalnız `expect Success` step'leri bağlanabilir (S3)**; sonraki

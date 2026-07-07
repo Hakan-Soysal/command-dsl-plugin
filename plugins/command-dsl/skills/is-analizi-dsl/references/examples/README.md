@@ -25,6 +25,12 @@ geçen biçim **gerçek CommandDSL parser'ında doğrulanmıştır**.
 - **Flow:** `flow … for`, `note`, `step`, `optional`, `repeat`, `optional repeat`,
   `using`, `include` (+`optional repeat`), `either/or`, `outside`, `abandon anytime`.
 - **Process:** `process … of`, `note`, flow-`stage … by`, operation-`stage`, `any order … and`.
+- **rule + requires:** top-level `rule … { reads … satisfies … }` (`OrderSubmittable`,
+  `reads Invoice as inv` + `[not] exists <alias> where …` niceleyicisi) + op-clause
+  `requires` (`SubmitOrder`).
+- **outcome:** `outcome … { measure '<metrik>' <op> <sayı> unit … within … · covers
+  flow/process/op }` (`FastFulfilment`, iki `measure` + `covers Fulfil, SalesProcess,
+  ApproveBigOrder`).
 
 `support.cdsl` (Modül 2):
 - **`import`** (çapraz modül: Customer/Admin/Store shop'tan gelir).

@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-437f0bc58e66", grammarHash: "437f0bc58e66", techSrcHash: "32a0602af0ef", commit: "9d3b4a7", builtAt: "2026-07-07T09:18:19+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-437f0bc58e66", grammarHash: "437f0bc58e66", techSrcHash: "50e1f51c03e2", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00", langium: "4.2.4" };
   }
 });
 
@@ -20377,8 +20377,8 @@ var Set_default = Set2;
 
 // node_modules/lodash-es/_WeakMap.js
 init_define_BUILD_INFO();
-var WeakMap = getNative_default(root_default, "WeakMap");
-var WeakMap_default = WeakMap;
+var WeakMap2 = getNative_default(root_default, "WeakMap");
+var WeakMap_default = WeakMap2;
 
 // node_modules/lodash-es/_getTag.js
 var mapTag3 = "[object Map]";
@@ -32257,6 +32257,9 @@ var Model = {
   rolemap: "rolemap",
   standalone: "standalone"
 };
+function isModel(item) {
+  return reflection2.isInstance(item, Model.$type);
+}
 var Module2 = {
   $type: "Module",
   annotations: "annotations",
@@ -38789,6 +38792,26 @@ function entityFieldJson(f, model, owningModule) {
   return base;
 }
 var REFINEMENT_NUMERIC_TYPES = /* @__PURE__ */ new Set(["Int", "Integer", "Long", "Decimal", "Float", "Double", "Number", "Money"]);
+var universeCache = /* @__PURE__ */ new WeakMap();
+function buildTypeUniverse(model) {
+  const enums = /* @__PURE__ */ new Map();
+  const structural = /* @__PURE__ */ new Set();
+  for (const n of ast_utils_exports.streamAllContents(model)) {
+    if (isEnumDecl(n)) enums.set(n.name, new Set(n.values));
+    else if (isEntity(n) || isTypeDecl(n)) structural.add(n.name);
+  }
+  return { enums, structural };
+}
+function typeUniverseOf(node) {
+  const model = ast_utils_exports.getContainerOfType(node, isModel);
+  if (!model) return void 0;
+  let u = universeCache.get(model);
+  if (!u) {
+    u = buildTypeUniverse(model);
+    universeCache.set(model, u);
+  }
+  return u;
+}
 function refinementViolations(field) {
   const r = field.refinement;
   if (!r) return [];
@@ -38807,7 +38830,22 @@ function refinementViolations(field) {
       if (seen.has(s)) out.push({ code: "union-dup", value: s });
       seen.add(s);
     }
-    if (typeName && numeric) out.push({ code: "union-numeric" });
+    if (typeName && numeric) {
+      out.push({ code: "union-numeric" });
+    } else if (typeName) {
+      const universe = typeUniverseOf(field);
+      const enumMembers = universe?.enums.get(typeName);
+      if (enumMembers) {
+        for (const v of raw) {
+          const s = String(v);
+          if (!enumMembers.has(s)) out.push({ code: "union-not-in-enum", value: s });
+        }
+      } else if (universe?.structural.has(typeName)) {
+        out.push({ code: "union-nonscalar" });
+      }
+    }
+  } else {
+    out.push({ code: "refinement-incomplete" });
   }
   return out;
 }
@@ -39172,6 +39210,73 @@ function exprNodeEqual(a2, b) {
   return JSON.stringify(a2) === JSON.stringify(b);
 }
 
+// src/shared/note-lint.ts
+init_define_BUILD_INFO();
+var AMBIGUOUS_NOTE_CODE = "note.ambiguous";
+var EARS_NOTE_CODE = "note.ears-shape";
+var REFINEMENT_NOTE_CODE = "note.refinement-shape";
+var UNCERTAINTY_WORDS = [
+  "belki",
+  "olabilir",
+  "galiba",
+  "san\u0131r\u0131m",
+  "muhtemelen",
+  "genelde",
+  "genellikle",
+  "bazen",
+  "\xE7o\u011Funlukla",
+  "herhalde",
+  "gerekebilir",
+  "olas\u0131",
+  "sanki",
+  "maybe",
+  "might",
+  "may",
+  "should",
+  "probably",
+  "usually",
+  "sometimes",
+  "perhaps",
+  "possibly",
+  "typically",
+  "generally",
+  "could"
+];
+var B = String.raw`(?<![\p{L}\p{N}])`;
+var E = String.raw`(?![\p{L}\p{N}])`;
+var UNCERTAINTY_RE = new RegExp(`${B}(?:${UNCERTAINTY_WORDS.join("|")})${E}`, "iu");
+var EARS_TRIGGER_RE = new RegExp(`${B}(?:oldu\u011Funda|oldu\u011Fu zaman|durumunda|when|iken)${E}`, "iu");
+var EARS_OBLIGATION_RE = new RegExp(`(?:(?:meli|mal\u0131)${E}|${B}(?:shall|gerekir|zorunlu)${E})`, "iu");
+var REFINEMENT_RANGE_RE = /\d+\s*\.\.\s*\d+/;
+var REFINEMENT_UNION_RE = /\{[^}]*\|[^}]*\}/;
+function detectNoteLint(text) {
+  if (!text || text.trim() === "") return [];
+  const hits = [];
+  const amb = text.match(UNCERTAINTY_RE);
+  if (amb) {
+    hits.push({
+      code: AMBIGUOUS_NOTE_CODE,
+      severity: "warning",
+      message: `Belirsiz kip notta: "${amb[0]}" kesinlik ta\u015F\u0131m\u0131yor \u2014 \xE7\xF6z\xFClmemi\u015F soru mu? Netle\u015Ftir ya da yap\u0131sal kurala \xE7evir (gerek\xE7e/kural authored, LLM doldurmaz).`
+    });
+  }
+  if (EARS_TRIGGER_RE.test(text) && EARS_OBLIGATION_RE.test(text)) {
+    hits.push({
+      code: EARS_NOTE_CODE,
+      severity: "info",
+      message: `EARS-\u015Fekilli not (tetik + y\xFCk\xFCml\xFCl\xFCk): bu serbest-proza de\u011Fil, yap\u0131sal kural olabilir \u2014 yap\u0131salla\u015Ft\u0131r\u0131lmal\u0131 m\u0131? (karar authored)`
+    });
+  }
+  if (REFINEMENT_RANGE_RE.test(text) || REFINEMENT_UNION_RE.test(text)) {
+    hits.push({
+      code: REFINEMENT_NOTE_CODE,
+      severity: "info",
+      message: `Refinement-\u015Fekilli not (aral\u0131k/k\xFCme): F3.1 range/union gramer aday\u0131 \u2014 yap\u0131sal k\u0131s\u0131t m\u0131? (talep-kan\u0131t\u0131)`
+    });
+  }
+  return hits;
+}
+
 // src/tech/witness.ts
 init_define_BUILD_INFO();
 var EMPTY_RANGE = { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
@@ -39431,14 +39536,14 @@ var TechDslValidator = class {
       if (!opTarget) continue;
       const bizOp = contract.operations.get(opTarget);
       if (!bizOp) continue;
-      for (const E of bizOp.access.writes) {
-        const owners = techModuleEntityRealizers.get(E);
+      for (const E2 of bizOp.access.writes) {
+        const owners = techModuleEntityRealizers.get(E2);
         if (owners?.has(module2.name)) continue;
-        if (exemptByBoundary.has(E)) continue;
+        if (exemptByBoundary.has(E2)) continue;
         if (owners && owners.size > 0) {
-          accept("error", `Entity-kapsama: '${op.name}' i\u015F write-set'i '${E}' ba\u015Fka module'de (cross-unit write) \u2014 kendi module '${module2.name}' i\xE7inde realizes eden entity yok.`, { node: op, property: "name" });
+          accept("error", `Entity-kapsama: '${op.name}' i\u015F write-set'i '${E2}' ba\u015Fka module'de (cross-unit write) \u2014 kendi module '${module2.name}' i\xE7inde realizes eden entity yok.`, { node: op, property: "name" });
         } else {
-          accept("error", `Entity-kapsama: '${op.name}' i\u015F write-set'i '${E}' hi\xE7bir teknik entity taraf\u0131ndan realizes edilmiyor.`, { node: op, property: "name" });
+          accept("error", `Entity-kapsama: '${op.name}' i\u015F write-set'i '${E2}' hi\xE7bir teknik entity taraf\u0131ndan realizes edilmiyor.`, { node: op, property: "name" });
         }
       }
     }
@@ -39715,17 +39820,17 @@ var TechDslValidator = class {
     const bizReads = new Set(bizOp.access.reads);
     const { writes: techWrite, reads: techRead } = this.accessBizClasses(op);
     const accessClause = op.clauses.find(isAccessClause);
-    for (const E of techWrite) {
-      if (bizReads.has(E) && !bizWrites.has(E)) {
-        acceptWitness(accept, "warning", `Eri\u015Fim-sapma: '${op.name}' business salt-okunur say\u0131lan '${E}' entity'sini tech taraf\u0131nda mutasyon ediyor (read\u2192write y\xFCkseltme) \u2014 g\xFCvenlik-zay\u0131flatma.`, op, "name", "escalation", [
-          { node: accessClause ?? op, message: `tech write: ${E}` },
-          { node: op, message: `s\xF6zle\u015Fme: read-only ${E}` }
+    for (const E2 of techWrite) {
+      if (bizReads.has(E2) && !bizWrites.has(E2)) {
+        acceptWitness(accept, "warning", `Eri\u015Fim-sapma: '${op.name}' business salt-okunur say\u0131lan '${E2}' entity'sini tech taraf\u0131nda mutasyon ediyor (read\u2192write y\xFCkseltme) \u2014 g\xFCvenlik-zay\u0131flatma.`, op, "name", "escalation", [
+          { node: accessClause ?? op, message: `tech write: ${E2}` },
+          { node: op, message: `s\xF6zle\u015Fme: read-only ${E2}` }
         ]);
       }
     }
-    for (const E of techRead) {
-      if (bizWrites.has(E) && !techWrite.has(E)) {
-        accept("info", `Eri\u015Fim-sapma: '${op.name}' business write say\u0131lan '${E}' entity'sini tech taraf\u0131nda yaln\u0131z okuyor (zarars\u0131z daralma).`, { node: op, property: "name" });
+    for (const E2 of techRead) {
+      if (bizWrites.has(E2) && !techWrite.has(E2)) {
+        accept("info", `Eri\u015Fim-sapma: '${op.name}' business write say\u0131lan '${E2}' entity'sini tech taraf\u0131nda yaln\u0131z okuyor (zarars\u0131z daralma).`, { node: op, property: "name" });
       }
     }
   }
@@ -40135,20 +40240,20 @@ var TechDslValidator = class {
     for (const decl of model.decls) {
       if (!isModule(decl)) continue;
       for (const op of decl.members.filter(isOperation)) {
-        for (const E of this.accessBizClasses(op).writes) {
-          let owners = writeRealizers.get(E);
+        for (const E2 of this.accessBizClasses(op).writes) {
+          let owners = writeRealizers.get(E2);
           if (!owners) {
             owners = /* @__PURE__ */ new Map();
-            writeRealizers.set(E, owners);
+            writeRealizers.set(E2, owners);
           }
           if (!owners.has(decl.name)) owners.set(decl.name, op);
         }
       }
     }
-    for (const [E, owners] of writeRealizers) {
+    for (const [E2, owners] of writeRealizers) {
       if (owners.size >= 2) {
-        const entries = [...owners.entries()].sort((a2, b) => a2[0] < b[0] ? -1 : a2[0] > b[0] ? 1 : 0).map(([M, op]) => ({ node: op, message: `module ${M} '${E}'yi write-realize ediyor` }));
-        acceptWitness(accept, "warning", `\xC7ift-sahiplik: i\u015F varl\u0131\u011F\u0131 '${E}' \u22652 module'\xFCn yazma-s\u0131n\u0131r\u0131na yay\u0131lm\u0131\u015F (eventual; me\u015Fru ama bildirilir).`, model, void 0, "shared-write", entries);
+        const entries = [...owners.entries()].sort((a2, b) => a2[0] < b[0] ? -1 : a2[0] > b[0] ? 1 : 0).map(([M, op]) => ({ node: op, message: `module ${M} '${E2}'yi write-realize ediyor` }));
+        acceptWitness(accept, "warning", `\xC7ift-sahiplik: i\u015F varl\u0131\u011F\u0131 '${E2}' \u22652 module'\xFCn yazma-s\u0131n\u0131r\u0131na yay\u0131lm\u0131\u015F (eventual; me\u015Fru ama bildirilir).`, model, void 0, "shared-write", entries);
       }
     }
   }
@@ -40839,6 +40944,18 @@ var TechDslValidator = class {
       accept("error", refinementViolationMessage(v, field), { node });
     }
   }
+  /** F3.1b takip (denetim-bulgusu): imza-içi parametre adları TEKİL olmalı. ADR-0035 §4 "param adları
+   *  tekildir" varsayımı validator'da enforce edilmiyordu → dup ad dup ruleId (violations[]) + belirsiz imza
+   *  üretiyordu. Register: Operation + BoundaryOp (ikisi de params taşır; IdempotentClause `by key` de param'a çözülür). */
+  checkParamUniqueness(op, accept) {
+    const seen = /* @__PURE__ */ new Set();
+    for (const p of op.params) {
+      if (seen.has(p.name)) {
+        accept("error", `Yinelenen parametre ad\u0131 '${p.name}' \u2014 imza i\xE7inde parametreler tekil olmal\u0131.`, { node: p, property: "name" });
+      }
+      seen.add(p.name);
+    }
+  }
   // ───────────────────────── F2.1: çapraz-modül yapısal duplikasyon-süpürmesi ─────────────────────────
   /** Bir alanın yapısal token'ı: `ad:tip[]?` (tip yoksa '?'). Shape-parmak-izinin yapı-taşı. */
   fieldToken(f) {
@@ -40922,6 +41039,18 @@ var TechDslValidator = class {
     this.scanRedaction(node.text, node, accept);
   }
   /**
+   * F2.3 (tech dilimi): NoteClause + Guarantee `.text` serbest-proza'sında belirsizlik/EARS/
+   * refinement-şekli lint'i. Dedektör shared/note-lint.ts'te (language ile TEK-KAYNAK); stabil
+   * code'lar = F3.1 talep-sayacı. TECH'te refinement-şekilli not = DOĞRUDAN tech-gramer talebi
+   * (F3.1b `Field`/`Param` refinement burada indi) — language-note'undan daha güçlü sinyal.
+   * checkRedaction ile aynı NoteClause|Guarantee kaydına eklenir (mantık kopyası YOK).
+   */
+  checkNoteLint(node, accept) {
+    for (const hit of detectNoteLint(node.text)) {
+      accept(hit.severity, hit.message, { node, property: "text", code: hit.code });
+    }
+  }
+  /**
    * F3.1b (Step 5.3): op'un param-refinement'larından sentezlenen ruleId'ler (`<param>.<kind>`;
    * `violationsOf`, manifest.ts — TEK-KAYNAK, T-2.2) authored guard-id (validation/rule clause
    * `for guard "..."`) ile ÇAKIŞIRSA → warning (ERROR DEĞİL; gate değil — DESIGN §K4). Gelecekteki
@@ -40971,6 +41100,12 @@ function refinementViolationMessage(v, field) {
       return `Literal-union'da yinelenen de\u011Fer: '${v.value}'.`;
     case "union-numeric":
       return `Literal-union yaln\u0131z String/enum alanlarda kullan\u0131l\u0131r; '${t}' say\u0131sal.`;
+    case "union-not-in-enum":
+      return `Literal-union de\u011Feri '${v.value}', '${t}' enum'unun \xFCyesi de\u011Fil \u2014 k\u0131s\u0131t tip-uzay\u0131yla \xE7eli\u015Fir.`;
+    case "union-nonscalar":
+      return `Literal-union yaln\u0131z String/enum alanlarda kullan\u0131l\u0131r; '${t}' yap\u0131sal (entity/type), literal-de\u011Fer-k\xFCmesi ta\u015F\u0131maz.`;
+    case "refinement-incomplete":
+      return `Eksik refinement (${field.name}): 'in' sonras\u0131 aral\u0131k (13..120) ya da literal-union ({A|B}) gerekli.`;
   }
 }
 function registerTechValidationChecks(services) {
@@ -40978,19 +41113,19 @@ function registerTechValidationChecks(services) {
   const validator = services.validation.TechDslValidator;
   const checks = {
     // M3.2-3.6 + Faz-1.5 (roles/ownership/version) kancaları (Operation/Module/Model bazlı)
-    Operation: [validator.checkVisibility, validator.checkCqrsKind, validator.checkRoles, validator.checkOwnershipRelation, validator.checkOwnershipDivergence, validator.checkAccessDivergence, validator.checkExprDivergence, validator.checkConsistencyMode, validator.checkAbac, validator.checkDuplicateThrows, validator.checkCompensateSameSystem, validator.checkIdempotent, validator.checkDuplicateEmits, validator.checkPagination, validator.checkSubscription, validator.checkCrossModuleCall, validator.checkValidationInputScope, validator.checkRuleStateScope, validator.checkRuleIdCollision],
-    BoundaryOp: [validator.checkBoundaryValidationInputScope],
+    Operation: [validator.checkVisibility, validator.checkCqrsKind, validator.checkRoles, validator.checkOwnershipRelation, validator.checkOwnershipDivergence, validator.checkAccessDivergence, validator.checkExprDivergence, validator.checkConsistencyMode, validator.checkAbac, validator.checkDuplicateThrows, validator.checkCompensateSameSystem, validator.checkIdempotent, validator.checkDuplicateEmits, validator.checkPagination, validator.checkSubscription, validator.checkCrossModuleCall, validator.checkValidationInputScope, validator.checkRuleStateScope, validator.checkRuleIdCollision, validator.checkParamUniqueness],
+    BoundaryOp: [validator.checkBoundaryValidationInputScope, validator.checkParamUniqueness],
     Entity: [validator.checkInvariantScope, validator.checkCrossModuleEntityField, validator.checkSourceOfTruth, validator.checkConcurrency],
     // T-3.3: invariant path-scope (saf-tech) + T-2.3: cross-module entity-field ban + sourceOfTruth marker + T-2.1: concurrency ≤1 + uncharted-ban
     EventDecl: [validator.checkEventPayloadEntity],
     Field: [validator.checkRefinement],
     Param: [validator.checkRefinement],
     // T-3.1: Field ile aynı check (yapısal-genelleştirme; reuse)
-    NoteClause: [validator.checkRedaction],
-    // F2.7: op-notu + guarantee-notu prose redaction taraması
+    NoteClause: [validator.checkRedaction, validator.checkNoteLint],
+    // F2.7 redaction + F2.3 note-lint (op-notu)
     Module: [validator.checkEntityCoverage, validator.checkSharedUtils, validator.checkDuplicateErrorName, validator.checkDuplicateEventName],
-    Guarantee: [validator.checkGuarantee, validator.checkRedaction],
-    // F2.7: guarantee ifadesi (.text) redaction
+    Guarantee: [validator.checkGuarantee, validator.checkRedaction, validator.checkNoteLint],
+    // F2.7 redaction + F2.3 note-lint (guarantee ifadesi)
     Model: [validator.checkStructural, validator.checkContractVersion, validator.checkUnrealizedBusinessOps, validator.checkRequiredRuleCoverage, validator.checkDoubleOwnership, validator.checkAnnotationDeclared, validator.checkExtensionDecl, validator.checkPreludeReserved, validator.checkExtensionCollision, validator.checkAnnotationUsage, validator.checkUnprotectedReach, validator.checkWriteCycle, validator.checkImportedPackContent, validator.checkImportResolvable, validator.checkUnusedError, validator.checkUnusedEvent, validator.checkGuaranteeNames, validator.checkCrossModuleDuplication]
   };
   registry.register(checks, validator);

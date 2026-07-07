@@ -114,6 +114,7 @@ await esbuild.build({
         '@qadsl/services': servicesEntry,
         '@qadsl/validation': resolve(cmdPath, 'src/qa/qa-dsl-validation.ts'),
         '@qadsl/manifest': resolve(cmdPath, 'src/qa/qa-manifest.ts'),
+        '@qadsl/waiver-report': resolve(cmdPath, 'src/qa/waiver-report.ts'),
         '@qadsl/ast': resolve(cmdPath, 'src/qa/generated/ast.ts'),
     },
     // bare import'lar (langium, vscode-languageserver-*) CommandDSL node_modules'ından çözülür.

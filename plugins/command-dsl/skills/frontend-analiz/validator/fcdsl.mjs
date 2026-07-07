@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", frontendSrcHash: "9ac3ee2c6a62", commit: "4a62049", builtAt: "2026-07-06T23:21:37+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", frontendSrcHash: "d9b8d6a148df", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00", langium: "4.2.4" };
   }
 });
 
@@ -39259,6 +39259,7 @@ function loadTech(techPath, documentUri) {
         realizes: o.realizes ?? null,
         throws: o.throws ?? [],
         validation: o.validation ?? [],
+        hasRefinedInput: (o.violations ?? []).length > 0,
         pagination: o.pagination ?? null,
         serving: o.serving ?? [],
         returns: o.signature?.returns ?? "",
@@ -39296,7 +39297,7 @@ function taggableResultsOf(ops, tech) {
       const rt = tech.resultTypeOf(op.module, err);
       if (rt) out.add(rt);
     }
-    if (op.validation.length > 0) out.add("NotValid");
+    if (op.validation.length > 0 || op.hasRefinedInput) out.add("NotValid");
   }
   return out;
 }
@@ -39428,7 +39429,10 @@ function registerFrontendValidationChecks(services) {
     ResultHandler: [v.checkResultHandler],
     UiEvent: [v.checkUiEvent],
     WhenBlock: [v.checkWhenBlock],
-    FlowDecl: [v.checkFlowCoverage]
+    FlowDecl: [v.checkFlowCoverage],
+    MutableState: [v.checkStateExpr],
+    // denetim-bulgusu: state init/expr path-kök denetimi (fail-open kapanışı)
+    DerivedState: [v.checkStateExpr]
   };
   registry.register(checks, v);
 }
@@ -39762,11 +39766,33 @@ var FrontendDslValidator = class {
     for (const c of dupsBy(comps, effectiveName)) {
       accept("error", `Component ad\u0131 '${effectiveName(c)}' bu ekranda birden \xE7ok kez kullan\u0131l\u0131yor \u2014 'as <ad>' ile ay\u0131r\u0131n (karar #38).`, { node: c });
     }
+    const reserved = /* @__PURE__ */ new Set(["session", "currentUser", "row"]);
+    for (const p of screen.params ?? []) reserved.add(p.name);
+    for (const s of screen.members.filter(isStateDecl)) {
+      const n = stateNameOf(s);
+      if (n) reserved.add(n);
+    }
+    for (const s of ast_utils_exports.getContainerOfType(screen, isExperience)?.members.filter(isStateDecl) ?? []) {
+      const n = stateNameOf(s);
+      if (n) reserved.add(n);
+    }
+    for (const c of comps) {
+      if ((isDetailComponent(c) || isValueComponent(c)) && reserved.has(effectiveName(c))) {
+        accept("error", `Ekran-kayd\u0131 ad\u0131 '${effectiveName(c)}' rezerve bir path-k\xF6k\xFCn\xFC (session/currentUser/row/ekran-param/state) g\xF6lgeliyor \u2014 'as <farkl\u0131-ad>' verin (F3.7 k\xF6k-belirsizli\u011Fi).`, { node: c });
+      }
+    }
     checkDecorations(screen.decorations, "screen", accept);
   };
   /** İ5-lift: form-field @ui.* dekorasyonu (readonly/hidden/emphasis). */
   checkFormField = (f, accept) => {
     checkDecorations(f.decorations, "field", accept);
+  };
+  /** Denetim-bulgusu (F3.7-öncesi fail-open): state init/expr de kapalı path-kök setine tabidir.
+   *  `derived x = campaign.status` gibi bilinmeyen-kök sessizce geçmemeli (visible-when emsali).
+   *  rowAllowed:false — state experience/screen düzeyi, satır-öğe bağlamı değil. */
+  checkStateExpr = (s, accept) => {
+    const expr = isMutableState(s) ? s.init : s.expr;
+    if (expr) checkPathRootsIn(expr, s, accept, { rowAllowed: false });
   };
   /** #24 cardinality + kind (list/detail/value). */
   checkDataComponent = (c, accept) => {

@@ -45,7 +45,7 @@ interface OpCoverage { id: string; tech?: string; branches: BranchCoverage[] }
 interface RealizeCoverage { id: string; status: 'covered' | 'uncovered'; coveredBy?: CoverRef[] }
 interface QaMerged {
     meta: { dsl: string; schemaVersion: number; merged?: boolean; sources?: string[]; hasErrors?: boolean; errorCount?: number };
-    coverage: { operations: OpCoverage[]; flows: RealizeCoverage[]; processes: RealizeCoverage[] };
+    coverage: { operations: OpCoverage[]; flows: RealizeCoverage[]; processes: RealizeCoverage[]; outcomes?: RealizeCoverage[] };
 }
 
 const BRANCH_KINDS = new Set<string>([
@@ -83,7 +83,9 @@ function validateMerged(x: unknown, src: string): QaMerged {
                 fail(`op ${o.id}: covered dalda coveredBy dizi değil`);
         }
     }
-    for (const grp of ['flows', 'processes'] as const) {
+    // outcomes OPSİYONEL (eski merged.json'da yok) — varsa flows/processes ile aynı şekilde doğrula.
+    const groups = Array.isArray(cov!.outcomes) ? (['flows', 'processes', 'outcomes'] as const) : (['flows', 'processes'] as const);
+    for (const grp of groups) {
         for (const r of cov![grp] as unknown[]) {
             const rr = r as Record<string, unknown>;
             if (typeof rr?.id !== 'string') fail(`coverage.${grp}[].id string değil`);
@@ -176,20 +178,43 @@ function renderHtml(merged: QaMerged, title: string | undefined, sourceLabel: st
         h.push('</table></section>');
     }
 
-    // Flow / process presence (§4.4) — emsaldeki tek birleşik tablo (kind sütunlu)
+    // Flow / süreç / outcome presence (§4.4 + F3.6) — tek birleşik tablo (kind sütunlu).
+    // outcome: `satisfies` senaryosu olmayan = kapatılabilir ürün-hedefi (uncovered).
     const realizes = [
         ...merged.coverage.flows.map(f => ({ ...f, kind: 'flow' as const })),
         ...merged.coverage.processes.map(p => ({ ...p, kind: 'process' as const })),
+        ...(merged.coverage.outcomes ?? []).map(o => ({ ...o, kind: 'outcome' as const })),
     ];
     if (realizes.length > 0) {
-        h.push('<h2>Akış / Süreç presence</h2><table class="presence">');
+        h.push('<h2>Akış / Süreç / Outcome presence</h2><table class="presence">');
         for (const r of realizes) {
             const info = r.status === 'covered'
                 ? (r.coveredBy ?? []).map(coverRefLabel).join(' · ')
-                : `'realizes ${r.kind}' senaryosu yok`;
+                : (r.kind === 'outcome' ? `'satisfies' senaryosu yok — kapatılabilir hedef` : `'realizes ${r.kind}' senaryosu yok`);
             h.push(`<tr><td>${r.kind}</td><td><code>${esc(r.id)}</code></td>` +
                 `<td><span class="chip chip-${r.status}">${r.status}</span></td>` +
                 `<td class="cov-info">${esc(info)}</td></tr>`);
+        }
+        h.push('</table>');
+    }
+
+    // Waiver konsolidasyonu (F2.2 tam-parite): TÜM authored waive'ler durum-sınıflı
+    // (aktif / süresi-yakın ≤14g / dolmuş / süresiz). Op-dal tablosunda satır-içi de var; bu teşhir.
+    const waives = merged.coverage.operations.flatMap(op =>
+        op.branches.filter(b => b.status === 'waived').map(b => ({ op: op.id, branch: branchLabel(b.branch), reason: b.reason, until: b.until })));
+    if (waives.length > 0) {
+        const today = new Date().toISOString().slice(0, 10);
+        const soon = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+        const cls = (u?: string): string => !u ? 'süresiz' : u < today ? 'dolmuş' : u <= soon ? 'süresi-yakın' : 'aktif';
+        const counts: Record<string, number> = { 'aktif': 0, 'süresi-yakın': 0, 'dolmuş': 0, 'süresiz': 0 };
+        for (const w of waives) counts[cls(w.until)]++;
+        h.push(`<h2>Waiver'lar (${waives.length})</h2>`);
+        h.push(`<p class="meta">${counts['aktif']} aktif · ${counts['süresi-yakın']} süresi-yakın · ${counts['dolmuş']} dolmuş · ${counts['süresiz']} süresiz</p>`);
+        h.push('<table class="presence"><tr><th>Op</th><th>Dal</th><th>Durum</th><th>until</th><th>Gerekçe</th></tr>');
+        for (const w of waives) {
+            h.push(`<tr><td><code>${esc(w.op)}</code></td><td>${esc(w.branch)}</td>` +
+                `<td>${esc(cls(w.until))}</td><td>${esc(w.until ?? '—')}</td>` +
+                `<td class="cov-info">${esc(w.reason ?? '')}</td></tr>`);
         }
         h.push('</table>');
     }

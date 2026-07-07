@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-tech", srcHash: "8b3ef156d6a9", commit: "b7be84a", builtAt: "2026-07-03T23:48:19+03:00" };
+var define_BUILD_INFO_default = { tool: "report-tech", srcHash: "1c06677f20fc", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00" };
 
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/report-tech.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync, rmSync } from "node:fs";
@@ -530,6 +530,48 @@ function coverageMd(m, ops) {
   return lines.join("\n");
 }
 
+// src/tech-report/assurance.ts
+function generateAssurance(m) {
+  const lines = [...mdWarnBanner(m)];
+  lines.push("# ASSURANCE \u2014 guarantee izlenebilirli\u011Fi", "");
+  lines.push('Her guarantee bir insan-garantisini yap\u0131sal y\xFCk\xFCml\xFCl\xFCklere (invariant / guard / throws / operation) E\u015ELER \u2014 salt mapping, mant\u0131k ta\u015F\u0131maz. Tech-taraf\u0131 izlenebilirlik; QA test-kapsamas\u0131 burada DE\u011E\u0130L (qa.html "Garantiler").', "");
+  const gs = m.guarantees ?? [];
+  if (gs.length === 0) {
+    lines.push("Model hi\xE7 guarantee bildirmiyor.", "");
+    return lines.join("\n");
+  }
+  lines.push("## Garantiler", "");
+  lines.push("| Garanti | Metin | \u0130zler (goalId) | # Y\xFCk\xFCml\xFCl\xFCk |");
+  lines.push("|---|---|---|---|");
+  for (const g of gs) {
+    const traces = g.traces.length > 0 ? g.traces.map(mdCode).join(", ") : "\u2014";
+    lines.push(`| ${mdCode(g.id)} | ${escMd(g.text)} | ${traces} | ${g.obligations.length} |`);
+  }
+  lines.push("");
+  lines.push("## Y\xFCk\xFCml\xFCl\xFCk ayr\u0131nt\u0131s\u0131", "");
+  for (const g of gs) {
+    lines.push(`### ${escMd(g.id)}`, "");
+    if (g.note) lines.push(`> ${escMd(g.note)}`, "");
+    lines.push("| T\xFCr | Hedef | Ayr\u0131nt\u0131 |");
+    lines.push("|---|---|---|");
+    for (const ob of g.obligations) {
+      const { target, detail } = obligationCells(ob);
+      lines.push(`| ${ob.kind} | ${target} | ${detail} |`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n");
+}
+function obligationCells(ob) {
+  if (ob.kind === "invariant") {
+    return { target: mdCode(`${ob.entity.module}.${ob.entity.name}`), detail: ob.label != null ? mdCode(ob.label) : "\u2014" };
+  }
+  const op = mdCode(`${ob.op.system}.${ob.op.op}`);
+  if (ob.kind === "guard") return { target: op, detail: mdCode(ob.guard) };
+  if (ob.kind === "throws") return { target: op, detail: mdCode(ob.error) };
+  return { target: op, detail: "\u2014" };
+}
+
 // src/tech-report/index.ts
 function generateTechReport(manifest2) {
   const files2 = [];
@@ -549,6 +591,7 @@ function generateTechReport(manifest2) {
   files2.push({ path: "tech/ACCESS.md", content: matrices.access });
   files2.push({ path: "tech/AUTH.md", content: matrices.auth });
   files2.push({ path: "tech/COVERAGE.md", content: matrices.coverage });
+  files2.push({ path: "tech/ASSURANCE.md", content: generateAssurance(manifest2) });
   return files2;
 }
 

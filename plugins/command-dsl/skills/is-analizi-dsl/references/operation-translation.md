@@ -126,13 +126,18 @@ Operation'ın *davranışının doğru* olması ile *ürünün başarılı* olma
 **"bunun işe yaradığını nasıl ÖLÇECEĞİZ?"** (technology-agnostik, ölçülebilir-sonuç
 aday-sorusu).
 
-- Yalnız **ölçülebilir** cevap yapısallaşır (note / Envanter SC-adayı olarak). Örn:
-  "onay süresi 2 günden aza insin", "reddedilen talep oranı < %5".
+- Yalnız **ölçülebilir** cevap yapısallaşır. Örn: "onay süresi 2 günden aza insin",
+  "reddedilen talep oranı < %5". Ölçülebilir cevap artık birinci-sınıf bir
+  **`outcome`**'a iner (aşağı bak) — note-yedeği yalnızca eşik/pencere çıkmayan
+  yarı-ölçülebilir ifadeler içindir.
 - **Ölçülemeyen SC KOYULMAZ** (correctness-over-completeness — ilke-3): "kullanıcı
   memnun olsun" ölçüte dönüşmez → ya somutlaştır ("memnuniyet ≥ 4/5"), ya da hiç yazma.
   Yarım / temenni-SC = yanlış-alan.
-- Bu bir MD-dilimidir; birinci-sınıf `SuccessCriteria` construct'ı gramer-kuyruğundadır
-  (pilot-koşullu) — şimdilik note taşır.
+- **`outcome` artık shipped birinci-sınıf construct'tır** (ADR-0037; `SuccessCriteria`
+  gramer-kuyruğu iddiası GÜNCEL DEĞİL). Ölçülebilir cevap `outcome <Ad> { measure
+  '<metrik>' <op> <sayı> [unit …] [within …] }` olur; `covers` ile **bu op'a**
+  (ve/veya ilgili flow/process'e) bağlanır. `outcome` **top-level**'dır — op'un içine
+  gömülü bir clause DEĞİL. Tam sözdizimi: `references/dsl-reference.md` §11.
 
 ## Tür-uygunluk denetimi (kendi kontrolün — T1-T4)
 Çevirdikten sonra doğrula:

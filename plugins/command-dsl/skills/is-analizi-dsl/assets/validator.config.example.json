@@ -5,5 +5,5 @@
   "url": "",
   "cacheDir": "./.validator-cache",
   "runner": "auto",
-  "grammarVersion": "v3.x-2b37f47acc3c"
+  "grammarVersion": "v3.x-77493a5ddfa9"
 }

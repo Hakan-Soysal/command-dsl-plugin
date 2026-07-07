@@ -4,7 +4,7 @@
 |---|---|
 | `proposals.qa` | Kanonik QA exemplar'ı (spec §7) — dal-coverage **TAM**: 13 dalın tamamı ya test/senaryo-adımı ya gerekçeli waive |
 | `proposals.tcdsl` | Tech kapanışı — `.qa`'nın `uses tech "./proposals.tcdsl"` göreli yoluyla bağladığı gerçek-gramerli tech exemplar'ı |
-| `proposals.operations.json` | Business kapanışı (**v3**) — `uses flows "./proposals.operations.json"` ile bağlı; 3 op + `ProposalFlow` + 2 actor |
+| `proposals.operations.json` | Business kapanışı (**v3**) — `uses flows "./proposals.operations.json"` ile bağlı; 3 op + `ProposalFlow` + 2 actor + ölçülebilir `outcome ProposalThroughput` (`successCriteria`, F3.6 satisfies hedefi) |
 | `proposals.qa.json` | Per-file manifest — **gömülü `qcdsl.mjs`'in kendisiyle** üretildi (el yazması değil) |
 | `qa.json` | Merged workspace manifest — aynı koşuda `--merged qa.json` ile üretildi; **coverage yalnız burada** |
 
@@ -12,7 +12,7 @@
 (qcdsl tooling turu). `.qa` içindeki `uses` yolları göreli (`./proposals.tcdsl`,
 `./proposals.operations.json`) olduğundan kopya bu dizinde **aynen** çalışır.
 
-## Doğrulama kanıtı (gömülü araçla — build: grammar `5e7f3ca61106`, src `8803bb50614c`)
+## Doğrulama kanıtı (gömülü araçla — build: grammar `9be3e380a32e`, src `aff3ba0d1ab5`)
 
 Bu dizinin İÇİNDEN (cwd = bu dizin; `meta.source` yolları temiz kalsın):
 
@@ -28,13 +28,24 @@ Beklenen (strict VARSAYILAN, exit **0**):
 → proposals.qa.json
 → qa.json (birleşik: 4 op · dal 10 covered / 3 waived / 0 uncovered)
   garantiler: 1 · 1 covered / 0 partial / 0 uncovered / 0 structural
+  outcome (authored satisfies): 1 · 1 karşılanan / 0 açık-hedef
+  waiver'lar: 3 · 3 aktif / 0 süresi-yakın / 0 dolmuş / 0 süresiz
 ÖZET: 1 dosya · 0 hata · 4 uyarı · 3 bilgi · strict
 ```
+
+> **waiver'lar satırı** (F2.2): merged manifest'teki authored waive'lerin süre-durumu
+> (`today` CANLI/display-only). 3 waive `until 2026-12-31` → hepsi **aktif**; dolan ya da
+> 14 gün içinde dolacak waive'ler `süresi-yakın`/`dolmuş` sayılır.
 
 > **guarantee-coverage satırı** (dal özetinin altında): tech `guarantee`'lerinin testable
 > yükümlülük (guard/throws) durumu. `proposals.tcdsl`'deki `ValidProposal` garantisinin 3
 > guard + 1 throws yükümlülüğü zaten kapsandığından **covered**; `partial`/`uncovered`
 > garantiler ayrıca kapsanmayan yükümlülüklerini `⚠` ile listeler.
+>
+> **outcome (authored satisfies) satırı** (F3.6): business `outcome`/`successCriteria`
+> presence-coverage'ı. `ProposalThroughput` hedefi `satisfies` senaryosuyla karşılandığından
+> **1 karşılanan / 0 açık-hedef**; karşılanmayan hedef `⚠ karşılanmayan outcome (senaryo yaz)`
+> ile listelenir (warning-routed; waive kapatmaz).
 
 `.qa` dosyasının kendisi **0/0/0**; tüm uyarı/bilgi kapanıştaki `proposals.tcdsl`'den
 gelir ve **bilinçli/didaktiktir** — tech exemplar'ı bu tanıları göstermek için böyle
@@ -96,6 +107,13 @@ waives var) — coverage yalnız merged'de hesaplanır; `meta.source: "proposals
 - **Step-binding'li senaryo**: `step s1 = SubmitProposal …` → sonraki adımlar
   `s1.result.id`; `advance time 2 days` + adım-arası `as` değişimi; senaryo
   `realizes flow ProposalFlow` ile business akışına çıpalı.
+- **`satisfies` — ürün-hedefi presence (F3.6, ADR-0037)**: aynı senaryo
+  `satisfies ProposalThroughput` ile business `outcome`'unu (operations.json
+  `successCriteria`) test-kanıtlar → merged `qa.json` `coverage.outcomes[]`: `covered`
+  (satisfies senaryosu var). PIN: `ProposalThroughput` yalnız-**op** (`SubmitProposal`)
+  kapsar → `realizes flow` onu ASLA covered yapamaz; `satisfies` TEK satisfaction-yolu.
+  qcdsl özeti: `outcome (authored satisfies): 1 · 1 karşılanan / 0 açık-hedef`. Karşılanmayan
+  hedef → warning (warning-routed; waive kapatmaz).
 - **3 gerekçeli waive**: `until` + `because` zorunlu — gerekçesiz "geç" yok; roles
   yolu P1 jenerik-kimlik kapsamına devredilmiş, `GetProposal`'da yalnız roles
   waive'lenip ownership testle kapatılmış (niteleyicili waive).

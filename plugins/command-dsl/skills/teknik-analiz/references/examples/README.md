@@ -25,6 +25,15 @@ Bir construct'ı nasıl yazacağından emin değilsen buraya bak.
   - `guarantee` (izlenebilirlik): iki çapraz-kesen garanti → `by invariant` (etiketli) ve
     `by throws` yükümlülüklerine eşleme + `traces "REQ-…"` upstream köprüsü
   - Doğrulama: `0 error / 1 warn (kapsam) / 2 info`.
+- **`refinement.tcdsl`** — **F3.1b refinement** exemplar (değer-uzayı daraltma; ADR-0034/0035).
+  Gösterdiği construct'lar:
+  - **FIELD range** `priority: Int in 1..5` (sayısal tip → geçerli) + **FIELD union** `status: ProposalStatus
+    in {Draft|Submitted}` (enum ALT-KÜMESİ → `union-not-in-enum` tetiklenmez)
+  - **PARAM range/union** `SubmitProposal(priority: Int in 1..5, title: String in {"rfp"|"quote"|"tender"})`
+    → manifest `op.violations[]` (`priority.range`, `title.union`) = NotValid(400) hata-gövdesi sözleşmesi
+  - Manifest'te doğrulandı: `entities[].fields[].refinement` (range+union) + `op.violations[]`;
+    `emit-manifest.mjs meta.hasErrors:false`. Geçersiz biçimler kasıtlı yok (0-error exemplar).
+  - Doğrulama: `0 error / 2 warn (kapsam)`.
 
 ## "kapsam" warning'i neden var? (beklenen — hata değil)
 

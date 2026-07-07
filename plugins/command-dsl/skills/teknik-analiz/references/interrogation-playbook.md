@@ -21,6 +21,11 @@
 - "Bu alanlar arasında **kişisel/hassas veri** (kimlik, sağlık, iletişim) ya da **şifre/sır** var mı?"
   → alan-önü `@sensitivity.tag`/`@crypto.encrypted` (authored). ⟦data classification: hassas alan
   işaretsiz kalmasın; saklama/silme gerçeklemesi üreteç-politikasıdır — kalıcı kural gerekirse op-`note`.⟧
+- "Bir alanın **izinli değer-uzayı** dar mı — sayısal **aralık** (yaş 13-120) ya da **kapalı küme/durum**
+  (∈ {Taslak, Gönderildi})?" → alan-sonu `in <lo>..<hi>` (range, yalnız sayısal) / `in {A|B|C}` (union,
+  String/enum). ⟦domain integrity: izinli aralık/küme dışı değer engellensin — NotValid payload'ı buradan.⟧
+  ⚠ Tip **enum** ise union üyeleri o enum'un **alt-kümesi** olmalı (`union-not-in-enum` error); range
+  sayısal, union String/enum. Değer-uzayını **sor, uydurma**; sınır belirlenince boundary-value'yu da sor.
 - **⚠ Sınır-aşan navigasyon:** "şu kaydın içinden öteki module'ün kaydına gitmek" → yasak
   (error). ⟦data ownership: veri kimin? başka module'e yalnız `calls` ile sor.⟧
 
@@ -29,6 +34,9 @@
 - "Bu işlem teknik olarak **neyi girdi alır, ne döndürür**?" ⟦interface stability: bu imza
   client'lar tarafından mı tüketilecek? geriye-uyumlu evrilebilir mi?⟧
 - "Hangi kayıtları **okuyor**, hangilerini **yaratıyor/güncelliyor/siliyor**?" → CRUD access.
+- "Bir **girdi-parametresinin** izinli aralığı/kümesi var mı (miktar 1-100, tür ∈ {A,B})?" → param-sonu
+  `in <lo>..<hi>` / `in {A|B|C}`. ⟦input contract: sınır-dışı değer NotValid(400) dönmeli — makine-okunur
+  `op.violations[]` (`ruleId=<param>.<kind>`) üreteç/tüketiciye taşınır.⟧ Param adları tekil (dup=error).
 - "Bu işlemin çağrılması **denetim kaydı** ister mi (finansal, kişisel-veri erişimi)?" →
   `@audit.logged` (op-önü, authored). ⟦compliance: kim-neye-ne-zaman erişti izi gerekli mi?⟧
 - **⚠ CQRS kayması:** iş'in "sorgu" dediği işleme yazma verme. **⚠ Access yükseltme:** iş'in

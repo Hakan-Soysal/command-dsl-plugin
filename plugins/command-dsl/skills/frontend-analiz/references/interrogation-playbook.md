@@ -85,7 +85,11 @@ değişikliği ayrı iştir, sunum beyanı değil.
 ## Faz 6 — Form & hata deneyimi
 
 - "Formda hangi alanlar? Hangileri boş geçilemez? Uzunluk/format sınırı?" → field rules.
-- "Alanlar arası kural var mı ('bitiş, başlangıçtan sonra olmalı')?" → `rule`.
+- "Bu alan formda **salt-okunur** mu, **gizli** mi, yoksa **vurgulu** mu görünmeli?"
+  → `@ui.readonly` / `@ui.hidden` (field) · `@ui.emphasis` (field VEYA ekran). Frontend-yazarı
+  sunum-ipucu (backend-hassas maske DEĞİL — o `@sensitivity`→tech-driven). **Sorulmazsa**
+  bu niyet en iyi ihtimalle `#` yorumda kalır = **makinece-taşınmaz** (manifest'e girmez,
+  üreteç düz-alan üretir). Author edilince manifest `decorations: [...]` taşır.
 - "Uzun form mu — adımlara bölünsün mü?" → `step`.
 - Uygulama-geneli (BİR KEZ sor): "Oturum düşmüşse ne olsun?" (→ Login'e nav) ·
   "Beklenmedik hata?" (→ toast+retry standardı) · "Alan hataları?" (→ formda yerinde).

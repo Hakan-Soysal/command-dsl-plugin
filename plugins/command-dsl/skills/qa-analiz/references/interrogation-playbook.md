@@ -96,6 +96,16 @@ SÖYLERSİN ("bu test 'başlık gerekli' reddini doğrulayacak").
 - Presence tablosunu SUN: "İş analizi şu akışları/süreçleri tanımlıyor: […]. Hangileri
   için uçtan-uca senaryo yazalım?" Kapsanmayan her biri için: "bilinçli kapsam-dışı mı?
   (Not: bu boşluk raporda uyarı olarak kalır — akış uyarısı 'geç' kaydıyla kapanmaz.)"
+- **Ürün-hedefi (outcome) presence — flow/process presence'in KARDEŞİ (F3.6):** iş analizi
+  ölçülebilir başarı-ölçütü (`operations.json.successCriteria`) tanımladıysa, evreni SUN:
+  "İş analizi şu ölçülebilir ürün-hedeflerini tanımlıyor: […]. **Bu senaryo hangi
+  ürün-hedefini karşılıyor?**" Yazdığın her yaşam-döngüsü senaryosu için sor: "bu akış şu
+  hedefi kanıtlıyor mu?" → `satisfies <outcome>` (varsa `realizes flow/process` ile birlikte
+  aynı senaryoda). Karşılanmayan her hedef için: "senaryo mu ekleyelim, kapatılabilir
+  açık-hedef mi bırakalım?" (Not: uyarı warning-routed — **waive KAPATMAZ**; ancak senaryo
+  ya da belgeli-açık.)
+  - **★ süpürme (yalnız-op kapsayan hedef):** bir outcome yalnız bir op'u kapsıyorsa
+    `realizes flow` onu ASLA covered yapamaz → `satisfies` TEK yoldur; bu hedefi es geçme.
 - Akış başına: "Adımlar hangi sırayla? Her adımı **kim** yapıyor?" → as/step dizisi.
 - "Bir adımın çıktısı sonrakinin girdisi mi (oluşan kaydın numarasıyla mı devam
   ediliyor)?" → step-binding (`s1.result.id`).

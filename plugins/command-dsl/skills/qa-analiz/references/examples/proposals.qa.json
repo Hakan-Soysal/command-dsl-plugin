@@ -2,7 +2,9 @@
   "meta": {
     "dsl": "qa",
     "schemaVersion": 1,
-    "source": "proposals.qa"
+    "source": "proposals.qa",
+    "hasErrors": false,
+    "errorCount": 0
   },
   "uses": {
     "tech": [
@@ -510,6 +512,9 @@
       "realizes": {
         "flow": "ProposalFlow"
       },
+      "satisfies": [
+        "ProposalThroughput"
+      ],
       "time": "2026-07-02T09:00:00Z",
       "given": [],
       "stubs": [

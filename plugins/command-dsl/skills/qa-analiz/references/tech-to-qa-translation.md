@@ -155,6 +155,41 @@ değişikliği ayrı iştir, test-niyeti beyanı değil.
   ediyor; doğru operations.json'u mu bağladık?" Cevaba göre ya flows yolunu düzelt ya
   tech'i güncellet.
 
+## G2. operations.json → outcome (ürün-hedefi) evreni (F3.6 `satisfies`, ADR-0037)
+
+Flow/process evreninin YANINDA operations.json ölçülebilir bir **ürün-hedefi** evreni de
+taşır: `successCriteria[]` (business `outcome { measure … }` construct'ının emit'i). Bu,
+"davranış doğru" (dal-coverage) ile **"ürün başarılı"** (ölçülebilir sonuç) ayrımının
+QA-tarafı kancasıdır — bir senaryo `satisfies <outcome>` yazarak o hedefin test-kanıtı
+olduğunu bildirir.
+
+- **Evren = `operations.json.successCriteria[].id`** (flows.ts bu id'leri okur; measure/
+  covers/note QA-tarafını ETKİLEMEZ — yalnız `id` satisfaction-hedefidir). Ayrı bir hedef
+  kataloğu aranmaz.
+- **Presence-coverage (kapatılabilir hedef):** her outcome-id için workspace'te en az bir
+  `satisfies` senaryosu yoksa → **warning** (`uses flows` satırında konsolide;
+  warning-routed — strict'te de warning, **waive ile KAPANMAZ**; flow/process presence
+  emsali). CLI: `outcome (authored satisfies): N · … karşılanan / … açık-hedef` + `⚠
+  karşılanmayan outcome (senaryo yaz): …`.
+- **Bilinmeyen outcome `satisfies` → error** (`realizes`'ın karşılıksız-hedef kuralıyla aynı).
+- **PIN — `covers` bir OP olan outcome:** business `outcome … covers <op>` yalnız bir op'u
+  kapsıyorsa, senaryo o op'u ASLA realize edemez (senaryo yalnız flow/process realize eder)
+  → o hedefin satisfaction-bağı için **TEK yol `satisfies`**'tir. Bu, `analyze --outcomes`
+  türetilmiş op-kapsama raporundan AYRIDIR: o mevcut op-dal kapsamasını TOPLAR (rapor);
+  `satisfies` outcome-düzeyinde YENİ kapatılabilir HEDEF yaratır (authored niyet).
+
+**"Hangi senaryo hangi outcome'u satisfies eder" (elicitation-sunumu için):**
+
+| operations.json `successCriteria.id` | QA-tarafı bağı | durum |
+|---|---|---|
+| ölçülebilir ürün-hedefi (ör. `ProposalThroughput`) | `scenario "…" [realizes flow/process X] satisfies ProposalThroughput { … }` | covered (satisfies senaryosu var) |
+| `satisfies` senaryosu YAZILMAMIŞ hedef | — | uncovered = **kapatılabilir açık-hedef** (warning; senaryo yaz ya da belgeli-açık bırak) |
+
+- **Sınır:** `satisfies` presence-DÜZEYİDİR — outcome'un `measure` eşiğinin GERÇEKTEN
+  tutulup tutulmadığını ölçmez (metrik prozadır, ADR-0037 #1); senaryo yalnız o hedefi
+  **kanıtlama-niyetini** bildirir. Eşiğin sağlanması çalışma-zamanı/analitik işidir, QA
+  DSL kapsamı değil.
+
 ## H. Guard-id tekilliği (S17) — düzeltme yeri TECH
 
 - Op-içi `validation ∪ rule` birleşiminde guard-id'ler tekil olmalı; ihlal qa
