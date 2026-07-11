@@ -5,6 +5,6 @@
     "report-qa.src.mts",
     "report-index.src.mts"
   ],
-  "builtAt": "2026-07-07T21:47:57.880Z",
+  "builtAt": "2026-07-11T11:28:36.966Z",
   "note": "SAF json→html rapor aracı; grammar/dil servisi gömülmez. Girdi şeması: CommandDSL spec qa-dsl-tasarim-spec-2026-07-02.md §6.2 (merged qa.json). HTML yapısı: playground qa-main.ts renderCoverage/branchLabel portu + emsal reports/qa/kapsama.html CSS."
 }

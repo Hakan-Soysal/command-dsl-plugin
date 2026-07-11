@@ -9,7 +9,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `9be3e380a32e` · src `aff3ba0d1ab5` · commit `27ff90b` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `c906fac8fd94` · src `f231e5353038` · commit `4ada795` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
@@ -171,6 +171,7 @@ given {
 ```
 when call with gecerliTeklif { title: "" }                        // dataset + inline override
 when call with { title: "X", amount: 5 }                          // tam inline
+when call with { request: { amount: 250, tip: 5 } }               // kompozit param → object-literal değer
 when event Proposals.ProposalSubmitted with { proposalId: "p1" }  // consumer op'lar
 ```
 
@@ -213,6 +214,7 @@ then {
   emitted ProposalSubmitted with { title = "Yeni teklif" }
   not emitted ProposalRejected
   called Payments.ReserveFee with { amount = 100 }
+  called Payments.Authorize with { request.amount = 250, request.tip = 5 }   // kompozit arg iç-alanı: noktalı yol
   compensated Payments.ReleaseFee
   page count 3
   page more
@@ -233,7 +235,7 @@ then {
 | `state <Entity> count <NUMBER> [{ koşullar }]` | kayıt sayısı | aynı |
 | `emitted <Event> [with { alan = değer … }]` | event yayınlandı (yayın-niyeti — P9) | Event, op'un `emits` listesinde olmalı (error) |
 | `not emitted <Event>` | event yayınlanMAdı | aynı |
-| `called <Ext.Op> [with { … }]` / `not called <Ext.Op>` | outbound çağrı [bu argümanlarla] yapıldı/yapılmadı | hedef, op'un `calls` hedefleri ∪ compensator'ları içinde olmalı (İQ11 — happy-path'te `not called <compensator>` meşru); gözlem P10 |
+| `called <Ext.Op> [with { … }]` / `not called <Ext.Op>` | outbound çağrı [bu argümanlarla] yapıldı/yapılmadı | hedef, op'un `calls` hedefleri ∪ compensator'ları içinde olmalı (İQ11 — happy-path'te `not called <compensator>` meşru); gözlem P10. **Kompozit arg** iç-alanı **noktalı yol**la (`request.amount = …`) hedeflenir; yol, param'ın composite tipinin gerçek şekline karşı doğrulanır (leaf skalar/enum, çözülemeyen yol → error) |
 | `compensated <Ext.Op>` | telafi çağrısı koştu | hedef, op'un `calls … compensate with` compensator'ı olmalı |
 | `page count <NUMBER>` / `page more` / `page end` | dönen sayfa: öğe sayısı / devamı var / son sayfa | yalnız `paginated` query'de (S4) |
 
