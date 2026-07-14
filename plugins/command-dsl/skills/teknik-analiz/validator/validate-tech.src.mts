@@ -87,16 +87,9 @@ for (let i = 0; i < loaded.length; i++) {
     const doc = loaded[i];
     const file = tcdslFiles[i];
 
-    // Parse (lexer/parser) hataları — severity 1 sayılır.
-    for (const e of doc.parseResult.lexerErrors) {
-        errors++;
-        diagnostics.push({ severity: 1, line: 0, col: 0, message: `lexer: ${e.message}`, file });
-    }
-    for (const e of doc.parseResult.parserErrors) {
-        errors++;
-        diagnostics.push({ severity: 1, line: 0, col: 0, message: `parser: ${e.message}`, file });
-    }
-
+    // Lexer/parser hataları AYRICA push EDİLMEZ: Langium DocumentValidator
+    // (processLexingErrors/processParsingErrors) bunları zaten doc.diagnostics'e
+    // GERÇEK konumla ekler. Elle 0:0 push = çift-basım + çift-sayım (drift bulgusu G).
     for (const d of doc.diagnostics ?? []) {
         const sev = d.severity ?? 1;
         if (sev === 1) errors++; else if (sev === 2) warns++; else if (sev === 3) infos++;

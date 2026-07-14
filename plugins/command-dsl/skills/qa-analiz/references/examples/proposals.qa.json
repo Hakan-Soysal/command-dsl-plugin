@@ -10,7 +10,9 @@
     "tech": [
       "proposals.tcdsl"
     ],
-    "flows": "proposals.operations.json"
+    "flows": [
+      "proposals.operations.json"
+    ]
   },
   "personas": [
     {

@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-77493a5ddfa9", grammarHash: "77493a5ddfa9", srcHash: "ba74613865a6", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-77493a5ddfa9", grammarHash: "77493a5ddfa9", srcHash: "373e8f666433", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/report-business.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/report-business.src.mts
 init_define_BUILD_INFO();
 import { mkdirSync, readdirSync as readdirSync3, statSync as statSync3, writeFileSync as writeFileSync2 } from "node:fs";
 import { dirname, isAbsolute, join as join2, resolve } from "node:path";
@@ -39217,6 +39217,14 @@ var CommandDslValidator = class {
   checkFlowStep(step, accept) {
     const flow = ast_utils_exports.getContainerOfType(step, isFlowDef);
     if (!flow) return;
+    const stepOp = stepOperation(step);
+    if (stepOp?.clauses.some(isSchedule)) {
+      accept(
+        "warning",
+        `Zamanlanm\u0131\u015F komut ak\u0131\u015F ad\u0131m\u0131 olamaz: '${stepOp.name}' schedule kural\u0131 ta\u015F\u0131yor \u2014 zamanlanm\u0131\u015F i\u015Fler System-cron tetiklidir, ak\u0131\u015F-d\u0131\u015F\u0131d\u0131r (P7 emsali)`,
+        { node: step, property: "name" }
+      );
+    }
     const usingTarget = step.source?.ref;
     if (usingTarget) {
       if (usingTarget === step) {
@@ -40907,7 +40915,7 @@ function generateProcessBlueprint(p, model) {
   return lines.join("\n");
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/report-index.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/report-index.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, readFileSync as readFileSync2, writeFileSync, statSync as statSync2, existsSync as existsSync2 } from "node:fs";
 import { join, relative } from "node:path";
@@ -41011,7 +41019,7 @@ function regenerateIndex(reportsRoot2, opts = {}) {
   writeFileSync(join(reportsRoot2, "index.html"), html.join("\n"));
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/report-business.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/report-business.src.mts
 var USAGE = 'Kullan\u0131m: node report-business.mjs <girdi.cdsl|dizin> --reports <dizin> [--title "\u2026"] [--quiet]';
 var argv = process.argv.slice(2);
 if (argv.includes("--version")) {

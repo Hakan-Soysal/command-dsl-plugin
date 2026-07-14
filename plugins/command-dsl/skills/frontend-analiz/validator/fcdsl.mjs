@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", frontendSrcHash: "d9b8d6a148df", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", frontendSrcHash: "d8d36708fe0b", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, statSync as statSync2, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, join, basename } from "node:path";
@@ -39449,6 +39449,12 @@ function techOf(node) {
   if (!model.contract?.techPath) return null;
   return loadTech(model.contract.techPath, ast_utils_exports.getDocument(node).uri);
 }
+function exposedBizOps(tech) {
+  const s = /* @__PURE__ */ new Set();
+  for (const ops of tech.byRealizes.values())
+    for (const op of ops) if (op.visibility === "exposed" && op.realizes) s.add(op.realizes);
+  return s;
+}
 function realizedBizOpId(u, business) {
   if (u.realizes) return { id: u.realizes.$refText, source: "authored" };
   if (business?.operations.has(u.name)) return { id: u.name, source: "by-name" };
@@ -39491,6 +39497,22 @@ function visibleUses(node, documents2) {
 }
 function resolveActionUses(action, documents2) {
   return visibleUses(action, documents2).find((u) => u.name === action.name);
+}
+function offeredUsesOf(comp, documents2) {
+  if (isActionComponent(comp)) {
+    const u = resolveActionUses(comp, documents2);
+    return u ? [u] : [];
+  }
+  const out = [];
+  const primary = comp.bind.op.ref;
+  if (primary) out.push(primary);
+  if (isFormComponent(comp)) {
+    for (const loads of comp.members.filter(isLoadsClause)) {
+      const lu = loads.bind.op.ref;
+      if (lu) out.push(lu);
+    }
+  }
+  return out;
 }
 function pathsOf(e, acc = []) {
   if (isBinary(e) || isArith(e)) {
@@ -39591,10 +39613,7 @@ var FrontendDslValidator = class {
     const tech = loadTech(model.contract.techPath, docUri);
     const business = loadBusiness(model.contract.path, docUri);
     if (!tech) return;
-    const exposedBiz = /* @__PURE__ */ new Set();
-    for (const ops of tech.byRealizes.values()) {
-      for (const op of ops) if (op.visibility === "exposed" && op.realizes) exposedBiz.add(op.realizes);
-    }
+    const exposedBiz = exposedBizOps(tech);
     if (exposedBiz.size === 0) return;
     const offered = /* @__PURE__ */ new Set();
     for (const doc of this.documents.all) {
@@ -39605,12 +39624,10 @@ var FrontendDslValidator = class {
       for (const c of containers) {
         for (const screen of c.members.filter(isScreen)) {
           for (const comp of componentsOfScreen(screen)) {
-            let uses;
-            if (isActionComponent(comp)) uses = resolveActionUses(comp, this.documents);
-            else uses = comp.bind.op.ref;
-            if (!uses) continue;
-            const realized = realizedBizOpId(uses, business);
-            if (realized) offered.add(realized.id);
+            for (const uses of offeredUsesOf(comp, this.documents)) {
+              const realized = realizedBizOpId(uses, business);
+              if (realized) offered.add(realized.id);
+            }
           }
         }
       }
@@ -40005,18 +40022,20 @@ var FrontendDslValidator = class {
     if (!business || !flow.realizes) return;
     const flowOps = business.flows.get(flow.realizes.$refText) ?? [];
     if (flowOps.length === 0) return;
+    const tech = techOf(flow);
+    const uiEligible = tech ? exposedBizOps(tech) : null;
     const offered = /* @__PURE__ */ new Set();
     for (const stepRef of flow.steps) {
       const screen = stepRef.ref;
       if (!screen) continue;
       for (const comp of componentsOfScreen(screen)) {
-        const uses = isActionComponent(comp) ? resolveActionUses(comp, this.documents) : comp.bind.op.ref;
-        if (!uses) continue;
-        const realized = realizedBizOpId(uses, business);
-        if (realized) offered.add(realized.id);
+        for (const uses of offeredUsesOf(comp, this.documents)) {
+          const realized = realizedBizOpId(uses, business);
+          if (realized) offered.add(realized.id);
+        }
       }
     }
-    const missing = flowOps.filter((id) => !offered.has(id)).sort();
+    const missing = flowOps.filter((id) => !offered.has(id) && (!uiEligible || uiEligible.has(id))).sort();
     if (missing.length > 0) {
       accept("warning", `Ak\u0131\u015F-ad\u0131m\u0131 kapsanmad\u0131: '${flow.realizes.$refText}' op'lar\u0131ndan \u015Funlar hi\xE7bir ad\u0131m-ekran\u0131nda sunulmuyor: ${missing.join(", ")}.`, { node: flow, property: "realizes" });
     }
@@ -40366,7 +40385,7 @@ function strip(s) {
   return s.replace(/^['"]|['"]$/g, "");
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
 function parseArgs(argv) {
   const args2 = { inputs: [], json: false, quiet: false, version: false };
   for (let i = 0; i < argv.length; i++) {
@@ -40443,14 +40462,6 @@ var infos = 0;
 for (let i = 0; i < docs.length; i++) {
   const doc = docs[i];
   const file = basename(files[i]);
-  for (const e of doc.parseResult.lexerErrors) {
-    errors++;
-    diagnostics.push({ severity: 1, line: 0, col: 0, message: `lexer: ${e.message}`, file });
-  }
-  for (const e of doc.parseResult.parserErrors) {
-    errors++;
-    diagnostics.push({ severity: 1, line: 0, col: 0, message: `parser: ${e.message}`, file });
-  }
   for (const d of doc.diagnostics ?? []) {
     const sev = d.severity ?? 1;
     if (sev === 1) errors++;

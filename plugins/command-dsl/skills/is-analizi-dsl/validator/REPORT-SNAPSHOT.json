@@ -3,9 +3,9 @@
   "tool": "report-business.mjs",
   "grammarVersion": "cdsl-v3.x-77493a5ddfa9",
   "grammarHash": "77493a5ddfa9",
-  "srcHash": "ba74613865a6",
-  "commit": "27ff90b",
-  "builtAt": "2026-07-07T23:30:00+03:00",
+  "srcHash": "373e8f666433",
+  "commit": "1ca2337",
+  "builtAt": "2026-07-14T00:49:36+03:00",
   "langium": "4.2.4",
   "note": "İnsan-okur rapor bundle'ı — üreteçler: plantuml/plantuml-flow/plantuml-process/plantuml-blueprint/process-doc/cockburn/coverage + report-index (kanonik ortak kopya)"
 }

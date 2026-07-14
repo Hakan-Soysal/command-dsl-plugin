@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "v3.x-77493a5ddfa9", grammarHash: "77493a5ddfa9", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "v3.x-77493a5ddfa9", grammarHash: "77493a5ddfa9", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, statSync as statSync2 } from "node:fs";
 import { join, isAbsolute, dirname, resolve } from "node:path";
@@ -39173,6 +39173,14 @@ var CommandDslValidator = class {
   checkFlowStep(step, accept) {
     const flow = ast_utils_exports.getContainerOfType(step, isFlowDef);
     if (!flow) return;
+    const stepOp = stepOperation(step);
+    if (stepOp?.clauses.some(isSchedule)) {
+      accept(
+        "warning",
+        `Zamanlanm\u0131\u015F komut ak\u0131\u015F ad\u0131m\u0131 olamaz: '${stepOp.name}' schedule kural\u0131 ta\u015F\u0131yor \u2014 zamanlanm\u0131\u015F i\u015Fler System-cron tetiklidir, ak\u0131\u015F-d\u0131\u015F\u0131d\u0131r (P7 emsali)`,
+        { node: step, property: "name" }
+      );
+    }
     const usingTarget = step.source?.ref;
     if (usingTarget) {
       if (usingTarget === step) {
@@ -39744,7 +39752,7 @@ function createCommandDslServices(context) {
   return { shared: shared2, CommandDsl };
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
 var argv = process.argv.slice(2);
 var jsonMode = argv.includes("--json");
 var wantVersion = argv.includes("--version");
@@ -39789,14 +39797,6 @@ var infos = 0;
 for (let i = 0; i < loaded.length; i++) {
   const doc = loaded[i];
   const file = cdslFiles[i];
-  for (const e of doc.parseResult.lexerErrors) {
-    errors++;
-    diagnostics.push({ severity: 1, line: 0, col: 0, message: `lexer: ${e.message}`, code: null, file });
-  }
-  for (const e of doc.parseResult.parserErrors) {
-    errors++;
-    diagnostics.push({ severity: 1, line: 0, col: 0, message: `parser: ${e.message}`, code: null, file });
-  }
   for (const d of doc.diagnostics ?? []) {
     const sev = d.severity ?? 1;
     if (sev === 1) errors++;

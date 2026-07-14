@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-tech", srcHash: "1c06677f20fc", commit: "27ff90b", builtAt: "2026-07-07T23:30:00+03:00" };
+var define_BUILD_INFO_default = { tool: "report-tech", srcHash: "1c06677f20fc", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00" };
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/report-tech.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/teknik-analiz/validator/report-tech.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync, rmSync } from "node:fs";
 import { resolve, join as join2, dirname } from "node:path";
 
@@ -595,7 +595,7 @@ function generateTechReport(manifest2) {
   return files2;
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/report-index.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/teknik-analiz/validator/report-index.src.mts
 import { readdirSync, readFileSync, writeFileSync, statSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 import { deflateRawSync } from "node:zlib";
@@ -698,7 +698,7 @@ function regenerateIndex(reportsRoot2, opts = {}) {
   writeFileSync(join(reportsRoot2, "index.html"), html.join("\n"));
 }
 
-// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/report-tech.src.mts
+// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/teknik-analiz/validator/report-tech.src.mts
 var BUILD_INFO = typeof define_BUILD_INFO_default !== "undefined" ? define_BUILD_INFO_default : { tool: "report-tech", srcHash: "dev", builtAt: "dev" };
 function usage() {
   console.error(`Kullan\u0131m: node report-tech.mjs <manifest.json> --reports <dizin> [--title "<Proje>"] [--quiet]
