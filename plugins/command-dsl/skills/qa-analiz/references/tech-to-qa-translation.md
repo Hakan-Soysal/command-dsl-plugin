@@ -16,7 +16,7 @@ Op-başına dal envanterini bu tabloyla KENDİN çıkar, kullanıcıya düz dill
 | `rule { … for guard "y" }` | guard-dalı (NotProcessable sınıfı) | `covers guard "y"` | "iş kuralı: <kuralın anlamı>" |
 | `throws E` | named-error dalı | `covers error E` | "<E'nin anlamı> hatası" |
 | `roles …` | NotAuthorized·roles | `covers NotAuthorized roles` | "yanlış roldeki kullanıcı" |
-| `ownership …` (`public` hariç) | NotAuthorized·ownership | `covers NotAuthorized ownership` | "başkasının kaydına erişim" |
+| `ownership …` (`public`, `any`, `all` hariç — any/all dal türetmez, waive de yazma) | NotAuthorized·ownership | `covers NotAuthorized ownership` | "başkasının kaydına erişim" |
 | `permit when …` | NotAuthorized·permit | `covers NotAuthorized permit` | "koşullu izin dışı çağrı" |
 | `scope …` | NotAuthorized·scope | `covers NotAuthorized scope` | "kapsam dışı çağrı" |
 | id'siz validation check(ler)i | TEK anonim NotValid dalı (S5) | `covers NotValid` | "adsız girdi kuralları (topluca)" |

@@ -325,7 +325,7 @@ Bir Operation'ın zorunlu dalları tech kaynağından **türetilir**:
 | guard-id'li rule check | `rule { … for guard "y" }` | `covers guard "y"` |
 | named error | `throws E` (E: ErrorDecl, taksonomi-pinli) | `covers error E` |
 | NotAuthorized·roles | op'ta `roles` varsa | `covers NotAuthorized roles` |
-| NotAuthorized·ownership | op'ta `ownership` varsa (`public` hariç) | `covers NotAuthorized ownership` |
+| NotAuthorized·ownership | op'ta `ownership` varsa (`public`, `any`, `all` hariç — any/all ihlal-edilemez, dal türetilmez; waive yazma → stale-error §3.5) | `covers NotAuthorized ownership` |
 | NotAuthorized·permit | op'ta `permit when` varsa | `covers NotAuthorized permit` |
 | NotAuthorized·scope | op'ta `scope` varsa | `covers NotAuthorized scope` |
 | anonim NotValid | id'siz validation check'i varsa (tek dal) | `covers NotValid` |
