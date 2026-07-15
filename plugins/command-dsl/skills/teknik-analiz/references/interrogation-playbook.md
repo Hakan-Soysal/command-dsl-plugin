@@ -33,6 +33,10 @@
 
 - "Bu işlem teknik olarak **neyi girdi alır, ne döndürür**?" ⟦interface stability: bu imza
   client'lar tarafından mı tüketilecek? geriye-uyumlu evrilebilir mi?⟧
+- "Bu işlem **tek bir kayıt** döndürüyor — o kaydı **ne belirliyor**?" ⟦determinism: kaydın kendi
+  ID'si mi, yoksa onu var eden kaydın ID'si mi (sepet↔kullanıcı)? Belirleyici yoksa tüketici
+  "ilk kaydı al"a düşer = prod'da yanlış kayıt.⟧ **İstisna:** net filtre belirteci (son/ilk/en
+  büyük/en küçük) ya da ephemeral türev (şu anki hava/kullanım) — ikisinde de **ölçütü** `note`'a yaz.
 - "Hangi kayıtları **okuyor**, hangilerini **yaratıyor/güncelliyor/siliyor**?" → CRUD access.
 - "Bir **girdi-parametresinin** izinli aralığı/kümesi var mı (miktar 1-100, tür ∈ {A,B})?" → param-sonu
   `in <lo>..<hi>` / `in {A|B|C}`. ⟦input contract: sınır-dışı değer NotValid(400) dönmeli — makine-okunur
@@ -46,6 +50,9 @@
 
 - **roles (KİM):** "Bunu kim çağırabilir?" ⟦least privilege: gereğinden geniş yetki mi?⟧
 - **ownership (HANGİ satır):** "Herkesinkini mi, sadece kendi/yönettiği kaydı mı?"
+- **ownership sütun bağı (HANGİ sütun):** cevap `own`/`<relation>` ise devam sor — "kaydın
+  sahibini hangi alan tutuyor (`customerId`? `orgId`?)" → `by <Entity>.<alan>, …`. ⟦bağsız
+  `own`/`<relation>` = validator warning; üreteç filtre sütununu tahmin eder — sızıntı riski.⟧
 - **permit (öznitelik):** "Rol ve sahiplik dışında bir koşul mu var (ör. sadece kendi bölgesi)?"
 - **⚠ Yetki gevşetme:** ownership'i iş'ten geniş yapıyorsan (`own`→`any`) ya da rol yetkili
   aktör kümesini aşıyorsa → **weakening**. Bunu asla sessiz geçme; "iş analizi daha dar diyor,

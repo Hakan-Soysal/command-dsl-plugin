@@ -200,6 +200,32 @@ olduğunu bildirir.
   önce orayı düzeltelim" de, `teknik-analiz` skill'ine yönlendir, tech düzelince
   doğrulamayı tekrarla.
 
+## H2. Tech kararı testi BLOKE ediyorsa — DUR ve BİLDİR (§H ailesinin validator-suz üyesi)
+
+§H'de yakalayan doğrulayıcıdır (S17 error); burada yakalayan **SENSİN**: tech 0-error geçer
+ama bir kararı deterministik test kurmayı imkânsız/anlamsız kılar. Böyle bir çelişkide test
+UYDURMA (sahte-yeşil üretir), sessiz workaround KURMA, tech'i kendi kafana göre DÜZELTME —
+**DUR**, kullanıcıya neyin neden test edilemez olduğunu somut söyle, düzeltmeyi
+`teknik-analiz`'e yönlendir, tech düzelince türetim/doğrulamayı tekrarla (§H protokolüyle aynı).
+
+**Kapsam DAR — "tutarsızlık" = testi bloke eden / sahte-yeşile zorlayan GERÇEK çelişki:**
+
+| Tech kararı | Neden test edilemez |
+|---|---|
+| **Belirsiz tekil dönüş:** op tek kayıt döner (`: Order`, `list of` değil) ama imzada onu belirleyen girdi yok VE istisna ölçütü (`note`: son/ilk/en büyük · ephemeral) de yok | "Hangi kaydı assert edeceğim?" — seed 2 kayıt koyunca beklenen sonuç TANIMSIZ; test ancak üretecin keyfî seçimine ("ilk kaydı al") çıpalanır = sahte-yeşil |
+| **Dal envanteri business ile çelişiyor:** tech'in beyan ettiği dallar operations.json'un outcome/akış beyanıyla bağdaşmıyor | Senaryo/`satisfies` çıpası kurulamaz — test hangi beyana yazılırsa yanlış olanı yeşile boyama riski; hangisinin doğru olduğuna qa karar VEREMEZ |
+| **Sütun bağsız ownership:** `ownership own/<relation>` var ama `by <Entity>.<alan>` bağı yok | NotAuthorized·ownership dalının satır-filtresi testi deterministik kurulamaz — üreteç filtre sütununu TAHMİN eder; test tahmini doğrular, güvenceyi değil |
+
+**Durdurmayan (nitpick — qa her tech kusurunda durursa kullanılamaz hâle gelir):**
+adlandırma/üslup tercihi; id'siz guard'lar (S5 — katlanmış dalla İLERLE, tech'e yalnız
+öneri raporla); tech oturumunda kullanıcıyla ONAYLANMIŞ divergence'lar. Şüphedeysen ölçüt
+tek soru: **"bu kararla deterministik bir test yazabiliyor muyum?"** Evet → ilerle
+(gerekirse öneri not düş); hayır → DUR.
+
+**Waive ile karıştırma:** waive = *"bu dal test edilebilir ama etmiyorum, gerekçem bu"*
+(authored kapsam kararı). Buradaki durum = *"bu dal BU tech'le test EDİLEMEZ"* — waive'e
+sarmak sahte-kapamadır; çözüm tech'tedir.
+
 ## I. Neyi YAZMAYACAKSIN (sınır disiplini)
 
 - **Beklenen outcome** — S10 türetir; `then outcome` diye bir yüzey yok.

@@ -1,7 +1,7 @@
 // Zengin LINKED TechDsl exemplar — catalog.operations.json'a bağlı (schemaVersion 3).
 // Tek module (intra-module = strong consistency → mode gerekmez, consistency warning yok).
 // Gösterdiği construct'lar: contract + realizes (op & entity) + rolemap + access (CRUD) +
-// roles/ownership + idempotent (param-key) + error/throws + pagination + entity invariant
+// roles/ownership (+ `by` sütun bağı — ADR-0038) + idempotent (param-key) + error/throws + pagination + entity invariant
 // (etiketli — `as "..."`) + concurrency optimistic + serving görünürlük (@rest) +
 // guarantee (izlenebilirlik: insan-garantisi → mevcut yükümlülük eşlemesi).
 // Doğrulayıcı beklentisi: 0 error (realizes/divergence kapsama info'ları olabilir).
@@ -21,7 +21,7 @@ module Orders {
   @rest(POST, "/orders")
   operation PlaceMyOrder(cartId: CartId): OrderId realizes PlaceOrderFromCart {
     roles Customer
-    ownership own
+    ownership own by Cart.customerId
     access { creates Order  reads Cart }
     idempotent by cartId
     note "Aynı sepetle ikinci çağrı yeni sipariş yaratmamalı (retry-safe)."
@@ -31,7 +31,7 @@ module Orders {
   @rest(GET, "/orders")
   operation ListMyOrders(): list of Order realizes ListOwnOrders {
     roles Customer
-    ownership own
+    ownership own by Order.customerId
     access { reads Order }
     paginated by cursor createdAt desc, id asc size 50
   }
@@ -40,7 +40,7 @@ module Orders {
   @rest(POST, "/orders/:id/cancel")
   operation CancelMyOrder(id: OrderId): Unit realizes CancelPendingOrder {
     roles Customer
-    ownership own
+    ownership own by Order.customerId
     access { updates Order  creates Refund }
     throws OrderNotCancellable
     note "İptal sonrası iade webhook'u beklenmeli — senkron yanıt varsayma."
@@ -49,6 +49,7 @@ module Orders {
   // Entity: kaba realizes + invariant (composite path total.amount) + concurrency (lost-update).
   entity Order realizes Order {
     id: OrderId
+    customerId: CustomerId              // ownership `by` sütun bağının hedefi (ADR-0038)
     status: OrderStatus
     total: Money
     createdAt: Timestamp
@@ -56,7 +57,7 @@ module Orders {
     concurrency optimistic
   }
   entity Refund realizes Refund { id: RefundId  amount: Money }
-  entity Cart   realizes Cart   { id: CartId    total: Money }
+  entity Cart   realizes Cart   { id: CartId    customerId: CustomerId  total: Money }
 }
 
 // Saf-teknik paylaşılan module: yalnız type + enum (SharedUtils disiplini → warning YOK).

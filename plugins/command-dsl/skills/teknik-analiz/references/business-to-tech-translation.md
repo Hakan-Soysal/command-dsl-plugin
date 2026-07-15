@@ -41,6 +41,7 @@
 | `kind` | `access`'ten **türetilir** (yazma) | Doğrudan yazılmaz; CRUD'dan çıkar. Sorgu iş-op + write → CQRS warning. |
 | `signature.actor` | `roles <R>` + `rolemap { actor -> R }` | "Kim çağırabilir?" Rol = capability; rolemap ile aktöre bağla. Yetkili küme = actor ∪ `extends` descendants. |
 | `signature.ownership` | `ownership own\|any\|all\|public\|<relation>` | "Kimin kaydı üzerinde?" Business'tan **geniş yazma** → weakening warning. `<relation>` → `relations[]`. |
+| (sahip sütunu, business'ta YOK — saf-tech) | `ownership … by <Entity>.<alan>, …` | Cevap `own`/`<relation>` ise **devam sor**: "sahiplik filtresi **hangi sütunda** kurulur — sahibi hangi alan tutuyor?" Bağsız = warning (üreteç sütunu tahmin eder). Entity op'un `access`'inde, alan skaler/enum (ADR-0038). |
 | `access.writes` (kaba) | `access { creates/updates/deletes <Entity> }` | "Yaratıyor mu / güncelliyor mu / siliyor mu?" Kaba write'ı **CRUD'a inceltirsin**. |
 | `access.reads` (kaba) | `access { reads <Entity> }` | "Hangi kayıtları okuyor?" |
 | `guards[].ast` (`where`/`if`/`when`) | `validation { … }` (400) / `rule { … }` (422) + `for guard "<id>"` | "Kontrol **request payload**'ında mı (→ validation, input-only) yoksa **stored state**'te mi (→ rule)?" **ARTIK YAPISAL ENFORCE (ADR-0031):** validation path kökü yalnız `op.params`; rule state-kökü `access` (entity/`as`-alias) veya `calls`-alias ile **bildirilmeli** — çıplak/bildirilmemiş kök → error. guard-id link (dik eksen) → ifade-divergence. |

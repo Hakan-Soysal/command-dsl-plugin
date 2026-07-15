@@ -68,15 +68,27 @@ node validate-tech.mjs --version
      çağrılabilir olmalı) ya da farklı (exposed) bir query çağır.
    - *`read-only olmayan call sonucu gate-edilemez`* → gate edilen boundary-op'a `readonly` ekle (gerçekten
      read-only ise) ya da rule'u o sonuçtan ayır.
+   - *`in`-kümesi enum-üyelik (`checkInSetEnumMembership`, ADR-0038 K9b):* `x in { … }` LHS yaprağı
+     enum-tipliyse kümenin her üyesi o enum'un üyesi olmalı (dört bağlam: invariant/validation/rule/permit) →
+     TYPO/enum-dışı değeri gerçek enum üyesiyle değiştir (manifest tip-uzayıyla çelişen predicate emit edilmez).
 2. **warning (severity 2)** çoğunlukla **divergence/kapsam sinyali**dir (ownership/access-sapma,
    consistency mode-eksik, görünürlük-belirsiz, rolemap-typo, SharedUtils, "differs",
    **kapsam-eksik**). Her birini **kullanıcıya takip sorusu** olarak yansıt:
    - *Ownership-sapma:* "İş analizi daha dar (`own`) diyor, `any`'e genişletme bilinçli mi?"
+   - *Ownership sütun-bağı eksik (`checkOwnershipBinding`, ADR-0038):* "`own`/`<relation>` satır-filtresi
+     kurar — hangi sütunda? (`by <Entity>.<alan>` bildir; aksi halde üreteç filtre sütununu tahmin eder.)"
    - *Erişim-sapma:* "İş bu kaydı salt-okunur sayıyor; tech'te yazıyorsun — kasıtlı mı?"
    - *Consistency mode-eksik:* "Bu cross-module yazma anında mı (async) yoksa dayanıklı mı (durable)?"
    - *Görünürlük:* "Bu işlem nasıl çağrılıyor — bir protokol mü, yoksa iç (@internal) mi?"
    - *Rule misclassification (ADR-0031):* "rule yalnız input'a bağlı (state kökü yok) → `validation`
      daha doğru" — kontrol gerçekten request-only mi? Öyleyse `validation`'a çevir.
+   - *Guard rol-sapması (`role-mismatch`, ADR-0039):* *"business guard '<id>' bir sonuç-filtresi
+     (role=result-filter …); tech 'rule/validation' onu fail-semantiğine eşliyor"* — sorgunun
+     `only when`'i dönen kümeyi DARALTIR; `rule` (422) / `validation` (400) ise operasyonu DÜŞÜRÜR:
+     "kümeyi daralt" sessizce "hata ver"e dönüşmüş. **Fix: bu `for guard` link'ini kaldır** — bu bir
+     sonuç-filtresidir, fail-check'e eşlenmez; tech'e filtre clause'u da YAZILMAZ (filtre
+     `operations.json`'da `ast`+`role` ile hazır durur, üreteç `.Where(ast)`'i ORADAN uygular;
+     manifest süperset değil, ADR-0013 K1). Bu warning'de o link için AST-kıyası ("differs") atlanır.
    - *Kapsam-eksik (`checkUnrealizedBusinessOps`):* "Şu business-op'lar hiçbir tech operation'a
      bağlanmadı — bunları bu turda kapsamayacak mıyız (bilinçli erteleme) yoksa atladık mı?"
    Warning'i ya **gider** ya da kullanıcı onayıyla "bilinçli" olarak **belgele**.

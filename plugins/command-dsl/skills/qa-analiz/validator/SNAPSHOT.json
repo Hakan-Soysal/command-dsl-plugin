@@ -1,8 +1,8 @@
 {
   "source": "CommandDSL",
-  "grammarVersion": "qa-v1.x-b059dc23fdb4",
-  "grammarHash": "b059dc23fdb4",
-  "qaSrcHash": "23b92f4249e8",
+  "grammarVersion": "qa-v1.x-78b7a113b7f8",
+  "grammarHash": "78b7a113b7f8",
+  "qaSrcHash": "0eaf7c347ec1",
   "commit": "1ca2337",
   "builtAt": "2026-07-14T00:49:36+03:00",
   "langium": "4.2.4",

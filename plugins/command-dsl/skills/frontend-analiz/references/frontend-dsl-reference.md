@@ -2,12 +2,12 @@
 
 > Kaynak: `CommandDSL/frontend-dsl.langium` + tasarım spec'i v0.4 (karar #1-#48).
 > Uzantı `.fcdsl`; yorum `#`. İfade dili = shared Expr (tech ile AYNI AST; karşılaştırma
-> **tek `=`**, `!=` var, `not` YOK). Bu dosya yazım-anı başvurusudur; sorgulama soruları
-> `interrogation-playbook.md`'de.
+> **tek `=`**, `!=` var, `not` YOK; **`in` üyelik operatörü VAR** — ADR-0038, bkz. §12).
+> Bu dosya yazım-anı başvurusudur; sorgulama soruları `interrogation-playbook.md`'de.
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `bfeb6db74b94` · src `d9b8d6a148df` · commit `27ff90b` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `a428b3d71944` · src `2c7b1bdb3499` · commit `1ca2337`+ADR-0038 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 
 Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listeler (zorunlular — experience/screen/uses/region — faz+validator'ca zorlanır). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → eşleşme aday-soru kuyruğuna girer (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok). `entry` ve result-handler-tamlığı zaten validator-warning'idir (sessiz değil) → burada yok; warning geldiğinde ikinci-tur soru olarak ele al.
 
@@ -29,7 +29,7 @@ Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listele
 | `step` (form wizard) | "adım adım form / sihirbaz" | 6 | ○ | **çökmüş-sihirbaz** — adımlı form tek sayfaya iner; uzun form bir arada gelir |
 | `@ui.readonly` / `@ui.hidden` (field) · `@ui.emphasis` (field+screen) | "bu alan **salt-okunur** görünsün / formda **gizli** olsun / **vurgulu** çıksın" (frontend-yazarı sunum-ipucu; UX — backend-gerçeği DEĞİL) | 4/6 | ○ | **kayıp-sunum-ipucu** — alan/ekran salt-okunur/gizli/vurgu niyeti manifest'e taşınmaz; üreteç düz-alan üretir (kullanıcı düzenlenmemesi gereken alanı düzenler / gizli alan görünür) |
 
-**Not:** frontend-yazarı `@ui.*` dekorasyonu bu bundle'da **VAR** (grammar `bfeb6db74b94`; `decorations+=Annotation` — Screen:131 + FormField:190; probe'la doğrulandı → manifest `decorations: [...]` emit eder). Kapalı çekirdek-yorumlu küme: `@ui.readonly`·`@ui.hidden` (yalnız field-site), `@ui.emphasis` (field+screen). `@bogus.*` = bilinmeyen namespace **error**; yanlış-site (ör. `@ui.readonly` screen'de) **error**; argüman verilirse **warning** (yok sayılır). Render: hidden→«gizli» · readonly→«okunur» · emphasis→«vurgu». **AYRI concern:** backend-hassas `@sensitivity`/`@crypto`→maske %100 **tech-driven** kalır (frontend re-declare ETMEZ; [[manifest-mapping-not-superset]] tek-kaynak) — o köprü hâlâ üstakışta, `@ui.*` onun yerine geçmez.
+**Not:** frontend-yazarı `@ui.*` dekorasyonu bu bundle'da **VAR** (grammar `a428b3d71944`; `decorations+=Annotation` — Screen:131 + FormField:190; probe'la doğrulandı → manifest `decorations: [...]` emit eder). Kapalı çekirdek-yorumlu küme: `@ui.readonly`·`@ui.hidden` (yalnız field-site), `@ui.emphasis` (field+screen). `@bogus.*` = bilinmeyen namespace **error**; yanlış-site (ör. `@ui.readonly` screen'de) **error**; argüman verilirse **warning** (yok sayılır). Render: hidden→«gizli» · readonly→«okunur» · emphasis→«vurgu». **AYRI concern:** backend-hassas `@sensitivity`/`@crypto`→maske %100 **tech-driven** kalır (frontend re-declare ETMEZ; [[manifest-mapping-not-superset]] tek-kaynak) — o köprü hâlâ üstakışta, `@ui.*` onun yerine geçmez.
 
 ## 1. Model kökü
 
@@ -247,3 +247,8 @@ flow SiparisVer = [MyOrders -> NewOrder -> MyOrders] # realizes'siz de legal
   deneysel doğrulandı). TEK İSTİSNA — alan/param adı OLAMAZ: **`and or sum of true false`**
   (expression kelime hazinesi — parse hatası verir). Çakışan alan adını yeniden adlandırt.
 - Karşılaştırma **tek `=`** (`==` parse HATASI); `!=` var; `not` YOK.
+- **`in` üyelik operatörü (ADR-0038, shared Expr):** `x in {Pending|Active}` (literal küme) veya
+  `x in <to-many path>` — skaler-ile-küme'yi `=` ile kıyaslama (tip-yalanı); sağda skaler leaf →
+  error. `visible-when`/`derived`/`rule`/`set` ifadelerinde kullanılabilir. **`in` HÂLÂ alan/param/
+  region adı olarak da SERBESTTİR** (TokenBuilder `EXPR_VOCABULARY`'ye eklenmedi — keywords-as-
+  identifiers dengesi korundu; ayrıca bileşen-shape'inin `in { … }` girdi-bloğu ayrı roldedir).

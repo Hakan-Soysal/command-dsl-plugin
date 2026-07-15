@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", srcHash: "6bf4df0890ed", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00" };
+var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", srcHash: "b1a60adc098d", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00" };
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/frontend-analiz/validator/report-frontend.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/report-frontend.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync, readdirSync as readdirSync2, statSync as statSync2, rmSync } from "node:fs";
 import { resolve, join as join2, dirname } from "node:path";
 
@@ -376,7 +376,7 @@ function uiEventEdges(from, ev, addEdge, owner) {
   }
 }
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/frontend-analiz/validator/report-index.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/report-index.src.mts
 import { readdirSync, readFileSync, writeFileSync, statSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 import { deflateRawSync } from "node:zlib";
@@ -479,7 +479,7 @@ function regenerateIndex(reportsRoot2, opts = {}) {
   writeFileSync(join(reportsRoot2, "index.html"), html.join("\n"));
 }
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/frontend-analiz/validator/report-frontend.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/report-frontend.src.mts
 function usage() {
   console.error(`Kullan\u0131m: node report-frontend.mjs <experience.json\u2026|dizin> [--flows <operations.json>] --reports <dizin> [--title "<Proje>"] [--quiet]
 

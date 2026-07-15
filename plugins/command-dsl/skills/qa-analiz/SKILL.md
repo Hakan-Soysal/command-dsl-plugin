@@ -120,6 +120,14 @@ atlandı. Biri olduysa DUR, adını koy, düzelt.
 - **Doğru atıf.** Dal/veri/stub/assert sorusu **tech**'e bakar; akış/süreç (senaryo
   çıpası) sorusu **operations.json**'a bakar. Uyarı taşırken kaynağı doğru söyle
   ("iş analizi bu akışı tanımlamış; hiçbir senaryo onu koşmuyor").
+- **Tech'i DEĞERLENDİR, kutsal metin gibi tüketme.** Dal envanterinin kaynağı tech'tir
+  ama tech'in bir kararı testi **imkânsız/anlamsız** kılıyorsa (deterministik assert
+  kurulamıyor → test ancak sahte-yeşil olur) etrafından SESSİZCE dolaşma: **DUR**,
+  kullanıcıya **neyin neden test edilemez** olduğunu somut söyle, düzeltmeyi
+  `teknik-analiz`'e yönlendir (S17 protokolüyle aynı — `references/tech-to-qa-translation.md`
+  §H2). Workaround üretme, test uydurma, tech'i kendin düzeltme. **Kapsam DAR:** yalnız
+  testi bloke eden / sahte-yeşile zorlayan gerçek çelişki durdurur; üslup/tercih nitpick'i
+  durdurmaz — qa her tech kusurunda durursa kullanılamaz hâle gelir.
 - **Yerel adlar ASCII (S11).** persona/dataset/step-binding adları ASCII identifier'dır
   (`musteri` olur, `müşteri` olmaz); görünen metin STRING'lerde (başlık, gerekçe) Türkçe
   serbesttir.
@@ -229,6 +237,10 @@ ZORUNLU ve anlamlı olmalı ("vaktimiz yok" kabul edilmez → `until` ile ertele
 **`because` gerekçesini LLM DOLDURAMAZ — authored'dır**: skill gerekçeyi kullanıcıdan alır, kendi uydurmaz (büyü yok). **Doğrulayıcı (bundle'da) erteleme-bahanesi taşıyan gerekçeyi yakalar (F2.3):** kapalı bir bahane-listesine (ör. "vaktimiz yok") uyan `because` → warning ("somut risk-argümanı yaz ya da `until` ile koşullu ertele"). Tüm waive'ler merged manifest'te konsolide taşınır; skill'in `qcdsl.mjs` CLI'ı `--merged` özetinde süre-durumu sınıflamasını basar (`waiver'lar: N · aktif / süresi-yakın / dolmuş / süresiz` — F2.2, `today` CANLI/display-only, merged'e yazılmaz). Statik HTML rapor (`report-qa.mjs`) şimdilik her waive'i `reason` + `until` ile satır-içi gösterir (konsolide "Waiver'lar" bölümü canlı playground'da; report-qa portu henüz kapsamıyor).
 Tersi de tuzak: her dala mekanik test yazdırma — tek-rollü op'un NotAuthorized'ı P1
 jenerik-kimlik kapsamında waive edilebilir (spec §7 exemplar deseni).
+**⚠ Anti-pattern — test-edilemezi waive'e sarma:** dal, tech'in bir kararı yüzünden test
+EDİLEMEZ ise (belirsiz tekil dönüş gibi — `references/tech-to-qa-translation.md` §H2) waive
+sahte-kapamadır (waive = "test edilebilir ama etmiyorum, gerekçem bu"; burada test edilebilirlik
+yok) → DUR, neyin neden test edilemez olduğunu söyle, tech'i `teknik-analiz` ile düzelttir.
 **Kapatır:** coverage/strict (S6 + `--strict` yükseltmesi), karşılıksız-hedef
 error'ları, #21 NotAuthorized niteleyici zorunluluğu, S5 anonim-dal katlaması
 (+ "for guard önerilir" info'sunu tech'e iyileştirme önerisi olarak taşı), waive

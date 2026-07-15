@@ -25,7 +25,7 @@ module Proposals {
       title: String in {"rfp" | "quote" | "tender"}  // param union (String skaler → permissive, geçerli)
   ): ProposalId realizes CreateProposal {
     roles Customer
-    ownership own
+    ownership own by Proposal.customerId
     access { creates Proposal }
     note "priority sınır-dışı (0 veya 6) NotValid(400) dönmeli — payload ruleId=priority.range."
   }
@@ -33,6 +33,7 @@ module Proposals {
   // FIELD refinement: sayısal range + enum-tipli union (üye alt-kümesi).
   entity Proposal realizes Proposal {
     id: ProposalId
+    customerId: CustomerId                         // ownership `by` sütun bağının hedefi (ADR-0038)
     priority: Int in 1..5                          // field range
     status: ProposalStatus in {Draft | Submitted}  // field union → {Draft,Submitted} ⊆ ProposalStatus
   }

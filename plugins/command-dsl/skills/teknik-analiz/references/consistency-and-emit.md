@@ -29,6 +29,8 @@ Doğrulayıcı bunların çoğunu yakalar; ama emit'ten önce gözden geçir —
       **read** = `calls <Module>.<Query>`; hedef **query** + **non-`@internal`**; consistency-garantisiz
       TÜREV — ayrı `consistency` gerekmez.)
 - [ ] ownership/roles iş'ten **geniş** değil (geniştiyse kullanıcı onayı belgeli).
+- [ ] `own`/`<relation>` ownership'li her op'ta **sütun bağı** var (`by <Entity>.<alan>` — entity
+      op'un `access`'inde, alan skaler/enum; bağsız = warning → kullanıcıya soruldu). (ADR-0038.)
 - [ ] `permit when` op'unda **tam bir** write-hedefi var (resource çözülebilir).
 - [ ] pagination yalnız `list of` dönen **sorgu**da; `concurrency` yalnız sahip-olunan entity'de.
 

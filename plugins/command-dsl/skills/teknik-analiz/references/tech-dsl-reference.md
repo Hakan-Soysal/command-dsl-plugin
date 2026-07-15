@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `ae0d7c345813` · src `c61714079e96` · commit `1ca2337` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `bfe458c054af` · src `90734b71751a` · commit `1ca2337`+ADR-0038 K9b+ADR-0039 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -29,6 +29,7 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ | **izlenemez-değişiklik** — kim-ne-zaman izi tutulmaz; denetim/uyum kaydı oluşmaz |
 | `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ | **ölçülemez-işlem** — sayaç/metrik yayılmaz; işlem gözlemlenemez |
 | `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ | **öznitelik-yetki-aşımı** — bölge/departman koşulu düşer; aktör kapsam-dışı kayda erişir |
+| `ownership … by <Entity>.<alan>` (op) | "kaydın sahibini hangi alan tutuyor; customerId/orgId/ownerId sütunuyla filtrele; kayıt sahibi şu kolondan belli" | 4 | ★ (warning-routed) | **tahmin-edilen-filtre-sütunu** — `own`/`<relation>` yazılır ama satır-filtresinin SÜTUNU bildirilmez; üreteç sahip sütununu TAHMİN eder (yanlış sütun = yanlış veri kapsamı / satır sızıntısı) |
 | `scope` (op) | "OAuth kapsamı / token izni gerekli" | 4 | ○ | **kapsamsız-erişim** — token izni zorlanmaz; yetersiz-kapsamlı token işlemi çağırabilir |
 | `idempotent by` (op) | "aynı istek iki kez gelirse; ağ tekrarı; mükerrer önle" | 6 | ★ | **çift-işlem** — tekrarlanan istek iki kez işlenir (mükerrer kayıt / çift tahsilat) |
 | `consistency async\|durable` (op) | "başka modüle yazıyor; anında mı görünmeli, arka planda dayanıklı mı" | 6 | ★ (warning-routed) | **belirsiz-tutarlılık** — modüller-arası yazımın görünürlük/dayanıklılık kipi tanımsız; yanlış varsayılana düşer |
@@ -143,6 +144,9 @@ in {A | B | C}          // LiteralUnion — UnionVal ('|' UnionVal)*; UnionVal =
 **`in` = HARD-RESERVE keyword** (ADR-0034 §2): birleşik tech keyword-setine sert eklendi (TokenBuilder
 YAZILMADI — çakışma kanıtı yoktu). **Kabul edilen kısıt:** artık hiçbir `.tcdsl` alanı/param/enum-değeri
 `in` adını alamaz (`to` ve `event`'in daha önce sessizce field/param adı yasakladığı dersin tekrarı önlendi).
+**ADR-0038 sonrası `in` İKİ ayrı roldedir:** (1) Refinement-`in` — alan/param **tip-daraltması** (bu bölüm);
+(2) Expr-`in` — shared Expr'de **üyelik operatörü** (§10). Çakışmadan bir arada yaşarlar (AST'leri ayrı:
+`LiteralUnion`/`UnionVal` vs `SetLit`/`SetVal`); karıştırma.
 
 **TİP-UYUMU kuralları — TEK-KAYNAK `refinementViolations` (`manifest.ts`; validator + emit aynı helper'ı
 tüketir).** Manifest **yalnız violation'sız (geçerli)** refinement'ı yazar (correctness: yarım/yanlış alan
@@ -239,7 +243,7 @@ idempotent by · emits · on · paginated by · consistency · note`
 
 ```
 roles Customer, Operator              // KİM (capability/RBAC); rolemap ile aktöre M:N; 401/403
-ownership own                          // HANGİ satır: own|any|all|public|<relation>; 403
+ownership own by Order.customerId      // HANGİ satır: own|any|all|public|<relation>; 403 — `by` = sütun bağı
 permit when actor.region = resource.owner.region    // ABAC öznitelik koşulu (op başına ≤1)
 scope "hr:read", "hr:write"           // OAuth-stili opak kapsam (AND); manifest passthrough
 ```
@@ -247,6 +251,20 @@ scope "hr:read", "hr:write"           // OAuth-stili opak kapsam (AND); manifest
   aşarsa **güvenlik-zayıflatma warning**.
 - **`ownership`** (`checkOwnershipDivergence`): genişlik kafesi `own<relation<any<all<public`.
   Business'tan **geniş** → weakening warning; `<relation>` business `relations[]`'te yoksa → warning.
+- **`ownership … by <Entity>.<alan>, …` — sütun bağı (ADR-0038):** satır-filtresinin kurulacağı
+  **SÜTUN**; genişlik kafesinden **AYRI eksen** (kafes "ne kadar geniş", bağ "hangi sütunda").
+  Çoklu bağ virgülle (`access` emsali): bir iş-entity'si teknikte >1 entity'ye bölünebilir
+  (`ownership <relation> by Campaign.orgId, CampaignMetric.orgId`). **Saf-tech** → divergence'a
+  GİRMEZ. `checkOwnershipBinding`:
+  - `by` yalnız `own`/`<relation>` ile anlamlı (`any`/`all`/`public` satır-filtresi kurmaz) → **error**;
+  - bağlanan entity op'un `access` kümesinde olmalı (dokunulmayan entity'de filtre anlamsız) → **error**;
+  - bağlanan alan **skaler/enum** olmalı (entity-tipli/composite/to-many değil) → **error**;
+  - aynı entity'ye ≥2 bağ (hangi sütun belirsiz) → **error**; op başına ≥2 `ownership` clause → **error**;
+  - `own`/`<relation>` var ama bağ **YOK** → **warning** ("tüketici filtre sütununu tahmin eder" —
+    özelliğin varlık sebebi; additive, error değil). `any`/`all`/`public` bağsız → sessiz.
+  **Cross-module bağ İFADE EDİLEMEZ** (`[Entity:ID]` niteliksiz + entity'ler modül-yerel → linker
+  çözmez; ADR-0021 K6 gramer-şekliyle korunur — nitelikli `Module.Entity` bilinçle yok). Manifest:
+  `ownership: string` DEĞİŞMEDİ + paralel `ownershipBinding: [{entity,field}] | null` (null = bildirilmemiş).
 - **`permit when`** (`checkAbac`): `resource` = op'un **tek write-hedefi** entity'si (0 veya ≥2 →
   error). `resource.*` path-scope denetlenir; `actor.*` **opak** (denetlenmez). Kök `actor.`/
   `resource.` olmalı.
@@ -286,6 +304,13 @@ operation Transfer(from: Iban, to: Iban, amount: Money): Unit {
   instance'ı seçen **input key'i** (`from` param'ı). Tek-belirsizsiz instance → çıplak ad yeter.
 - `for guard "<id>"` → business guard'ına link (dik eksen; provenance'tan bağımsız); ifade business'tan
   saparsa `checkExprDivergence` → **"differs" warning**. Link'siz tech check → info.
+- **Guard rol-sapması (ADR-0039):** link'lenen business guard'ın `role`'ü **`result-filter`** ise
+  (sorgu `only when` — dönen kümeyi satır-başına daraltan filtre, fail DEĞİL) → **`role-mismatch`
+  warning** ve o link için AST-kıyası atlanır ("kümeyi daralt" sessizce 400/422 "hata ver"e dönüşür).
+  Fix: result-filter'ı `validation`/`rule`'a EŞLEME — ve tech'e filtre clause'u da YAZMA: filtre
+  `operations.json`'da `ast`+`role` ile zaten yapısal durur, üreteç sorgu filtresini ORADAN uygular
+  (`.Where(ast)`); manifest = realizes-mapping, süperset değil (ADR-0013 K1). `role=precondition`
+  (komut `when`'i) ve role'süz guard'lar (where/if) mevcut davranışta kalır.
 - `throws` hedefi module-level `error`'a çözülür (dangling → linker error). ResultType ∈
   {NotAuthenticated, NotAuthorized, NotValid, NotProcessable}.
 
@@ -430,11 +455,28 @@ Bilinmeyen protokol/zorunlu-arg eksikse → usage diagnostic'i (örn. `@trigger.
 `invariant`, `validation`, `rule`, `permit when` ifadeleri:
 ```
 or / and / = != > < >= <= / + - * /            // boolean + karşılaştırma + aritmetik
+x in {A | "b" | 3}  /  x in tags                // ÜYELİK (ADR-0038): literal küme (SetLit) | to-many path
 sum of <path>                                   // aggregate (to-many gezme)
 fn(arg, …)                                       // çağrı
 a.b.c                                            // path (segment'ler)
 "str" | 123 | true | false                       // literal
 ```
+**`in` — üyelik operatörü (ADR-0038):** skaler-ile-küme'yi `=` ile kıyaslamak **tip-yalanı**
+(küme asla skaler değildir) → ayrı operatör. Sağ operand **YALNIZ küme-şekli**: literal küme
+`{a|b}` (`SetLit` — Refinement'ın `LiteralUnion`'ından bilinçle AYRI üretim) **veya to-many path**.
+`in` sağı bir **koleksiyon-bağlamıdır** (`sum of` emsali): "`sum of`'suz to-many → error" kuralı
+orada uygulanmaz; **AYRICA sağ leaf koleksiyon DEĞİLSE → error** (skaler leaf'e üyelik = saçmalık,
+kapalı). `actor.*` sağ-operand olarak **meşru DEĞİL** (opak — küme olduğu doğrulanamaz; ADR-0020 K8).
+**Literal kümede ENUM-ÜYELİK (`checkInSetEnumMembership`, ADR-0038 K9b):** `x in { … }` biçiminde
+LHS path'inin YAPRAĞI **enum-tipliyse**, kümenin HER üyesi o enum'un üyesi olmalı; değilse **error** —
+§2'deki `union-not-in-enum`'un ("manifest tip-uzayıyla çelişemez", ADR-0034 KARAR-1) `in`-kümesi
+karşılığıdır (`invariant status in { draft | TYPO }` artık sessizce geçmez — hiçbir zaman doğru
+olamayacak predicate manifest'e sızmaz). DÖRT bağlamda da uygulanır: invariant / validation / rule
+(scope-denetimsiz param-kökü dahil) / permit. Bilinmeyen/import tipte **permissive** (refinement
+enum-üyeliğiyle aynı daralma). Kapsam-DIŞI (bilinçle): to-many path RHS eleman-tip-uyumu ve
+`union-numeric`/`union-nonscalar` karşılıkları.
+ExprNode: `{node:'cmp', op:'in'}` + literal küme yeni `{node:'set', values}` (business üretmez →
+union superset; divergence'da tech-only refinement muamelesi). Refinement-`in` (§2) ile ayrı roller.
 **Path kökü = provenance (ADR-0031, bağlam-duyarlı):** `validation` path kökü yalnız `op.params`;
 `rule` kökü param/`access`-entity-veya-alias/`calls`-alias; `invariant`/`permit when` kökü entity
 alanları/`resource.*` (cross-module entity navigasyonu → error). Bildirilmemiş/yanlış-eksen kök →

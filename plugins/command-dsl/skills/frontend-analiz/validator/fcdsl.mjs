@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-bfeb6db74b94", grammarHash: "bfeb6db74b94", frontendSrcHash: "d8d36708fe0b", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", frontendSrcHash: "2c7b1bdb3499", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, statSync as statSync2, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, join, basename } from "node:path";
@@ -32443,6 +32443,19 @@ var SetClause = {
 function isSetClause(item) {
   return reflection2.isInstance(item, SetClause.$type);
 }
+var SetLit = {
+  $type: "SetLit",
+  values: "values"
+};
+function isSetLit(item) {
+  return reflection2.isInstance(item, SetLit.$type);
+}
+var SetVal = {
+  $type: "SetVal",
+  id: "id",
+  num: "num",
+  str: "str"
+};
 var ShapeField = {
   $type: "ShapeField",
   name: "name",
@@ -33462,6 +33475,31 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [ActionMember.$type]
     },
+    SetLit: {
+      name: SetLit.$type,
+      properties: {
+        values: {
+          name: SetLit.values,
+          defaultValue: []
+        }
+      },
+      superTypes: []
+    },
+    SetVal: {
+      name: SetVal.$type,
+      properties: {
+        id: {
+          name: SetVal.id
+        },
+        num: {
+          name: SetVal.num
+        },
+        str: {
+          name: SetVal.str
+        }
+      },
+      superTypes: []
+    },
     ShapeField: {
       name: ShapeField.$type,
       properties: {
@@ -33782,7 +33820,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@69"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -33801,7 +33839,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -33832,7 +33870,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@69"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -33860,7 +33898,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -33876,7 +33914,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34000,7 +34038,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34016,7 +34054,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34062,7 +34100,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@69"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34074,7 +34112,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -34120,7 +34158,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34136,7 +34174,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34214,7 +34252,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34321,7 +34359,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -34343,7 +34381,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -34355,7 +34393,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -34367,7 +34405,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -34467,7 +34505,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34561,7 +34599,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34585,7 +34623,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -34806,7 +34844,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34825,7 +34863,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -34893,7 +34931,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -34920,7 +34958,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -34939,7 +34977,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@68"
+                        "$ref": "#/rules@70"
                       },
                       "arguments": []
                     }
@@ -35001,7 +35039,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -35179,7 +35217,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -35264,7 +35302,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -35302,7 +35340,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -35410,7 +35448,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35429,7 +35467,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -35482,7 +35520,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35539,7 +35577,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35599,7 +35637,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@69"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             },
@@ -35619,7 +35657,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -35664,7 +35702,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
         "terminal": {
           "$type": "RuleCall",
           "rule": {
-            "$ref": "#/rules@68"
+            "$ref": "#/rules@70"
           },
           "arguments": []
         }
@@ -35730,7 +35768,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -36018,7 +36056,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@68"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -36102,7 +36140,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -36168,7 +36206,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -36296,7 +36334,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -36396,7 +36434,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -36485,7 +36523,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@68"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -36512,7 +36550,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -36565,7 +36603,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -36727,7 +36765,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@68"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -36847,7 +36885,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -36879,7 +36917,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -36911,7 +36949,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -36941,7 +36979,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -37018,7 +37056,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -37059,7 +37097,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -37221,7 +37259,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 },
@@ -37263,7 +37301,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -37290,7 +37328,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@68"
+                          "$ref": "#/rules@70"
                         },
                         "arguments": []
                       },
@@ -37333,7 +37371,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -37567,7 +37605,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@68"
+                        "$ref": "#/rules@70"
                       },
                       "arguments": []
                     }
@@ -37620,7 +37658,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -37695,7 +37733,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -37722,7 +37760,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@68"
+                          "$ref": "#/rules@70"
                         },
                         "arguments": []
                       },
@@ -37761,7 +37799,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -37851,7 +37889,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -37911,7 +37949,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -37938,7 +37976,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@68"
+                          "$ref": "#/rules@70"
                         },
                         "arguments": []
                       },
@@ -37976,7 +38014,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -38087,7 +38125,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -38115,7 +38153,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@69"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -38143,7 +38181,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -38171,7 +38209,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -38206,7 +38244,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@68"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -38230,7 +38268,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@68"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -38261,7 +38299,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -38289,7 +38327,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -38320,7 +38358,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@68"
+                  "$ref": "#/rules@70"
                 },
                 "arguments": []
               },
@@ -38347,7 +38385,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@68"
+                      "$ref": "#/rules@70"
                     },
                     "arguments": []
                   },
@@ -38527,7 +38565,130 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@61"
+                "$ref": "#/rules@63"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "op",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Alternatives",
+                      "elements": [
+                        {
+                          "$type": "Keyword",
+                          "value": "="
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": "!="
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": ">"
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": "<"
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": ">="
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": "<="
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "right",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@63"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ]
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "op",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Keyword",
+                      "value": "in"
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "right",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Alternatives",
+                      "elements": [
+                        {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@61"
+                          },
+                          "arguments": []
+                        },
+                        {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@68"
+                          },
+                          "arguments": []
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "SetLit",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "values",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@62"
               },
               "arguments": []
             }
@@ -38536,53 +38697,75 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "$type": "Group",
             "elements": [
               {
-                "$type": "Assignment",
-                "feature": "op",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Alternatives",
-                  "elements": [
-                    {
-                      "$type": "Keyword",
-                      "value": "="
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "!="
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": ">"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "<"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": ">="
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "<="
-                    }
-                  ]
-                }
+                "$type": "Keyword",
+                "value": "|"
               },
               {
                 "$type": "Assignment",
-                "feature": "right",
-                "operator": "=",
+                "feature": "values",
+                "operator": "+=",
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@61"
+                    "$ref": "#/rules@62"
                   },
                   "arguments": []
                 }
               }
             ],
-            "cardinality": "?"
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "SetVal",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "id",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@70"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "str",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@71"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "num",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@72"
+              },
+              "arguments": []
+            }
           }
         ]
       },
@@ -38599,7 +38782,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@62"
+              "$ref": "#/rules@64"
             },
             "arguments": []
           },
@@ -38640,7 +38823,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@62"
+                    "$ref": "#/rules@64"
                   },
                   "arguments": []
                 }
@@ -38663,7 +38846,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@63"
+              "$ref": "#/rules@65"
             },
             "arguments": []
           },
@@ -38704,7 +38887,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@65"
                   },
                   "arguments": []
                 }
@@ -38747,14 +38930,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@64"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@65"
+              "$ref": "#/rules@66"
             },
             "arguments": []
           },
@@ -38768,7 +38944,14 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@66"
+              "$ref": "#/rules@69"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@68"
             },
             "arguments": []
           }
@@ -38804,7 +38987,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@66"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
@@ -38828,7 +39011,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -38900,7 +39083,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -38919,7 +39102,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -38946,7 +39129,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -38958,7 +39141,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@69"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -40094,9 +40277,15 @@ function serializeExpr(e) {
   }
   if (isAggregate(e)) return { node: "agg", fn: e.fn, path: [...e.path.segments] };
   if (isCall(e)) return { node: "call", name: e.name, args: e.args.map(serializeExpr) };
+  if (isSetLit(e)) return {
+    node: "set",
+    // Tırnak SOYULMAZ — DefaultValueConverter STRING tırnaklarını parse anında zaten soyar
+    // (tech manifest.ts `setValNode` ile aynı gerekçe; ek replace İÇERİK tırnağını yerdi).
+    values: e.values.map((v) => v.id != null ? { kind: "string", value: v.id } : v.str != null ? { kind: "string", value: v.str } : { kind: "number", value: v.num })
+  };
   if (isPath(e)) return { path: [...e.segments] };
   if (isLit(e)) {
-    if (e.str != null) return { kind: "string", value: e.str.replace(/^['"]|['"]$/g, "") };
+    if (e.str != null) return { kind: "string", value: e.str };
     if (e.bool != null) return { kind: "boolean", value: e.bool === "true" };
     return { kind: "number", value: e.num };
   }
@@ -40189,7 +40378,7 @@ function screenJson(s, documents2) {
   const decorations = uiDecorations(s.decorations, "screen");
   return {
     name: s.name,
-    title: s.title != null ? strip(s.title) : null,
+    title: s.title ?? null,
     persona: s.persona ?? null,
     params: s.params.map((p) => ({ name: p.name })),
     regions: s.members.filter(isRegion).map((r) => regionJson(r, documents2)),
@@ -40264,7 +40453,7 @@ function formFieldJson(ff) {
     if (isRequiredRule(r)) validation.required = true;
     else if (isMaxRule(r)) validation.max = r.value;
     else if (isMinRule(r)) validation.min = r.value;
-    else if (isPatternRule(r)) validation.pattern = r.value.replace(/^['"]|['"]$/g, "");
+    else if (isPatternRule(r)) validation.pattern = r.value;
   }
   const decorations = uiDecorations(ff.decorations, "field");
   return { name: ff.field.$refText, validation, ...decorations.length ? { decorations } : {} };
@@ -40278,7 +40467,7 @@ function actionJson(a2, documents2) {
     command: uses ? { op: uses.name, mechanic: a2.mech ?? null } : null,
     clientOnly: !uses,
     confirm: confirmClause !== void 0,
-    confirmText: confirmClause?.text != null ? strip(confirmClause.text) : null,
+    confirmText: confirmClause?.text ?? null,
     visibleWhen: (() => {
       const vw = a2.members.find(isVisibleWhen);
       return vw ? { expr: serializeExpr(vw.expr), uxOnly: true } : null;
@@ -40301,7 +40490,7 @@ function extComponentJson(e) {
   };
 }
 function litValue(lit) {
-  if (lit.str != null) return lit.str.replace(/^['"]|['"]$/g, "");
+  if (lit.str != null) return lit.str;
   if (lit.bool != null) return lit.bool === "true";
   return lit.num;
 }
@@ -40309,7 +40498,7 @@ function targetEscapeJson(t) {
   return {
     args: t.args.map((a2) => ({
       name: a2.name ?? null,
-      value: a2.str != null ? a2.str.replace(/^['"]|['"]$/g, "") : a2.num != null ? a2.num : a2.word ?? ""
+      value: a2.str != null ? a2.str : a2.num != null ? a2.num : a2.word ?? ""
     }))
   };
 }
@@ -40322,8 +40511,8 @@ function argJson(a2) {
 function handlerJson(h) {
   const hd = h.handler;
   if (isNavHandler(hd)) return { result: h.result, handler: { verb: "navigate", screen: hd.target.$refText, args: hd.args.map(argJson) } };
-  if (isToastHandler(hd)) return { result: h.result, handler: { verb: "toast", text: strip(hd.text), retry: hd.retry === true } };
-  if (isBannerHandler(hd)) return { result: h.result, handler: { verb: "banner", text: strip(hd.text) } };
+  if (isToastHandler(hd)) return { result: h.result, handler: { verb: "toast", text: hd.text, retry: hd.retry === true } };
+  if (isBannerHandler(hd)) return { result: h.result, handler: { verb: "banner", text: hd.text } };
   if (isInlineErrorsHandler(hd)) return { result: h.result, handler: { verb: "inline-errors" } };
   if (isRetryHandler(hd)) return { result: h.result, handler: { verb: "retry" } };
   return { result: h.result, handler: { verb: "retry" } };
@@ -40351,8 +40540,8 @@ function whenJson(w) {
   return {
     state: w.state,
     delta: w.deltas.map((d) => {
-      if (isBannerDelta(d)) return { verb: "banner", text: strip(d.text) };
-      if (isBadgeDelta(d)) return { verb: "badge", text: strip(d.text) };
+      if (isBannerDelta(d)) return { verb: "banner", text: d.text };
+      if (isBadgeDelta(d)) return { verb: "badge", text: d.text };
       if (isHideDelta(d)) return { verb: "hide", target: d.target };
       if (isRevealDelta(d)) return { verb: "reveal", target: d.target };
       return { verb: "banner", text: "" };
@@ -40381,11 +40570,8 @@ function stateJson(s, scope) {
     derivedExpr: isDerivedState(s) ? serializeExpr(s.expr) : null
   };
 }
-function strip(s) {
-  return s.replace(/^['"]|['"]$/g, "");
-}
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts
 function parseArgs(argv) {
   const args2 = { inputs: [], json: false, quiet: false, version: false };
   for (let i = 0; i < argv.length; i++) {

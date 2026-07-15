@@ -33,7 +33,7 @@ module Proposals {
 
     operation GetProposal(id: Id) : Proposal realizes GetProposal {
         roles Musteri, Yonetici
-        ownership own
+        ownership own by Proposal.owner
         access { reads Proposal }
     }
 

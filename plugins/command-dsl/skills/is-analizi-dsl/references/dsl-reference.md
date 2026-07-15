@@ -26,7 +26,7 @@ DSL'ini** (`.cdsl`) üretir; tech DSL (`.tcdsl`) bu skill'in konusu değildir.
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `77493a5ddfa9` · commit `27ff90b` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `94397168f2a1` · commit `1ca2337`+ADR-0038 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar — bu turdaki değişim ADR-0038'in shared-Expr'idir (business grameri shared'ı import ETMEZ; business yazım-yüzeyi DEĞİŞMEDİ).
 
 Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate) — riski soyut değil **"Atlanırsa"** kolonundaki adıyla teşhir et. Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
 

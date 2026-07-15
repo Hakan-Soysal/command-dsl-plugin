@@ -10,12 +10,12 @@ module OrderManagement {
   @rest(POST, "/orders/:id/cancel")
   operation CancelOrder(id: OrderId): Unit realizes CancelPendingOrder {
     roles Customer
-    ownership own
+    ownership own by Order.customerId
     access { updates Order  creates Refund }
     note "İptal sonrası iade webhook'u beklenmeli — senkron yanıt varsayma."
   }
 
-  entity Order  realizes Order  { id: OrderId  status: OrderStatus  total: Money }
+  entity Order  realizes Order  { id: OrderId  customerId: CustomerId  status: OrderStatus  total: Money }
   entity Refund realizes Refund { id: RefundId  amount: Money }
 }
 

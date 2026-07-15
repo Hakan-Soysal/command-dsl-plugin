@@ -206,6 +206,16 @@ veri yalnız `calls` ile akar.
   **NotValid (400) hata-gövdesini** makine-okunur biçimde şekillendiren **`op.violations[]`**'a
   (`ruleId=<param>.<kind>`) derive edilir → üreteç/tüketici red'i kural-kimliğiyle kurar (elle-doğrulamaya
   düşmez). Değer-uzayını **sor, uydurma**; taksonomi eşlemesi (ihlal→NotValid) Faz 5'te teyit edilir.
+- **Tekil obje dönen işlemde "onu NE belirliyor?" SOR.** Dönüş tek bir kayıtsa (`: Order` —
+  `list of` DEĞİL) imzada o kaydı **belirleyen** bir girdi olmalı: ya **kaydın kendi ID'si**
+  (`GetOrder(id: OrderId): Order`), ya da **onu var eden** kaydın ID'si (`GetCart(userId: UserId):
+  Cart` — sepet kullanıcı yüzünden vardır). Belirleyici girdi yoksa seçimi tüketici **uydurur**
+  (tablonun tamamında "ilk kaydı al") → dev'de tek satırla çalışır, prod'da YANLIŞ kayıt döner.
+  **İstisnalar:** (a) **net filtre belirteci** — son/ilk/en büyük/en küçük
+  (`GetLatestAnnouncement(): Announcement`); (b) **ephemeral/anlık türev** — kayıt değil, o an
+  hesaplanan değer (şu anki hava durumu, şu anki kullanım adedi).
+  ⚠ **İstisna bedava değildir:** (a)'da **seçim ölçütünü** (hangi alana göre "son"?) `note` ile
+  yaz — yoksa tahmini yalnızca bir adım öteye taşımış olursun.
 - "Hangi kayıtları okuyor / yaratıyor / güncelliyor / siliyor?" → `access { reads … creates …
   updates … deletes … }`. Komut/sorgu ayrımı access'ten türer (write-sınıfı varsa komut).
 - "Bu işlemin çağrılması **denetim/uyum kaydı** gerektiriyor mu (finansal işlem, kişisel-veri
@@ -217,7 +227,12 @@ veri yalnız `calls` ile akar.
 **⚠ Anti-pattern — CQRS kayması & access yükseltme:** iş'in "sorgu" saydığı işleme write
 access verme (warning); iş'in salt-okunur saydığı entity'yi tech'te mutasyon etme
 (güvenlik-zayıflatma warning) — **kasıtlıysa onaylat**.
-**Kapatır:** `deriveKind`, `checkCqrsKind`, `checkAccessDivergence`.
+**⚠ Anti-pattern — belirsiz tekil dönüş:** tek kayıt dönen imzada belirleyici girdi yok
+(`GetActiveOrder(): Order`) → tüketici kayıt seçimini uydurur. **Hiçbir validator bunu
+yakalamaz** — imza 0-error geçer → sorumluluk SENDE. İstisna değilse ID iste; istisnaysa
+ölçütü `note`'a yaz.
+**Kapatır:** `deriveKind`, `checkCqrsKind`, `checkAccessDivergence`. **Belirsiz tekil dönüş
+için validator YOK** → elicitation + Pre-Emit Gate.
 
 ---
 
@@ -228,6 +243,12 @@ access verme (warning); iş'in salt-okunur saydığı entity'yi tech'te mutasyon
 - "Bu işlemi **kim** çağırabilir?" → `roles` (capability; top-level `rolemap` ile iş
   aktörüne M:N bağlanır).
 - "**Kimin kaydı** üzerinde?" → `ownership own|any|all|public|<relation>` (satır-düzeyi).
+- Cevap `own`/`<relation>` ise **MUTLAKA devam sor**: "Bu sahiplik filtresi **hangi sütunda**
+  kurulur — kaydın sahibini hangi alan tutuyor (`customerId`? `orgId`?)?" → `ownership … by
+  <Entity>.<alan>, …` (sütun bağı; iş-entity'si >1 tech-entity'ye bölündüyse her birine ayrı bağ,
+  virgülle). Sormazsan DSL eksik çıkar: validator **warning** verir ve üreteç filtre sütununu
+  **TAHMİN** eder (yanlış sütun = satır sızıntısı). Bağlanan entity op'un `access`'inde ve alan
+  skaler/enum olmalı (ADR-0038).
 - "Bir **öznitelik koşulu** var mı (ör. sadece kendi bölgesindeki kayıt)?" → `permit when
   resource.* … actor.*` (ABAC).
 - OAuth kapsamı gerekiyorsa → `scope "…"`. **Kavram-koçluğuyla çıkar** (kullanıcı "scope"u bilmeyebilir):
@@ -238,7 +259,7 @@ access verme (warning); iş'in salt-okunur saydığı entity'yi tech'te mutasyon
 
 **⚠ Anti-pattern — Yetki gevşetme:** ownership'i iş'ten geniş yapma (`own`→`any`), roller
 yetkili aktör kümesini aşma. Bunlar **güvenlik-zayıflatma warning**'i — her birini açıkça onaylat.
-**Kapatır:** `checkRoles`, `checkOwnershipDivergence`, `checkOwnershipRelation`, `checkAbac`.
+**Kapatır:** `checkRoles`, `checkOwnershipDivergence`, `checkOwnershipRelation`, `checkOwnershipBinding`, `checkAbac`.
 
 ---
 
@@ -358,6 +379,9 @@ YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Emit'ten önce üç 
    **yetki eksenleri** (`roles` genişliği · `ownership own|any|all|public` · `permit`). Seçtiğin authz
    değerini sessiz emit etme: "Bu op'u yalnız X rolü, kendi kaydında yapabiliyor — doğru mu?" diye
    açıkça söyle ve onaylat (Faz 4 "güvenlik-zayıflatan eksende sor" ilkesinin emit-anı teşhiri).
+   Aynı sınıf: **tekil dönüşlü her op'ta belirleyici girdi var mı?** (`: <Entity>`, `list of` değil)
+   — yoksa istisna mı (son/ilk/en büyük · ephemeral) ve **ölçütü `note`'ta mı**? İmza 0-error
+   geçer ama kayıt seçimi tüketiciye kalır → sessiz-yanlış.
 3. **Sınır-devri (köprü süpürmesi):** bir fact sınırı geçip **köprüsüz** mü kaldı?
    - **Cross-module (kardeş module):** bir module başka module'ün verisine/olayına muhtaç mı? Köprü
      açık olmalı — read → `calls <Module>.<Query>` (yalnız QUERY); write → `emits`+`on` (event;

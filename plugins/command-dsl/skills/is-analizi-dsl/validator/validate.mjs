@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "v3.x-77493a5ddfa9", grammarHash: "77493a5ddfa9", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "v3.x-94397168f2a1", grammarHash: "94397168f2a1", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, statSync as statSync2 } from "node:fs";
 import { join, isAbsolute, dirname, resolve } from "node:path";
@@ -38203,7 +38203,7 @@ function equalityComparisons(cond) {
       walk(c.right);
     } else if (isComparison(c)) {
       if (c.op === "=" && isStringValue(c.right)) {
-        out.push({ path: c.left, value: c.right.value.replace(/^'|'$/g, "") });
+        out.push({ path: c.left, value: c.right.value });
       }
     }
   };
@@ -38308,7 +38308,7 @@ function deriveStateChain(p, input) {
         const calcs = knownCalcs(op).map((c) => ({ c, ef: entityField(c.target, ctx, entities) })).filter((x) => x.ef !== void 0 && axis.has(x.ef.entity) && isStringExpr(x.c.expr));
         const touchedKnown = /* @__PURE__ */ new Set();
         for (const { c, ef } of calcs) {
-          const value = c.expr.value.replace(/^'|'$/g, "");
+          const value = c.expr.value;
           const prod = prodOf(overlay, ef.entity);
           const set = prod.known.get(ef.field) ?? /* @__PURE__ */ new Set();
           set.add(value);
@@ -39752,7 +39752,7 @@ function createCommandDslServices(context) {
   return { shared: shared2, CommandDsl };
 }
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
 var argv = process.argv.slice(2);
 var jsonMode = argv.includes("--json");
 var wantVersion = argv.includes("--version");

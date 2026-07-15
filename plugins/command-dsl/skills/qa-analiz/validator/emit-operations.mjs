@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-34590a9ec91a", grammarHash: "34590a9ec91a", srcHash: "af82f0f0775d", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-34590a9ec91a", grammarHash: "34590a9ec91a", srcHash: "917d62a64d90", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/qa-analiz/validator/emit-operations.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/qa-analiz/validator/emit-operations.src.mts
 init_define_BUILD_INFO();
 import { writeFileSync, statSync as statSync2 } from "node:fs";
 import { resolve, isAbsolute } from "node:path";
@@ -38256,7 +38256,7 @@ function equalityComparisons(cond) {
       walk(c.right);
     } else if (isComparison(c)) {
       if (c.op === "=" && isStringValue(c.right)) {
-        out.push({ path: c.left, value: c.right.value.replace(/^'|'$/g, "") });
+        out.push({ path: c.left, value: c.right.value });
       }
     }
   };
@@ -38361,7 +38361,7 @@ function deriveStateChain(p, input) {
         const calcs = knownCalcs(op).map((c) => ({ c, ef: entityField(c.target, ctx, entities) })).filter((x) => x.ef !== void 0 && axis.has(x.ef.entity) && isStringExpr(x.c.expr));
         const touchedKnown = /* @__PURE__ */ new Set();
         for (const { c, ef } of calcs) {
-          const value = c.expr.value.replace(/^'|'$/g, "");
+          const value = c.expr.value;
           const prod = prodOf(overlay, ef.entity);
           const set = prod.known.get(ef.field) ?? /* @__PURE__ */ new Set();
           set.add(value);
@@ -39898,7 +39898,7 @@ function serializeExpr(e) {
   if (isAggregateExpr(e)) return { node: "agg", fn: "sum", path: e.path.segments };
   if (isFieldExpr(e)) return { path: e.path.segments };
   if (isNumberExpr(e)) return { kind: "number", value: e.value };
-  if (isStringExpr(e)) return { kind: "string", value: e.value.replace(/^'|'$/g, "") };
+  if (isStringExpr(e)) return { kind: "string", value: e.value };
   return { path: [] };
 }
 function serializeCondition(c) {
@@ -39906,7 +39906,7 @@ function serializeCondition(c) {
   if (isComparison(c)) {
     const right = c.right;
     let r;
-    if (isStringValue(right)) r = { kind: "string", value: right.value.replace(/^'|'$/g, "") };
+    if (isStringValue(right)) r = { kind: "string", value: right.value };
     else if (isNumberValue(right)) r = { kind: "number", value: right.value };
     else if (isDurationValue(right)) r = { kind: "duration", ...normalizeDuration(right.value) };
     else if (isFieldValue(right)) r = { path: right.path.segments };
@@ -40394,7 +40394,7 @@ function collectCommands(model2) {
   return [...map2.values()];
 }
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/qa-analiz/validator/emit-operations.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/qa-analiz/validator/emit-operations.src.mts
 var argv = process.argv.slice(2);
 if (argv.includes("--version")) {
   console.log(JSON.stringify(define_BUILD_INFO_default, null, 2));

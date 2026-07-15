@@ -3,13 +3,17 @@
 > Kaynak: `CommandDSL/qa-dsl.langium` + tasarım spec'i v0.4 (karar #1-#25, S1-S20,
 > İQ1-İQ12). Uzantı `.qa`; yorum `//`. İfade dili = shared Expr (tech ile AYNI AST;
 > karşılaştırma **tek `=`**, `!=` var, `==` YOK; `not` Expr'e ait DEĞİLDİR — yalnız
-> assert-yüzeyi keyword'ü: `not emitted` / `not called`). Bu dosya yazım-anı
-> başvurusudur; sorgulama soruları `interrogation-playbook.md`'de, tech→dal eşlemesi
-> `tech-to-qa-translation.md`'de.
+> assert-yüzeyi keyword'ü: `not emitted` / `not called`). **ADR-0038:** shared Expr'e
+> `in` üyelik operatörü geldi (`x in {a|b}` / to-many path; sağda skaler leaf → error) —
+> ve (K12 kapaması) QA'nın **kendi** assert/cond operatörleri de `in`'i BİRİNCİ SINIF taşır:
+> `CmpAssert` ve `Cond` shared `Cmp`'yi aynalar — `op='in'`, sağ operand YALNIZ küme-şekli
+> (`SetLit | Path`; `in 5` → parser error). `result.status in { draft | active }` artık
+> yazılabilir. Bu dosya yazım-anı başvurusudur; sorgulama soruları
+> `interrogation-playbook.md`'de, tech→dal eşlemesi `tech-to-qa-translation.md`'de.
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `b059dc23fdb4` · src `23b92f4249e8` · commit `1ca2337` (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `78b7a113b7f8` · src `0eaf7c347ec1` · commit `1ca2337`+ADR-0038 K12/K9b-eşi (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
@@ -240,7 +244,15 @@ then {
 | `page count <NUMBER>` / `page more` / `page end` | dönen sayfa: öğe sayısı / devamı var / son sayfa | yalnız `paginated` query'de (S4) |
 
 - Assert LHS = path, RHS = shared Expr (İQ1 — `result count` gibi keyword-önekli
-  assert'lerle çakışmasın diye).
+  assert'lerle çakışmasın diye). `<cmp>` kümesi: `= != > < >= <=` **ve `in`** (ADR-0038
+  K12 — `CmpAssert`/`Cond` shared `Cmp`'yi aynalar); `in`'in sağ operandı YALNIZ
+  küme-şekli (`{a|b}` SetLit | path — gramer zorlar, `in 5` parse hatası):
+  `result.status in { "Approved" | "Draft" }`.
+- **`in`-kümesinde enum-üyelik (`=` ile PARİTE — ADR-0038 K9b'nin qa-eşi):** yalnız
+  `Cond`'un **noktalı-path yaprağında** denetlenir (`{ request.status in { … } }` gibi) —
+  yaprak enum-tipliyse SetLit'in her üyesi o enum'un üyesi olmalı, değilse error.
+  `CmpAssert`'te ve noktasız cond'da denetim YOK — **bilinçli parite sınırı** (`=` de
+  yalnız o yüzeyde denetler; ters asimetri yaratılmadı).
 - Senaryo step-bloğu aynı yüzeyi kullanır; step-assert'lerde önceki **bağlanmış**
   step'lerin `sN.result.<path>`'i çözülür (QA-12).
 
@@ -349,8 +361,9 @@ Bir Operation'ın zorunlu dalları tech kaynağından **türetilir**:
 
 ## 12. Keyword tuzakları (yazım-anı)
 
-- **Karşılaştırma tek `=`** (`==` parse HATASI); `!=`, `>`, `<`, `>=`, `<=` var;
-  Expr'de `not` YOK (`not` yalnız `not emitted` / `not called` assert biçimidir).
+- **Karşılaştırma tek `=`** (`==` parse HATASI); `!=`, `>`, `<`, `>=`, `<=` ve **`in`**
+  (üyelik — ADR-0038 K12; sağ YALNIZ küme-şekli `{a|b}` | to-many path, `in 5` parse
+  HATASI) var; Expr'de `not` YOK (`not` yalnız `not emitted` / `not called` assert biçimidir).
 - **ID-biçimli qa keyword'leri path segmenti OLABİLİR** (`s1.result.id`, `result`,
   `count`, `state`, `page`, `time`… — TokenBuilder çözer, İ1). TEK İSTİSNA — alan/param
   adı OLAMAZ: **`and or sum of true false`** (EXPR_VOCABULARY — parse hatası verir).

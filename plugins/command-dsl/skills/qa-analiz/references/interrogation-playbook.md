@@ -54,6 +54,13 @@ mekanik test de yazdırma — tek-rollü op'un NotAuthorized'ı P1 gerekçesiyle
 edilebilir (spec §7 deseni).
 **⚠ Guard — P-sınırı:** "girişsiz test", "sayfa boyutu testi", "temizlik testi"
 istekleri → §P tablosu; yazma, açıkla.
+**⚠ Guard — Test-edilemez tech kararı (DUR ve BİLDİR):** envanteri türetirken / test
+kurarken bir tech kararı deterministik testi imkânsız kılıyorsa (translation.md §H2
+tablosu — ör. tek kayıt dönen op'ta belirleyici girdi de istisna `note`'u da yok)
+etrafından dolaşma, waive'e sarma, test uydurma. Kalıp: "Teknik analizde <Op> tek kayıt
+döndürüyor ama imzada o kaydı belirleyen girdi yok — hangi kaydı doğrulayacağımız
+tanımsız, bu haliyle test sahte-yeşil olur. Önce teknik analizi düzeltelim." Kapsam DAR:
+yalnız testi bloke eden çelişki durdurur; üslup/tercih nitpick'i durdurmaz.
 
 ## Faz 3 — Veri & varsayılanlar
 
