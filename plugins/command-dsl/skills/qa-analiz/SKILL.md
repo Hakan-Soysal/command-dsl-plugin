@@ -223,6 +223,18 @@ ETME — yalnız testlerin gerçekten kullanacağı kimlikler; ama yetki-testler
   **AÇIK sor** (karar #21): *"Bu işleme iki ayrı kapı var — yanlış roldeki kullanıcı
   ve başkasının kaydına erişen kullanıcı. İkisini de mi test edelim?"* Niteleyicisiz
   `covers NotAuthorized` çok-mekanizmalı op'ta error'dur.
+- **⚠️ `list of X` DÖNEN op'ta `ownership`/`permit` bir RED DEĞİL — FİLTREdir** (ADR-0040;
+  türetim `tech-to-qa-translation.md` §A2). Dal `Filtered <via>`; "başkasının kaydına erişince
+  403 alır" o op'ta **ASLA gerçekleşmez** (yalan test). Dal tablosunu bu op'larda **doğru dille
+  SUN:** *"Bu bir liste — yetkisiz kullanıcı hata almaz, o kayıtları sadece GÖRMEZ."*
+  **İKİ örnek kayıt iste** (arketip ikisini de error'la zorunlu kılar):
+  *"(a) Bu kullanıcının GÖRMESİ gereken bir kayıt, (b) GÖRMEMESİ gereken bir kayıt — ikisini de
+  tarif eder misin?"* → (a) `result contains {…}` (aşırı-filtreleme), (b) `result absent {…}`
+  (**sızıntı**). `ownership <axis>` ise axis'in **kaynak satırını da** seed'let ("delegasyon var"
+  + "yok").
+  **"Kaç kayıt döner?" SORMA** — sayı **kanıt değildir**: filtre bozukken de sonuç `Success`tir ve
+  yanlış satırlar dönse bile sayı tutabilir (`result count` → validator error).
+  **Tekil** dönen op'ta (`GetX(id): X`) durum DEĞİŞMEZ → `NotAuthorized` (orada gerçekten reddedilir).
 - Geçilecek dallar için gerekçe iste ve yapılandır:
   `waive <Op> covers <dal> [until "YYYY-MM-DD"] because "…"`.
 - Kullanıcı "girişsiz deneyince ne olur testi" / "sayfa boyutu testi" isterse sınırı

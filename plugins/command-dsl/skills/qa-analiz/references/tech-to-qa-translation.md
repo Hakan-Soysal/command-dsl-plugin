@@ -16,8 +16,10 @@ Op-başına dal envanterini bu tabloyla KENDİN çıkar, kullanıcıya düz dill
 | `rule { … for guard "y" }` | guard-dalı (NotProcessable sınıfı) | `covers guard "y"` | "iş kuralı: <kuralın anlamı>" |
 | `throws E` | named-error dalı | `covers error E` | "<E'nin anlamı> hatası" |
 | `roles …` | NotAuthorized·roles | `covers NotAuthorized roles` | "yanlış roldeki kullanıcı" |
-| `ownership …` (`public`, `any`, `all` hariç — any/all dal türetmez, waive de yazma) | NotAuthorized·ownership | `covers NotAuthorized ownership` | "başkasının kaydına erişim" |
-| `permit when …` | NotAuthorized·permit | `covers NotAuthorized permit` | "koşullu izin dışı çağrı" |
+| `ownership …` — op **KOLEKSİYON dönmüyorsa** (`public`/`any`/`all` hariç — dal türetmez, waive de yazma) | NotAuthorized·ownership | `covers NotAuthorized ownership` | "başkasının kaydına erişim" |
+| `ownership …` — op **`list of X` DÖNÜYORSA** (ADR-0040) | **Filtered·ownership** | `covers Filtered ownership` | "başkasının kayıtları listede GÖRÜNMEMELİ" |
+| `permit when …` — op **KOLEKSİYON dönmüyorsa** | NotAuthorized·permit | `covers NotAuthorized permit` | "koşullu izin dışı çağrı" |
+| `permit when …` — op **`list of X` DÖNÜYORSA** (ADR-0040) | **Filtered·permit** | `covers Filtered permit` | "koşulu sağlamayan kayıtlar listede GÖRÜNMEMELİ" |
 | `scope …` | NotAuthorized·scope | `covers NotAuthorized scope` | "kapsam dışı çağrı" |
 | id'siz validation check(ler)i | TEK anonim NotValid dalı (S5) | `covers NotValid` | "adsız girdi kuralları (topluca)" |
 | id'siz rule check(ler)i | TEK anonim NotProcessable dalı (S5) | `covers NotProcessable` | "adsız iş kuralları (topluca)" |
@@ -52,6 +54,54 @@ türü → durum kaynağı:
 - **Sorgulama sinyali:** `partial`/`uncovered` bir garanti = çapraz-kesen bir güvencenin
   test-kapsaması eksik. CLI `garantiler:` özeti + `⚠` ile kapsanmayan yükümlülükleri listeler;
   kapanışta (Faz 6) "bu garantinin şu guard'ı test edilmemiş — test mi, waive mı?" sorusuna çevir.
+
+## A2. `Filtered` arketipi — satır-kapsaması REDDETMEZ, KISAR (ADR-0040 · qa v2.0.0)
+
+**Ayıraç (tech'ten gelir, qa türetmez):** op **koleksiyon** mu dönüyor (`list of X`)?
+- **EVET** → `ownership`/`permit` orada **filtreler**: sonuç **`Success` + ALT-KÜME**, red YOK →
+  dal **`Filtered <via>`**.
+- **HAYIR** (tekil dönüş / komut) → satır yüklenir, ön-koşul denetlenir, sağlamazsa **reddedilir** →
+  dal **`NotAuthorized <via>`** (değişmedi).
+- `roles`/`scope` **hiç etkilenmez** — çağrının TAMAMINI reddederler, satır kısmazlar.
+
+> **Neden ayrı arketip:** `list of` dönen bir op'ta "başkasının kaydına erişim → 403" dalı **ASLA
+> gerçekleşmez**. O dalı yazdırmak yazarı ya **yalan teste** ya **zorunlu-boş waiver'a** iter.
+> Validator bunu error'la durdurur ve doğrusunu söyler.
+
+**⚠️ ARKETİPİN KALBİ — üyelik İKİLİSİ ZORUNLU (error):** filtre **bozukken de sonuç `Success`tir**.
+Bu yüzden "çağrı geçti" ya da "N satır geldi" **hiçbir şey kanıtlamaz**. Kanıt yalnız **üyelik**le olur:
+
+| Assert | Neyi yakalar | Yoksa |
+|---|---|---|
+| `result contains { … }` | kapsam-**İÇİ** satır DÖNDÜ mü | **aşırı-filtreleme** (hak edilen satırlar düşüyor) görünmez |
+| `result absent { … }` | kapsam-**DIŞI** satır DÖNMEDİ mi | **SIZINTI** görünmez ← güvenlik ekseni |
+
+**`result count N` KANIT DEĞİLDİR** — yanlış satırlar dönse de sayı tutar → **false-negative üreteci**.
+Validator `count`-only testi error'lar ve bu tuzağı açıkça söyler.
+
+**Test verisi:** en az İKİ seed gerekir — biri kapsam içi, biri kapsam dışı (`ownership <axis>` ise
+axis'in kaynak satırı da seed'lenmeli: "delegasyon var" + "delegasyon yok" durumları).
+
+```
+test "ajans yalnız delege edilmiş kampanyaları görür"
+     of ListAgencyCampaigns covers Filtered ownership {
+  as ajans
+  given {
+    seed d1 = AgencyDelegation { agencyOrgId: "A", clientOrgId: "C1", status: "active" }
+    seed c1 = Campaign { organizationId: "C1", id: "k1" }   // kapsam İÇİ  → görünmeli
+    seed c2 = Campaign { organizationId: "C9", id: "k2" }   // kapsam DIŞI → görünmemeli
+  }
+  when call with { }
+  then {
+    result contains { organizationId = "C1" }
+    result absent   { organizationId = "C9" }
+  }
+}
+```
+
+**Sorgulama kalıbı:** *"Bu liste yetkiye göre daralıyor — (a) kullanıcının GÖRMESİ GEREKEN bir kayıt
+listede çıkmalı, (b) GÖRMEMESİ GEREKEN bir kayıt çıkmamalı. İkisi için de birer örnek kayıt tarif
+eder misin?"* → (a) `result contains`, (b) `result absent`.
 
 ## B. NotAuthorized mekanizma-seçim rehberi (karar #21 + İQ8)
 

@@ -13,7 +13,19 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `78b7a113b7f8` · src `0eaf7c347ec1` · commit `1ca2337`+ADR-0038 K12/K9b-eşi (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `3883ec9e9a7e` · src `8a6e15453548` · commit `e680de0`+**ADR-0040 (qa v2.0.0: `Filtered` dal arketipi)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+>
+> **⚠️ ADR-0040 · qa v2.0.0 — KIRICI (2026-07-16).** İki ayrı şey oldu, karıştırma:
+> 1. **Yankı (yüzey DEĞİL):** tech'e `principal`/`axis` girdi → qa gramerini import ettiği için hash
+>    kaydı. Tech'in 7 yeni keyword'ü QA'da **hâlâ identifier olarak kullanılabilir**
+>    (`QaDslTokenBuilder` keywords-as-identifiers'ı varsayılan yapar; ampirik ölçüldü) → mevcut `.qa`
+>    modelleri **bu yüzden** kırılmaz.
+> 2. **GERÇEK yüzey değişikliği:** yeni dal arketipi **`covers Filtered [ownership|permit]`**
+>    (bkz. `tech-to-qa-translation.md` §A2). **KOLEKSİYON dönen** (`list of X`) bir sorguda
+>    `ownership`/`permit` **REDDETMEZ, satır KISAR** → `covers NotAuthorized ownership|permit` orada
+>    artık **error**; `Filtered` + **üyelik ikilisi** (`result contains` + `result absent`) **zorunlu**.
+>    Tekil-dönen op'lar ve `roles`/`scope` **etkilenmez**. Göç ölçüldü: **11 op**.
+>    `qa.json` `branch` union'ı genişledi → kapalı `switch`'li tüketici düşer = **KIRICI**.
 
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
@@ -22,6 +34,7 @@ QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kaps
 | Derinlik | Ne zaman gerekli (sinyal) | Faz | Risk | Atlanırsa (adlandırılmış mod) |
 |---|---|---|---|---|
 | Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8) | 4 | ★★ | **yalancı-kapsam (tetiklemeyen-negatif)** — dal "covered" sayılır ama ihlal hiç tetiklenmez; yetkisiz/hatalı yol sessizce geçebilir |
+| **`Filtered` dalında üyelik İKİLİSİ** (`result contains` + `result absent`) | op `list of X` dönüyor VE `ownership`/`permit` taşıyor → dal `Filtered <via>` (ADR-0040). Filtre **bozukken de `Success` döner** → "çağrı geçti"/"N satır geldi" hiçbir şey kanıtlamaz | 4 | ★★ | **kanıtsız-filtre** — `contains` yoksa **aşırı-filtreleme** (hak edilen satır düşüyor), `absent` yoksa **SIZINTI** (kapsam-dışı satır dönüyor) görünmez. `result count` = **false-negative üreteci** (yanlış satırlar dönse de sayı tutar). *(Validator bu ikiliyi error'la zorlar — tablo tetikleyici olarak durur.)* |
 | `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ | **doğrulanmamış-etki** — dönüş doğru ama kalıcı etki (kayıt/event/dış-çağrı) hiç assert'lenmez; sığ-yeşil test |
 | `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ | **koşulmayan-zaman-dalı** — zaman-koşullu dal "covered" ama zaman ilerletilmediğinden hiç koşmaz |
 | `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ | **kurulumsuz-dal** — ön-durum (mevcut kayıt/başkasının kaydı/limit-aşımı) kurulmadığından dal gerçekten tetiklenmez |

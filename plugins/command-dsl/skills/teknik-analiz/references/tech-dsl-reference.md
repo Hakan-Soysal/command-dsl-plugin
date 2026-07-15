@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `bfe458c054af` · src `90734b71751a` · commit `1ca2337`+ADR-0038 K9b+ADR-0039 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `90857eb74904` · src `8419e473931c` · commit `e680de0`+**ADR-0040 (tech v2.0.0: `principal`+`axis`+sorgu-ABAC'ı)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -28,6 +28,8 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `refinement` (op param) + `violations[]` | "bu parametrenin izinli aralığı/kümesi var; sınır-dışı değer NotValid dönmeli — kural kimliğiyle" | 3 | ★ | **sentezlenmeyen-ihlal-payload** — param'a refinement yazılmazsa `violations[]` (ruleId/field/domain, manifest `op.violations`) hiç üretilmez; üreteç/tüketici sınır-dışı red'i kural-bazlı (NotValid ruleId) kuramaz, gevşek/elle doğrulamaya düşer |
 | `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ | **izlenemez-değişiklik** — kim-ne-zaman izi tutulmaz; denetim/uyum kaydı oluşmaz |
 | `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ | **ölçülemez-işlem** — sayaç/metrik yayılmaz; işlem gözlemlenemez |
+| `principal` (top) | "çağıranın kendi profili/organizasyonu/bölgesi/departmanı var; 'kullanıcının X'i' diye bir şeye göre karar veriliyor; token'da/oturumda kim olduğu tutuluyor" | 4 | ★★ | **uydurulmuş-çağıran-attribute'u** — `actor.*` opak kalır; yazar `actor.delegatedOrgIds` gibi **runtime karşılığı OLMAYAN** bir ad yazar ve doğrulayıcı SESSİZ kalır (ÖLÇÜLDÜ: sahada çağıran-bağımsız denetim = herkes herkesin kaydına erişti) |
+| `axis` (top) + `ownership <ad>` (op) | "kendi kaydı DEĞİL ama yetkilendirildiği/delege edildiği kayıtlar; bayi kendi müşterilerini görür; ajans temsil ettiği markaları yönetir; 'bana atanmış olanlar'" | 4 | ★★ | **denotasyonsuz-eksen** — `ownership <ad>` yalnız bir İSİM olur; hangi satırların sete girdiği sözleşmede **hiç yazmaz** → tüketici seti/filtreyi TAHMİN eder (yanlış tahmin = delege-olmayan kayıtlar sızar). `axis` yoksa alternatif: sorgu `permit`'i (tek read-çıpalı op'larda) |
 | `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ | **öznitelik-yetki-aşımı** — bölge/departman koşulu düşer; aktör kapsam-dışı kayda erişir |
 | `ownership … by <Entity>.<alan>` (op) | "kaydın sahibini hangi alan tutuyor; customerId/orgId/ownerId sütunuyla filtrele; kayıt sahibi şu kolondan belli" | 4 | ★ (warning-routed) | **tahmin-edilen-filtre-sütunu** — `own`/`<relation>` yazılır ama satır-filtresinin SÜTUNU bildirilmez; üreteç sahip sütununu TAHMİN eder (yanlış sütun = yanlış veri kapsamı / satır sızıntısı) |
 | `scope` (op) | "OAuth kapsamı / token izni gerekli" | 4 | ○ | **kapsamsız-erişim** — token izni zorlanmaz; yetersiz-kapsamlı token işlemi çağırabilir |
@@ -247,6 +249,68 @@ ownership own by Order.customerId      // HANGİ satır: own|any|all|public|<rel
 permit when actor.region = resource.owner.region    // ABAC öznitelik koşulu (op başına ≤1)
 scope "hr:read", "hr:write"           // OAuth-stili opak kapsam (AND); manifest passthrough
 ```
+
+### 5.0 `principal` — ÖZNE ŞEMASI (top-decl · ADR-0040 · tech v2.0.0)
+
+`actor.*`'ın çözüldüğü yer. **Bildirilmezse `actor.*` OPAK kalır** → uydurma attribute yakalanmaz.
+Ölçülmüş kusur sınıfı tam buydu: `permit when resource.organizationId = actor.delegatedOrgIds` —
+`actor.delegatedOrgIds` runtime'da **YOK** (uydurma) ve skaler=küme kıyası **tip-yalanı**.
+
+```
+principal AgencyStaff {
+  identity userId                            // TEK opak kimlik-dikişi, SKALER (gramer zorlar)
+  binds Agency.AgencyUserProfile by userId   // yapısal bağ (NİTELİKLİ Module.Entity) — OPSİYONEL
+  roles agency_user                          // dispatch anahtarı (tech roles; ZORUNLU, ≥1)
+}
+```
+- **`identity`** = güven kökü: modelin üretemeyeceği tek şey (authn ne koyduysa). **Adı denetlenir,
+  DEĞERİ opak.** Zorunlu skaler → `in`'in sağ operandı **olamaz** (yapısal çit).
+- **`binds`** → bağlı entity'nin alanları `actor.<alan>` olarak **yapısal** olur (typo → error).
+  Yoksa yalnız `actor.<identity>` yazılabilir.
+- **`roles`** → op'un `roles`'uyla **kesişimle** eşleşir. Business `actors[]` DEĞİL → **standalone çalışır**.
+- `actor.<alan>` çözümü: `identity` → dikiş (opak) · bağlı skaler/enum alan → yapısal · bağlı
+  `list of <skaler>` → **yalnız `in` sağında** · `actor.x.y` (çok-hop) → **error** · başkası → **error**.
+- Op'un roles'u **≥2 principal**'a düşerse `actor.*` → **error** ("belirsiz özne" — rolleri ayrıştır).
+- **Legacy:** principal yoksa `= actor.x` → **warning**; `x in actor.y` → **error her modda**.
+
+### 5.0b `axis` — OWNERSHIP DENOTASYONU (top-decl · ADR-0040 · tech v2.0.0)
+
+`ownership <ad>` bugüne dek **denotasyonsuz bir isimdi** (tüketici filtreyi tahmin ederdi). `axis` ona
+**çözülen bir küme tanımı** verir. Sabit-arite: **`Expr` YOK · lambda YOK · serbest değişken YOK · `or` YOK.**
+
+```
+axis delegatedClientsCampaignEdit {
+  principal AgencyStaff                          // özne AUTHORED (caller BURADAN çözülür)
+  entity Agency.AgencyDelegation                 // kaynak (NİTELİKLİ; `entity` keyword'ü yeniden-kullanım)
+  yields clientOrgId                             // projeksiyon (skaler)
+  scoped by agencyOrgId = caller.organizationId  // kapsam ÇİFTİ — İKİ TARAF DA AUTHORED; ≥1 ZORUNLU
+  when status = active                           // conjunct: <alan> = <literal>
+  when agencyRole in { org_admin | org_editor }  // conjunct: <alan> in { … } (enum-üyelik denetlenir)
+  when "campaigns" in accessScope                // conjunct: STRING in <to-many alan>
+}
+
+operation ListAgencyCampaigns(): list of Campaign {
+  roles agency_user
+  ownership delegatedClientsCampaignEdit by Campaign.organizationId   // → DENOTASYONLU
+  access { reads AgencyDelegation  reads Campaign }                   // axis kaynağı AUTHORED yazılmalı
+}
+```
+Denotasyon: `Campaign.organizationId IN (SELECT clientOrgId FROM AgencyDelegation
+WHERE agencyOrgId = caller.organizationId AND status = active AND …)`.
+- **`=` mi `IN` mi SORULMAZ → TÜRETİLİR** (`caller` alanı skaler → `eq`; `list of <skaler>` →
+  `membership`). Manifest'te açık taşınır (`scopedBy[].match`).
+- `checkAxis` / `checkOwnershipAxis`:
+  - `scoped by` **≥1 ZORUNLU** (gramer) — kapsam-çiftsiz axis **çağıran-bağımsız** set olurdu = sızıntı;
+  - `caller.<alan>` eleman-tipi ≡ kapsam sütunu tipi → aksi **error**;
+  - `<by-sütunu>` tipi ≡ `yields` tipi → aksi **error** (`IN`'in DIŞ tarafı);
+  - axis kaynağı op'un `reads`'inde olmalı → aksi **error** (access sessizce genişlemez);
+  - op'un roles'u axis'in principal'ına düşmeli; **≥2 principal → error** ("belirsiz çağıran");
+  - **`when`-siz axis → LEGAL + koşulsuz warning** (kapsamdaki HER satır sete girer; satır-silmeli
+    revocation modelinde KASITLI olabilir — yaşam-döngüsü durumu varsa `when` ekle).
+- **Op başına TEK eksen** — `axis` kompozisyonu/union YOK (`ownership A, B` yasak). own+delegated
+  gerekiyorsa: iki op (önerilen) · self-delegation satırı · daha geniş axis.
+- ⚠️ **Axis bir per-request comprehension'dır** (principal attribute'unun aksine snapshot DEĞİL) →
+  "iptal anında etkili" bundan gelir. Boş/null çağıran kapsamı → **boş set → satır dönmez** (fail-closed).
 - **`roles`** (`checkRoles`): rolemap'te yoksa typo warning; temsil ettiği aktör yetkili kümeyi
   aşarsa **güvenlik-zayıflatma warning**.
 - **`ownership`** (`checkOwnershipDivergence`): genişlik kafesi `own<relation<any<all<public`.
@@ -265,9 +329,14 @@ scope "hr:read", "hr:write"           // OAuth-stili opak kapsam (AND); manifest
   **Cross-module bağ İFADE EDİLEMEZ** (`[Entity:ID]` niteliksiz + entity'ler modül-yerel → linker
   çözmez; ADR-0021 K6 gramer-şekliyle korunur — nitelikli `Module.Entity` bilinçle yok). Manifest:
   `ownership: string` DEĞİŞMEDİ + paralel `ownershipBinding: [{entity,field}] | null` (null = bildirilmemiş).
-- **`permit when`** (`checkAbac`): `resource` = op'un **tek write-hedefi** entity'si (0 veya ≥2 →
-  error). `resource.*` path-scope denetlenir; `actor.*` **opak** (denetlenmez). Kök `actor.`/
-  `resource.` olmalı.
+- **`permit when`** (`checkAbac` · **ADR-0040 ile DEĞİŞTİ**): `resource` = op'un tek **ACCESS-ÇIPASI** —
+  **komutta** tek write-hedefi (değişmedi), **sorguda** tek read-hedefi (**YENİ**: sorguda `permit`
+  artık **LEGAL** — eskiden error'du; sızıntı yüzeyi tam olarak sorgulardı). 0 veya ≥2 → **error**
+  ("satır-düzeyi ABAC tek çıpa ister"; çok-kaynaklı satır-kapsamı **`axis`'in** işi, ABAC'ın değil).
+  `resource.*` path-scope denetlenir; **`actor.*` ARTIK ÇÖZÜLÜR** (§5.0 — principal bildirilmişse;
+  yoksa opak + warning). Kök `actor.`/`resource.` olmalı.
+  Manifest: `abac: {permit, resource:{entity, via:'write'|'read'}|null, effect:'gate'|'filter'}` —
+  `effect:'filter'` → üreteç `.Where(...)` emit eder (dönen HER satır permit'i sağlamalı).
 
 ---
 

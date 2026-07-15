@@ -249,8 +249,27 @@ için validator YOK** → elicitation + Pre-Emit Gate.
   virgülle). Sormazsan DSL eksik çıkar: validator **warning** verir ve üreteç filtre sütununu
   **TAHMİN** eder (yanlış sütun = satır sızıntısı). Bağlanan entity op'un `access`'inde ve alan
   skaler/enum olmalı (ADR-0038).
+- **Cevap `<relation>` ise (own DEĞİL — "kendi kaydı değil, yetkilendirildiği/delege edildiği
+  kayıtlar": bayi kendi müşterilerini, ajans temsil ettiği markaları görür) → `axis` ZORUNLU devam
+  sorusu** (ADR-0040): *"Bu 'delege edilmiş' küme **hangi tabloda** tutuluyor? O satırın **hangi
+  sütunu** çağıranla eşleşiyor — çağıranın **hangi alanıyla**? Sette olması için satırın sağlaması
+  gereken **koşullar** neler (iptal/pasif satırlar sette OLMAMALI)?"* → top-level
+  `axis <ad> { principal … entity <Module>.<Entity>  yields <alan>  scoped by <sütun> = caller.<alan>
+  when … }` + op'ta `ownership <ad> by <Entity>.<alan>`.
+  **Sormazsan `ownership <ad>` yalnız bir İSİM olur** — hangi satırların sete girdiği sözleşmede HİÇ
+  yazmaz → tüketici seti **TAHMİN** eder (ÖLÇÜLDÜ: sahada delege-olmayan kayıtlar sızdı). `when`
+  sormayı atlarsan validator **warning** verir (koşulsuz axis = revoke edilmiş satırlar sette kalır).
+  Axis'in kaynağı op'un `access { reads … }`'inde **authored** olmalı (yoksa error).
 - "Bir **öznitelik koşulu** var mı (ör. sadece kendi bölgesindeki kayıt)?" → `permit when
-  resource.* … actor.*` (ABAC).
+  resource.* … actor.*` (ABAC). **Sorgularda da yazılabilir** (ADR-0040: `resource` = komutta tek
+  write-hedefi, **sorguda tek read-hedefi**; manifest `effect:'filter'` → üreteç `.Where` emit eder).
+- **`actor.*` yazdıran her cevap `principal` bildirimini TETİKLER** (ADR-0040): *"Çağıranın bu
+  özniteliği (bölge/organizasyon/departman) **nerede** duruyor — hangi tabloda, hangi alanda? Kimliği
+  (token/oturum claim'i) hangi ad taşıyor?"* → top-level `principal <Ad> { identity <claim>  binds
+  <Module>.<Entity> by <alan>  roles <r> }`. **Sormazsan `actor.*` OPAK kalır** ve yazar runtime
+  karşılığı OLMAYAN bir ad uydurur — bu ÖLÇÜLMÜŞ kusur sınıfıdır (`actor.delegatedOrgIds`: runtime'da
+  öyle bir şey yok + skaler=küme tip-yalanı → sahada **çağıran-bağımsız** denetim). Principal
+  bildirilmişse `actor.<alan>` typo'su **error** olur; bildirilmemişse yalnız warning.
 - OAuth kapsamı gerekiyorsa → `scope "…"`. **Kavram-koçluğuyla çıkar** (kullanıcı "scope"u bilmeyebilir):
   *"Giriş yapmış bir uygulamanın neyi yapabileceğini sınırlamak ister misin — ör. bu işlemi yalnız belirli
   yetkiye sahip token'lar çağırabilsin?"* → soyut `scope`. **Provider / secret / PKCE / konsol-ekranı
@@ -259,7 +278,7 @@ için validator YOK** → elicitation + Pre-Emit Gate.
 
 **⚠ Anti-pattern — Yetki gevşetme:** ownership'i iş'ten geniş yapma (`own`→`any`), roller
 yetkili aktör kümesini aşma. Bunlar **güvenlik-zayıflatma warning**'i — her birini açıkça onaylat.
-**Kapatır:** `checkRoles`, `checkOwnershipDivergence`, `checkOwnershipRelation`, `checkOwnershipBinding`, `checkAbac`.
+**Kapatır:** `checkRoles`, `checkOwnershipDivergence`, `checkOwnershipRelation`, `checkOwnershipBinding`, `checkAbac`, `checkPrincipal`, `checkAxis`, `checkOwnershipAxis`.
 
 ---
 
