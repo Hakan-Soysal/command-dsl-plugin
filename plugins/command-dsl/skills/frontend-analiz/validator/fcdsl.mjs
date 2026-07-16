@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", frontendSrcHash: "2c7b1bdb3499", commit: "e680de0", builtAt: "2026-07-15T17:57:43+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", frontendSrcHash: "fc67b59f2059", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
   }
 });
 
@@ -40229,6 +40229,58 @@ var FrontendDslValidator = class {
   }
 };
 
+// src/shared/keyword-hints.ts
+init_define_BUILD_INFO();
+var ID_SHAPED2 = /^[A-Za-z_][A-Za-z0-9_]*$/;
+function keywordHint(word) {
+  return `
+\u0130pucu: '${word}' bu DSL'de rezerve bir anahtar kelimedir (keyword) \u2014 alan/parametre/tan\u0131mlay\u0131c\u0131 ad\u0131 olarak kullan\u0131lamaz; farkl\u0131 bir ad se\xE7in (\xF6rn. '${word}Value').`;
+}
+function sameRange(a2, b) {
+  return a2.start.line === b.start.line && a2.start.character === b.start.character && a2.end.line === b.end.line && a2.end.character === b.end.character;
+}
+var KeywordHintDocumentValidator = class extends DefaultDocumentValidator {
+  coreServices;
+  reservedCache;
+  constructor(services) {
+    super(services);
+    this.coreServices = services;
+  }
+  /** SERT-rezerve keyword seti (lazy — Lexer inşası tamamlandıktan sonraki İLK parse-error'da). */
+  reservedKeywords() {
+    if (!this.reservedCache) {
+      const set = /* @__PURE__ */ new Set();
+      const tokenTypes = this.coreServices.parser.Lexer.definition;
+      for (const node of ast_utils_exports.streamAllContents(this.coreServices.Grammar)) {
+        if (!ast_exports.isKeyword(node) || !ID_SHAPED2.test(node.value)) continue;
+        const tt = tokenTypes[node.value];
+        const soft = !!tt?.CATEGORIES?.some((c) => c.name === "ID");
+        if (!soft) set.add(node.value);
+      }
+      this.reservedCache = set;
+    }
+    return this.reservedCache;
+  }
+  processParsingErrors(parseResult, diagnostics2, options) {
+    const before = diagnostics2.length;
+    super.processParsingErrors(parseResult, diagnostics2, options);
+    const reserved = this.reservedKeywords();
+    for (const err of parseResult.parserErrors) {
+      const token = err.token;
+      if (!token || Number.isNaN(token.startOffset)) continue;
+      if (!ID_SHAPED2.test(token.image) || !reserved.has(token.image)) continue;
+      const range = cst_utils_exports.tokenToRange(token);
+      for (let i = before; i < diagnostics2.length; i++) {
+        const d = diagnostics2[i];
+        if (d.message === err.message && sameRange(d.range, range)) {
+          d.message += keywordHint(token.image);
+          break;
+        }
+      }
+    }
+  }
+};
+
 // src/frontend/frontend-dsl-module.ts
 var FrontendDslModule = {
   parser: {
@@ -40238,6 +40290,10 @@ var FrontendDslModule = {
     ScopeProvider: (services) => new FrontendDslScopeProvider(services)
   },
   validation: {
+    // Keyword-as-fieldname parse-error ipucu (H): mesaj-ekleme, error-count stabil.
+    // Frontend'de yalnız SERT-rezerve alt-küme (EXPR_VOCABULARY) yakalanır; İ1 soft
+    // keyword'ler (value/role/state…) identifier olarak zaten parse olur (tasarım).
+    DocumentValidator: (services) => new KeywordHintDocumentValidator(services),
     FrontendDslValidator: (services) => new FrontendDslValidator(services.shared.workspace.LangiumDocuments)
   }
 };

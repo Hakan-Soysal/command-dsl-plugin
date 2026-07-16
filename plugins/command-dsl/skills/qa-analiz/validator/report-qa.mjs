@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-qa", srcHash: "ba5a4abc13bc", srcFiles: ["report-qa.src.mts", "report-index.src.mts"], builtAt: "2026-07-15T21:14:52.065Z" };
+var define_BUILD_INFO_default = { tool: "report-qa", srcHash: "ba5a4abc13bc", srcFiles: ["report-qa.src.mts", "report-index.src.mts"], builtAt: "2026-07-16T19:01:08.273Z" };
 
-// report-qa.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/qa-analiz/validator/report-qa.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync } from "node:fs";
 import { join as join2, resolve } from "node:path";
 
-// report-index.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/qa-analiz/validator/report-index.src.mts
 import { readdirSync, readFileSync, writeFileSync, statSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 import { deflateRawSync } from "node:zlib";
@@ -110,7 +110,7 @@ function regenerateIndex(reportsRoot2, opts = {}) {
   writeFileSync(join(reportsRoot2, "index.html"), html.join("\n"));
 }
 
-// report-qa.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/qa-analiz/validator/report-qa.src.mts
 var BUILD_INFO = typeof define_BUILD_INFO_default !== "undefined" ? define_BUILD_INFO_default : { tool: "report-qa", srcHash: "dev", builtAt: "dev" };
 var BRANCH_KINDS = /* @__PURE__ */ new Set([
   "success",

@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-90857eb74904", grammarHash: "90857eb74904", techSrcHash: "8419e473931c", commit: "e680de0", builtAt: "2026-07-15T17:57:43+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-ed720eef8159", grammarHash: "ed720eef8159", techSrcHash: "762108ad602e", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
   }
 });
 
@@ -32429,7 +32429,9 @@ function isQualifiedRef(item) {
 var Range2 = {
   $type: "Range",
   from: "from",
-  to: "to"
+  fromNeg: "fromNeg",
+  to: "to",
+  toNeg: "toNeg"
 };
 var Refinement = {
   $type: "Refinement",
@@ -33506,8 +33508,16 @@ var TechDslAstReflection = class extends AbstractAstReflection {
         from: {
           name: Range2.from
         },
+        fromNeg: {
+          name: Range2.fromNeg,
+          defaultValue: false
+        },
         to: {
           name: Range2.to
+        },
+        toNeg: {
+          name: Range2.toNeg,
+          defaultValue: false
         }
       },
       superTypes: []
@@ -37709,6 +37719,16 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
         "elements": [
           {
             "$type": "Assignment",
+            "feature": "fromNeg",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "-"
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
             "feature": "from",
             "operator": "=",
             "terminal": {
@@ -37722,6 +37742,16 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "Keyword",
             "value": ".."
+          },
+          {
+            "$type": "Assignment",
+            "feature": "toNeg",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "-"
+            },
+            "cardinality": "?"
           },
           {
             "$type": "Assignment",
@@ -39745,6 +39775,9 @@ function typeUniverseOf(node) {
   }
   return u;
 }
+function rangeBounds(r) {
+  return { from: r.fromNeg ? -r.from : r.from, to: r.toNeg ? -r.to : r.to };
+}
 function refinementViolations(field) {
   const r = field.refinement;
   if (!r) return [];
@@ -39752,7 +39785,8 @@ function refinementViolations(field) {
   const numeric = REFINEMENT_NUMERIC_TYPES.has(typeName);
   const out = [];
   if (r.range) {
-    if (!(r.range.from < r.range.to)) out.push({ code: "range-inverted" });
+    const bounds = rangeBounds(r.range);
+    if (!(bounds.from < bounds.to)) out.push({ code: "range-inverted" });
     if (typeName && !numeric) out.push({ code: "range-nonnumeric" });
   } else if (r.union) {
     const raw = r.union.values.map(unionValRaw);
@@ -39788,7 +39822,10 @@ function unionValRaw(v) {
   return v.num;
 }
 function refinementJson(r) {
-  if (r.range) return { kind: "range", from: r.range.from, to: r.range.to };
+  if (r.range) {
+    const { from, to } = rangeBounds(r.range);
+    return { kind: "range", from, to };
+  }
   return { kind: "union", values: r.union.values.map(unionValRaw) };
 }
 function violationsOf(op) {
@@ -42102,8 +42139,14 @@ function refinementViolationMessage(v, field) {
     case "union-nonscalar":
       return `Literal-union yaln\u0131z String/enum alanlarda kullan\u0131l\u0131r; '${t}' yap\u0131sal (entity/type), literal-de\u011Fer-k\xFCmesi ta\u015F\u0131maz.`;
     case "refinement-incomplete":
-      return `Eksik refinement (${field.name}): 'in' sonras\u0131 aral\u0131k (13..120) ya da literal-union ({A|B}) gerekli.`;
+      return `Eksik refinement (${field.name}): 'in' sonras\u0131 aral\u0131k (13..120) ya da literal-union ({A|B}) gerekli.${inKeywordFieldHint(field)}`;
   }
+}
+function inKeywordFieldHint(field) {
+  const cst = field.refinement?.$cstNode;
+  if (!cst) return "";
+  const rest = cst.root.fullText.slice(cst.offset + cst.length);
+  return /^\s*:/.test(rest) ? ` \u0130pucu: burada 'in' adl\u0131 bir ALAN tan\u0131mlamaya \xE7al\u0131\u015Ft\u0131ysan\u0131z \u2014 'in' bu DSL'de rezerve bir anahtar kelimedir (refinement); alan/parametre ad\u0131 olarak kullan\u0131lamaz, farkl\u0131 bir ad se\xE7in.` : "";
 }
 function registerTechValidationChecks(services) {
   const registry = services.validation.ValidationRegistry;
@@ -42222,6 +42265,58 @@ var TechDslHoverProvider = class extends MultilineCommentHoverProvider {
   }
 };
 
+// src/shared/keyword-hints.ts
+init_define_BUILD_INFO();
+var ID_SHAPED = /^[A-Za-z_][A-Za-z0-9_]*$/;
+function keywordHint(word) {
+  return `
+\u0130pucu: '${word}' bu DSL'de rezerve bir anahtar kelimedir (keyword) \u2014 alan/parametre/tan\u0131mlay\u0131c\u0131 ad\u0131 olarak kullan\u0131lamaz; farkl\u0131 bir ad se\xE7in (\xF6rn. '${word}Value').`;
+}
+function sameRange(a2, b) {
+  return a2.start.line === b.start.line && a2.start.character === b.start.character && a2.end.line === b.end.line && a2.end.character === b.end.character;
+}
+var KeywordHintDocumentValidator = class extends DefaultDocumentValidator {
+  coreServices;
+  reservedCache;
+  constructor(services) {
+    super(services);
+    this.coreServices = services;
+  }
+  /** SERT-rezerve keyword seti (lazy — Lexer inşası tamamlandıktan sonraki İLK parse-error'da). */
+  reservedKeywords() {
+    if (!this.reservedCache) {
+      const set = /* @__PURE__ */ new Set();
+      const tokenTypes = this.coreServices.parser.Lexer.definition;
+      for (const node of ast_utils_exports.streamAllContents(this.coreServices.Grammar)) {
+        if (!ast_exports.isKeyword(node) || !ID_SHAPED.test(node.value)) continue;
+        const tt = tokenTypes[node.value];
+        const soft = !!tt?.CATEGORIES?.some((c) => c.name === "ID");
+        if (!soft) set.add(node.value);
+      }
+      this.reservedCache = set;
+    }
+    return this.reservedCache;
+  }
+  processParsingErrors(parseResult, diagnostics2, options) {
+    const before = diagnostics2.length;
+    super.processParsingErrors(parseResult, diagnostics2, options);
+    const reserved = this.reservedKeywords();
+    for (const err of parseResult.parserErrors) {
+      const token = err.token;
+      if (!token || Number.isNaN(token.startOffset)) continue;
+      if (!ID_SHAPED.test(token.image) || !reserved.has(token.image)) continue;
+      const range = cst_utils_exports.tokenToRange(token);
+      for (let i = before; i < diagnostics2.length; i++) {
+        const d = diagnostics2[i];
+        if (d.message === err.message && sameRange(d.range, range)) {
+          d.message += keywordHint(token.image);
+          break;
+        }
+      }
+    }
+  }
+};
+
 // src/tech/tech-dsl-module.ts
 var TechDslModule = {
   references: {
@@ -42232,6 +42327,8 @@ var TechDslModule = {
     HoverProvider: (services) => new TechDslHoverProvider(services)
   },
   validation: {
+    // Keyword-as-fieldname parse-error ipucu (H): mesaj-ekleme, error-count stabil.
+    DocumentValidator: (services) => new KeywordHintDocumentValidator(services),
     TechDslValidator: (services) => new TechDslValidator(services.shared.workspace.LangiumDocuments)
   }
 };

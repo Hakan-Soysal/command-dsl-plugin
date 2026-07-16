@@ -13,7 +13,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `3883ec9e9a7e` · src `8a6e15453548` · commit `e680de0`+**ADR-0040 (qa v2.0.0: `Filtered` dal arketipi)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `2d0187885b3b` · src `1583ad03d495` · commit `2b683d7`+**qa v2.1.0 (keyword-as-fieldname lint)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 >
 > **⚠️ ADR-0040 · qa v2.0.0 — KIRICI (2026-07-16).** İki ayrı şey oldu, karıştırma:
 > 1. **Yankı (yüzey DEĞİL):** tech'e `principal`/`axis` girdi → qa gramerini import ettiği için hash

@@ -1,10 +1,10 @@
 {
   "source": "CommandDSL",
-  "grammarVersion": "qa-v1.x-3883ec9e9a7e",
-  "grammarHash": "3883ec9e9a7e",
-  "qaSrcHash": "8a6e15453548",
-  "commit": "e680de0",
-  "builtAt": "2026-07-15T17:57:43+03:00",
+  "grammarVersion": "qa-v1.x-2d0187885b3b",
+  "grammarHash": "2d0187885b3b",
+  "qaSrcHash": "1583ad03d495",
+  "commit": "2b683d7",
+  "builtAt": "2026-07-16T21:59:41+03:00",
   "langium": "4.2.4",
   "emitOperations": "frontend-analiz kopyası (2026-07-03; src/business hash'i is-analizi-dsl kanonik üreticisiyle aynı repo durumundan)"
 }
