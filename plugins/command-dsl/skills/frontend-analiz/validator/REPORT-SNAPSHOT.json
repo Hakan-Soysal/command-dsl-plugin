@@ -2,7 +2,11 @@
   "source": "CommandDSL",
   "grammarVersion": "frontend-v1.x-a428b3d71944",
   "grammarHash": "a428b3d71944",
-  "srcHash": "7d0462b09a07",
+  "srcDirs": [
+    "src/frontend",
+    "src/playground"
+  ],
+  "srcHash": "708fb488265e",
   "commit": "2b683d7",
   "builtAt": "2026-07-16T21:59:41+03:00"
 }

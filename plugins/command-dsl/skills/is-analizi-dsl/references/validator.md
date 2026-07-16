@@ -140,4 +140,7 @@ node ${CLAUDE_SKILL_DIR}/validator/report-business.mjs <model.cdsl> --reports <d
 - **Bayatlık:** `REPORT-SNAPSHOT.json` aile iki-hash disipliniyle aynı BUILD_INFO'yu
   taşır; rapor bundle'ı da **aile-eşzamanlı build** kuralına tabidir — tüm aile
   bundle'ları AYNI repo durumundan birlikte tazelenir, tek tarafı tazelemek
-  sürüm-kayması üretir.
+  sürüm-kayması üretir. **EK (Faz-2, 2026-07-17):** aile-eşzamanlılık artık sigortalıdır —
+  CommandDSL-src taşıyan HER emit/report bundle'ı (`emit-operations.mjs` +
+  `report-business.mjs` dahil) `check-skill-staleness` tarafından kendi
+  `srcDirs`/`srcHash` damgasıyla AYRI denetlenir; kısmi rebuild sessiz kalamaz.

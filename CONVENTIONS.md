@@ -75,7 +75,12 @@ skills/<skill>/
   `metafile`) bundle'a gerçekten giren `src/` dizinlerini türetir, `BUILD_INFO.srcDirs` olarak
   damgalar; `srcHash` o dizinlerin ağacından hesaplanır. Statik dizin-reçetesi YOKTUR (eski
   statik reçete is-analizi'yi tam-kör, qa'yı `src/tech`'e kör bırakmıştı); yeni bir cross-dizin
-  import otomatik kapsanır.
+  import otomatik kapsanır. **Faz-2 (2026-07-17):** aynı iki-pass mekanizması **CommandDSL-src
+  taşıyan TÜM emit/report bundle'larına** genişledi (4× `build.emit.mjs` + `build.manifest.mjs`
+  + 3× `build.report.mjs`; qa `report-qa` HARİÇ — CommandDSL-src taşımaz, rebuild edilmez).
+  TYPE-ONLY import'lar metafile'da GÖRÜNMEZ → girdi-şemasını taşıyan dizin `EXTRA_SRC_DIRS` ile
+  damgaya elle eklenir (report-tech → `src/tech`, report-frontend → `src/frontend`).
+  emit-operations'ın grammar reçetesi primary ile hizalandı: `command-dsl.langium + shared.langium`.
 - **Otomatik bayatlık-denetimi (meta-fix E, 2026-07-08):** `scripts/check-skill-staleness.mjs
   [<CommandDSL-yolu>]` — 4 skil'in bundle hash'ini (İKİ parmak izi), envanter-damgasını VE
   içerik-kapsamasını (gramerdeki keyword ref-doküman'da öğretiliyor mu) **CANLI gramere karşı**
@@ -83,7 +88,14 @@ skills/<skill>/
   okur → reçete-drifti imkansız); damga yok/deforme ya da skill'in kendi dizini (`mustInclude`
   çıpası) kapsam-dışıysa **loud STALE** (hibrit sigorta — sessiz-yeşile dönüşemez). Eski
   manuel-karşılaştırma bundle'a çıpalıydı (bundle+damga birlikte kayınca yanlış
-  "taze"); bu araç canlı CommandDSL'e çıpalar → aylarca-sessiz drift biter. **Tetik:** CommandDSL'in
+  "taze"); bu araç canlı CommandDSL'e çıpalar → aylarca-sessiz drift biter. **Faz-2 (2026-07-17):
+  denetim skill-başına BUNDLE LİSTESİDİR** — aile-eşzamanlı rebuild disiplini KALIR ama artık
+  sigortasızca ona güvenilmez: CommandDSL-src taşıyan her emit/report bundle'ı AYRI denetlenir
+  (12 bundle). Eski "emit/report ayrı denetlenmez, aile-rebuild yeter" kararı SÜPERSEDE —
+  kısmi-rebuild deliği ölçüldü: is-analizi emit `e680de0`'da kalmışken aile `2b683d7`'deydi ve
+  denetçi 4/4 TAZE diyordu. Bundle-başına grammar reçetesi: skill grammar'ı (varsayılan) ·
+  `null` = grammar denetimi YOK (saf json→rapor aracı: report-tech) · açık liste (cross-DSL:
+  4 kopya emit-operations BUSINESS gramerine bağlı). **Tetik:** CommandDSL'in
   `.githooks/pre-push`'u (kardeş plugin'i denetler; `scripts/install-hooks.sh` ile kurulur) — gramer
   push'undan ÖNCE stale bundle push'u durdurur. Gramer/validator değişince DoD: aile-eşzamanlı
   rebuild + referans/envanter + `check-skill-staleness` yeşil.

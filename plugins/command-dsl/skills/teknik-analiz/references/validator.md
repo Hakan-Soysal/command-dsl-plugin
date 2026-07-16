@@ -145,9 +145,16 @@ node ${CLAUDE_SKILL_DIR}/validator/report-tech.mjs <manifest.json> --reports <di
   kökünde birleşir, aynı `--title`'ı ver). `.puml` girdileri göreli kaynak linki +
   plantuml.com/plantuml/svg/ görüntüleme linkiyle listelenir (render harici
   sunucuda — hassas içerikte tıklamamak kullanıcının tercihi).
-- **Bayatlık:** `REPORT-SNAPSHOT.json` — `srcHash` = CommandDSL `src/tech-report/**`
-  kaynakları + ortak report-index modülü. **Grammar hash'i YOK** — araç saf
+- **Bayatlık:** `REPORT-SNAPSHOT.json` — `srcHash` = `srcDirs` damgasındaki dizinlerin
+  ağacı (Faz-2 2026-07-17: Pass-1 esbuild-metafile'dan türetilir + `EXTRA_SRC_DIRS`;
+  bugün `src/generator` + `src/tech` + `src/tech-report`). `src/tech` metafile'da
+  GÖRÜNMEZ (manifest.ts import'u type-only) ama manifest.json girdi-ŞEMASI orada yaşar →
+  `EXTRA_SRC_DIRS` ile elle damgaya eklenir. **Grammar hash'i YOK** — araç saf
   manifest→puml/md dönüşümüdür, dile dokunmaz; §2'deki `validate-tech`/`emit-manifest`
   SNAPSHOT'ından bağımsızdır ve ona dokunmaz. Rapor bundle'ı **aile-eşzamanlı build**
   kuralına tabidir: ortak index modülü dört skill'de byte-özdeş kopyadır → tüm aile
-  rapor bundle'ları AYNI CommandDSL repo durumundan birlikte tazelenir.
+  rapor bundle'ları AYNI CommandDSL repo durumundan birlikte tazelenir. **EK (Faz-2):**
+  aile-eşzamanlılık artık sigortalıdır — CommandDSL-src taşıyan HER emit/report bundle'ı
+  (`emit-manifest.mjs` + `emit-operations.mjs` + `report-tech.mjs` dahil)
+  `check-skill-staleness` tarafından kendi `srcDirs`/`srcHash` damgasıyla AYRI denetlenir
+  (report-tech'te grammar denetimi `null`); kısmi rebuild sessiz kalamaz.

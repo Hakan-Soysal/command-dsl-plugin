@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-94397168f2a1", grammarHash: "94397168f2a1", srcHash: "74d1760d27f9", commit: "e680de0", builtAt: "2026-07-15T17:57:43+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-94397168f2a1", grammarHash: "94397168f2a1", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "c3c70ae50f8a", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
   }
 });
 
@@ -39705,6 +39705,58 @@ var CommandDslDocumentBuilder = class extends DefaultDocumentBuilder {
   }
 };
 
+// src/shared/keyword-hints.ts
+init_define_BUILD_INFO();
+var ID_SHAPED = /^[A-Za-z_][A-Za-z0-9_]*$/;
+function keywordHint(word) {
+  return `
+\u0130pucu: '${word}' bu DSL'de rezerve bir anahtar kelimedir (keyword) \u2014 alan/parametre/tan\u0131mlay\u0131c\u0131 ad\u0131 olarak kullan\u0131lamaz; farkl\u0131 bir ad se\xE7in (\xF6rn. '${word}Value').`;
+}
+function sameRange(a2, b) {
+  return a2.start.line === b.start.line && a2.start.character === b.start.character && a2.end.line === b.end.line && a2.end.character === b.end.character;
+}
+var KeywordHintDocumentValidator = class extends DefaultDocumentValidator {
+  coreServices;
+  reservedCache;
+  constructor(services) {
+    super(services);
+    this.coreServices = services;
+  }
+  /** SERT-rezerve keyword seti (lazy — Lexer inşası tamamlandıktan sonraki İLK parse-error'da). */
+  reservedKeywords() {
+    if (!this.reservedCache) {
+      const set = /* @__PURE__ */ new Set();
+      const tokenTypes = this.coreServices.parser.Lexer.definition;
+      for (const node of ast_utils_exports.streamAllContents(this.coreServices.Grammar)) {
+        if (!ast_exports.isKeyword(node) || !ID_SHAPED.test(node.value)) continue;
+        const tt = tokenTypes[node.value];
+        const soft = !!tt?.CATEGORIES?.some((c) => c.name === "ID");
+        if (!soft) set.add(node.value);
+      }
+      this.reservedCache = set;
+    }
+    return this.reservedCache;
+  }
+  processParsingErrors(parseResult, diagnostics, options) {
+    const before = diagnostics.length;
+    super.processParsingErrors(parseResult, diagnostics, options);
+    const reserved = this.reservedKeywords();
+    for (const err of parseResult.parserErrors) {
+      const token = err.token;
+      if (!token || Number.isNaN(token.startOffset)) continue;
+      if (!ID_SHAPED.test(token.image) || !reserved.has(token.image)) continue;
+      const range = cst_utils_exports.tokenToRange(token);
+      for (let i = before; i < diagnostics.length; i++) {
+        const d = diagnostics[i];
+        if (d.message === err.message && sameRange(d.range, range)) {
+          d.message += keywordHint(token.image);
+          break;
+        }
+      }
+    }
+  }
+};
+
 // src/language/command-dsl-module.ts
 var CommandDslNameProvider = class extends DefaultNameProvider {
   getName(node) {
@@ -39771,6 +39823,8 @@ var CommandDslModule = {
     CompletionProvider: (services) => new CommandDslCompletionProvider(services)
   },
   validation: {
+    // Keyword-as-fieldname parse-error ipucu (H): mesaj-ekleme, error-count stabil.
+    DocumentValidator: (services) => new KeywordHintDocumentValidator(services),
     // Validator import çözümü için dokümanlara ve dosya sistemi türüne bakar
     CommandDslValidator: (services) => new CommandDslValidator(services)
   }

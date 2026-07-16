@@ -120,4 +120,11 @@ node ${CLAUDE_SKILL_DIR}/validator/report-frontend.mjs <experience-dizini> [--fl
   kullanıcının tercihi).
 - **Bayatlık:** `REPORT-SNAPSHOT.json` aile iki-hash disipliniyle aynı BUILD_INFO'yu
   taşır; rapor bundle'ı da yukarıdaki **aile-eşzamanlı build** kuralına tabidir —
-  tüm aile bundle'ları AYNI repo durumundan birlikte tazelenir.
+  tüm aile bundle'ları AYNI repo durumundan birlikte tazelenir. **EK (Faz-2,
+  2026-07-17):** aile-eşzamanlılık artık sigortalıdır — CommandDSL-src taşıyan HER
+  emit/report bundle'ı (`fcdsl.mjs` + `emit-operations.mjs` + `report-frontend.mjs`)
+  `check-skill-staleness` tarafından kendi `srcDirs`/`srcHash` damgasıyla AYRI
+  denetlenir; kısmi rebuild sessiz kalamaz. report-frontend'in `srcDirs`'ü Pass-1
+  metafile + `EXTRA_SRC_DIRS` birleşimidir (bugün `src/frontend` + `src/playground`):
+  `experience.ts` import'ları type-only olduğundan metafile'da görünmez ama
+  experience.json girdi-ŞEMASI orada yaşar → `src/frontend` elle damgaya eklenir.

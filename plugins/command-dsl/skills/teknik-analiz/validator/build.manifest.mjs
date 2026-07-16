@@ -10,7 +10,8 @@
  * Varsayılan CommandDSL yolu: ../../../CommandDSL (bu skill'in komşusu).
  *
  * BUILD_INFO drift tespiti içindir (validate-tech ile AYNI hash'ler): grammarHash =
- * sha256(tech-dsl.langium + shared.langium); techSrcHash = src/tech + src/shared kapanışı —
+ * sha256(tech-dsl.langium + shared.langium); techSrcHash = bundle'a giren TÜM src/ dizinleri
+ * (Faz-2 2026-07-17: Pass-1 metafile'dan türetilir, BUILD_INFO.srcDirs olarak damgalanır) —
  * manifest.ts değişince techSrcHash değişir → bayat bundle yakalanır.
  */
 import { createRequire } from 'node:module';
@@ -67,7 +68,39 @@ function shaTree(...dirs) {
     }
     return h.digest('hex').slice(0, 12);
 }
-const techSrcHash = shaTree('src/tech', 'src/shared');
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi — Faz-1 build.tech.mjs şablonu) ---
+// Pass-1 (write:false + metafile, hiçbir dosya yazılmaz): esbuild'in bundle'a GERÇEKTEN
+// aldığı src/ dosyalarından izlenen dizinler türetilir. check-skill-staleness bu damgayı
+// okur → statik-reçete drifti imkansız; gelecekte eklenen cross-dizin import otomatik kapsanır.
+const commonOptions = {
+    entryPoints: [resolve(here, 'emit-manifest.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    alias: {
+        '@techdsl/services': servicesEntry,
+        '@techdsl/manifest': manifestEntry,
+    },
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri
+// startsWith('src/') filtresiyle dışarıda kalır (ZORUNLU — inputs node_modules'ı da içerir).
+const srcDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)].sort();
+const techSrcHash = shaTree(...srcDirs);
 
 let commit = 'unknown';
 let commitDate = 'unknown';
@@ -84,25 +117,17 @@ try {
 const BUILD_INFO = {
     grammarVersion: `tech-v1.x-${grammarHash}`,
     grammarHash,
-    techSrcHash,
+    srcDirs,          // Pass-1 metafile'dan türetilen izlenen src/ dizinleri (check-staleness damgası)
+    techSrcHash,      // manifest/services mantığı parmak izi (grammar-dışı bayatlık dedektörü; kapsam = srcDirs)
     commit,
     builtAt: commitDate,
     langium,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + techSrcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'emit-manifest.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'emit-manifest.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    alias: {
-        '@techdsl/services': servicesEntry,
-        '@techdsl/manifest': manifestEntry,
-    },
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     banner: {
         js: [
@@ -114,4 +139,4 @@ await esbuild.build({
     logLevel: 'info',
 });
 
-console.error(`\n✓ emit-manifest.mjs yazıldı · grammar ${grammarHash} · src ${techSrcHash} · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ emit-manifest.mjs yazıldı · grammar ${grammarHash} · src ${techSrcHash} [${srcDirs.join(' ')}] · commit ${commit} · langium ${langium}`);

@@ -9,9 +9,10 @@
  *
  * Kullanım: node build.report.mjs [<CommandDSL-yolu>]   (CMDDSL=<yol> de olur; vars. ../../../CommandDSL)
  *
- * BUILD_INFO: grammarHash = sha256(command-dsl.langium + shared.langium — build.mjs ile aynı);
- * srcHash = sha256(src/language + src/generator, *.ts/*.mts, relpath dahil) → üreteç/servis
- * mantığı değişince yakalanır. Hash'ler ayrıca REPORT-SNAPSHOT.json'a yazılır (mevcut
+ * BUILD_INFO (Faz-2 2026-07-17): grammarHash = sha256(command-dsl.langium + shared.langium —
+ * build.mjs ile aynı); srcHash = sha256(bundle'a giren TÜM src/ dizinleri — Pass-1
+ * metafile'dan türetilir, BUILD_INFO.srcDirs olarak damgalanır) → üreteç/servis mantığı
+ * değişince yakalanır. Hash'ler ayrıca REPORT-SNAPSHOT.json'a yazılır (mevcut
  * SNAPSHOT disiplinine dokunmadan — rapor bundle'ının kendi kaydı).
  */
 import { createRequire } from 'node:module';
@@ -80,7 +81,37 @@ function shaTree(...dirs) {
 }
 // build.mjs ile aynı grammar kapsamı: command-dsl.langium + shared.langium (import'u).
 const grammarHash = sha('command-dsl.langium', 'shared.langium');
-const srcHash = shaTree('src/language', 'src/generator');
+
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi — Faz-1 build.mjs şablonu) ---
+// Pass-1 (write:false + metafile, hiçbir dosya yazılmaz): esbuild'in bundle'a GERÇEKTEN
+// aldığı src/ dosyalarından izlenen dizinler türetilir. check-skill-staleness bu damgayı
+// okur → statik-reçete drifti imkansız; gelecekte eklenen cross-dizin import otomatik kapsanır.
+const commonOptions = {
+    entryPoints: [resolve(here, 'report-business.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    alias,
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri
+// startsWith('src/') filtresiyle dışarıda kalır (ZORUNLU — inputs node_modules'ı da içerir).
+const srcDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)].sort();
+const srcHash = shaTree(...srcDirs);
 
 let commit = 'unknown', commitDate = 'unknown';
 try {
@@ -96,22 +127,17 @@ try {
 const BUILD_INFO = {
     grammarVersion: `cdsl-v3.x-${grammarHash}`,
     grammarHash,
-    srcHash,
+    srcDirs,     // Pass-1 metafile'dan türetilen izlenen src/ dizinleri (check-staleness damgası)
+    srcHash,     // rapor üreteç/servis mantığı parmak izi (grammar-dışı bayatlık dedektörü; kapsam = srcDirs)
     commit,
     builtAt: commitDate,
     langium,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + srcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'report-business.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'report-business.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    alias,
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     banner: {
         js: [
@@ -131,5 +157,5 @@ writeFileSync(resolve(here, 'REPORT-SNAPSHOT.json'), JSON.stringify({
     note: 'İnsan-okur rapor bundle\'ı — üreteçler: plantuml/plantuml-flow/plantuml-process/plantuml-blueprint/process-doc/cockburn/coverage + report-index (kanonik ortak kopya)',
 }, null, 2) + '\n');
 
-console.error(`\n✓ report-business.mjs yazıldı · grammar ${grammarHash} · src ${srcHash} · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ report-business.mjs yazıldı · grammar ${grammarHash} · src ${srcHash} [${srcDirs.join(' ')}] · commit ${commit} · langium ${langium}`);
 console.error(`✓ REPORT-SNAPSHOT.json yazıldı`);

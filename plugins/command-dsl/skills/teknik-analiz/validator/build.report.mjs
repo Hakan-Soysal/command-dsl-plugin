@@ -13,10 +13,11 @@
  *   node build.report.mjs [<CommandDSL-yolu>]
  *   CMDDSL=<yol> node build.report.mjs
  *
- * BUILD_INFO (aile kuralının rapor-aracı uyarlaması — TECH-RAPOR-TASARIM §3.2):
- *   srcHash = sha256(CommandDSL src/tech-report/** + report-tech.src.mts +
- *             report-index.src.mts, relpath dahil) — grammar hash YOK
- *             (saf json→puml/md; dil servisleri kullanılmaz).
+ * BUILD_INFO (aile kuralının rapor-aracı uyarlaması — TECH-RAPOR-TASARIM §3.2; Faz-2 2026-07-17):
+ *   srcHash = sha256(bundle'a giren TÜM src/ dizinleri — Pass-1 metafile'dan türetilir —
+ *             + EXTRA_SRC_DIRS, BUILD_INFO.srcDirs olarak damgalanır) — grammar hash YOK
+ *             (saf json→puml/md; dil servisleri kullanılmaz). Kendi .src.mts'leri hash'ten
+ *             DÜŞTÜ (primary emsali: damga CommandDSL kaynağını izler, aracın kendisini değil).
  */
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -39,7 +40,7 @@ if (!existsSync(techReportEntry)) {
 const require = createRequire(resolve(cmdPath, 'package.json'));
 const esbuild = require('esbuild');
 
-// --- BUILD_INFO: srcHash = tech-report kaynak ağacı + bu aracın iki .src.mts'i ---
+// --- BUILD_INFO: srcHash = bundle'a giren src/ dizinleri + EXTRA_SRC_DIRS ---
 function walkTs(dir, acc = []) {
     for (const name of readdirSync(dir).sort()) {
         const full = resolve(dir, name);
@@ -48,16 +49,58 @@ function walkTs(dir, acc = []) {
     }
     return acc;
 }
-const h = createHash('sha256');
-for (const f of walkTs(resolve(cmdPath, 'src/tech-report')).sort()) {
-    h.update(f.slice(cmdPath.length));   // konum-bağımsız relpath → rename/move kaydolur
-    h.update(readFileSync(f));
+function shaTree(...dirs) {
+    const h = createHash('sha256');
+    const files = [];
+    for (const d of dirs) {
+        const abs = resolve(cmdPath, d);
+        if (existsSync(abs)) files.push(...walkTs(abs));
+    }
+    files.sort();
+    for (const f of files) {
+        h.update(f.slice(cmdPath.length));   // konum-bağımsız relpath → rename/move kaydolur
+        h.update(readFileSync(f));
+    }
+    return h.digest('hex').slice(0, 12);
 }
-for (const f of ['report-tech.src.mts', 'report-index.src.mts']) {
-    h.update(f);
-    h.update(readFileSync(resolve(here, f)));
-}
-const srcHash = h.digest('hex').slice(0, 12);
+
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi — Faz-1 şablonu) + EXTRA_SRC_DIRS ---
+// GEREKÇE (EXTRA_SRC_DIRS): manifest.ts import'u TYPE-ONLY → esbuild metafile'da GÖRÜNMEZ
+// (probe srcDirs = [src/generator?, src/tech-report] civarı) ama manifest.json girdi-ŞEMASI
+// src/tech/manifest.ts'te yaşar → şema değişimi raporu bayatlatır. Metafile bunu kaçırır,
+// o yüzden src/tech elle eklenir (damga union'ı; check-staleness damgayı okur, yeniden-hash'ler).
+const EXTRA_SRC_DIRS = ['src/tech'];
+
+const commonOptions = {
+    entryPoints: [resolve(here, 'report-tech.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    // tech-report barrel'ını mutlak yola alias'la — kaynak portable kalır.
+    alias: {
+        '@techreport/index': techReportEntry,
+    },
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri ve
+// skill-dizinindeki .src.mts girdiler ('../…') startsWith('src/') filtresiyle dışarıda kalır.
+const derivedDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)];
+const srcDirs = [...new Set([...derivedDirs, ...EXTRA_SRC_DIRS])].sort();
+const srcHash = shaTree(...srcDirs);
 
 let commit = 'unknown';
 let commitDate = 'unknown';
@@ -70,24 +113,16 @@ try {
 
 const BUILD_INFO = {
     tool: 'report-tech',
+    srcDirs,          // Pass-1 metafile türetimi + EXTRA_SRC_DIRS (check-staleness damgası)
     srcHash,          // rapor üreteç mantığı parmak izi (bayatlık dedektörü) — grammar hash YOK
     commit,
     builtAt: commitDate,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + srcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'report-tech.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'report-tech.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    // tech-report barrel'ını mutlak yola alias'la — kaynak portable kalır.
-    alias: {
-        '@techreport/index': techReportEntry,
-    },
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     banner: { js: '#!/usr/bin/env node' },
     logLevel: 'info',
@@ -104,5 +139,5 @@ writeFileSync(resolve(here, 'REPORT-SNAPSHOT.json'), JSON.stringify({
         '+ report-index (kanonik ortak kopya).',
 }, null, 2) + '\n');
 
-console.error(`\n✓ report-tech.mjs yazıldı · src ${srcHash} · commit ${commit}`);
+console.error(`\n✓ report-tech.mjs yazıldı · src ${srcHash} [${srcDirs.join(' ')}] · commit ${commit}`);
 console.error('✓ REPORT-SNAPSHOT.json yazıldı');

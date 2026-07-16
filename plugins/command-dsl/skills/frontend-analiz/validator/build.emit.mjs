@@ -7,8 +7,12 @@
  *
  * Kullanım: node build.emit.mjs [<CommandDSL-yolu>]   (CMDDSL=<yol> de olur; vars. ../../../CommandDSL)
  *
- * BUILD_INFO: grammarHash = sha256(command-dsl.langium); srcHash = sha256(src/language +
- * src/generator + src/shared, *.ts/*.mts, relpath dahil) → generator/services mantığı değişince yakalanır.
+ * BUILD_INFO iki hash (Faz-2 2026-07-17 — primary build.mjs ile hizalı):
+ *   grammarHash = sha256(command-dsl.langium + shared.langium) — business primary'nin
+ *                 (build.mjs) reçetesiyle AYNI; shared.langium önceden KAÇIYORDU (kör nokta).
+ *   srcHash     = sha256(bundle'a giren TÜM src/ dizinleri — Pass-1 metafile'dan türetilir,
+ *                 BUILD_INFO.srcDirs olarak damgalanır) → generator/services mantığı
+ *                 değişince yakalanır; check-skill-staleness damgayı okuyup yeniden-hash'ler.
  */
 import { createRequire } from 'node:module';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -59,8 +63,43 @@ function shaTree(...dirs) {
     for (const f of files) { h.update(f.slice(cmdPath.length)); h.update(readFileSync(f)); }
     return h.digest('hex').slice(0, 12);
 }
-const grammarHash = sha('command-dsl.langium');
-const srcHash = shaTree('src/language', 'src/generator', 'src/shared');
+// Grammar reçetesi primary (build.mjs) ile AYNI: command-dsl.langium + shared.langium.
+const grammarHash = sha('command-dsl.langium', 'shared.langium');
+
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi — Faz-1 build.mjs şablonu) ---
+// Pass-1 (write:false + metafile, hiçbir dosya yazılmaz): esbuild'in bundle'a GERÇEKTEN
+// aldığı src/ dosyalarından izlenen dizinler türetilir. check-skill-staleness bu damgayı
+// okur → statik-reçete drifti imkansız; gelecekte eklenen cross-dizin import otomatik kapsanır.
+const commonOptions = {
+    entryPoints: [resolve(here, 'emit-operations.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    alias: {
+        '@cmddsl/services': servicesEntry,
+        '@cmddsl/generator': generatorEntry,
+        '@cmddsl/operations': operationsEntry,
+    },
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri
+// startsWith('src/') filtresiyle dışarıda kalır (ZORUNLU — inputs node_modules'ı da içerir).
+const srcDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)].sort();
+const srcHash = shaTree(...srcDirs);
 
 let commit = 'unknown', commitDate = 'unknown';
 try {
@@ -76,26 +115,17 @@ try {
 const BUILD_INFO = {
     grammarVersion: `cdsl-v3.x-${grammarHash}`,
     grammarHash,
-    srcHash,
+    srcDirs,     // Pass-1 metafile'dan türetilen izlenen src/ dizinleri (check-staleness damgası)
+    srcHash,     // generator/services mantığı parmak izi (grammar-dışı bayatlık dedektörü; kapsam = srcDirs)
     commit,
     builtAt: commitDate,
     langium,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + srcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'emit-operations.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'emit-operations.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    alias: {
-        '@cmddsl/services': servicesEntry,
-        '@cmddsl/generator': generatorEntry,
-        '@cmddsl/operations': operationsEntry,
-    },
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     banner: {
         js: [
@@ -107,4 +137,4 @@ await esbuild.build({
     logLevel: 'info',
 });
 
-console.error(`\n✓ emit-operations.mjs yazıldı · grammar ${grammarHash} · src ${srcHash} · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ emit-operations.mjs yazıldı · grammar ${grammarHash} · src ${srcHash} [${srcDirs.join(' ')}] · commit ${commit} · langium ${langium}`);

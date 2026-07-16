@@ -176,4 +176,10 @@ node ${CLAUDE_SKILL_DIR}/validator/report-qa.mjs <qa.json> --reports <dizin> [--
   kullanıcının tercihi).
 - **Bayatlık:** `REPORT-SNAPSHOT.json` aile iki-hash disipliniyle aynı BUILD_INFO'yu
   taşır; rapor bundle'ı da yukarıdaki **aile-eşzamanlı build** kuralına tabidir —
-  tüm aile bundle'ları AYNI repo durumundan birlikte tazelenir.
+  tüm aile bundle'ları AYNI repo durumundan birlikte tazelenir. **EK (Faz-2,
+  2026-07-17):** aile-eşzamanlılık artık sigortalıdır — CommandDSL-src taşıyan HER
+  emit/report bundle'ı (`qcdsl.mjs` + `emit-operations.mjs`) `check-skill-staleness`
+  tarafından kendi `srcDirs`/`srcHash` damgasıyla AYRI denetlenir; kısmi rebuild sessiz
+  kalamaz. `report-qa.mjs` bu bundle-listesinin DIŞINDADIR (kayıtlı): CommandDSL-src
+  taşımaz (yalnız kendi `.src.mts`'leri), CommandDSL değişince rebuild edilmez →
+  denetlenecek canlı-kaynak izi yoktur.

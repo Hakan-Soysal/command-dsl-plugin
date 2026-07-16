@@ -9,7 +9,8 @@
  * bundle'ın gömülü hash'ini (--version BUILD_INFO) canlı repodan yeniden-hesaplanan
  * hash'le karşılaştırır. Fark → STALE (aile-eşzamanlı rebuild gerekir).
  *
- * Kapsam: (1) primary-validator bundle grammarHash + srcHash (HER İKİSİ — srcHash
+ * Kapsam: (1) skill'in CommandDSL-src taşıyan TÜM bundle'ları (primary + emit + report,
+ * Faz-2) grammarHash + srcHash (HER İKİSİ — srcHash
  * grammar-DIŞI validator-mantık driftini yakalar, grammarHash tek başına kaçırırdı);
  * (2) envanter-snapshot damgası (ref doc canlı grammarHash'i içermeli); (3) içerik-
  * kapsaması (gramerdeki keyword'ler ref-doküman'da öğretiliyor mu — hash-eşitliğinin
@@ -20,8 +21,13 @@
  * BUILD_INFO'ya `srcDirs` olarak damgalar; bu araç damgayı okuyup canlı repodan aynı
  * dizinleri yeniden-hash'ler. Reçete build'de, check damgayı okur → reçete-drifti
  * imkansız (eski statik reçete is-analizi'yi tam-kör, qa'yı src/tech'e kör bırakmıştı).
- * NOT: emit/report bundle'ları primary-validator ile AİLE-EŞZAMANLI rebuild edilir
- * (validator.md); primary stale ise tüm aile rebuild edilir → ayrı denetlenmez (kayıtlı).
+ * SÜPERSEDE (2026-07-17 Faz-2): eski karar "emit/report bundle'ları ayrı denetlenmez —
+ * aile-eşzamanlı rebuild yeter" idi; KISMİ-REBUILD DELİĞİ ölçüldü: is-analizi emit
+ * e680de0'da kalmışken aile 2b683d7'deydi ve denetçi 4/4 TAZE diyordu. Artık CommandDSL-src
+ * taşıyan HER emit/report bundle'ı skill-başına BUNDLE LİSTESİYLE ayrı denetlenir (aile-
+ * eşzamanlı rebuild disiplini KALIR; bu denetim onun sigortasıdır). Bundle-başına grammar
+ * reçetesi: undefined → skill grammar'ı; null → grammar denetimi YOK (saf json→rapor aracı);
+ * array → o liste (cross-DSL: emit-operations BUSINESS gramerine bağlıdır).
  *
  * Kullanım: node scripts/check-skill-staleness.mjs [<CommandDSL-yolu>]
  *           CMDDSL=<yol> node scripts/check-skill-staleness.mjs
@@ -69,12 +75,46 @@ function shaTree(...dirs) {
 
 // Grammar reçetesi build.*.mjs'lerle eşleşir (drift olursa yanlış-STALE = loud, güvenli).
 // src reçetesi ise STATİK DEĞİL: bundle'ın srcDirs damgasından okunur; `mustInclude` o damganın
-// asgari-akıl-sağlığı çıpasıdır (skill'in KENDİ dizini damgada yoksa türetim bozuktur → loud STALE).
+// asgari-akıl-sağlığı çıpasıdır (bundle'ın ANA dizini damgada yoksa türetim bozuktur → loud STALE).
+//
+// Skill başına BUNDLE LİSTESİ (Faz-2): CommandDSL-src taşıyan her bundle ayrı kayıt.
+// Bundle.grammar: undefined → skill grammar'ı · null → grammar denetimi YOK · array → o liste.
+// qa report-qa.mjs LİSTEDE YOK (kayıtlı): CommandDSL-src taşımaz (yalnız kendi .src.mts'leri),
+// CommandDSL değişince rebuild edilmez → bu araçla denetlenecek canlı-kaynak izi yok.
+const CDSL_GRAMMAR = ['command-dsl.langium', 'shared.langium'];
 const SKILLS = {
-    'is-analizi-dsl': { bundle: 'validator/validate.mjs', grammar: ['command-dsl.langium', 'shared.langium'], srcField: 'businessSrcHash', mustInclude: 'src/language', langium: 'command-dsl.langium', ref: 'references/dsl-reference.md' },
-    'teknik-analiz':  { bundle: 'validator/validate-tech.mjs', grammar: ['tech-dsl.langium', 'shared.langium'], srcField: 'techSrcHash', mustInclude: 'src/tech', langium: 'tech-dsl.langium', ref: 'references/tech-dsl-reference.md' },
-    'qa-analiz':      { bundle: 'validator/qcdsl.mjs', grammar: ['qa-dsl.langium', 'tech-dsl.langium', 'shared.langium'], srcField: 'qaSrcHash', mustInclude: 'src/qa', langium: 'qa-dsl.langium', ref: 'references/qa-dsl-reference.md' },
-    'frontend-analiz':{ bundle: 'validator/fcdsl.mjs', grammar: ['frontend-dsl.langium', 'shared.langium'], srcField: 'frontendSrcHash', mustInclude: 'src/frontend', langium: 'frontend-dsl.langium', ref: 'references/frontend-dsl-reference.md' },
+    'is-analizi-dsl': {
+        grammar: CDSL_GRAMMAR, langium: 'command-dsl.langium', ref: 'references/dsl-reference.md',
+        bundles: [
+            { bundleRel: 'validator/validate.mjs',        srcField: 'businessSrcHash', mustInclude: 'src/language' },
+            { bundleRel: 'validator/emit-operations.mjs', srcField: 'srcHash',         mustInclude: 'src/generator' },
+            { bundleRel: 'validator/report-business.mjs', srcField: 'srcHash',         mustInclude: 'src/generator' },
+        ],
+    },
+    'teknik-analiz': {
+        grammar: ['tech-dsl.langium', 'shared.langium'], langium: 'tech-dsl.langium', ref: 'references/tech-dsl-reference.md',
+        bundles: [
+            { bundleRel: 'validator/validate-tech.mjs',   srcField: 'techSrcHash', mustInclude: 'src/tech' },
+            { bundleRel: 'validator/emit-manifest.mjs',   srcField: 'techSrcHash', mustInclude: 'src/tech' },
+            { bundleRel: 'validator/emit-operations.mjs', srcField: 'srcHash',     mustInclude: 'src/generator', grammar: CDSL_GRAMMAR },
+            { bundleRel: 'validator/report-tech.mjs',     srcField: 'srcHash',     mustInclude: ['src/tech-report', 'src/tech'], grammar: null },  // src/tech = EXTRA_SRC_DIRS (type-only şema); çıpası da korunur
+        ],
+    },
+    'qa-analiz': {
+        grammar: ['qa-dsl.langium', 'tech-dsl.langium', 'shared.langium'], langium: 'qa-dsl.langium', ref: 'references/qa-dsl-reference.md',
+        bundles: [
+            { bundleRel: 'validator/qcdsl.mjs',           srcField: 'qaSrcHash', mustInclude: 'src/qa' },
+            { bundleRel: 'validator/emit-operations.mjs', srcField: 'srcHash',   mustInclude: 'src/generator', grammar: CDSL_GRAMMAR },
+        ],
+    },
+    'frontend-analiz': {
+        grammar: ['frontend-dsl.langium', 'shared.langium'], langium: 'frontend-dsl.langium', ref: 'references/frontend-dsl-reference.md',
+        bundles: [
+            { bundleRel: 'validator/fcdsl.mjs',           srcField: 'frontendSrcHash', mustInclude: 'src/frontend' },
+            { bundleRel: 'validator/emit-operations.mjs', srcField: 'srcHash',         mustInclude: 'src/generator', grammar: CDSL_GRAMMAR },
+            { bundleRel: 'validator/report-frontend.mjs', srcField: 'srcHash',         mustInclude: ['src/playground', 'src/frontend'] },  // src/frontend = EXTRA_SRC_DIRS (type-only şema); çıpası da korunur
+        ],
+    },
 };
 
 // İçerik-kapsaması: bu keyword'ler grammatik-glue/sentetik; ref-doküman'da AYRI construct olarak
@@ -105,45 +145,69 @@ function bundleInfo(skillDir, bundleRel) {
     return JSON.parse(out.slice(start, end + 1));
 }
 
+// Grammar-sha memoizasyonu: aynı grammar listesi (örn. CDSL_GRAMMAR ×4 bundle) bir kez hash'lenir.
+const grammarShaCache = new Map();
+function shaGrammar(files) {
+    const key = files.join('+');
+    if (!grammarShaCache.has(key)) grammarShaCache.set(key, sha(...files));
+    return grammarShaCache.get(key);
+}
+
 let anyStale = false;
+let totalBundles = 0;
+let freshBundles = 0;
 console.log(`Skill bayatlık-denetimi · CommandDSL: ${cmdPath}\n${'─'.repeat(64)}`);
 
 for (const [name, s] of Object.entries(SKILLS)) {
     const dir = resolve(skillsRoot, name);
     const problems = [];
+    const freshLines = [];
 
-    // (1) bundle hash-tazeliği (grammarHash + srcHash) — CANLI gramere karşı
-    let liveGrammar = null;
-    let stampedDirs = null;
-    try {
-        liveGrammar = sha(...s.grammar);
-        const info = bundleInfo(dir, s.bundle);
-        if (info.grammarHash !== liveGrammar) problems.push(`grammarHash STALE: bundle ${info.grammarHash} ≠ canlı ${liveGrammar}`);
-        // srcDirs DAMGASI: reçete build'in metafile'ından türer, buradan yalnız OKUNUR.
-        // HİBRİT SİGORTA: damga yok/deforme (eski-format bundle) ya da mustInclude çıpası
-        // eksik (metafile-türetim bug'ı) → sessiz-yeşile dönüşemez, loud STALE.
-        const dirs = info.srcDirs;
-        if (!Array.isArray(dirs) || !dirs.length || !dirs.every(d => /^src\/[^/]+$/.test(d)) || !dirs.includes(s.mustInclude)) {
-            problems.push(`srcDirs damgası yok/deforme (eski-format bundle ya da '${s.mustInclude}' kapsam-dışı) → rebuild gerekir`);
-        } else {
-            stampedDirs = dirs;
-            const liveSrc = shaTree(...dirs);
-            const bundleSrc = info[s.srcField];
-            if (bundleSrc !== liveSrc) problems.push(`${s.srcField} STALE: bundle ${bundleSrc} ≠ canlı ${liveSrc} (validator-mantık drifti · izlenen: ${dirs.join(' ')})`);
-        }
-    } catch (e) { problems.push(`bundle okunamadı (${s.bundle}): ${e.message}`); }
+    // (1) bundle hash-tazeliği — skill'in HER CommandDSL-src taşıyan bundle'ı ayrı denetlenir.
+    for (const b of s.bundles) {
+        totalBundles += 1;
+        const bundleProblems = [];
+        // grammar reçetesi: undefined → skill grammar'ı; null → denetim YOK; array → o liste.
+        const grammarFiles = b.grammar === undefined ? s.grammar : b.grammar;
+        try {
+            const info = bundleInfo(dir, b.bundleRel);
+            if (grammarFiles !== null) {
+                const liveG = shaGrammar(grammarFiles);
+                if (info.grammarHash !== liveG) bundleProblems.push(`grammarHash STALE: bundle ${info.grammarHash} ≠ canlı ${liveG} (reçete: ${grammarFiles.join('+')})`);
+            }
+            // srcDirs DAMGASI: reçete build'in metafile'ından (± EXTRA_SRC_DIRS) türer, buradan yalnız OKUNUR.
+            // HİBRİT SİGORTA: damga yok/deforme (eski-format bundle) ya da mustInclude çıpa(lar)ı
+            // eksik (metafile-türetim bug'ı VEYA EXTRA_SRC_DIRS düşmesi) → sessiz-yeşile dönüşemez, loud STALE.
+            // mustInclude dizi olabilir: ana dizin + elle EXTRA_SRC_DIRS (type-only şema) HEP çıpalanır.
+            const dirs = info.srcDirs;
+            const anchors = [].concat(b.mustInclude);
+            if (!Array.isArray(dirs) || !dirs.length || !dirs.every(d => /^src\/[^/]+$/.test(d)) || !anchors.every(mi => dirs.includes(mi))) {
+                bundleProblems.push(`srcDirs damgası yok/deforme (eski-format bundle ya da '${anchors.join("','")}' kapsam-dışı) → rebuild gerekir`);
+            } else {
+                const liveSrc = shaTree(...dirs);
+                const bundleSrc = info[b.srcField];
+                if (bundleSrc !== liveSrc) bundleProblems.push(`${b.srcField} STALE: bundle ${bundleSrc} ≠ canlı ${liveSrc} (mantık drifti · izlenen: ${dirs.join(' ')})`);
+                if (bundleProblems.length === 0) freshLines.push(`${b.bundleRel} · src ${liveSrc} [${dirs.join(' ')}]`);
+            }
+        } catch (e) { bundleProblems.push(`bundle okunamadı: ${e.message}`); }
 
-    // (2) envanter-snapshot damgası: ref-doküman canlı grammarHash'i İÇERMELİ
+        if (bundleProblems.length === 0) freshBundles += 1;
+        else for (const p of bundleProblems) problems.push(`${b.bundleRel}: ${p}`);
+    }
+
+    // (2) envanter-snapshot damgası: ref-doküman canlı grammarHash'i İÇERMELİ (skill grammar'ı; skill-başına BİR kez)
+    const liveGrammar = shaGrammar(s.grammar);
     const refPath = resolve(dir, s.ref);
     const refText = existsSync(refPath) ? readFileSync(refPath, 'utf-8') : '';
-    if (liveGrammar && !refText.includes(liveGrammar)) problems.push(`envanter-damgası STALE: ${s.ref} canlı grammarHash '${liveGrammar}' içermiyor`);
+    if (!refText.includes(liveGrammar)) problems.push(`envanter-damgası STALE: ${s.ref} canlı grammarHash '${liveGrammar}' içermiyor`);
 
-    // (3) içerik-kapsaması: gramerdeki construct-keyword'ler ref-doküman'da öğretiliyor mu
+    // (3) içerik-kapsaması: gramerdeki construct-keyword'ler ref-doküman'da öğretiliyor mu (skill-başına BİR kez)
     const missing = grammarKeywords(s.langium).filter(k => !refText.includes(k));
     if (missing.length > 0) problems.push(`içerik-eksik (keyword gramerde var, ${s.ref}'de yok): ${missing.join(', ')}`);
 
     if (problems.length === 0) {
-        console.log(`✓ ${name} — TAZE (grammar ${liveGrammar} · src ${shaTree(...stampedDirs)} [${stampedDirs.join(' ')}])`);
+        console.log(`✓ ${name} — TAZE ${s.bundles.length}/${s.bundles.length} bundle (grammar ${liveGrammar})`);
+        for (const l of freshLines) console.log(`    · ${l}`);
     } else {
         anyStale = true;
         console.log(`✗ ${name} — STALE:`);
@@ -153,9 +217,9 @@ for (const [name, s] of Object.entries(SKILLS)) {
 
 console.log('─'.repeat(64));
 if (anyStale) {
-    console.log('STALE skill(ler) var → aile-eşzamanlı bundle rebuild + referans/envanter güncelle.');
+    console.log(`STALE var (${freshBundles}/${totalBundles} bundle taze) → aile-eşzamanlı bundle rebuild + referans/envanter güncelle.`);
     console.log('  (rebuild: <skill>/validator/ içindeki her build.*.mjs\'i CMDDSL ile koştur)');
     process.exit(1);
 }
-console.log('Tüm skiller TAZE — bundle/envanter/referans canlı CommandDSL ile senkron.');
+console.log(`Tüm skiller TAZE — ${freshBundles}/${totalBundles} bundle; bundle/envanter/referans canlı CommandDSL ile senkron.`);
 process.exit(0);

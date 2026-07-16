@@ -13,11 +13,12 @@
  *   node build.report.mjs [<CommandDSL-yolu>]
  *   CMDDSL=<yol> node build.report.mjs
  *
- * BUILD_INFO iki-hash (aile disiplini):
+ * BUILD_INFO iki-hash (aile disiplini; Faz-2 2026-07-17):
  *   grammarHash = sha256(frontend-dsl.langium + shared.langium)
  *                 — build.frontend.mjs ile AYNI tanım (fcdsl.mjs ile eşleşme kontrolü)
- *   srcHash     = sha256(src/playground/frontend-salt.ts + frontend-flow.ts
- *                 + src/frontend/**.ts, relpath dahil) — RAPOR üreteç mantığı izi
+ *   srcHash     = sha256(bundle'a giren TÜM src/ dizinleri — Pass-1 metafile'dan türetilir —
+ *                 + EXTRA_SRC_DIRS, BUILD_INFO.srcDirs olarak damgalanır) — RAPOR üreteç
+ *                 mantığı izi (sonuç bugün: src/frontend + src/playground)
  */
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -49,8 +50,8 @@ function sha(...files) {
 }
 const grammarHash = sha('frontend-dsl.langium', 'shared.langium');
 
-// srcHash: rapor bundle'ına giren üreteç kapanışının parmak izi — playground'un
-// iki saf modülü + src/frontend/** (tipler + emit mantığı; over-inclusion bilinçli).
+// srcHash: rapor bundle'ına giren üreteç kapanışının parmak izi (over-inclusion bilinçli:
+// izlenen src/ dizinlerinin TAMAMI hash'lenir — kaçırmaktansa fazladan tetikle, güvenli yön).
 function walkTs(dir, acc = []) {
     for (const name of readdirSync(dir).sort()) {
         const full = resolve(dir, name);
@@ -59,15 +60,60 @@ function walkTs(dir, acc = []) {
     }
     return acc;
 }
-function shaFiles(files) {
+function shaTree(...dirs) {
     const h = createHash('sha256');
-    for (const f of [...files].sort()) {
+    const files = [];
+    for (const d of dirs) {
+        const abs = resolve(cmdPath, d);
+        if (existsSync(abs)) files.push(...walkTs(abs));
+    }
+    files.sort();
+    for (const f of files) {
         h.update(f.slice(cmdPath.length)); // konum-bağımsız relpath → rename/move kaydolur
         h.update(readFileSync(f));
     }
     return h.digest('hex').slice(0, 12);
 }
-const srcHash = shaFiles([saltEntry, flowEntry, ...walkTs(resolve(cmdPath, 'src/frontend'))]);
+
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi — Faz-1 şablonu) + EXTRA_SRC_DIRS ---
+// GEREKÇE (EXTRA_SRC_DIRS): experience.ts import'ları TYPE-ONLY → esbuild metafile'da GÖRÜNMEZ
+// (probe srcDirs = yalnız [src/playground]) ama experience.json girdi-ŞEMASI src/frontend/
+// experience.ts'te yaşar → şema değişimi raporu bayatlatır. Metafile bunu kaçırır, o yüzden
+// src/frontend elle eklenir (damga union'ı; check-staleness damgayı okur, yeniden-hash'ler).
+const EXTRA_SRC_DIRS = ['src/frontend'];
+
+const commonOptions = {
+    entryPoints: [resolve(here, 'report-frontend.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    // Playground üreteçlerini mutlak yola alias'la — kaynak portable kalır.
+    alias: {
+        '@frontenddsl/salt': saltEntry,
+        '@frontenddsl/flow': flowEntry,
+        '@frontenddsl/experience': resolve(cmdPath, 'src/frontend/experience.ts'),
+    },
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri ve
+// skill-dizinindeki .src.mts girdiler ('../…') startsWith('src/') filtresiyle dışarıda kalır.
+const derivedDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)];
+const srcDirs = [...new Set([...derivedDirs, ...EXTRA_SRC_DIRS])].sort();
+const srcHash = shaTree(...srcDirs);
 
 let commit = 'unknown';
 let commitDate = 'unknown';
@@ -81,26 +127,16 @@ try {
 const BUILD_INFO = {
     grammarVersion: `frontend-v1.x-${grammarHash}`,
     grammarHash,
-    srcHash,          // rapor üreteç mantığı parmak izi (bayatlık dedektörü)
+    srcDirs,          // Pass-1 metafile türetimi + EXTRA_SRC_DIRS (check-staleness damgası)
+    srcHash,          // rapor üreteç mantığı parmak izi (bayatlık dedektörü; kapsam = srcDirs)
     commit,
     builtAt: commitDate,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + srcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'report-frontend.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'report-frontend.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    // Playground üreteçlerini mutlak yola alias'la — kaynak portable kalır.
-    alias: {
-        '@frontenddsl/salt': saltEntry,
-        '@frontenddsl/flow': flowEntry,
-        '@frontenddsl/experience': resolve(cmdPath, 'src/frontend/experience.ts'),
-    },
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     banner: { js: '#!/usr/bin/env node' },
     logLevel: 'info',
@@ -109,4 +145,4 @@ await esbuild.build({
 // REPORT-SNAPSHOT.json — kaynak repo + commit + hash kaydı (bayatlama tespiti, insan-okur).
 writeFileSync(resolve(here, 'REPORT-SNAPSHOT.json'), JSON.stringify({ source: 'CommandDSL', ...BUILD_INFO }, null, 2) + '\n');
 
-console.error(`\n✓ report-frontend.mjs yazıldı · grammar ${grammarHash} · src ${srcHash} · commit ${commit}`);
+console.error(`\n✓ report-frontend.mjs yazıldı · grammar ${grammarHash} · src ${srcHash} [${srcDirs.join(' ')}] · commit ${commit}`);
