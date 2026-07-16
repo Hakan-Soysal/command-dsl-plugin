@@ -110,8 +110,13 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs --version
 
 - `grammarHash` — `qa-dsl.langium` + `tech-dsl.langium` + `shared.langium` parmak izi
   (qa birleşik üretimi ÜÇÜNÜ de tüketir — bundle tech'i kendisi parse eder).
-- `qaSrcHash` — `src/qa/**` + `src/shared/**` parmak izi (validation + coverage +
-  emit mantığı; grammar değişmeden yapılan davranış fix'lerini de yakalar).
+- `srcDirs` — bundle'a gerçekten giren `src/` dizinleri (bugün `src/qa` + `src/shared` +
+  `src/tech`; tech custom servisleri qa-dsl-module import zinciriyle bu bundle'a da girer).
+  Build'in Pass-1 esbuild-metafile'ından türetilir ve damgalanır — statik reçete DEĞİL
+  (2026-07-17; eski "tech izi teknik-analiz bundle'ında yaşar" kararı superseded).
+- `qaSrcHash` — `srcDirs`'teki `**.ts/**.mts` ağacının parmak izi (validation + coverage +
+  emit mantığı; grammar değişmeden yapılan davranış fix'lerini de yakalar — `src/tech`
+  fix'leri dahil).
 - `commit` / `builtAt` — kaynak CommandDSL commit'i.
 
 Kullanıcının elinde canlı CommandDSL varsa ve dil davranışı bundle'la çelişiyorsa

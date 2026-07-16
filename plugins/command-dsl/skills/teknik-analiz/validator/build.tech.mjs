@@ -42,12 +42,14 @@ function sha(...files) {
 }
 const grammarHash = sha('tech-dsl.langium', 'shared.langium');
 
-// techSrcHash: bundle'a giren VALIDATION-kaynak kapanışının (src/tech + src/shared, recursive
-// *.ts/*.mts) parmak izi. grammarHash GRAMMAR'ı izler; bu hash ise validation MANTIĞINI izler —
-// böylece manifest.ts/edges.ts/validation.ts gibi grammar-DIŞI bir fix bundle'ı bayatlattığında
+// techSrcHash: bundle'a giren VALIDATION-kaynak kapanışının (recursive *.ts/*.mts) parmak izi.
+// grammarHash GRAMMAR'ı izler; bu hash ise validation MANTIĞINI izler — böylece
+// manifest.ts/edges.ts/validation.ts gibi grammar-DIŞI bir fix bundle'ı bayatlattığında
 // (grammar hash değişmese bile) yakalanır. relpath de hash'lenir → dosya taşıma/yeniden-adlandırma
 // da kaydolur. Over-inclusion bilinçli (generated/ + LSP dosyaları dahil): kaçırmaktansa fazladan
 // tetikle — güvenli yön.
+// KAPSAM DİNAMİK (2026-07-17): hash'lenecek src/ dizinleri statik reçete değil — Pass-1
+// esbuild-metafile'ından türetilir ve BUILD_INFO'ya `srcDirs` olarak damgalanır (aşağı).
 function walkTs(dir, acc = []) {
     for (const name of readdirSync(dir).sort()) {
         const full = resolve(dir, name);
@@ -70,7 +72,38 @@ function shaTree(...dirs) {
     }
     return h.digest('hex').slice(0, 12);
 }
-const techSrcHash = shaTree('src/tech', 'src/shared');
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi) ---
+// Pass-1 (write:false + metafile, hiçbir dosya yazılmaz): esbuild'in bundle'a GERÇEKTEN
+// aldığı src/ dosyalarından izlenen dizinler türetilir. check-skill-staleness bu damgayı
+// okur → statik-reçete drifti imkansız; gelecekte eklenen cross-dizin import otomatik kapsanır.
+const commonOptions = {
+    entryPoints: [resolve(here, 'validate-tech.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    // TechDsl services'i mutlak yola alias'la — kaynak portable kalır.
+    alias: { '@techdsl/services': servicesEntry },
+    // bare import'lar (langium, vscode-languageserver-*) CommandDSL node_modules'ından çözülür.
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri
+// startsWith('src/') filtresiyle dışarıda kalır (ZORUNLU — inputs node_modules'ı da içerir).
+const srcDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)].sort();
+const techSrcHash = shaTree(...srcDirs);
 
 let commit = 'unknown';
 let commitDate = 'unknown';
@@ -90,24 +123,17 @@ try {
 const BUILD_INFO = {
     grammarVersion: `tech-v1.x-${grammarHash}`,
     grammarHash,
-    techSrcHash,          // validation-mantığı parmak izi (grammar-dışı bayatlık dedektörü)
+    srcDirs,              // Pass-1 metafile'dan türetilen izlenen src/ dizinleri (check-staleness damgası)
+    techSrcHash,          // validation-mantığı parmak izi (grammar-dışı bayatlık dedektörü; kapsam = srcDirs)
     commit,
     builtAt: commitDate,
     langium,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + techSrcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'validate-tech.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'validate-tech.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    // TechDsl services'i mutlak yola alias'la — kaynak portable kalır.
-    alias: { '@techdsl/services': servicesEntry },
-    // bare import'lar (langium, vscode-languageserver-*) CommandDSL node_modules'ından çözülür.
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     // ESM bundle içindeki CJS bağımlılıklar (vscode-jsonrpc vb.) runtime'da require çağırır.
     banner: {
@@ -120,4 +146,4 @@ await esbuild.build({
     logLevel: 'info',
 });
 
-console.error(`\n✓ validate-tech.mjs yazıldı · grammar ${grammarHash} · src ${techSrcHash} · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ validate-tech.mjs yazıldı · grammar ${grammarHash} · src ${techSrcHash} [${srcDirs.join(' ')}] · commit ${commit} · langium ${langium}`);

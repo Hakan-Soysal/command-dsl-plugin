@@ -61,7 +61,10 @@ ve tüm yapısal kurallar. Teknik analiz sonradan yapılınca: `contract` satır
 `--version` gömülü BUILD_INFO'yu basar (`SNAPSHOT.json`'da da aynısı):
 
 - `grammarHash` — `frontend-dsl.langium` + `shared.langium` parmak izi (GRAMMAR izi).
-- `frontendSrcHash` — `src/frontend/**` + `src/shared/**` parmak izi (VALIDATION+EMIT
+- `srcDirs` — bundle'a gerçekten giren `src/` dizinleri (bugün `src/frontend` + `src/shared`).
+  Build'in Pass-1 esbuild-metafile'ından türetilir ve damgalanır — statik reçete DEĞİL
+  (2026-07-17); yeni bir cross-dizin import otomatik kapsanır.
+- `frontendSrcHash` — `srcDirs`'teki `**.ts/**.mts` ağacının parmak izi (VALIDATION+EMIT
   mantığı izi; grammar değişmeden yapılan davranış fix'lerini de yakalar).
 - `commit` / `builtAt` — kaynak CommandDSL commit'i.
 

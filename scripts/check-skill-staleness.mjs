@@ -14,6 +14,12 @@
  * (2) envanter-snapshot damgası (ref doc canlı grammarHash'i içermeli); (3) içerik-
  * kapsaması (gramerdeki keyword'ler ref-doküman'da öğretiliyor mu — hash-eşitliğinin
  * yakalayamadığı "construct var ama belgesiz" sınıfı, örn. rule/requires).
+ *
+ * SRC-REÇETESİ BUNDLE-DAMGALIDIR (2026-07-17): hangi src/ dizinlerinin hash'leneceği
+ * artık burada STATİK yazmaz — her build.*.mjs Pass-1 esbuild-metafile'ından türetir ve
+ * BUILD_INFO'ya `srcDirs` olarak damgalar; bu araç damgayı okuyup canlı repodan aynı
+ * dizinleri yeniden-hash'ler. Reçete build'de, check damgayı okur → reçete-drifti
+ * imkansız (eski statik reçete is-analizi'yi tam-kör, qa'yı src/tech'e kör bırakmıştı).
  * NOT: emit/report bundle'ları primary-validator ile AİLE-EŞZAMANLI rebuild edilir
  * (validator.md); primary stale ise tüm aile rebuild edilir → ayrı denetlenmez (kayıtlı).
  *
@@ -37,7 +43,8 @@ if (!existsSync(resolve(cmdPath, 'command-dsl.langium'))) {
     process.exit(2);
 }
 
-// --- build'lerdeki hash reçetelerinin BİREBİR kopyası (drift → yanlış-STALE = fail-safe) ---
+// --- build'lerdeki hash FONKSİYONLARININ mantık-özdeş kopyası (drift → yanlış-STALE = fail-safe).
+//     Hangi src/ dizinlerinin hash'leneceği (reçete) burada değil, bundle'ın srcDirs damgasındadır. ---
 function sha(...files) {
     const h = createHash('sha256');
     for (const f of files) h.update(readFileSync(resolve(cmdPath, f)));
@@ -60,12 +67,14 @@ function shaTree(...dirs) {
     return h.digest('hex').slice(0, 12);
 }
 
-// Reçeteler her build.*.mjs'in BUILD_INFO'suyla eşleşir (drift olursa yanlış-STALE = loud, güvenli).
+// Grammar reçetesi build.*.mjs'lerle eşleşir (drift olursa yanlış-STALE = loud, güvenli).
+// src reçetesi ise STATİK DEĞİL: bundle'ın srcDirs damgasından okunur; `mustInclude` o damganın
+// asgari-akıl-sağlığı çıpasıdır (skill'in KENDİ dizini damgada yoksa türetim bozuktur → loud STALE).
 const SKILLS = {
-    'is-analizi-dsl': { bundle: 'validator/validate.mjs', grammar: ['command-dsl.langium', 'shared.langium'], srcDirs: null, srcField: null, langium: 'command-dsl.langium', ref: 'references/dsl-reference.md' },
-    'teknik-analiz':  { bundle: 'validator/validate-tech.mjs', grammar: ['tech-dsl.langium', 'shared.langium'], srcDirs: ['src/tech', 'src/shared'], srcField: 'techSrcHash', langium: 'tech-dsl.langium', ref: 'references/tech-dsl-reference.md' },
-    'qa-analiz':      { bundle: 'validator/qcdsl.mjs', grammar: ['qa-dsl.langium', 'tech-dsl.langium', 'shared.langium'], srcDirs: ['src/qa', 'src/shared'], srcField: 'qaSrcHash', langium: 'qa-dsl.langium', ref: 'references/qa-dsl-reference.md' },
-    'frontend-analiz':{ bundle: 'validator/fcdsl.mjs', grammar: ['frontend-dsl.langium', 'shared.langium'], srcDirs: ['src/frontend', 'src/shared'], srcField: 'frontendSrcHash', langium: 'frontend-dsl.langium', ref: 'references/frontend-dsl-reference.md' },
+    'is-analizi-dsl': { bundle: 'validator/validate.mjs', grammar: ['command-dsl.langium', 'shared.langium'], srcField: 'businessSrcHash', mustInclude: 'src/language', langium: 'command-dsl.langium', ref: 'references/dsl-reference.md' },
+    'teknik-analiz':  { bundle: 'validator/validate-tech.mjs', grammar: ['tech-dsl.langium', 'shared.langium'], srcField: 'techSrcHash', mustInclude: 'src/tech', langium: 'tech-dsl.langium', ref: 'references/tech-dsl-reference.md' },
+    'qa-analiz':      { bundle: 'validator/qcdsl.mjs', grammar: ['qa-dsl.langium', 'tech-dsl.langium', 'shared.langium'], srcField: 'qaSrcHash', mustInclude: 'src/qa', langium: 'qa-dsl.langium', ref: 'references/qa-dsl-reference.md' },
+    'frontend-analiz':{ bundle: 'validator/fcdsl.mjs', grammar: ['frontend-dsl.langium', 'shared.langium'], srcField: 'frontendSrcHash', mustInclude: 'src/frontend', langium: 'frontend-dsl.langium', ref: 'references/frontend-dsl-reference.md' },
 };
 
 // İçerik-kapsaması: bu keyword'ler grammatik-glue/sentetik; ref-doküman'da AYRI construct olarak
@@ -105,14 +114,22 @@ for (const [name, s] of Object.entries(SKILLS)) {
 
     // (1) bundle hash-tazeliği (grammarHash + srcHash) — CANLI gramere karşı
     let liveGrammar = null;
+    let stampedDirs = null;
     try {
         liveGrammar = sha(...s.grammar);
         const info = bundleInfo(dir, s.bundle);
         if (info.grammarHash !== liveGrammar) problems.push(`grammarHash STALE: bundle ${info.grammarHash} ≠ canlı ${liveGrammar}`);
-        if (s.srcDirs) {
-            const liveSrc = shaTree(...s.srcDirs);
+        // srcDirs DAMGASI: reçete build'in metafile'ından türer, buradan yalnız OKUNUR.
+        // HİBRİT SİGORTA: damga yok/deforme (eski-format bundle) ya da mustInclude çıpası
+        // eksik (metafile-türetim bug'ı) → sessiz-yeşile dönüşemez, loud STALE.
+        const dirs = info.srcDirs;
+        if (!Array.isArray(dirs) || !dirs.length || !dirs.every(d => /^src\/[^/]+$/.test(d)) || !dirs.includes(s.mustInclude)) {
+            problems.push(`srcDirs damgası yok/deforme (eski-format bundle ya da '${s.mustInclude}' kapsam-dışı) → rebuild gerekir`);
+        } else {
+            stampedDirs = dirs;
+            const liveSrc = shaTree(...dirs);
             const bundleSrc = info[s.srcField];
-            if (bundleSrc !== liveSrc) problems.push(`${s.srcField} STALE: bundle ${bundleSrc} ≠ canlı ${liveSrc} (validator-mantık drifti)`);
+            if (bundleSrc !== liveSrc) problems.push(`${s.srcField} STALE: bundle ${bundleSrc} ≠ canlı ${liveSrc} (validator-mantık drifti · izlenen: ${dirs.join(' ')})`);
         }
     } catch (e) { problems.push(`bundle okunamadı (${s.bundle}): ${e.message}`); }
 
@@ -126,7 +143,7 @@ for (const [name, s] of Object.entries(SKILLS)) {
     if (missing.length > 0) problems.push(`içerik-eksik (keyword gramerde var, ${s.ref}'de yok): ${missing.join(', ')}`);
 
     if (problems.length === 0) {
-        console.log(`✓ ${name} — TAZE (grammar ${liveGrammar}${s.srcDirs ? ` · src ${shaTree(...s.srcDirs)}` : ''})`);
+        console.log(`✓ ${name} — TAZE (grammar ${liveGrammar} · src ${shaTree(...stampedDirs)} [${stampedDirs.join(' ')}])`);
     } else {
         anyStale = true;
         console.log(`✗ ${name} — STALE:`);

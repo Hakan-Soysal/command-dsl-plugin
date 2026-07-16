@@ -70,11 +70,19 @@ skills/<skill>/
 - **Snapshot disiplini (§3.4 yol haritası):** bundle bir **grammar + mantık snapshot**'ıdır.
   `build.<x>.mjs` canlı grammar deposundan (**read-only**) tazeler. Bayatlık = İKİ parmak izi:
   `grammarHash` (grammar) + `srcHash` (validation mantığı) — `--version` ikisini basar; biri
-  kaynakla uyuşmazsa bundle bayattır → yeniden build.
+  kaynakla uyuşmazsa bundle bayattır → yeniden build. **srcHash'in kapsamı BUNDLE-DAMGALIDIR
+  (2026-07-17):** validate build'leri iki-pass çalışır — Pass-1 (esbuild `write:false` +
+  `metafile`) bundle'a gerçekten giren `src/` dizinlerini türetir, `BUILD_INFO.srcDirs` olarak
+  damgalar; `srcHash` o dizinlerin ağacından hesaplanır. Statik dizin-reçetesi YOKTUR (eski
+  statik reçete is-analizi'yi tam-kör, qa'yı `src/tech`'e kör bırakmıştı); yeni bir cross-dizin
+  import otomatik kapsanır.
 - **Otomatik bayatlık-denetimi (meta-fix E, 2026-07-08):** `scripts/check-skill-staleness.mjs
   [<CommandDSL-yolu>]` — 4 skil'in bundle hash'ini (İKİ parmak izi), envanter-damgasını VE
   içerik-kapsamasını (gramerdeki keyword ref-doküman'da öğretiliyor mu) **CANLI gramere karşı**
-  denetler. Eski manuel-karşılaştırma bundle'a çıpalıydı (bundle+damga birlikte kayınca yanlış
+  denetler. Src-reçetesini bundle'ın `srcDirs` damgasından OKUR (reçete build'de, check damgayı
+  okur → reçete-drifti imkansız); damga yok/deforme ya da skill'in kendi dizini (`mustInclude`
+  çıpası) kapsam-dışıysa **loud STALE** (hibrit sigorta — sessiz-yeşile dönüşemez). Eski
+  manuel-karşılaştırma bundle'a çıpalıydı (bundle+damga birlikte kayınca yanlış
   "taze"); bu araç canlı CommandDSL'e çıpalar → aylarca-sessiz drift biter. **Tetik:** CommandDSL'in
   `.githooks/pre-push`'u (kardeş plugin'i denetler; `scripts/install-hooks.sh` ile kurulur) — gramer
   push'undan ÖNCE stale bundle push'u durdurur. Gramer/validator değişince DoD: aile-eşzamanlı

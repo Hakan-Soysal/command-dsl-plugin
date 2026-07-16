@@ -15,7 +15,8 @@
  *   grammarHash = sha256(qa-dsl.langium + tech-dsl.langium + shared.langium) → GRAMMAR izi
  *                 (üçü birden: qa birleşik üretim tech'i de tüketir — spec §11;
  *                 teknik-analiz bundle'ıyla tech-grammar eşzamanlılığı bu yüzden kritik)
- *   qaSrcHash   = sha256(src/qa/**.ts + src/shared/**.ts, relpath dahil)
+ *   qaSrcHash   = sha256(bundle'a giren TÜM src/ dizinleri — Pass-1 metafile'dan türetilir,
+ *                 BUILD_INFO.srcDirs olarak damgalanır; bugün src/qa + src/shared + src/tech)
  *                 → VALIDATION+EMIT mantığı izi (grammar-dışı fix'ler de yakalanır)
  */
 import { createRequire } from 'node:module';
@@ -48,12 +49,14 @@ function sha(...files) {
 // ÜÇ grammar birden: src/qa/generated birleşik üretimi qa + tech + shared'dan türer.
 const grammarHash = sha('qa-dsl.langium', 'tech-dsl.langium', 'shared.langium');
 
-// qaSrcHash: bundle'a giren kaynak kapanışının (src/qa + src/shared, recursive
-// *.ts/*.mts) parmak izi. relpath de hash'lenir → taşıma/yeniden-adlandırma
-// kaydolur. Over-inclusion bilinçli (generated/ dahil): kaçırmaktansa fazladan tetikle.
-// NOT: src/tech custom servisleri de bundle'a girer (qa-dsl-module import zinciri) ama
-// hash kapsamı aile sözleşmesince src/qa + src/shared'dır; tech tarafının izi
-// teknik-analiz bundle'ının kendi hash'lerinde yaşar (aile-eşzamanlı-build kuralı).
+// qaSrcHash: bundle'a giren kaynak kapanışının (recursive *.ts/*.mts) parmak izi.
+// relpath de hash'lenir → taşıma/yeniden-adlandırma kaydolur. Over-inclusion bilinçli
+// (generated/ dahil): kaçırmaktansa fazladan tetikle.
+// KAPSAM DİNAMİK (2026-07-17): hash'lenecek src/ dizinleri Pass-1 esbuild-metafile'ından
+// türetilir ve BUILD_INFO'ya `srcDirs` olarak damgalanır. Eski "hash kapsamı src/qa+src/shared,
+// tech izi teknik-analiz'de yaşar" kararı SUPERSEDED — src/tech custom servisleri BU bundle'a
+// da girer (qa-dsl-module import zinciri); kısmi-rebuild'de o deliğin sessiz kaldığı ölçüldü,
+// artık qaSrcHash src/tech'i de kapsar.
 function walkTs(dir, acc = []) {
     for (const name of readdirSync(dir).sort()) {
         const full = resolve(dir, name);
@@ -76,7 +79,44 @@ function shaTree(...dirs) {
     }
     return h.digest('hex').slice(0, 12);
 }
-const qaSrcHash = shaTree('src/qa', 'src/shared');
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi) ---
+// Pass-1 (write:false + metafile, hiçbir dosya yazılmaz): esbuild'in bundle'a GERÇEKTEN
+// aldığı src/ dosyalarından izlenen dizinler türetilir. check-skill-staleness bu damgayı
+// okur → statik-reçete drifti imkansız; gelecekte eklenen cross-dizin import otomatik kapsanır.
+const commonOptions = {
+    entryPoints: [resolve(here, 'qcdsl.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    // QA servisleri/emitter'ı mutlak yola alias'la — kaynak portable kalır.
+    alias: {
+        '@qadsl/services': servicesEntry,
+        '@qadsl/validation': resolve(cmdPath, 'src/qa/qa-dsl-validation.ts'),
+        '@qadsl/manifest': resolve(cmdPath, 'src/qa/qa-manifest.ts'),
+        '@qadsl/waiver-report': resolve(cmdPath, 'src/qa/waiver-report.ts'),
+        '@qadsl/ast': resolve(cmdPath, 'src/qa/generated/ast.ts'),
+    },
+    // bare import'lar (langium, vscode-languageserver-*) CommandDSL node_modules'ından çözülür.
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri
+// startsWith('src/') filtresiyle dışarıda kalır (ZORUNLU — inputs node_modules'ı da içerir).
+const srcDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)].sort();
+const qaSrcHash = shaTree(...srcDirs);
 
 let commit = 'unknown';
 let commitDate = 'unknown';
@@ -96,30 +136,17 @@ try {
 const BUILD_INFO = {
     grammarVersion: `qa-v1.x-${grammarHash}`,
     grammarHash,
-    qaSrcHash,            // validation+emit mantığı parmak izi (grammar-dışı bayatlık dedektörü)
+    srcDirs,              // Pass-1 metafile'dan türetilen izlenen src/ dizinleri (check-staleness damgası)
+    qaSrcHash,            // validation+emit mantığı parmak izi (grammar-dışı bayatlık dedektörü; kapsam = srcDirs)
     commit,
     builtAt: commitDate,
     langium,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + qaSrcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'qcdsl.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'qcdsl.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    // QA servisleri/emitter'ı mutlak yola alias'la — kaynak portable kalır.
-    alias: {
-        '@qadsl/services': servicesEntry,
-        '@qadsl/validation': resolve(cmdPath, 'src/qa/qa-dsl-validation.ts'),
-        '@qadsl/manifest': resolve(cmdPath, 'src/qa/qa-manifest.ts'),
-        '@qadsl/waiver-report': resolve(cmdPath, 'src/qa/waiver-report.ts'),
-        '@qadsl/ast': resolve(cmdPath, 'src/qa/generated/ast.ts'),
-    },
-    // bare import'lar (langium, vscode-languageserver-*) CommandDSL node_modules'ından çözülür.
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     // ESM bundle içindeki CJS bağımlılıklar (vscode-jsonrpc vb.) runtime'da require çağırır.
     banner: {
@@ -142,4 +169,4 @@ writeFileSync(resolve(here, 'SNAPSHOT.json'), JSON.stringify({
     emitOperations: 'frontend-analiz kopyası (2026-07-03; src/business hash\'i is-analizi-dsl kanonik üreticisiyle aynı repo durumundan)',
 }, null, 2) + '\n');
 
-console.error(`\n✓ qcdsl.mjs yazıldı · grammar ${grammarHash} · src ${qaSrcHash} · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ qcdsl.mjs yazıldı · grammar ${grammarHash} · src ${qaSrcHash} [${srcDirs.join(' ')}] · commit ${commit} · langium ${langium}`);

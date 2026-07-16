@@ -81,11 +81,21 @@ Beklenen davranış:
 
 ## 4. Bayatlık (drift) uyarısı
 
-bundled/url snapshot olduğu için grammar değişince bayatlar. Mümkünse:
+bundled/url snapshot olduğu için grammar/validation değişince bayatlar. Mümkünse:
 - Doğrulayıcı kendi `grammarVersion`'ını bassın; config'teki `grammarVersion` ile
   uyuşmuyorsa kullanıcıyı **uyar** ("Doğrulayıcı vX, model vY varsayıyor — sonuç
   güvenilmez olabilir"). Sessiz yanlış-yeşil en kötü senaryodur.
 - Canlı proje erişilebilirken bundle/url'i tercih etme.
+- Gömülü `__BUILD_INFO__` (`node validate.mjs --version`) aile iki-hash disiplinini taşır
+  (2026-07-17'den beri):
+  - `grammarHash` — `command-dsl.langium` + `shared.langium` parmak izi (GRAMMAR izi).
+  - `srcDirs` — bundle'a gerçekten giren `src/` dizinleri (bugün `src/generated` +
+    `src/language` + `src/shared`). Build'in (`build.mjs`) Pass-1 esbuild-metafile'ından
+    türetilir ve damgalanır — statik reçete DEĞİL; yeni bir cross-dizin import otomatik kapsanır.
+  - `businessSrcHash` — `srcDirs`'teki `**.ts/**.mts` ağacının parmak izi (VALIDATION mantığı
+    izi; grammar değişmeden yapılan davranış fix'lerini de yakalar — eski tek-hash dönem
+    bu sınıfa TAM KÖRDÜ).
+  - `commit` / `builtAt` — kaynak CommandDSL commit'i.
 
 ## 5. Düzeltme döngüsü
 

@@ -28,16 +28,20 @@ node <skill>/validator/build.tech.mjs [<CommandDSL-yolu>]
     ile bundle'lanır (TechDsl servisleri + `manifestContent` gömülü). `validate-tech` ile **aynı**
     grammar+src hash'i taşır (aynı `src/tech` kaynağı). `contract` araç içinde doc.uri'ye göre çözülür;
     severity-1 error'da emit ETMEZ (exit 1). `--version` → `grammarHash` + `techSrcHash`.
-- Gömülü `__BUILD_INFO__` İKİ parmak izi taşır (`node validate-tech.mjs --version`):
+- Gömülü `__BUILD_INFO__` İKİ parmak izi + bir damga taşır (`node validate-tech.mjs --version`):
   - **`grammarHash`** = `sha256(tech-dsl.langium + shared.langium)` → **grammar**'ı izler.
-  - **`techSrcHash`** = `sha256(src/tech/**.ts + src/shared/**.ts, relpath dahil)` → **validation
+  - **`srcDirs`** = bundle'a gerçekten giren `src/` dizinleri (bugün `src/shared` + `src/tech`) —
+    build'in Pass-1 esbuild-metafile'ından türetilir ve damgalanır; statik reçete DEĞİL.
+  - **`techSrcHash`** = `sha256(srcDirs'teki **.ts/**.mts ağacı, relpath dahil)` → **validation
     mantığını** izler (manifest/edges/validation/entity-graph/witness/scope…).
 - **Bayatlık (iki eksen):** grammar değişti → `grammarHash` değişir; validation mantığı değişti
   (grammar-DIŞI bir fix — ör. `manifest.ts` görünürlük türevi) → **`techSrcHash` değişir** (grammar
   hash AYNI kalsa bile). İki hash'ten biri kaynakla uyuşmuyorsa bundle bayattır → yeniden build et.
   > **Neden iki hash:** grammar-hash tek başına `src/tech/*.ts` mantık değişikliklerini kaçırırdı
   > (validation `riskOf/modeOf/accessOf/serializeExpr/exprNodeEqual` ve check'leri grammar değil).
-  > `techSrcHash` bu boşluğu kapatır.
+  > `techSrcHash` bu boşluğu kapatır. **Neden damgalı kapsam (2026-07-17):** hash'in hangi
+  > dizinleri kapsadığı build'in metafile'ından türer; `check-skill-staleness` damgayı okur →
+  > kapsam-drifti imkansız, yeni cross-dizin import otomatik kapsanır.
 
 ## 3. Çağrı sözleşmesi
 

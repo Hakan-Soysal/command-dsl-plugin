@@ -13,7 +13,8 @@
  *
  * BUILD_INFO drift tespiti içindir (İKİ hash — teknik-analiz dersi):
  *   grammarHash     = sha256(frontend-dsl.langium + shared.langium) → GRAMMAR izi
- *   frontendSrcHash = sha256(src/frontend/**.ts + src/shared/**.ts, relpath dahil)
+ *   frontendSrcHash = sha256(bundle'a giren TÜM src/ dizinleri — Pass-1 metafile'dan türetilir,
+ *                     BUILD_INFO.srcDirs olarak damgalanır; bugün src/frontend + src/shared)
  *                     → VALIDATION+EMIT mantığı izi (grammar-dışı fix'ler de yakalanır)
  */
 import { createRequire } from 'node:module';
@@ -45,9 +46,11 @@ function sha(...files) {
 }
 const grammarHash = sha('frontend-dsl.langium', 'shared.langium');
 
-// frontendSrcHash: bundle'a giren kaynak kapanışının (src/frontend + src/shared,
-// recursive *.ts/*.mts) parmak izi. relpath de hash'lenir → taşıma/yeniden-adlandırma
-// kaydolur. Over-inclusion bilinçli (generated/ dahil): kaçırmaktansa fazladan tetikle.
+// frontendSrcHash: bundle'a giren kaynak kapanışının (recursive *.ts/*.mts) parmak izi.
+// relpath de hash'lenir → taşıma/yeniden-adlandırma kaydolur. Over-inclusion bilinçli
+// (generated/ dahil): kaçırmaktansa fazladan tetikle.
+// KAPSAM DİNAMİK (2026-07-17): hash'lenecek src/ dizinleri statik reçete değil — Pass-1
+// esbuild-metafile'ından türetilir ve BUILD_INFO'ya `srcDirs` olarak damgalanır (aşağı).
 function walkTs(dir, acc = []) {
     for (const name of readdirSync(dir).sort()) {
         const full = resolve(dir, name);
@@ -70,7 +73,42 @@ function shaTree(...dirs) {
     }
     return h.digest('hex').slice(0, 12);
 }
-const frontendSrcHash = shaTree('src/frontend', 'src/shared');
+// --- İKİ-PASS BUILD (bundle-damgalı dinamik src-reçetesi) ---
+// Pass-1 (write:false + metafile, hiçbir dosya yazılmaz): esbuild'in bundle'a GERÇEKTEN
+// aldığı src/ dosyalarından izlenen dizinler türetilir. check-skill-staleness bu damgayı
+// okur → statik-reçete drifti imkansız; gelecekte eklenen cross-dizin import otomatik kapsanır.
+const commonOptions = {
+    entryPoints: [resolve(here, 'fcdsl.src.mts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    // FrontendDsl servisleri/emitter'ı mutlak yola alias'la — kaynak portable kalır.
+    alias: {
+        '@frontenddsl/services': servicesEntry,
+        '@frontenddsl/experience': resolve(cmdPath, 'src/frontend/experience.ts'),
+        '@frontenddsl/ast': resolve(cmdPath, 'src/frontend/generated/ast.ts'),
+    },
+    // bare import'lar (langium, vscode-languageserver-*) CommandDSL node_modules'ından çözülür.
+    absWorkingDir: cmdPath,
+    nodePaths: [resolve(cmdPath, 'node_modules')],
+};
+
+const probe = await esbuild.build({
+    ...commonOptions,
+    write: false,
+    metafile: true,
+    define: { __BUILD_INFO__: '{}' },
+    logLevel: 'silent',
+});
+// metafile.inputs yolları cmdPath-göreli (absWorkingDir=cmdPath); node_modules girdileri
+// startsWith('src/') filtresiyle dışarıda kalır (ZORUNLU — inputs node_modules'ı da içerir).
+const srcDirs = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => p.startsWith('src/'))
+        .map(p => 'src/' + p.split('/')[1])
+)].sort();
+const frontendSrcHash = shaTree(...srcDirs);
 
 let commit = 'unknown';
 let commitDate = 'unknown';
@@ -90,28 +128,17 @@ try {
 const BUILD_INFO = {
     grammarVersion: `frontend-v1.x-${grammarHash}`,
     grammarHash,
-    frontendSrcHash,      // validation+emit mantığı parmak izi (grammar-dışı bayatlık dedektörü)
+    srcDirs,              // Pass-1 metafile'dan türetilen izlenen src/ dizinleri (check-staleness damgası)
+    frontendSrcHash,      // validation+emit mantığı parmak izi (grammar-dışı bayatlık dedektörü; kapsam = srcDirs)
     commit,
     builtAt: commitDate,
     langium,
 };
 
+// Pass-2: gerçek build (BUILD_INFO artık srcDirs + frontendSrcHash damgasını taşır).
 await esbuild.build({
-    entryPoints: [resolve(here, 'fcdsl.src.mts')],
+    ...commonOptions,
     outfile: resolve(here, 'fcdsl.mjs'),
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node20',
-    // FrontendDsl servisleri/emitter'ı mutlak yola alias'la — kaynak portable kalır.
-    alias: {
-        '@frontenddsl/services': servicesEntry,
-        '@frontenddsl/experience': resolve(cmdPath, 'src/frontend/experience.ts'),
-        '@frontenddsl/ast': resolve(cmdPath, 'src/frontend/generated/ast.ts'),
-    },
-    // bare import'lar (langium, vscode-languageserver-*) CommandDSL node_modules'ından çözülür.
-    absWorkingDir: cmdPath,
-    nodePaths: [resolve(cmdPath, 'node_modules')],
     define: { __BUILD_INFO__: JSON.stringify(BUILD_INFO) },
     // ESM bundle içindeki CJS bağımlılıklar (vscode-jsonrpc vb.) runtime'da require çağırır.
     banner: {
@@ -127,4 +154,4 @@ await esbuild.build({
 // SNAPSHOT.json — kaynak repo + commit + hash kaydı (bayatlama tespiti, insan-okur).
 writeFileSync(resolve(here, 'SNAPSHOT.json'), JSON.stringify({ source: 'CommandDSL', ...BUILD_INFO }, null, 2) + '\n');
 
-console.error(`\n✓ fcdsl.mjs yazıldı · grammar ${grammarHash} · src ${frontendSrcHash} · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ fcdsl.mjs yazıldı · grammar ${grammarHash} · src ${frontendSrcHash} [${srcDirs.join(' ')}] · commit ${commit} · langium ${langium}`);
