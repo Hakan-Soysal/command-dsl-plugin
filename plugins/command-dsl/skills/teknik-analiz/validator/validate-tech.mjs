@@ -9247,7 +9247,7 @@ ${stack}`);
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/validate-tech.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, statSync as statSync2 } from "node:fs";
-import { join, isAbsolute, dirname, resolve } from "node:path";
+import { join, isAbsolute, dirname, basename, resolve } from "node:path";
 
 // node_modules/langium/lib/index.js
 var lib_exports = {};
@@ -42357,28 +42357,48 @@ function createTechDslServices(context) {
 var argv = process.argv.slice(2);
 var jsonMode = argv.includes("--json");
 var wantVersion = argv.includes("--version");
+var singleMode = argv.includes("--single");
 var positional = argv.filter((a2) => !a2.startsWith("--"));
 if (wantVersion) {
   console.log(JSON.stringify(define_BUILD_INFO_default, null, 2));
   process.exit(0);
 }
 if (positional.length === 0) {
-  console.error("Kullan\u0131m: node validate-tech.mjs <dosya.tcdsl | dizin> [--json]");
+  console.error("Kullan\u0131m: node validate-tech.mjs <dosya.tcdsl | dizin> [--json] [--single]");
+  console.error("  --single  dizin-geni\u015Fletme atlan\u0131r: yaln\u0131z verilen DOSYA + import kapan\u0131\u015F\u0131");
+  console.error("            y\xFCklenir (linked contract \xE7\xF6z\xFCm\xFC de\u011Fi\u015Fmez; kapan\u0131\u015F tan\u0131lar\u0131");
+  console.error('            "(kapan\u0131\u015F)" etiketiyle raporlan\u0131r ve say\u0131l\u0131r).');
   process.exit(2);
 }
 var rawTarget = positional[0];
 var target = isAbsolute(rawTarget) ? rawTarget : resolve(process.cwd(), rawTarget);
-var dir;
+var isDir;
 try {
-  dir = statSync2(target).isDirectory() ? target : dirname(target);
+  isDir = statSync2(target).isDirectory();
 } catch {
   console.error(`Hata: yol bulunamad\u0131: ${target}`);
   process.exit(2);
 }
-var tcdslFiles = readdirSync2(dir).filter((f) => f.endsWith(".tcdsl")).sort();
-if (tcdslFiles.length === 0) {
-  console.error(`Hata: ${dir} i\xE7inde .tcdsl dosyas\u0131 yok.`);
-  process.exit(2);
+var dir;
+var tcdslFiles;
+if (singleMode) {
+  if (isDir) {
+    console.error(`Hata: --single bir DOSYA bekler, dizin verildi: ${target}`);
+    process.exit(2);
+  }
+  if (!target.endsWith(".tcdsl")) {
+    console.error(`Hata: --single hedefi bir .tcdsl dosyas\u0131 olmal\u0131: ${target}`);
+    process.exit(2);
+  }
+  dir = dirname(target);
+  tcdslFiles = [basename(target)];
+} else {
+  dir = isDir ? target : dirname(target);
+  tcdslFiles = readdirSync2(dir).filter((f) => f.endsWith(".tcdsl")).sort();
+  if (tcdslFiles.length === 0) {
+    console.error(`Hata: ${dir} i\xE7inde .tcdsl dosyas\u0131 yok.`);
+    process.exit(2);
+  }
 }
 var { shared } = createTechDslServices(NodeFileSystem);
 var documents = shared.workspace.LangiumDocuments;
@@ -42391,9 +42411,7 @@ var diagnostics = [];
 var errors = 0;
 var warns = 0;
 var infos = 0;
-for (let i = 0; i < loaded.length; i++) {
-  const doc = loaded[i];
-  const file = tcdslFiles[i];
+function pushDoc(doc, file, closure2) {
   for (const d of doc.diagnostics ?? []) {
     const sev = d.severity ?? 1;
     if (sev === 1) errors++;
@@ -42406,16 +42424,28 @@ for (let i = 0; i < loaded.length; i++) {
       col: d.range.start.character + 1,
       // 1-tabanlı
       message: d.message,
-      file
+      file,
+      ...closure2 ? { closure: true } : {}
     });
   }
 }
+for (let i = 0; i < loaded.length; i++) {
+  pushDoc(loaded[i], tcdslFiles[i], false);
+}
+if (singleMode) {
+  const inputSet = new Set(loaded.map((d) => d.uri.toString()));
+  const closureDocs = [...documents.all].filter((d) => !inputSet.has(d.uri.toString())).sort((a2, b) => a2.uri.fsPath.localeCompare(b.uri.fsPath));
+  for (const doc of closureDocs) {
+    pushDoc(doc, basename(doc.uri.fsPath), true);
+  }
+}
 var ok = errors === 0;
+var modeTag = singleMode ? " \xB7 --single (dizin-geni\u015Fletme yok; import kapan\u0131\u015F\u0131 dahil)" : "";
 if (jsonMode) {
   console.error(
     `TechDsl do\u011Frulay\u0131c\u0131 \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 src ${define_BUILD_INFO_default.techSrcHash} \xB7 commit ${define_BUILD_INFO_default.commit} \xB7 langium ${define_BUILD_INFO_default.langium}`
   );
-  console.error(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(", ")}`);
+  console.error(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(", ")}${modeTag}`);
   console.error(`\xD6zet: ${errors} error, ${warns} warning, ${infos} info`);
   process.stdout.write(JSON.stringify(diagnostics) + "\n");
 } else {
@@ -42424,10 +42454,11 @@ if (jsonMode) {
     `
 === TechDsl do\u011Frulama \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 src ${define_BUILD_INFO_default.techSrcHash} ===`
   );
-  console.log(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(", ")}
+  console.log(`Dosyalar (${tcdslFiles.length}): ${tcdslFiles.join(", ")}${modeTag}
 `);
   for (const d of diagnostics) {
-    console.log(`${sevName[d.severity] ?? d.severity} ${d.file}:${d.line}: ${d.message}`);
+    const label = d.closure ? `${d.file} (kapan\u0131\u015F)` : d.file;
+    console.log(`${sevName[d.severity] ?? d.severity} ${label}:${d.line}: ${d.message}`);
   }
   if (diagnostics.length === 0) console.log("(temiz \u2014 hi\xE7 diagnostic yok)");
   console.log(`

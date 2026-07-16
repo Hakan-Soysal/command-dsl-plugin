@@ -52,7 +52,7 @@ valid-by-construction + self-check ile ürettim") ve devam et — emit'i engelle
 Doğrulayıcı şöyle çağrılabilmeli ve **makine-okur** çıktı vermeli:
 
 ```
-<runner> <validator> <dosya.cdsl> [--json]
+<runner> <validator> <dosya.cdsl> [--json] [--single]
 ```
 
 Beklenen davranış:
@@ -67,6 +67,17 @@ Beklenen davranış:
   bulunduğu dizindeki tüm `.cdsl`'leri birlikte derler — import kapanışının bir
   üst-kümesidir. Skill'in modül-başına-dosya emit kalıbında ikisi aynıdır; tek
   dizinde alâkasız iki model varsa tek-global-isim-uzayı kontrolü tetiklenebilir.)
+- **`--single` (opt-in):** yukarıdaki dizin-genişletme tuzağının çıkış yolu —
+  yalnız verilen **DOSYA** girdi olur; alâkasız komşu `.cdsl`'ler HİÇ yüklenmez
+  (komşu hataları çıktıya/exit-code'a karışmaz). `import` kapanışı yine TAM
+  çözülür (CommandDSL'in kendi DocumentBuilder'ı kapanışı otomatik çeker).
+  Kapanış dosyalarındaki tanılar **fail-loud**'dur: `(kapanış)` etiketiyle
+  raporlanır VE sayılır (bozuk import hedefi = exit 1); `--json`'da bu tanılar
+  `"closure": true` alanı taşır. `--single` bir **dizinle** çağrılırsa exit 2.
+  ⚠ Ters-yön importer'lar (bu dosyayı import EDEN akış dosyaları) yüklenmediği
+  için dizin moduna göre **F6 kapsama / P8 destek-akışı** INFO-WARN farkı
+  görülebilir — hata değil, doğrulama-birimi farkıdır. Varsayılan davranış
+  (bayraksız = dizin-birimi) DEĞİŞMEDİ.
 
 ## 4. Bayatlık (drift) uyarısı
 

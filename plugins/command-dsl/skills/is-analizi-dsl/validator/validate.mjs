@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "v3.x-94397168f2a1", grammarHash: "94397168f2a1", commit: "1ca2337", builtAt: "2026-07-14T00:49:36+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "v3.x-94397168f2a1", grammarHash: "94397168f2a1", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9247,7 +9247,7 @@ ${stack}`);
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/validate.src.mts
 init_define_BUILD_INFO();
 import { readdirSync as readdirSync2, statSync as statSync2 } from "node:fs";
-import { join, isAbsolute, dirname, resolve } from "node:path";
+import { join, isAbsolute, dirname, basename, resolve } from "node:path";
 
 // node_modules/langium/lib/index.js
 var lib_exports = {};
@@ -39661,6 +39661,58 @@ var CommandDslDocumentBuilder = class extends DefaultDocumentBuilder {
   }
 };
 
+// src/shared/keyword-hints.ts
+init_define_BUILD_INFO();
+var ID_SHAPED = /^[A-Za-z_][A-Za-z0-9_]*$/;
+function keywordHint(word) {
+  return `
+\u0130pucu: '${word}' bu DSL'de rezerve bir anahtar kelimedir (keyword) \u2014 alan/parametre/tan\u0131mlay\u0131c\u0131 ad\u0131 olarak kullan\u0131lamaz; farkl\u0131 bir ad se\xE7in (\xF6rn. '${word}Value').`;
+}
+function sameRange(a2, b) {
+  return a2.start.line === b.start.line && a2.start.character === b.start.character && a2.end.line === b.end.line && a2.end.character === b.end.character;
+}
+var KeywordHintDocumentValidator = class extends DefaultDocumentValidator {
+  coreServices;
+  reservedCache;
+  constructor(services) {
+    super(services);
+    this.coreServices = services;
+  }
+  /** SERT-rezerve keyword seti (lazy — Lexer inşası tamamlandıktan sonraki İLK parse-error'da). */
+  reservedKeywords() {
+    if (!this.reservedCache) {
+      const set = /* @__PURE__ */ new Set();
+      const tokenTypes = this.coreServices.parser.Lexer.definition;
+      for (const node of ast_utils_exports.streamAllContents(this.coreServices.Grammar)) {
+        if (!ast_exports.isKeyword(node) || !ID_SHAPED.test(node.value)) continue;
+        const tt = tokenTypes[node.value];
+        const soft = !!tt?.CATEGORIES?.some((c) => c.name === "ID");
+        if (!soft) set.add(node.value);
+      }
+      this.reservedCache = set;
+    }
+    return this.reservedCache;
+  }
+  processParsingErrors(parseResult, diagnostics2, options) {
+    const before = diagnostics2.length;
+    super.processParsingErrors(parseResult, diagnostics2, options);
+    const reserved = this.reservedKeywords();
+    for (const err of parseResult.parserErrors) {
+      const token = err.token;
+      if (!token || Number.isNaN(token.startOffset)) continue;
+      if (!ID_SHAPED.test(token.image) || !reserved.has(token.image)) continue;
+      const range = cst_utils_exports.tokenToRange(token);
+      for (let i = before; i < diagnostics2.length; i++) {
+        const d = diagnostics2[i];
+        if (d.message === err.message && sameRange(d.range, range)) {
+          d.message += keywordHint(token.image);
+          break;
+        }
+      }
+    }
+  }
+};
+
 // src/language/command-dsl-module.ts
 var CommandDslNameProvider = class extends DefaultNameProvider {
   getName(node) {
@@ -39727,6 +39779,8 @@ var CommandDslModule = {
     CompletionProvider: (services) => new CommandDslCompletionProvider(services)
   },
   validation: {
+    // Keyword-as-fieldname parse-error ipucu (H): mesaj-ekleme, error-count stabil.
+    DocumentValidator: (services) => new KeywordHintDocumentValidator(services),
     // Validator import çözümü için dokümanlara ve dosya sistemi türüne bakar
     CommandDslValidator: (services) => new CommandDslValidator(services)
   }
@@ -39756,28 +39810,48 @@ function createCommandDslServices(context) {
 var argv = process.argv.slice(2);
 var jsonMode = argv.includes("--json");
 var wantVersion = argv.includes("--version");
+var singleMode = argv.includes("--single");
 var positional = argv.filter((a2) => !a2.startsWith("--"));
 if (wantVersion) {
   console.log(JSON.stringify(define_BUILD_INFO_default, null, 2));
   process.exit(0);
 }
 if (positional.length === 0) {
-  console.error("Kullan\u0131m: node validate.mjs <dosya.cdsl | dizin> [--json]");
+  console.error("Kullan\u0131m: node validate.mjs <dosya.cdsl | dizin> [--json] [--single]");
+  console.error("  --single  dizin-geni\u015Fletme atlan\u0131r: yaln\u0131z verilen DOSYA + import kapan\u0131\u015F\u0131");
+  console.error('            y\xFCklenir (kapan\u0131\u015F tan\u0131lar\u0131 "(kapan\u0131\u015F)" etiketiyle raporlan\u0131r ve say\u0131l\u0131r).');
+  console.error("            Dikkat: ters-y\xF6n importer y\xFCklenmez \u2192 F6/P8 kapsama fark\u0131 olabilir.");
   process.exit(2);
 }
 var rawTarget = positional[0];
 var target = isAbsolute(rawTarget) ? rawTarget : resolve(process.cwd(), rawTarget);
-var dir;
+var isDir;
 try {
-  dir = statSync2(target).isDirectory() ? target : dirname(target);
+  isDir = statSync2(target).isDirectory();
 } catch {
   console.error(`Hata: yol bulunamad\u0131: ${target}`);
   process.exit(2);
 }
-var cdslFiles = readdirSync2(dir).filter((f) => f.endsWith(".cdsl")).sort();
-if (cdslFiles.length === 0) {
-  console.error(`Hata: ${dir} i\xE7inde .cdsl dosyas\u0131 yok.`);
-  process.exit(2);
+var dir;
+var cdslFiles;
+if (singleMode) {
+  if (isDir) {
+    console.error(`Hata: --single bir DOSYA bekler, dizin verildi: ${target}`);
+    process.exit(2);
+  }
+  if (!target.endsWith(".cdsl")) {
+    console.error(`Hata: --single hedefi bir .cdsl dosyas\u0131 olmal\u0131: ${target}`);
+    process.exit(2);
+  }
+  dir = dirname(target);
+  cdslFiles = [basename(target)];
+} else {
+  dir = isDir ? target : dirname(target);
+  cdslFiles = readdirSync2(dir).filter((f) => f.endsWith(".cdsl")).sort();
+  if (cdslFiles.length === 0) {
+    console.error(`Hata: ${dir} i\xE7inde .cdsl dosyas\u0131 yok.`);
+    process.exit(2);
+  }
 }
 var { shared } = createCommandDslServices(NodeFileSystem);
 var documents = shared.workspace.LangiumDocuments;
@@ -39794,9 +39868,7 @@ var diagnostics = [];
 var errors = 0;
 var warns = 0;
 var infos = 0;
-for (let i = 0; i < loaded.length; i++) {
-  const doc = loaded[i];
-  const file = cdslFiles[i];
+function pushDoc(doc, file, closure2) {
   for (const d of doc.diagnostics ?? []) {
     const sev = d.severity ?? 1;
     if (sev === 1) errors++;
@@ -39810,16 +39882,28 @@ for (let i = 0; i < loaded.length; i++) {
       // 1-tabanlı
       message: d.message,
       code: extractCode(d.message),
-      file
+      file,
+      ...closure2 ? { closure: true } : {}
     });
   }
 }
+for (let i = 0; i < loaded.length; i++) {
+  pushDoc(loaded[i], cdslFiles[i], false);
+}
+if (singleMode) {
+  const inputSet = new Set(loaded.map((d) => d.uri.toString()));
+  const closureDocs = [...documents.all].filter((d) => !inputSet.has(d.uri.toString())).sort((a2, b) => a2.uri.fsPath.localeCompare(b.uri.fsPath));
+  for (const doc of closureDocs) {
+    pushDoc(doc, basename(doc.uri.fsPath), true);
+  }
+}
 var ok = errors === 0;
+var modeTag = singleMode ? " \xB7 --single (dizin-geni\u015Fletme yok; import kapan\u0131\u015F\u0131 dahil)" : "";
 if (jsonMode) {
   console.error(
     `CommandDSL do\u011Frulay\u0131c\u0131 \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) \xB7 commit ${define_BUILD_INFO_default.commit} \xB7 langium ${define_BUILD_INFO_default.langium}`
   );
-  console.error(`Dosyalar (${cdslFiles.length}): ${cdslFiles.join(", ")}`);
+  console.error(`Dosyalar (${cdslFiles.length}): ${cdslFiles.join(", ")}${modeTag}`);
   console.error(`\xD6zet: ${errors} error, ${warns} warning, ${infos} info`);
   process.stdout.write(JSON.stringify(diagnostics) + "\n");
 } else {
@@ -39828,10 +39912,11 @@ if (jsonMode) {
     `
 === CommandDSL do\u011Frulama \xB7 grammar ${define_BUILD_INFO_default.grammarVersion} (${define_BUILD_INFO_default.grammarHash}) ===`
   );
-  console.log(`Dosyalar (${cdslFiles.length}): ${cdslFiles.join(", ")}
+  console.log(`Dosyalar (${cdslFiles.length}): ${cdslFiles.join(", ")}${modeTag}
 `);
   for (const d of diagnostics) {
-    const where = d.code ? `${d.file}:${d.line} [${d.code}]` : `${d.file}:${d.line}`;
+    const label = d.closure ? `${d.file} (kapan\u0131\u015F)` : d.file;
+    const where = d.code ? `${label}:${d.line} [${d.code}]` : `${label}:${d.line}`;
     console.log(`${sevName[d.severity] ?? d.severity} ${where}: ${d.message}`);
   }
   if (diagnostics.length === 0) console.log("(temiz \u2014 hi\xE7 diagnostic yok)");

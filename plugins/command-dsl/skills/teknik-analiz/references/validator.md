@@ -42,12 +42,20 @@ node <skill>/validator/build.tech.mjs [<CommandDSL-yolu>]
 ## 3. Çağrı sözleşmesi
 
 ```
-node validate-tech.mjs <dosya.tcdsl | dizin> [--json]
+node validate-tech.mjs <dosya.tcdsl | dizin> [--json] [--single]
 node validate-tech.mjs --version
 ```
 - **Birim = DİZİN.** Bir dosya verilirse onu içeren dizin doğrulanır (tüm `.tcdsl` birlikte →
   import/cross-module çözümü). ⚠ Bu yüzden emit dizininde **yalnız o analizin** dosyaları olsun;
   alakasız `.tcdsl`'ler çift-tanım/çakışma üretir.
+- **`--single` (opt-in):** yukarıdaki tuzağın çıkış yolu — dizin-genişletme atlanır, yalnız
+  verilen **DOSYA** girdi olur; alakasız komşu `.tcdsl`'ler HİÇ yüklenmez (komşu hataları
+  çıktıya/exit-code'a karışmaz). `import` (extension-pack) kapanışı yine TAM çözülür
+  (TechDsl'in kendi DocumentBuilder'ı kapanışı otomatik çeker); linked `contract`
+  (operations.json) çözümü de DEĞİŞMEZ. Kapanış dosyalarındaki tanılar **fail-loud**'dur:
+  `(kapanış)` etiketiyle raporlanır VE sayılır (bozuk import hedefi = exit 1); `--json`'da
+  bu tanılar `"closure": true` alanı taşır. `--single` bir **dizinle** çağrılırsa exit 2.
+  Varsayılan davranış (bayraksız = dizin-birimi) DEĞİŞMEDİ.
 - **`--json`:** stdout = saf diagnostics dizisi (`{severity,line,col,message,file}`); stderr =
   meta + özet. **Varsayılan:** insan-okur rapor.
 - **Çıkış kodu:** `0` = error yok · `1` = ≥1 severity-1 error · `2` = kullanım/girdi hatası.
