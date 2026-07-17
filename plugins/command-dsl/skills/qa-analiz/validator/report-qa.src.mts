@@ -30,7 +30,7 @@ const BUILD_INFO = typeof __BUILD_INFO__ !== 'undefined'
 
 type BranchKind =
     | 'success' | 'validationGuard' | 'ruleGuard' | 'anonymousNotValid'
-    | 'anonymousNotProcessable' | 'error' | 'notAuthorized' | 'callFailure';
+    | 'anonymousNotProcessable' | 'error' | 'notAuthorized' | 'callFailure' | 'filtered';
 
 interface Branch { kind: BranchKind; id?: string; via?: string; target?: string }
 interface CoverRef { file: string; test?: string; scenario?: string; step?: number }
@@ -50,7 +50,7 @@ interface QaMerged {
 
 const BRANCH_KINDS = new Set<string>([
     'success', 'validationGuard', 'ruleGuard', 'anonymousNotValid',
-    'anonymousNotProcessable', 'error', 'notAuthorized', 'callFailure',
+    'anonymousNotProcessable', 'error', 'notAuthorized', 'callFailure', 'filtered',
 ]);
 const STATUSES = new Set<string>(['covered', 'waived', 'uncovered']);
 
@@ -110,6 +110,7 @@ function branchLabel(b: Branch): string {
         case 'error': return `error ${b.id}`;
         case 'notAuthorized': return `NotAuthorized${b.via ? ` · ${b.via}` : ''}`;
         case 'callFailure': return `callFailure ${b.target}`;
+        case 'filtered': return `Filtered · ${b.via} (Success + alt-küme)`;   // ADR-0040 satır-kapsayan sorgu dalı (qa-main branchLabel birebir)
     }
 }
 

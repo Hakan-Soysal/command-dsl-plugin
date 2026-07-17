@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "75c96730b7bf", builtAt: "2026-07-17T02:48:47+03:00" };
+var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "1d9bc1a3b29b", builtAt: "2026-07-17T09:40:48+03:00" };
 
 // report-qa.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync } from "node:fs";
@@ -120,7 +120,8 @@ var BRANCH_KINDS = /* @__PURE__ */ new Set([
   "anonymousNotProcessable",
   "error",
   "notAuthorized",
-  "callFailure"
+  "callFailure",
+  "filtered"
 ]);
 var STATUSES = /* @__PURE__ */ new Set(["covered", "waived", "uncovered"]);
 function validateMerged(x, src) {
@@ -182,6 +183,8 @@ function branchLabel(b) {
       return `NotAuthorized${b.via ? ` \xB7 ${b.via}` : ""}`;
     case "callFailure":
       return `callFailure ${b.target}`;
+    case "filtered":
+      return `Filtered \xB7 ${b.via} (Success + alt-k\xFCme)`;
   }
 }
 function coverRefLabel(ref) {
