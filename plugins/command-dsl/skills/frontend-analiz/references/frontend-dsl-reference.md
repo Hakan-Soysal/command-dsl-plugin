@@ -2,12 +2,13 @@
 
 > Kaynak: `CommandDSL/frontend-dsl.langium` + tasarım spec'i v0.4 (karar #1-#48).
 > Uzantı `.fcdsl`; yorum `#`. İfade dili = shared Expr (tech ile AYNI AST; karşılaştırma
-> **tek `=`**, `!=` var, `not` YOK; **`in` üyelik operatörü VAR** — ADR-0038, bkz. §12).
+> **tek `=`**, `!=` var, `not` YOK; **`in` üyelik operatörü VAR** — ADR-0038; **fonksiyon
+> çağrısı `ad(...)` YASAK — validator error**; bkz. §12).
 > Bu dosya yazım-anı başvurusudur; sorgulama soruları `interrogation-playbook.md`'de.
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `a428b3d71944` · src `2c7b1bdb3499` · commit `1ca2337`+ADR-0038 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `a428b3d71944` · src `3454ca193e07` · commit `dcbfd21`+**frontend v2.0.0 (`Call` yasağı — validator error; KIRICI girdi)** + ADR-0038 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 
 Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listeler (zorunlular — experience/screen/uses/region — faz+validator'ca zorlanır). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → eşleşme aday-soru kuyruğuna girer (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok). `entry` ve result-handler-tamlığı zaten validator-warning'idir (sessiz değil) → burada yok; warning geldiğinde ikinci-tur soru olarak ele al.
 
@@ -23,9 +24,10 @@ Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listele
 | `visible-when` (koşullu görünürlük — ROL / client-state / **kayıt-durumu**) | "bu buton yalnız yöneticide (rol) / seçili sekmede / filtreye göre / **sipariş 'pending'ken** görünsün" (UX — güvenlik DEĞİL; izinli path-kökleri: currentUser·session·ekran-param·state/derived·ekran-kaydı[detail/value adı]·row) | 4/7 | ★ | **koşulsuz-görünür-öğe** — koşula bağlı öğe her rolde/client-durumda görünür (rol-tarafı güvenlik açığı DEĞİL — yetki backend'de zorlanır). ✅ SUNUCU entity-durumu (geçersiz-durum-eylemi: Pause/Cancel) ifade edilir — (A) eylemi kaydı yükleyen **list/detail gövdesine** koy → `visible-when: row.status = '…'` (öğe-bağlamı; Karar #51 Fork A, tercih); (B) ayrı region/ekran-seviyesindeyse ekrandaki detail/value kaydına ADIYLA → `visible-when: <detailAdı>.status = '…'` (Fork B; `list` hariç — çok-satırlı) |
 | `paginated infinite\|pager` (list) | "liste çok uzun / sayfa sayfa / sonsuz kaydır" | 4 | ★ (warning-routed) | **sınırsız-liste-yükü** — uzun liste tek seferde çizilir; kayma/bellek çöküşü |
 | `when empty` / `when loading` (query yaşamdöngüsü) | "yüklenirken / hiç kayıt yokken ekranda ne görünsün" | 4 | ○ | **boş/donuk-ekran** — yükleme veya kayıtsız durumda ekran boş kalır; kullanıcı takıldı sanır |
-| UI-event: `on enter/leave` · `timer/interval` · `activate/secondary` | "ekrana girince / N sn sonra / periyodik / uzun-bas / sağ-tık" | 7 | ○ | **tetiklenmeyen-arayüz-olayı** — ekrana-giriş/zamanlayıcı/uzun-bas eylemi bağlanmaz; etkileşim gerçekleşmez |
-| `persisted state` (kalıcı client-state) | "kapatıp açınca kaybolmasın (sepet, taslak)" | 5 | ○ | **kaybolan-taslak** — kapat-aç'ta client-state (sepet/taslak) sıfırlanır |
+| UI-event: `on enter/leave` · `timer/interval` · `activate/secondary` | "ekrana girince / **ekrandan çıkınca-ayrılınca** / N sn sonra / periyodik / uzun-bas / sağ-tık" | 7 | ○ | **tetiklenmeyen-arayüz-olayı** — ekrana-giriş/ekrandan-ayrılış/zamanlayıcı/uzun-bas eylemi bağlanmaz; etkileşim gerçekleşmez |
+| `persisted state` (kalıcı client-state) | "kapatıp açınca kaybolmasın (sepet, taslak)" | 7 | ○ | **kaybolan-taslak** — kapat-aç'ta client-state (sepet/taslak) sıfırlanır |
 | `show a, b` (görüntü-şekli) | "listede/detayda yalnız şu alanlar görünsün" | 4 | ○ | **belirsiz-alan-izdüşümü** — hangi alanların görüneceği tanımsız; varsayılana/tümüne düşer |
+| `alan: Tip` (uses in/out alan tipi) | "bu alan **sayı mı, tarih mi, para mı, metin mi**?" | 2/6 | ○ | **yanlış-girdi-türü** — tipsiz alan üreteçte **string input** default'una düşer; sayı/tarih/para alanı düz metin kutusu olarak gelir (tarih-seçici/numerik klavye/para-maskesi yok) |
 | `step` (form wizard) | "adım adım form / sihirbaz" | 6 | ○ | **çökmüş-sihirbaz** — adımlı form tek sayfaya iner; uzun form bir arada gelir |
 | `@ui.readonly` / `@ui.hidden` (field) · `@ui.emphasis` (field+screen) | "bu alan **salt-okunur** görünsün / formda **gizli** olsun / **vurgulu** çıksın" (frontend-yazarı sunum-ipucu; UX — backend-gerçeği DEĞİL) | 4/6 | ○ | **kayıp-sunum-ipucu** — alan/ekran salt-okunur/gizli/vurgu niyeti manifest'e taşınmaz; üreteç düz-alan üretir (kullanıcı düzenlenmemesi gereken alanı düzenler / gizli alan görünür) |
 
@@ -112,6 +114,9 @@ screen OrderDetail(orderId) "Sipariş Detayı" for Customer {
 
 - Parametreli ekran: nav parametreyi AÇIK geçer (`-> screen OrderDetail(row.id)`);
   ambient route okuma yok. Görünen ad opsiyonel STRING (manifest `title`).
+  **Yokluk-default'u:** başlık yazılmazsa manifest `title: null` emit eder — üreteç başlık
+  İCAT ETMEZ (ekran başlıksız kalır). Skill bu yüzden **her ekrana authored başlık yazdırır**
+  ("ekranın başlığında kullanıcı ne okusun?" — SKILL Faz 3).
 - `region` iç-içe olabilir; `role` kapalı enum: `primary | focus | supplementary |
   navigation | statusbar` (boş bırakılabilir → yerleşim üretecin). Tek responsive-niyet:
   `collapse-when: compact`. Piksel/flex YOK.
@@ -252,3 +257,12 @@ flow SiparisVer = [MyOrders -> NewOrder -> MyOrders] # realizes'siz de legal
   error. `visible-when`/`derived`/`rule`/`set` ifadelerinde kullanılabilir. **`in` HÂLÂ alan/param/
   region adı olarak da SERBESTTİR** (TokenBuilder `EXPR_VOCABULARY`'ye eklenmedi — keywords-as-
   identifiers dengesi korundu; ayrıca bileşen-shape'inin `in { … }` girdi-bloğu ayrı roldedir).
+- **Fonksiyon çağrısı (`ad(...)`) YASAK — validator ERROR.** Gramer (shared Expr `Call`) parse
+  eder ama authored frontend'de **her** fonksiyon çağrısı (`daysBetween(now, due)`, `trim(x)`…)
+  error'dur: **çağrılabilir fonksiyon kümesi hiçbir yerde tanımlı değil** ve üreteç `{node:'call'}`'ı
+  yorumlayamaz (önceden 0-error ile tanımsız sembol üretece sızıyordu — fail-open kapatıldı).
+  Yasak Expr'in geçtiği TÜM yerlerde geçerlidir (state/derived · visible-when · form `rule` ·
+  `set` · arg-binding'ler, iç-içe dahil). Hesap gerekiyorsa **yapısal kur** (derived + aritmetik/
+  karşılaştırma, `sum of`) ya da hesabı **upstream'e taşı** (tech/query çıktı-alanı olarak döndür).
+  Fonksiyon-görünümlü tek meşru yapı: aggregate **`sum of x.y`** (bu bir `Call` DEĞİL; `sum(...)`
+  yazımı zaten parse hatası).

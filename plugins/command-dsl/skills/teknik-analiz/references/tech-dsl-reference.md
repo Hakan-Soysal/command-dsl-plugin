@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `ed720eef8159` · src `762108ad602e` · commit `2b683d7`+**tech v2.1.0 (negatif `Range` sınırı: `lat: Decimal in -90..90` + keyword-as-fieldname lint)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `ed720eef8159` · src `b2c7fe3511f9` · commit `dcbfd21`+**tech v2.1.0** (negatif `Range` sınırı: `lat: Decimal in -90..90` + keyword-as-fieldname lint; +`manifest.ts` imza-refactor 2026-07-17: qa coverage'a duck-typed görünüm — manifest.json çıktısı **bit-özdeş**, sürüm İLERLEMEDİ) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -28,6 +28,8 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `refinement` (op param) + `violations[]` | "bu parametrenin izinli aralığı/kümesi var; sınır-dışı değer NotValid dönmeli — kural kimliğiyle" | 3 | ★ | **sentezlenmeyen-ihlal-payload** — param'a refinement yazılmazsa `violations[]` (ruleId/field/domain, manifest `op.violations`) hiç üretilmez; üreteç/tüketici sınır-dışı red'i kural-bazlı (NotValid ruleId) kuramaz, gevşek/elle doğrulamaya düşer |
 | `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ | **izlenemez-değişiklik** — kim-ne-zaman izi tutulmaz; denetim/uyum kaydı oluşmaz |
 | `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ | **ölçülemez-işlem** — sayaç/metrik yayılmaz; işlem gözlemlenemez |
+| `@http.*` (param-önü) | "`@rest`'li op; 'ID URL'de, gövde JSON'da'; girdi query-string'den/header'dan geliyor" | 3 | ○ | **belirsiz-param-bağlama** — girdinin URL/query/header/gövdeden hangisiyle geldiği bildirilmez (`@http.path`/`@http.query`/`@http.header`/`@http.payload`, §9); bağlama üretecin varsayımına kalır → uç sözleşmesi kayar |
+| return-annotation (`: (@ns.name)* <Tip>`) | "dönüşün wire-detayı/meta işareti (extension `on return` sitesi)" | 3 | ○ | **işaretsiz-dönüş-metası** — dönüş-tipi annotation slotu (gramer: `':' (returnAnnotations)* returns`) boş bırakılır; `on return` extension'ları hiç uygulanamaz |
 | `principal` (top) | "çağıranın kendi profili/organizasyonu/bölgesi/departmanı var; 'kullanıcının X'i' diye bir şeye göre karar veriliyor; token'da/oturumda kim olduğu tutuluyor" | 4 | ★★ | **uydurulmuş-çağıran-attribute'u** — `actor.*` opak kalır; yazar `actor.delegatedOrgIds` gibi **runtime karşılığı OLMAYAN** bir ad yazar ve doğrulayıcı SESSİZ kalır (ÖLÇÜLDÜ: sahada çağıran-bağımsız denetim = herkes herkesin kaydına erişti) |
 | `axis` (top) + `ownership <ad>` (op) | "kendi kaydı DEĞİL ama yetkilendirildiği/delege edildiği kayıtlar; bayi kendi müşterilerini görür; ajans temsil ettiği markaları yönetir; 'bana atanmış olanlar'" | 4 | ★★ | **denotasyonsuz-eksen** — `ownership <ad>` yalnız bir İSİM olur; hangi satırların sete girdiği sözleşmede **hiç yazmaz** → tüketici seti/filtreyi TAHMİN eder (yanlış tahmin = delege-olmayan kayıtlar sızar). `axis` yoksa alternatif: sorgu `permit`'i (tek read-çıpalı op'larda) |
 | `permit when` / ABAC (op) | "yalnız kendi bölgesindeki / kendi departmanındaki kayıt" | 4 | ★ | **öznitelik-yetki-aşımı** — bölge/departman koşulu düşer; aktör kapsam-dışı kayda erişir |
@@ -39,9 +41,11 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `paginated by` (op) | "liste çok büyüyebilir; sayfalama" | 6 | ★ | **sınırsız-sonuç** — büyüyen liste tek seferde döner; bellek/performans çöküşü |
 | `@trigger.*` (op) | "gece 2'de / her ay / kuyruktan / webhook ile / dosya düşünce otomatik başlar" | 3/6 | ★ | **tetiklenmeyen-otomasyon** — zamanlı/kuyruk/webhook başlatıcı hiç koşmaz |
 | `emits` / `on` (op) | "olay yay; başka ekip/modül haber alsın; olayı dinle" | 6 | ○ (sınır-devri) | **kopuk-olay-sınırı** — olay yayılmaz/dinlenmez; modüller-arası sınır-devri gerçekleşmez |
+| event-payload (`event <Ad> { alanlar }`) | "olay yayılıyor; dinleyen taraf şu bilgiyle iş görecek" | 6 | ○ | **boş/eksik-payload** — olay yayılır ama dinleyenin işini görecek alanlar (**ID + değerler**; entity-tipli alan zaten error, §3 wire-DTO) sorulmaz; tüketici kaynak modüle geri-sorgu uydurur |
 | `note` (op) | "en fazla 3 sn / %99.9; X yıl sakla sonra sil; formalize edilemeyen iş-kuralı" | her faz | ★ | **kaybolan-iş-kuralı** — formalize edilemeyen kural (SLA, saklama süresi) makinece hiçbir yere taşınmaz |
 | `readonly` (boundary-op) | "bu dış çağrı yan-etkisiz, salt-okur (sonucu kurala/guarantee'ye girer)" | 7 | ○ (→★ sonucu rule/guarantee besliyorsa) | **yanlış-sınıflı-dış-çağrı** — salt-okur çağrı yan-etkili sanılır; sonucu kurala/guarantee'ye güvenle giremez |
 | `guarantee … traces` (top) | "çapraz-kesen güvence + üst-akış gereksinim ID'si (REQ-…)" | 8 | ○ | **izlenemez-güvence** — çapraz-kesen güvence ve üst-akış gereksinim bağı (REQ-…) kaybolur |
+| `extension` (+ `import` pack) | "kendi annotation şemamız/kurum-metamız var (ör. acme.audit); blessed prelude'lar yetmiyor" | 0 | ○ | **kaybolan-kurum-metası** — kullanıcı-tanımlı annotation şeması (`extension ns.name { on <site> arg … }`, §0) bildirilmez; kurum-metası ya hiç yazılamaz ya bilinmeyen-annotation diagnostiğine düşer |
 
 **`note` disiplini (structural-first):** yapısal karşılığı olanı note'a atma (hassas→`@sensitivity`, çapraz-kesen güvence→`guarantee`); note yalnız **yapısal karşılığı OLMAYAN** için. Saf proje-yönetimi (maliyet/milestone) hiç girmez.
 
@@ -57,8 +61,8 @@ contract './katalog.operations.json'      // LINKED: realizes hedeflerini bu JSO
 standalone                                 // saf-tech: realizes/contract YASAK
 ```
 - **Bu skill her zaman `contract` (linked) üretir** — fidelity check'leri ancak contract'la koşar.
-- `contract` yolu `.tcdsl`'in konumuna göre çözülür. JSON `meta.schemaVersion` **2** olmalı
-  (değilse `checkContractVersion` → error).
+- `contract` yolu `.tcdsl`'in konumuna göre çözülür. JSON `meta.schemaVersion` **3** olmalı
+  (değilse `checkContractVersion` → error; sözleşmeyi güncel İş DSL üreticisiyle yeniden üret).
 
 **`rolemap`** (workspace-kapsamlı, linked-only tablo): business aktörünü tech rol(ler)ine M:N eşler.
 ```
@@ -139,7 +143,7 @@ entity-tipli alan serbest.
 Bir alanın/param'ın taban-tipini (`Int`/`String`/enum) **authored** olarak daraltır. İki biçim
 (gramer: `Refinement: 'in' (range=Range | union=LiteralUnion)`):
 ```
-in 13..120              // Range  — from '..' to  (her ikisi NUMBER)
+in 13..120              // Range  — from '..' to  (her ikisi NUMBER; her uca opsiyonel '-' — v2.1.0: in -90..90)
 in {A | B | C}          // LiteralUnion — UnionVal ('|' UnionVal)*; UnionVal = ID | STRING | NUMBER
 ```
 
@@ -186,10 +190,13 @@ değil:** skaler-dönüşte range/union bir **response-şeması daraltması**dı
 postcondition) → **talep-kanıtı eşiğine tabi gelecek gramer-adayı**, kalıcı-dışlama değil. (İlk metnin "kategori-hatası"
 çerçevesi geri çekildi.)
 
-**Bilinen/kabul edilen ifade-gücü kısıtları (ADR-0034 §Bilinen-kısıt):**
-- **Negatif range ifade edilemez:** `terminal NUMBER` (`shared.langium`) İŞARETSİZDİR → `age: Int in -5..5` parse
-  etmez. Gramer-geneli konvansiyon (guard'daki `age > -5` de parse etmez), refinement-tutarsızlığı değil. Talep gelirse
-  minimal yol: kural-lokal `(neg?='-')?` (işaretli-TERMİNAL asla).
+**Bilinen/kabul edilen ifade-gücü kısıtları (ADR-0034 §Bilinen-kısıt · v2.1.0 ile güncel):**
+- **Negatif range YAZILABİLİR (tech v2.1.0):** gramer `Range: (fromNeg?='-')? from=NUMBER '..'
+  (toNeg?='-')? to=NUMBER` — ADR-0034'ün öngördüğü minimal yol (kural-lokal neg-flag; işaretli-TERMİNAL
+  değil) uygulandı → `lat: Decimal in -90..90` geçerli. Sayısal değeri `rangeBounds` (manifest.ts)
+  TEK-KAYNAK türetir; **işaretli kıyasla** `from < to` STRICT korunur (`in -2..-10` → `range-inverted`).
+  ⚠ Bu genişleme **yalnız Refinement-lokaldir**: `terminal NUMBER` hâlâ işaretsiz → guard/Expr'de
+  negatif literal (`age > -5`) hâlâ parse etmez.
 - **Tek-değer sayısal kısıt ifade edilemez:** `in 5..5` → `from<to` STRICT reddeder; sayısal-union yasak. **First-class
   workaround dilde var:** `validation { x = 5 }` (GuardedExpr, kesin eşitlik). ⚠ `in 5..6` "yaklaşık" workaround YANLIŞ
   (Int inclusive-okumada 6'yı kabul eder) — yalnız guard-eşitliği doğru.

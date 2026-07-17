@@ -42,6 +42,19 @@ testlerin kullanacağı kimlikler. Ama yanlış-kimlik personasını da unutma.
 - Çok-mekanizmalı yetki (karar #21 — MUTLAKA AYRI AYRI sor): "Bu işleme iki ayrı kapı
   var: yanlış rol ve başkasının kaydı. İkisini de mi test edelim, birini gerekçeyle mi
   geçelim?"
+- **Liste dönen op'ta satır-kapsaması = `Filtered` (ADR-0040) — sunum dilini DEĞİŞTİR:**
+  "başkasının kaydına erişince hata alır" diye SUNMA — o dal listede **ASLA gerçekleşmez**
+  (`covers NotAuthorized ownership|permit` orada error'dur). Doğru kalıp: *"Bu bir liste —
+  yetkisiz kullanıcı hata ALMAZ, o kayıtları sadece GÖRMEZ. (a) Bu kullanıcının GÖRMESİ
+  gereken bir kayıt, (b) GÖRMEMESİ gereken bir kayıt — ikisini de tarif eder misin?"* →
+  `covers Filtered <via>` + üyelik İKİLİSİ: (a) `result contains {…}` (aşırı-filtreleme),
+  (b) `result absent {…}` (sızıntı). İkisi de validator-zorunlu (translation.md §A2).
+  - **⚠ persona↔principal değer bağı (DUR-BİLDİR):** axis'li kapsamda MUTLAKA sor:
+    *"çağıranın kapsam-alanı değeri (ör. organizasyonu) neyle kurulacak?"* — persona'nın
+    **öznitelik-değer yüzeyi YOK**; değer ancak principal-binding satırının persona-ref'li
+    seed'iyle kurulur (`seed u1 = <BindingEntity> { <kimlikAlanı>: <persona>, <kapsamAlanı>:
+    "…" }`) ve axis-seed'iyle EŞLEŞMELİ (translation.md §A2 exemplar). Bu bağ kurulamıyorsa
+    testi UYDURMA — DUR ve bildir (§H2 emsali).
 - Waive gerekçesi: "Bu yolu geçiyoruz — **neden**? (Bu gerekçe dosyaya yazılacak ve
   ekip görecek.)" Gerekçe zayıfsa ("vaktimiz yok"): "O zaman bir tarihe erteleyelim —
   ne zamana kadar?" → `until "YYYY-MM-DD"`.
@@ -89,8 +102,10 @@ değeri kullanıcı beyanıyla yaz, doğrulama iddiasında bulunma.
   çıkmasın) ve telafi çağrısı koşmalı mı?" → compensated + not emitted + state absent.
 - Zamana duyarlı guard: "Bu kural tarihe/saate bakıyor — testi sabit bir ana
   pinleyelim mi?" → `given time` (offset'li).
-- Liste dönen op'ta: "dönen listede kaç öğe beklenir / hangi öğe mutlaka olmalı?"
-  → `result count / contains / absent`.
+- Liste dönen op'ta ÜYELİK ÖNCE: "hangi kayıt listede MUTLAKA olmalı, hangi kayıt ASLA
+  görünmemeli?" → `result contains {…}` / `result absent {…}`. `result count` yalnız EK
+  kanıttır (üyelik değildir — yanlış satırlar dönse de sayı tutar); **`Filtered` dalında
+  count-only YASAK** (validator error'lar — üyelik ikilisi zorunlu, ADR-0040).
 
 **⚠ Guard — Outcome sorusu:** "bu test ne dönmeli?" SORULMAZ — S10 türetir; sen
 SÖYLERSİN ("bu test 'başlık gerekli' reddini doğrulayacak").

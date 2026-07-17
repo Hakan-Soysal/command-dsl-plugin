@@ -13,7 +13,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `2d0187885b3b` · src `1583ad03d495` · commit `2b683d7`+**qa v2.1.0 (keyword-as-fieldname lint)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `2d0187885b3b` · src `251cd5a43260` · commit `dcbfd21`+**qa v3.0.0 (refinement dalı: `coverage.ts` `refinementViolation` — KIRICI çıktı)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 >
 > **⚠️ ADR-0040 · qa v2.0.0 — KIRICI (2026-07-16).** İki ayrı şey oldu, karıştırma:
 > 1. **Yankı (yüzey DEĞİL):** tech'e `principal`/`axis` girdi → qa gramerini import ettiği için hash
@@ -26,6 +26,8 @@
 >    artık **error**; `Filtered` + **üyelik ikilisi** (`result contains` + `result absent`) **zorunlu**.
 >    Tekil-dönen op'lar ve `roles`/`scope` **etkilenmez**. Göç ölçüldü: **11 op**.
 >    `qa.json` `branch` union'ı genişledi → kapalı `switch`'li tüketici düşer = **KIRICI**.
+>
+> **⚠️ qa v3.0.0 — KIRICI çıktı (2026-07-17).** `coverage.ts` `Branch` union'ına **`{kind:'refinementViolation', id:'<param>.range|union'}`** eklendi: tech imza-param'ı `in <Range>|{union}` taşıyorsa (ör. `amount: Money in 1..10000`) sınır-ihlali (NotValid) artık **dal-uzayında** — strict onu ya test (`covers guard "<param>.range"`) ya waive ister (eskiden **görünmezdi** → strict yapısal kör). Girdi additive (mevcut `.qa` parse eder; `covers guard "<param>.<kind>"` artık geçerli) ama refinement'lı op'ta yeni `uncovered` warning doğar. Çıktı `branch` union'ı genişledi → kapalı-`switch` tüketici düşer = **KIRICI**. Bkz. `docs/releases/qa-dsl.md` v3.0.0.
 
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
@@ -33,7 +35,7 @@ QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kaps
 
 | Derinlik | Ne zaman gerekli (sinyal) | Faz | Risk | Atlanırsa (adlandırılmış mod) |
 |---|---|---|---|---|
-| Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8) | 4 | ★★ | **yalancı-kapsam (tetiklemeyen-negatif)** — dal "covered" sayılır ama ihlal hiç tetiklenmez; yetkisiz/hatalı yol sessizce geçebilir |
+| Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8). **Refinement dalı** (`covers guard "<param>.range\|union"`, v3.0.0) da bu sınıftadır: girdi gerçekten **sınır-dışı** mı (in-range değer boundary'yi tetiklemez)? | 4 | ★★ | **yalancı-kapsam (tetiklemeyen-negatif)** — dal "covered" sayılır ama ihlal hiç tetiklenmez; yetkisiz/hatalı yol (ya da sınır-içi kalıp boundary'yi ıskalayan refinement testi) sessizce geçebilir |
 | **`Filtered` dalında üyelik İKİLİSİ** (`result contains` + `result absent`) | op `list of X` dönüyor VE `ownership`/`permit` taşıyor → dal `Filtered <via>` (ADR-0040). Filtre **bozukken de `Success` döner** → "çağrı geçti"/"N satır geldi" hiçbir şey kanıtlamaz | 4 | ★★ | **kanıtsız-filtre** — `contains` yoksa **aşırı-filtreleme** (hak edilen satır düşüyor), `absent` yoksa **SIZINTI** (kapsam-dışı satır dönüyor) görünmez. `result count` = **false-negative üreteci** (yanlış satırlar dönse de sayı tutar). *(Validator bu ikiliyi error'la zorlar — tablo tetikleyici olarak durur.)* |
 | `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ | **doğrulanmamış-etki** — dönüş doğru ama kalıcı etki (kayıt/event/dış-çağrı) hiç assert'lenmez; sığ-yeşil test |
 | `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ | **koşulmayan-zaman-dalı** — zaman-koşullu dal "covered" ama zaman ilerletilmediğinden hiç koşmaz |
@@ -207,6 +209,7 @@ when event Proposals.ProposalSubmitted with { proposalId: "p1" }  // consumer op
 | `Success` | Success |
 | `guard "x"` (tech'te validation-check) | NotValid, guard "x" |
 | `guard "x"` (tech'te rule-check) | NotProcessable, guard "x" |
+| `guard "<param>.range\|union"` (tech'te param-refinement — Model C) | NotValid, guard "<param>.<kind>" (= tech `violations[].ruleId` join anahtarı) |
 | `NotValid` (anonim) | NotValid (guard'sız) |
 | `NotProcessable` (anonim) | NotProcessable (guard'sız) |
 | `error E` | E (taksonomi sınıfı = E'nin pini) |
@@ -348,6 +351,7 @@ Bir Operation'ın zorunlu dalları tech kaynağından **türetilir**:
 | Success | her op | `covers Success` |
 | guard-id'li validation check | `validation { … for guard "x" }` | `covers guard "x"` |
 | guard-id'li rule check | `rule { … for guard "y" }` | `covers guard "y"` |
+| refinement sınır-ihlali (NotValid sınıfı) | op imzasında GEÇERLİ param-refinement — `p: T in 1..N` \| `in {a \| b}` (param başına BİR dal; ruleId `<param>.range`/`<param>.union` = tech manifest `violations[].ruleId`; entity-FIELD refinement'ı dal doğurmaz) | `covers guard "<param>.range"` / `covers guard "<param>.union"` (MEVCUT guard yüzeyi — yeni sözdizimi yok) |
 | named error | `throws E` (E: ErrorDecl, taksonomi-pinli) | `covers error E` |
 | NotAuthorized·roles | op'ta `roles` varsa | `covers NotAuthorized roles` |
 | NotAuthorized·ownership | op'ta `ownership` varsa (`public`, `any`, `all` hariç — any/all ihlal-edilemez, dal türetilmez; waive yazma → stale-error §3.5) | `covers NotAuthorized ownership` |

@@ -25,6 +25,9 @@ atanır; buradaki karar "hangi kullanıcı kitlesi + offline gereksinimi". Kayde
   → kararı BELGELE (uncovered-op uyarısı çıkınca cevabın hazır olur).
 - Op başına: "Ekranda bu işlemden hangi bilgiler görünecek?" → out-projeksiyon.
   "Tek kayıt mı dönüyor, liste mi?" → cardinality.
+- Alan başına: "Bu alan **ne türde — sayı mı, tarih mi, para mı, metin mi**?" → alan tipi
+  (`ad: Tip`). Tipsiz alan üreteçte string input default'una düşer (tarih alanı düz metin
+  kutusu olur) — tipi bilineni açıkça yazdır (yanlış-girdi-türü).
 - "Bu işlem hangi durumlarda 'olmaz' der?" → authored `results:` (tech taggable'larını
   kapsa — translation.md §C).
 
@@ -37,6 +40,9 @@ atanır; buradaki karar "hangi kullanıcı kitlesi + offline gereksinimi". Kayde
 - "Uygulama açılınca kullanıcı **ilk saniyede** ne görüyor?" → `entry`. (Cevapsız geçme —
   yazılmazsa 100 developer farklı başlar.)
 - "Ekranları sayalım: [önerini listele]. Kim hangisini görür?" → persona kapıları.
+- Ekran başına: "**Ekranın başlığında** kullanıcı ne okusun?" → görünen ad (`"…"`).
+  Yazılmazsa manifest `title: null` — üreteç başlık icat etmez, validator da uyarmaz
+  (sessiz-eksik). Her ekrana authored başlık yazdır.
 - "Bu ekrana **nereden** gelinir?" — her ekran için cevap olmalı (erişilebilirlik).
   Cevabı olmayan ekran: "nav mı eksik, ekran mı gereksiz?"
 - "İş akışı [bizFlow adı] şu adımlarla yürüyor: … Bu yolculuk hangi ekranlardan geçsin?"
@@ -85,6 +91,9 @@ değişikliği ayrı iştir, sunum beyanı değil.
 ## Faz 6 — Form & hata deneyimi
 
 - "Formda hangi alanlar? Hangileri boş geçilemez? Uzunluk/format sınırı?" → field rules.
+- "Her alan **ne türde — sayı mı, tarih mi, para mı, metin mi**?" → alan tipi (`uses`
+  `in {ad: Tip}`). Tipsiz alan **düz metin kutusu** olarak gelir (numerik klavye /
+  tarih-seçici / para-maskesi çıkmaz) — required/min/max sorulup tip atlanmasın.
 - "Bu alan formda **salt-okunur** mu, **gizli** mi, yoksa **vurgulu** mu görünmeli?"
   → `@ui.readonly` / `@ui.hidden` (field) · `@ui.emphasis` (field VEYA ekran). Frontend-yazarı
   sunum-ipucu (backend-hassas maske DEĞİL — o `@sensitivity`→tech-driven). **Sorulmazsa**

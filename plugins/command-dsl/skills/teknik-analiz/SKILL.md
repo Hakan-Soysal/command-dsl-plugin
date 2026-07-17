@@ -125,6 +125,11 @@ Girdiyi netleştir:
   `node ${CLAUDE_SKILL_DIR}/validator/emit-operations.mjs <girdi.cdsl> <çıktı.operations.json>`
   (`${CLAUDE_SKILL_DIR}` = bu skill'in dizini; CWD kullanıcının cwd'si olduğundan göreli yol kullanma).
   `.cdsl` parse hatalıysa araç emit etmez (exit 1) — **önce iş tarafını düzelttir**, tech'e geçme.
+- **İkisi de YOKSA (ne `operations.json` ne `.cdsl`) → DUR.** Kullanıcıyı `is-analizi-dsl` skill'ine
+  yönlendir (önce iş analizi çıkarılır); bu skill onun ÇIKTISINDAN başlar. **Sessizce `standalone`'a
+  düşme** — standalone TÜM fidelity check'lerini (entity-kapsama, CQRS, güvenlik-zayıflatma, kapsam)
+  içi-boş bırakır ve skill'in "sadakat" amacını geçersiz kılar (bkz. "Neyi neden" §1). Kullanıcı
+  bilinçle saf-tech (iş analizi olmayan) bir model istiyorsa bunu AÇIKÇA onaylat ve belgele.
 
 Sonra sekiz elicitation fazını (Faz 0–7) sırayla yürüt; ardından **opsiyonel** Faz 8'i (guarantee,
 yalnız çapraz-kesen garanti varsa). (Elicit top-down: büyük resim → detay; emit dependency-order.)
@@ -218,6 +223,10 @@ veri yalnız `calls` ile akar.
   yaz — yoksa tahmini yalnızca bir adım öteye taşımış olursun.
 - "Hangi kayıtları okuyor / yaratıyor / güncelliyor / siliyor?" → `access { reads … creates …
   updates … deletes … }`. Komut/sorgu ayrımı access'ten türer (write-sınıfı varsa komut).
+- **`@rest`'li op'ta param-bağlama SOR:** "Hangi girdi **URL'de** (path), hangisi **query/header'da**,
+  hangisi **gövdede** taşınıyor?" → param-önü `@http.path` · `@http.query(name: "…")` ·
+  `@http.header(name: "…")` · `@http.payload` (isimli-arg zorunlu; reference §9). Yazılmazsa
+  bağlama üretecin varsayımına kalır → uç sözleşmesi kayar.
 - "Bu işlemin çağrılması **denetim/uyum kaydı** gerektiriyor mu (finansal işlem, kişisel-veri
   erişimi)?" → op-önü `@audit.logged(category: "…", retention: "…")` (opsiyonel/authored). `retention`
   sınıflandırmadır; saklama gerçeklemesi üreteç-politikası. **SIRA:** annotation prelude'ları
@@ -252,10 +261,16 @@ için validator YOK** → elicitation + Pre-Emit Gate.
 - **Cevap `<relation>` ise (own DEĞİL — "kendi kaydı değil, yetkilendirildiği/delege edildiği
   kayıtlar": bayi kendi müşterilerini, ajans temsil ettiği markaları görür) → `axis` ZORUNLU devam
   sorusu** (ADR-0040): *"Bu 'delege edilmiş' küme **hangi tabloda** tutuluyor? O satırın **hangi
-  sütunu** çağıranla eşleşiyor — çağıranın **hangi alanıyla**? Sette olması için satırın sağlaması
-  gereken **koşullar** neler (iptal/pasif satırlar sette OLMAMALI)?"* → top-level
+  sütunu** çağıranla eşleşiyor — çağıranın **hangi alanıyla**? O satırda **erişilen hedefi gösteren**
+  sütun hangisi — delege edilen müşteri/marka **hangi kolonda** (projeksiyon → `yields`)? Sette
+  olması için satırın sağlaması gereken **koşullar** neler (iptal/pasif satırlar sette OLMAMALI)?"* →
+  top-level
   `axis <ad> { principal … entity <Module>.<Entity>  yields <alan>  scoped by <sütun> = caller.<alan>
   when … }` + op'ta `ownership <ad> by <Entity>.<alan>`.
+  ⚠ Link-tablosu alan **tiplerini VARSAYMA**: kapsam sütunu ile projeksiyon sütunu çoğu zaman
+  **aynı tiptedir** (`agencyOrgId` ve `clientOrgId` — ikisi de OrgId); hangisinin çağıranla
+  eşleştiğini (`scoped by`), hangisinin erişilen hedefi gösterdiğini (`yields`) **kullanıcıdan al**,
+  ad-benzerliğinden çıkarma.
   **Sormazsan `ownership <ad>` yalnız bir İSİM olur** — hangi satırların sete girdiği sözleşmede HİÇ
   yazmaz → tüketici seti **TAHMİN** eder (ÖLÇÜLDÜ: sahada delege-olmayan kayıtlar sızdı). `when`
   sormayı atlarsan validator **warning** verir (koşulsuz axis = revoke edilmiş satırlar sette kalır).
@@ -265,8 +280,10 @@ için validator YOK** → elicitation + Pre-Emit Gate.
   write-hedefi, **sorguda tek read-hedefi**; manifest `effect:'filter'` → üreteç `.Where` emit eder).
 - **`actor.*` yazdıran her cevap `principal` bildirimini TETİKLER** (ADR-0040): *"Çağıranın bu
   özniteliği (bölge/organizasyon/departman) **nerede** duruyor — hangi tabloda, hangi alanda? Kimliği
-  (token/oturum claim'i) hangi ad taşıyor?"* → top-level `principal <Ad> { identity <claim>  binds
-  <Module>.<Entity> by <alan>  roles <r> }`. **Sormazsan `actor.*` OPAK kalır** ve yazar runtime
+  (token/oturum claim'i) hangi ad taşıyor? Bu özne **hangi tech rolleriyle** çağırır?"* → top-level
+  `principal <Ad> { identity <claim>  binds <Module>.<Entity> by <alan>  roles <r> }`.
+  `roles` slot'u **authored**'dır (gramer ≥1 zorlar) — op'un `roles`'undan ÇIKARIM yapma
+  (Değişmez-1 ihlali: çıkarım soru üretir, cevap üretmez); rolleri kullanıcıdan al. **Sormazsan `actor.*` OPAK kalır** ve yazar runtime
   karşılığı OLMAYAN bir ad uydurur — bu ÖLÇÜLMÜŞ kusur sınıfıdır (`actor.delegatedOrgIds`: runtime'da
   öyle bir şey yok + skaler=küme tip-yalanı → sahada **çağıran-bağımsız** denetim). Principal
   bildirilmişse `actor.<alan>` typo'su **error** olur; bildirilmemişse yalnız warning.
@@ -325,7 +342,10 @@ bağımlılığı" error. İş guard'ından ifade sapması → "differs" warning
   `consistency async|durable`. (Cross-write var ama mode yoksa → warning. Cross-module write
   `calls` ile DEĞİL — `emits`/`on`/saga ile.)
 - "Aynı çağrı yanlışlıkla iki kez gelirse ne olmalı?" → `idempotent by <param>`.
-- "Bir olay yayıyor / dinliyor mu?" → `emits <Event>` / `on <Module.Event>`.
+- "Bir olay yayıyor / dinliyor mu?" → `emits <Event>` / `on <Module.Event>`. **Yayıyorsa ZORUNLU
+  devam:** "Dinleyen tarafın işini görmesi için olay **hangi alanları** taşımalı?" → `event <Ad> { … }`
+  payload'ı (entity DEĞİL — entity-tipli alan error; **ID + değerler** taşı; reference §3 wire-DTO).
+  Payload'ı sormazsan olay yayılır ama tüketici kaynak modüle geri-sorgu uydurur.
 - "Liste dönüşü sayfalanıyor mu?" → `paginated by cursor|offset <field> asc|desc`.
 - "Bu işlem **nasıl tetikleniyor / yayınlanıyor**?" → `@rest(...)`/`@internal`/`@trigger.*`.
   (Görünürlük belirsizse → warning.)

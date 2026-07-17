@@ -53,7 +53,23 @@
 - **ownership sütun bağı (HANGİ sütun):** cevap `own`/`<relation>` ise devam sor — "kaydın
   sahibini hangi alan tutuyor (`customerId`? `orgId`?)" → `by <Entity>.<alan>, …`. ⟦bağsız
   `own`/`<relation>` = validator warning; üreteç filtre sütununu tahmin eder — sızıntı riski.⟧
+- **axis — delege-küme denotasyonu (ADR-0040):** cevap `<relation>` ise (own DEĞİL — "kendi kaydı
+  değil, yetkilendirildiği/delege edildiği kayıtlar") **zorunlu devam-bloku**: "Bu delege küme
+  **hangi tabloda** tutuluyor? O satırın **hangi sütunu** çağıranla eşleşiyor — çağıranın **hangi
+  alanıyla** (`scoped by <sütun> = caller.<alan>`)? **Hangi sütun erişilen hedefi gösteriyor** —
+  delege edilen müşteri/marka hangi kolonda (projeksiyon → `yields`)? Sette olmak için satır **hangi
+  koşulu** sağlamalı — iptal/pasif satırlar girmesin (→ `when`)?" → top-level `axis` + op'ta
+  `ownership <ad> by <Entity>.<alan>`. ⟦sormazsan `ownership <ad>` yalnız bir İSİM kalır — hangi
+  satırların sete girdiği sözleşmede hiç yazmaz; tüketici seti TAHMİN eder (delege-olmayan kayıt sızar).⟧
+- **principal — özne şeması (ADR-0040):** cevapta `actor.*` doğuran bir koşul geçiyorsa (çağıranın
+  bölgesi/organizasyonu/departmanı) **devam-bloku**: "Çağıranın kimliği (token/oturum claim'i)
+  **hangi adla** geliyor (`identity`)? Bu öznitelik **hangi tabloda, hangi alanda** duruyor
+  (`binds <Module>.<Entity> by <alan>`)? Bu özne **hangi tech rolleriyle** çağırır (`roles` —
+  authored; op'un roles'undan ÇIKARIM yapma)?" → top-level `principal`. ⟦bildirilmezse `actor.*`
+  OPAK kalır; yazar runtime karşılığı OLMAYAN bir attribute uydurur — çağıran-bağımsız denetim.⟧
 - **permit (öznitelik):** "Rol ve sahiplik dışında bir koşul mu var (ör. sadece kendi bölgesi)?"
+  Sorguda da yazılabilir (ADR-0040: sorguda tek read-hedefi = `resource`; manifest `effect:'filter'`
+  → üreteç `.Where` emit eder).
 - **⚠ Yetki gevşetme:** ownership'i iş'ten geniş yapıyorsan (`own`→`any`) ya da rol yetkili
   aktör kümesini aşıyorsa → **weakening**. Bunu asla sessiz geçme; "iş analizi daha dar diyor,
   genişletme bilinçli mi?" diye sor.
@@ -89,12 +105,29 @@
 - "O sistemin **hangi uçlarını** çağırıyoruz, çağırırken **bildiğimiz input kuralları** neler?" →
   boundary op + serving + validation (caller-side fail-fast).
 
+## H. Guarantee — çapraz-kesen güvence (Faz 8, opsiyonel)
+
+- "Bu tasarımda **birden çok işlemi kesen**, tek bir kayıt/kuralla sınırlı olmayan bir güvence var
+  mı (ör. 'bir hesabın bakiyesi asla negatif olamaz')?" → `guarantee <Ad> "<insan-metni>"` + onu
+  ZATEN tutan yükümlülükleri `by invariant/guard/throws/operation` ile eşle. ⟦traceability: bir
+  yükümlülük silinir/yeniden-adlanırsa validator drift'i derleme-zamanı yakalar.⟧ **Yoksa atla** —
+  bu faz yeni mantık üretmez, yalnız yazılmış yükümlülükleri haritalar.
+- "Üst-akışta bir gereksinim/hedef ID'si var mı (REQ-…)?" → `traces "REQ-…"`. Yapısal yükümlülük
+  yoksa salt-proza güvenceyi op-`note`'a düşür (REQ-ID'yi not metnine yaz) — izlenebilirliği
+  sessizce düşürme.
+- **⚠ Garantiyi mantık zannetme / gereksiz sarma:** guarantee'ye kural YAZMA (mantık
+  invariant/rule/throws'ta kalır); **tek-op yerel** kuralı guarantee'ye sarma. Yükümlülüksüz
+  salt-proza garanti → warning (`note` kullan); yinelenen ad → error.
+
 ## Kapanış — warning'ler ikinci tur sorgudur
 
 Doğrulayıcı warning verdiğinde (ownership-sapma, access-sapma, mode-eksik, görünürlük-belirsiz,
-**kapsam-eksik**), bunu **kullanıcıya geri sor** — warning'ler senin discharge etmediğin
-belirsizlikleri işaret eder. 0 error'a indir; warning'leri ya gider ya da "bilinçli, kabul
-ediyorum" onayıyla belgele.
+**kapsam-eksik**, **`role-mismatch`** [result-filter guard'ı fail-semantiğine eşlenmiş — eşlemeyi
+KALDIR, üreteç filtreyi operations.json'dan uygular, ADR-0039], **koşulsuz-axis** [`when`-siz axis:
+kapsamdaki HER satır sete girer — yaşam-döngüsü durumu varsa `when` ekletin], **opak-actor**
+[principal'sız `actor.*` — principal bildirimini sor, §D]), bunu **kullanıcıya geri sor** —
+warning'ler senin discharge etmediğin belirsizlikleri işaret eder. 0 error'a indir; warning'leri
+ya gider ya da "bilinçli, kabul ediyorum" onayıyla belgele.
 
 **Kapsam (op-düzeyi fidelity):** Linked doğrulayıcı, sözleşmedeki (operations.json) **hiçbir
 tech operation'a bağlanmamış** business-op'ları tek-toplu warning olarak listeler. Bu, iş'in tam

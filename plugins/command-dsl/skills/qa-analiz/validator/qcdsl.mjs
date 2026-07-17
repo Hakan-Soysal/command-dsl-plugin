@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-2d0187885b3b", grammarHash: "2d0187885b3b", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "cd53b16a67b8", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-2d0187885b3b", grammarHash: "2d0187885b3b", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "251cd5a43260", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "dcbfd21", builtAt: "2026-07-17T10:46:33+03:00", langium: "4.2.4" };
   }
 });
 
@@ -54087,6 +54087,7 @@ function branchKey(b) {
   switch (b.kind) {
     case "validationGuard":
     case "ruleGuard":
+    case "refinementViolation":
     case "error":
       return `${b.kind}:${b.id}`;
     case "notAuthorized":
@@ -54171,6 +54172,7 @@ function opShape(op) {
     hasAnonValidation,
     hasAnonRule,
     duplicateGuardIds: [...dup],
+    refinementRuleIds: violationsOf(op).map((v) => v.ruleId),
     throwsErrors,
     mechanisms: MECHANISM_ORDER.filter((m) => mechanismsPresent.has(m)),
     calls,
@@ -54211,6 +54213,7 @@ function eventQualified(e) {
 }
 function branchUniverse(shape) {
   const out = [{ kind: "success" }];
+  for (const id of shape.refinementRuleIds) out.push({ kind: "refinementViolation", id });
   for (const g of shape.validationGuards) out.push({ kind: "validationGuard", id: g });
   for (const g of shape.ruleGuards) out.push({ kind: "ruleGuard", id: g });
   for (const e of shape.throwsErrors) out.push({ kind: "error", id: e.name });
@@ -54239,7 +54242,14 @@ function coversToBranch(covers, shape) {
     }
     if (inVal) return { branch: { kind: "validationGuard", id: covers.guardId }, problem: null };
     if (inRule) return { branch: { kind: "ruleGuard", id: covers.guardId }, problem: null };
-    return { branch: null, problem: `'${shape.qualified}' operasyonunda "${covers.guardId}" guard'\u0131 yok.` };
+    const rid = unqC(covers.guardId);
+    if (shape.refinementRuleIds.includes(rid)) {
+      return { branch: { kind: "refinementViolation", id: rid }, problem: null };
+    }
+    return {
+      branch: null,
+      problem: `'${shape.qualified}' operasyonunda "${covers.guardId}" guard'\u0131 yok.` + (shape.refinementRuleIds.length > 0 ? ` (refinement dallar\u0131: ${shape.refinementRuleIds.join(", ")})` : "")
+    };
   }
   if (covers.error) {
     const target = covers.error.ref;
@@ -54322,6 +54332,11 @@ function expectedOutcome(branch, shape) {
       return { class: "NotValid" };
     case "anonymousNotProcessable":
       return { class: "NotProcessable" };
+    // Model C (F3.1b): param-refinement ihlali → NotValid; `guard` alanı tech manifest
+    // `violations[].ruleId` ile AYNI id'yi taşır (tüketici join anahtarı — yeni alan açılmaz,
+    // `filtered` kararının "alanı yaz ya da hiç yazma" ilkesiyle tutarlı minimal yüzey).
+    case "refinementViolation":
+      return { class: "NotValid", guard: branch.id };
     case "error": {
       const decl = shape.throwsErrors.find((e) => e.name === branch.id);
       if (!decl) throw new Error(`eri\u015Filmez: '${branch.id}' error dal\u0131 throws'suz t\xFCretilemez`);
@@ -55809,6 +55824,8 @@ function branchDisplay(b) {
       return "NotValid (anonim)";
     case "anonymousNotProcessable":
       return "NotProcessable (anonim)";
+    case "refinementViolation":
+      return `guard "${b.id}" (refinement s\u0131n\u0131r-ihlali)`;
     case "error":
       return `error ${b.id}`;
     case "notAuthorized":

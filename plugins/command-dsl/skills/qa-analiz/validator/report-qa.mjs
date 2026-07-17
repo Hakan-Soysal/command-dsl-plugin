@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "1d9bc1a3b29b", builtAt: "2026-07-17T09:40:48+03:00" };
+var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "1d9bc1a3b29b", builtAt: "2026-07-17T09:50:57+03:00" };
 
 // report-qa.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync } from "node:fs";

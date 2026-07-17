@@ -69,9 +69,10 @@ Doğrulayıcı yakalar ama döngü israfıdır — emit'ten önce şunları kend
   (karar #18): op-başına `branches[]` (covered/waived/uncovered + `coveredBy[]`),
   flows/processes presence durumu. "Her dal kapalı" iddiasının makine-okur KANITI
   budur — bu yüzden merged üretimi ertelenemez (frontend'ten bilinçli fark).
-- **Determinizm (S13):** branch türetim-sırası sabit (Success → validation-guard'lar
-  kaynak-sırası → rule-guard'lar → throws → NotAuthorized alt-dalları
-  roles,ownership,permit,scope → anonimler → callFailure'lar calls-sırası);
+- **Determinizm (S13):** branch türetim-sırası sabit (Success → refinement sınır-ihlali
+  dalları param kaynak-sırası → validation-guard'lar kaynak-sırası → rule-guard'lar →
+  throws → NotAuthorized alt-dalları roles,ownership,permit,scope → anonimler →
+  callFailure'lar calls-sırası);
   tests/scenarios kaynak-sırası; yollar repo-köküne göre normalize (basename değil);
   step-indeksi advanceTime satırları DAHİL sayılır; `until` verbatim taşınır (İQ6).
   Aynı girdi → bayt-aynı çıktı; diff'lenebilir.

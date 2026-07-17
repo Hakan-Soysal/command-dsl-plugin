@@ -1,9 +1,12 @@
 # Doğrulayıcı: Konum Çözümleme + Düzeltme Döngüsü
 
 Üretilen `.cdsl`'i gerçek CommandDSL doğrulayıcısıyla parse-temiz kanıtlamak en
-güçlü "hatasız" garantisidir. Doğrulayıcı **opsiyoneldir**: bulunursa kullan,
-bulunmazsa valid-by-construction + tutarlılık self-check'iyle (bkz.
-`consistency-and-emit.md`) devam et.
+güçlü "hatasız" garantisidir. Doğrulayıcı **GÖMÜLÜdür** (`validator/validate.mjs`,
+`${CLAUDE_SKILL_DIR}` ile CWD-bağımsız çağrılır) — **her zaman vardır**, "varsa"
+değil. Doğrulama atlanabilir bir adım DEĞİLDİR: **0 error olmadan döngüden çıkma**
+(SKILL.md "Doğrulama + operations.json" ile aynı disiplin). Valid-by-construction
++ tutarlılık self-check'i (bkz. `consistency-and-emit.md`) doğrulayıcının yerine
+GEÇMEZ — onun önündeki emniyet katmanıdır; son söz doğrulayıcınındır.
 
 > Not: Doğrulayıcı artefaktının paketlenmesi (standalone bundle / canlı projeye
 > köprü / indirilebilir paket) bu skill'in dışında, ayrıca hallediliyor. Bu dosya
@@ -44,8 +47,11 @@ Skill, kendi dizininde `validator.config.json` arar (yoksa varsayılan zincir).
 2. **bundled** — `bundledPath` dosyası varsa onu çalıştır.
 3. **url** — `url` doluysa indir → `cacheDir`'e koy → çalıştır.
 
-Hiçbiri yoksa: kullanıcıya bir satır bilgi ver ("Doğrulayıcı bulunamadı;
-valid-by-construction + self-check ile ürettim") ve devam et — emit'i engelleme.
+Gömülü rejimde **bundled her zaman vardır** — zincirin tabanıdır; "hiçbir kaynak
+çalışmıyor" normal bir durum DEĞİL, kurulum kusurudur. Böyle bir kusurda
+doğrulamasız devam ETME ve çıktıyı "doğrulanmış" diye SUNMA: kullanıcıya durumu
+bildir, doğrulayıcı çalışır hâle gelmeden emit'i tamamlanmış sayma — ÇİFT-SIFIR'ın
+0-error yarısı kanıtsız kapanamaz.
 
 ## 3. Çağırma sözleşmesi
 
@@ -103,7 +109,10 @@ bundled/url snapshot olduğu için grammar/validation değişince bayatlar. Müm
 2. **severity 1 (error)** varsa: emit "başarısız" sayılır. Diagnostics'i oku,
    ilgili katmana dön (genelde tutarlılık self-check'inde kaçırdığın bir referans
    ya da tip-uyumu), düzelt, **yeniden doğrula**. 0 error olana kadar tekrarla.
-3. **severity 2 (warning):** değerlendir; çoğu gerçek sorun işaretidir, düzelt.
+3. **severity 2 (warning) = çözülmemiş soru (Değişmez-3):** skill warning'i KENDİ
+   uydurduğu düzeltmeyle kapatamaz — kapanış AUTHORED'dır: (a) kullanıcıya sor →
+   cevaba göre düzelt, (b) gerekçeli kabul (gerekçe `note`/çıktı özetine düşülür),
+   ya da (c) yanlış-pozitif olduğunu göster. Sessiz auto-fix YASAK.
 4. **severity 3 (info):** bilinçli olabilir (ör. P8 destek-akışı). Geçiyorsan
    **neden** geçtiğini dokümanda/çıktı özetinde belirt — sessizce normalize etme.
 5. Sonuçta kullanıcıya kısa özet ver: "Doğrulandı: 0 error, N warning (şu nedenle

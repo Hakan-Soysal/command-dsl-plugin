@@ -395,7 +395,7 @@ Branch-coverage tam olsa bile YETMEZ: bir dal SAYILDI diye gerçekten test edild
    waive kaldı mı? Sorulmamış her ★'ı göster ya da tek soruyla kapat.
 3. **Sınır-devri (köprü süpürmesi):** çok-aktör bir süreç ya da event-zinciri (üretici `emits` →
    tüketici `on`) var mı? Tek-op testi sınırı geçmez — bir `scenario realizes process` gerekli mi?
-   (NOT: uçtan-uca üretici→tüketici gözlemi qa v1'de YOK — reference §4.5; sınırı **bildir**, niyeti
+   (NOT: uçtan-uca üretici→tüketici gözlemi qa v1'de YOK — playbook §P/P9: emit edilen event consumer'ı TETİKLEMEZ; consumer'ın izole testi `when event` (reference §7). Sınırı **bildir**, niyeti
    senaryoyla yakala, kapsayamadığın parçayı gerekçeyle waive'le.)
 
 **Kalan warning = çözülmemiş soru (üçüncü hâl — error değil, sessiz-eksik değil).** Warning'i skill

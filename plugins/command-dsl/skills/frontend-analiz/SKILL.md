@@ -182,6 +182,9 @@ açıkça yazdırmak.
 - Her op için: "Ekranda bu işlemin **hangi girdileri/çıktıları** görünür?" →
   `uses command|query Ad realizes <BizOpID> { in {…} out [list of] {…} results: … }`.
   - **Tekil mi liste mi** AÇIK işaretlenir: `out list of {…}` (liste) vs `out {…}` (tekil).
+  - **Alan TİPİNİ de sor** — "bu alan **sayı mı, tarih mi, para mı, metin mi**?" → `ad: Tip`.
+    Tipsiz alan üreteçte **string input** default'una düşer (tarih alanı düz metin kutusu olur —
+    envanter ○ "yanlış-girdi-türü"); tipi bilinen her alana açıkça yazdır.
   - `results:` authored kümedir; tech-manifest'in üretebildiklerini (throws→taksonomi +
     validation→NotValid) kapsamalı — eksikse divergence warning gelir.
   - Yerel ad ≠ business ad ise `realizes` AÇIK yaz; ad aynıysa by-name kısayolu çalışır
@@ -204,6 +207,9 @@ warning / results-divergence warning), `checkUsesShape`, `checkUncoveredExposedO
 - "Hangi ekranlar var; **kim** görür?" → `screen Ad(param) "Görünen Ad" for Persona`.
   Ekran girdisi parametreyle açık geçer (`screen Detay(id)`); persona adları actors[]
   ile cross-check edilir. Shared ekranda `for` YASAK.
+- "Ekranın **başlığında** kullanıcı ne okusun?" → görünen ad (`"Görünen Ad"`). Yazılmazsa
+  manifest `title: null` emit eder — üreteç başlık İCAT ETMEZ (validator da uyarmaz =
+  sessiz-eksik). **Her ekrana authored başlık yazdır.**
 - "Nereden nereye gidilir?" → aksiyon-nav (`-> screen X(arg)`), açık `nav A -> B`,
   ve iş akışı yolculukları: `flow Ad realizes flow <BizFlowID> = [Ekran -> Ekran]`
   (yalnız TEK-AKTÖR business flow'una çıpalanır; çok-aktör süreç frontend'in işi değil).
@@ -227,6 +233,14 @@ persona cross-check), `checkFlowCoverage`.
 - "Burada **liste mi, tek kayıt mı, tek değer mi** görünüyor; **form mu** dolduruluyor;
   **düğme** mi var?" → `list | detail | value | form | action` (+ grafik gibi özel
   ihtiyaçlar → extension component `@ns.ad <Query>`).
+  - **Extension kullanılacaksa BİLDİRİMİNİ de yaz:** `@chart.timeseries GetMetrics` kullanımı
+    tek başına bırakılmaz — model kökünde `extension chart.timeseries { on component … }`
+    bildirimi YA DA bildirimi taşıyan pack'in `import './pack.fcdsl'`'u MUTLAKA eklenir
+    (kullanım + bildirim ÇİFT emit edilir; bildirimsiz kullanım asılı kalır).
+  - **`@target(...)` yerleşimi P-sınırına tabidir:** fiziksel yerleşim/platform detayı normalde
+    SORULMAZ (üreteç-politikası — playbook Faz 5 **P-sınırı guard'ı**). Kullanıcı belirli bir
+    hedefte LİTERAL yerleşim dayatıyorsa ancak o zaman opt-in `@target(...)` kaçışı yazılır —
+    opak passthrough'tur, hedefte karşılığı yoksa **no-op** (bu sınırı kullanıcıya söyle).
   - Yapısal eşleme: `list` ↔ liste-out; `detail`/`value` ↔ tekil-out (uyumsuzluk error).
   - Query parametrelerinin kaynağı açık: ekran-param / `session.*` / `currentUser.*` /
     state / literal (`detail OrderInfo(id: orderId)`).

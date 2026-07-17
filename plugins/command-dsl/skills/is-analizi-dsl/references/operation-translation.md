@@ -27,6 +27,15 @@ oku→`reads`, listele→`lists`. Alan-özel fiiller (`approves`, `submits`, `ca
 `issues`, `pays`…) doğrudan kullanılır **ama önce `verb <ad>` ile bildirilmeli**
 (yoksa yalnızca uyarı çıkar; yine de bildir — temiz model için).
 
+**Yetki-devri dalı** — fiil sinyali "erişim ver / geçici izin / vekâlet / yetkiyi
+devret" ise bu bir CRUD komutu DEĞİL, `grant`/`revoke`'tur (`references/dsl-reference.md`
+§5). Üç alt-soru sor:
+1. **Hangi izin** devrediliyor — okuma / yazma / güncelleme / silme
+   (`read | write | update | delete`)?
+2. **Kime** — hangi aktöre (`to <Aktör>`)?
+3. **Süreli mi** — süre bitince kendiliğinden kalkar mı (`for <süre>`, ör.
+   `for 24h`)? Süresizse geri-alma yolu var mı (`revokes … from <Aktör>`)?
+
 ### 3. Ownership (HANGİ kayıtlar üzerinde?) — jargonu kullanıcıya yansıtma
 Kullanıcının kapsam ifadesini anahtara çevir:
 | Kullanıcı der ki… | Ownership |
@@ -58,6 +67,10 @@ Faz 1-2'de kullanıcının söylediği kısıtları buraya yerleştir:
 - "tutar 50000'i geçmiyorsa" → `only if <Entity>.amount <= 50000`.
 - "sadece onaylı olanları" (sorguda filtre) → `only when <Entity>.status = 'approved'`.
 - Zamanlanmış iş ("her gece çalışsın") → `schedule: every day at 03:00` (yalnız System).
+- **Sorgu çeviriyorsan iki mikro-soru:** "sonuç nasıl **sıralı** dönsün?" →
+  `order by <Varlık.alan> ascending|descending` · "sonuç **sınırlı** mı — ilk N?" →
+  `limit to <N>`. Sorulmazsa kayıtlar rasgele sırayla/sınırsız döner
+  (Envanter ○ `order by` / `limit to` satırı).
 
 ### 7. Başarı sonrası (`on success do`)
 "… olunca ne olur?" sorusuyla yakala:
@@ -67,6 +80,12 @@ Faz 1-2'de kullanıcının söylediği kısıtları buraya yerleştir:
 - **Yeni kayıt doğar** → `create <Entity> from <Entity>`.
 - **Başka işlem otomatik tetiklenir** → `perform <DiğerİşlemAdı>` (arka plan; kullanıcı
   niyeti yok — örn. ödeme kaydı faturayı otomatik kapatır).
+- **Alan türetilmiş/hesaplanan mı?** ("…toplamıdır / …dan hesaplanır / otomatik
+  hesaplanır") → `calculate <Entity>.<alan> = <formül>` — formülü kullanıcıdan AL
+  (aritmetik `+ - * /`, `sum of <koleksiyon.alan>`; `references/dsl-reference.md` §8).
+  Durum-geçişi `calculate`'i bunun yerine GEÇMEZ; formülsüz bırakmak =
+  **kaybolan-formül** (Envanter ★). Hesaplama komutlarında (`System calculates own
+  Invoice`) `calculate` satırı `on success do` dışında, clause olarak da yazılabilir (D4).
 
 ### 8. İsim ver (İşlemAdı)
 Anlamlı, benzersiz PascalCase ID: `SubmitRequest`, `ApproveRequest`,

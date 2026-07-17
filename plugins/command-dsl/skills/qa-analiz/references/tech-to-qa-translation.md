@@ -14,6 +14,7 @@ Op-başına dal envanterini bu tabloyla KENDİN çıkar, kullanıcıya düz dill
 | her operation | Success | `covers Success` | "başarılı çağrı" |
 | `validation { … for guard "x" }` | guard-dalı (NotValid sınıfı) | `covers guard "x"` | "girdi kuralı: <kuralın anlamı>" |
 | `rule { … for guard "y" }` | guard-dalı (NotProcessable sınıfı) | `covers guard "y"` | "iş kuralı: <kuralın anlamı>" |
+| op imzasında param refinement'ı — `p: T in 1..N` \| `p: T in {a \| b}` (yalnız GEÇERLİ refinement; param başına BİR dal) | **refinement sınır-ihlali dalı** (NotValid sınıfı); ruleId `<param>.range` \| `<param>.union` — tech manifest `violations[].ruleId` ile AYNI id (üreteç join anahtarı) | `covers guard "<param>.range"` / `covers guard "<param>.union"` (MEVCUT guard yüzeyi — YENİ sözdizimi YOK) | "sınır-dışı girdi: <param> (ör. 1..10000 dışında tutar / izinli listede olmayan değer)" |
 | `throws E` | named-error dalı | `covers error E` | "<E'nin anlamı> hatası" |
 | `roles …` | NotAuthorized·roles | `covers NotAuthorized roles` | "yanlış roldeki kullanıcı" |
 | `ownership …` — op **KOLEKSİYON dönmüyorsa** (`public`/`any`/`all` hariç — dal türetmez, waive de yazma) | NotAuthorized·ownership | `covers NotAuthorized ownership` | "başkasının kaydına erişim" |
@@ -26,13 +27,20 @@ Op-başına dal envanterini bu tabloyla KENDİN çıkar, kullanıcıya düz dill
 | `calls <Ext.Op> compensate with <Ext.Op2>` — hedef `external`\|`uncharted` | callFailure dalı | `covers callFailure <Ext.Op>` | "dış servis çökerse (telafisiyle)" |
 | `on Module.Event` (consumer op) | dal uzayı AYNI kurallarla; tek fark act biçimi | test `when event … with { … }` yazar (karar #11) | "olay gelince ne yapıyor" |
 
+- **Refinement dalının sınırları:** yalnız **op imzasındaki param**'ların refinement'ları dal
+  doğurur — entity **FIELD** refinement'ı dal DOĞURMAZ (girdi yüzeyi değil; ihlali zaten kurulamaz).
+  Geçersiz refinement (tech-side error: inverted range, boş union vb.) da dal doğurmaz. Türetilmiş
+  outcome Model-C'dir: `NotValid` + `guard = <param>.<kind>`. Dal `waive <Op> covers guard
+  "<param>.<kind>" because "…"` ile de kapatılabilir (strict: test ya da waive — üçüncü yol yok).
+  İhlal girdisini ELLE kur (§I negatif-veri kuralı): range için sınır-dışı sayı, union için
+  liste-dışı değer — validator girdinin gerçekten ihlal ettiğini İDDİA ETMEZ.
 - Karşılıksız hedef (olmayan guard-id, olmayan error, mekanizmasız op'a NotAuthorized,
   olmayan mekanizma-niteleyicisi, compensate'siz/iç calls'a callFailure) → **error**
   (covers/expect/waive üçünde de aynı kural — spec §4.3/m6).
 - Aynı dalı birden çok test kapsayabilir (redundans serbest; merged `coveredBy[]`
   hepsini listeler). Senaryo `expect`'leri de coverage'a sayılır (karar #12).
 
-## A2. Tech `guarantee` → coverage rollup (guarantee-coverage sinerjisi)
+## A1a. Tech `guarantee` → coverage rollup (guarantee-coverage sinerjisi)
 
 Tech DSL'de bir `guarantee` (çapraz-kesen izlenebilirlik; tech-dsl §11) **yeni dal
 DOĞURMAZ** — zaten §A'da türettiğin guard/throws dallarına bir **eşleme** koyar. QA
@@ -82,11 +90,22 @@ Validator `count`-only testi error'lar ve bu tuzağı açıkça söyler.
 **Test verisi:** en az İKİ seed gerekir — biri kapsam içi, biri kapsam dışı (`ownership <axis>` ise
 axis'in kaynak satırı da seed'lenmeli: "delegasyon var" + "delegasyon yok" durumları).
 
+**⚠ persona ↔ principal değer bağı (DUR-BİLDİR):** qa `persona`'nın **öznitelik-değer yüzeyi
+YOKTUR** (yalnız `persona <ad>: [role] <hedef>` — attribute yazılamaz). Çağıranın kapsam-alanı
+değeri (`caller.<alan>`, ör. `caller.organizationId`) bu yüzden ancak **principal-binding
+satırını persona-ref'li seed'leyerek** kurulur: kimlik alanına persona adını yaz
+(`userId: ajans`), kapsam alanına axis-seed'iyle EŞLEŞEN değeri yaz. Bu bağ kurulamıyorsa
+(binding entity'si seed'lenemiyor / kimlik alanı imzada yok) test deterministik değildir —
+UYDURMA; DUR ve kullanıcıya bildir (§H2 protokolü), düzeltme yeri tech/gramer tartışmasıdır.
+
 ```
 test "ajans yalnız delege edilmiş kampanyaları görür"
      of ListAgencyCampaigns covers Filtered ownership {
   as ajans
   given {
+    // principal-binding satırı: çağıran `ajans`'ın organizationId'si BURADAN gelir
+    // (persona'da attribute yüzeyi yok — değer bağı bu seed'le kurulur; axis-seed'iyle eşleşmeli)
+    seed u1 = AgencyUserProfile { userId: ajans, organizationId: "A" }
     seed d1 = AgencyDelegation { agencyOrgId: "A", clientOrgId: "C1", status: "active" }
     seed c1 = Campaign { organizationId: "C1", id: "k1" }   // kapsam İÇİ  → görünmeli
     seed c2 = Campaign { organizationId: "C9", id: "k2" }   // kapsam DIŞI → görünmemeli
@@ -120,6 +139,17 @@ eder misin?"* → (a) `result contains`, (b) `result absent`.
   gerekçesiyle waive edilir.
 - Test verisi ipucu: ownership testi İKİ persona ister (çağıran + kaydın sahibi) —
   Faz 1'de `baskaMusteri` benzeri ikinci kimliği ekletmiş ol.
+- **Axis-tabanlı ownership'te (`ownership <axis> by …`) TEKİL-dönüşlü op'un
+  NotAuthorized·ownership testi axis'in KAYNAK-SATIRLARINI da seed'lemeli:** ihlal
+  "kaydın sahibi başka" değil, "çağıranın kapsam-alanı o kaydı İÇERMİYOR"dur. Çağıranın
+  kapsam-alanı iki satır-katmanından kurulur: (1) **principal-binding satırı**
+  (`binds <Entity> by <alan>` — çağıranın öznitelikleri buradan gelir; kimlik alanına
+  persona-ref yaz: `seed u1 = AgencyUserProfile { userId: ajans, organizationId: "A" }`),
+  (2) **axis-kaynak satırı** (`entity <Entity>` — kapsamı sayan tablo, ör. delegasyon).
+  İhlal testi: hedef kaydı çağıranın axis-üyeliği OLMADAN seed'le (kaynak satırı YOK ya
+  da başka org'a bağlı); Success/kontrol testinde üyelik satırı VAR. Kaynak satırları
+  seed'lenmeden dal deterministik tetiklenmez (üreteç varsayılan-boş kapsamla sahte-yeşil
+  ya da tanımsız davranışa düşer).
 
 ## C. Anonim dal katlaması (S5)
 
@@ -180,6 +210,7 @@ açıkla (politika detayları: `interrogation-playbook.md` §P):
 | "sunucu hatası testi" (ServerError) | altyapı davranışı | P2: üreteç isterse taksonomi-uyumlu hata zarfını tek altyapı testiyle doğrular (callFailure dalının outcome'u ServerError'dur ama dal anahtarı callFailure kalır — §E) |
 | "sayfa boyutu / imleç testi" (`paginated by`) | mekanik | P3: jenerik sıralama-tutarlılığı + size-üst-sınırı + imleç-devamlılığı testleri üretilir; yazar isterse `page`/`after` yüzeyiyle VERİ-ÖZEL doğrulama ekler (karar #16) |
 | `consistency async` | politika | P12: async efektler test yürütmesinde senkron-eşdeğer tamamlanmış kabul edilir; polling YASAK |
+| `consistency durable` | politika (async'in P12 emsali) | dayanıklı-teslim (kalıcı kuyruk/retry/crash-sonrası devam) altyapı güvencesidir, davranış dalı değil; test yürütmesinde efektler yine senkron-eşdeğer tamamlanmış kabul edilir — ayrı dal/test yazılmaz, dayanıklılık kanıtı üreteç/altyapı işi |
 | entity `invariant` | politika | P13/S16: dokunulan entity'lerin invariant'ları her test/step sonunda ÖRTÜK assert edilir — ayrıca yazdırma |
 | "her testten sonra temizlik" | politika | P6: her test/senaryo temiz state ile başlar |
 | `idempotent by` / `concurrency optimistic` | v1.1 dal-adayı (spec §9) | bugün istenirse senaryo + `state count 1` ile elle modellenebilir; zorunlu coverage değil |

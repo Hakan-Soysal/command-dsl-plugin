@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "fc67b59f2059", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "3454ca193e07", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "dcbfd21", builtAt: "2026-07-17T10:46:33+03:00", langium: "4.2.4" };
   }
 });
 
@@ -39615,7 +39615,12 @@ function registerFrontendValidationChecks(services) {
     FlowDecl: [v.checkFlowCoverage],
     MutableState: [v.checkStateExpr],
     // denetim-bulgusu: state init/expr path-kök denetimi (fail-open kapanışı)
-    DerivedState: [v.checkStateExpr]
+    DerivedState: [v.checkStateExpr],
+    // Call yasağı (kullanıcı kararı, 2026-07-17): AST-TİPİ bazlı kayıt — Langium tüm ağacı
+    // gezip her Call düğümünü dispatch eder → Expr'in geçtiği TÜM siteler (state/derived
+    // init · visible-when · form rule · set/EventSet · bind/nav/handler/event ArgBinding,
+    // iç-içe argümanlar dahil) tek noktadan kapsanır; yeni Expr-sitesi eklense de otomatik yakalanır.
+    Call: [v.checkCallBan]
   };
   registry.register(checks, v);
 }
@@ -39986,6 +39991,14 @@ var FrontendDslValidator = class {
   /** İ5-lift: form-field @ui.* dekorasyonu (readonly/hidden/emphasis). */
   checkFormField = (f, accept) => {
     checkDecorations(f.decorations, "field", accept);
+  };
+  /** Call yasağı (kullanıcı kararı, 2026-07-17): authored frontend Expr'inde fonksiyon çağrısı
+   *  DESTEKLENMEZ — çağrılabilir fonksiyon kümesi hiçbir yerde tanımlı değil ve üretecin
+   *  `{node:'call'}` desteği yok; önceden tanımsız `daysBetween(...)` gibi bir sembol 0-error
+   *  ile manifest'e sızıyordu (fail-open, probe ile ölçüldü). Gramer (shared.langium `Call`)
+   *  DEĞİŞMEDİ — tech aynı kuralı kullanmaya devam eder; yasak yalnız frontend-authored yüzeyde. */
+  checkCallBan = (c, accept) => {
+    accept("error", `Frontend DSL fonksiyon \xE7a\u011Fr\u0131s\u0131 desteklemez: '${c.name}(...)' \u2014 \xE7a\u011Fr\u0131labilir fonksiyon k\xFCmesi tan\u0131ml\u0131 de\u011Fil (\xFCrete\xE7 bu sembol\xFC yorumlayamaz). \u0130fadeyi yap\u0131sal kur (derived/aggregate/aritmetik/kar\u015F\u0131la\u015Ft\u0131rma) ya da hesab\u0131 upstream'e (tech/query alan\u0131) ta\u015F\u0131.`, { node: c, property: "name" });
   };
   /** Denetim-bulgusu (F3.7-öncesi fail-open): state init/expr de kapalı path-kök setine tabidir.
    *  `derived x = campaign.status` gibi bilinmeyen-kök sessizce geçmemeli (visible-when emsali).

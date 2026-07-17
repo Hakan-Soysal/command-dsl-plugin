@@ -43,11 +43,15 @@ Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını
 | `either/or` (akış dallanması) | "ya şöyle ya böyle ilerler / duruma göre farklı yol" | 2 | ★ | **kayıp-alternatif-dal** — dallanma tek-yola iner; diğer iş-senaryosu görünmez |
 | `note """…"""` | formalize edilemeyen iş-kuralı / dikkat-noktası (süre, istisna, politika) | her faz | ★ | **kaybolan-iş-kuralı** — formalize edilemeyen kural makinece hiçbir yere taşınmaz |
 | `outcome <Ad> { measure … }` (ürün başarı ölçütü) | "başarıyı NASIL ölçeceğiz — onay süresi 2 güne insin / dönüşüm ≥ %95 / P95 < 200ms / reddedilen oranı < %5" | 1 | ★ | **kaybolan-başarı-ölçütü** — ölçülebilir ürün-hedefi yapısallaşmaz; başarı ölçütü (measure/eşik/pencere) modelden düşer |
+| `any order` (sıra-bağımsız etaplar) | "aynı anda / sırası fark etmez / ikisi de olur / hangisi önce olursa" | 1 | ★ | **sahte-sıralama-kısıtı** — "bildirim sırası = zaman sırası" kanunu yüzünden eksik `any order` = YANLIŞ model; sırasız etaplara olmayan bir sıra dayatılır |
+| türetilmiş/hesaplanan sayısal alan: `calculate <E>.<alan> = <formül>` (`sum of` dahil) | "otomatik hesaplanır / …toplamıdır / X'ten türer / …dan oluşur" | 3 | ★ | **kaybolan-formül** — türetme formülü modelden düşer, alan elle-girilir sanılır (üstteki `calculate …status` satırı YALNIZ durum-geçişini kapsar; bu ayrı yüzeydir) |
 | `grant/revoke` (çalışma-anı yetki devri) | "geçici erişim ver (24s sonra kalksın) / vekâlet" | 3 | ○ | **kalıcı-veya-eksik-yetki** — geçici devir modellenmez; erişim ya süresiz ya hiç yok |
 | `send <Mesaj> to` (bildirim) | "onaylanınca / olunca haber gitsin, bildirim" | 3 | ○ | **sessiz-bildirim-kaybı** — haber gitmez; alıcı olaydan habersiz |
 | `create … from` (türetilmiş kayıt) | "talepten sipariş / şundan bu üretilir" | 3 | ○ | **üretilmeyen-türev-kayıt** — kaynaktan doğması gereken kayıt oluşmaz |
 | `outside "…"` (sistem-dışı adım) | "kullanıcı sistem dışında bir şey yapar (fiziksel, 3.parti, bilişsel seçim)" | 2 | ○ | **görünmez-manuel-adım** — sistem-dışı adım akışta yer almaz; süreç eksiksiz sanılır |
 | `abandon anytime` (akıştan çıkış) | "her noktada vazgeçebilir / yarıda bırakabilir" | 2 | ○ | **modellenmemiş-çıkış** — yarıda bırakma yolu yok; akış tek-yönlü sanılır |
+| `using <önceki-adım>` (adım-zincirleme) | "az önce oluşturduğu/seçtiği kaydın ÜZERİNDE devam eder / aynı kayıtla sürer" | 2 | ○ | **kopuk-kayıt-zinciri** — adımın hangi kayıt üzerinde çalıştığı örtük kalır; yanlış-kayıt varsayımı görünmez (entity-eşleşmesi/eksen-kayması kuralı: §6) |
+| `include <akış>` (alt-akış dahil etme) | "burada da aynı adımlar / ortak prosedür / şu akışın aynısı burada da geçer" | 2 | ○ | **kopyalanan-alt-akış** — ortak adım dizisi her akışta elle tekrar edilir → drift |
 | `actor <A> extends <B>` (yetki kalıtımı) | "yönetici, çalışanın tüm yetkilerine + fazlasına sahip" | 0 | ○ | **kopyalanan-veya-eksik-yetki** — kalıtım yok; yetkiler elle tekrar → drift |
 | query `order by` / `limit to` | "en yeniden eskiye sırala / ilk N kayıt" | 3 | ○ | **sırasız-sınırsız-sonuç** — kayıtlar rasgele sırayla / sınırsız döner |
 
@@ -134,6 +138,7 @@ only if <Varlık.alan> <op> <değer>        # K2 — ön-koşul (tek karşılaş
 only when <koşul>                         # K3 — komutta ön-koşul / sorguda sonuç filtresi
 requires <RuleAdı> [, <RuleAdı> …]        # K2-kardeşi — adlandırılmış rule'a bağla (bkz. §10)
 schedule: every <day|week|month|hour> [at <SS:DD>]   # K8 — yalnız System aktörlü komutta
+calculate <Varlık.alan> = <ifade> [if|when <koşul>]  # K5/D4 — CLAUSE-düzeyi de geçerli (blok dışında; aşağıya bak)
 on success do                             # K4 — başarı sonrası etkiler (girintili):
     calculate <Varlık.alan> = <ifade> [if|when <koşul>]   # K5 — türetilmiş alan / durum geçişi
     send <MesajTürü> to <alıcı>                            # K6 — bildirim
@@ -143,6 +148,11 @@ on success do                             # K4 — başarı sonrası etkiler (gi
 
 - `calculate <Entity>.status = '<değer>'` bir **durum geçişi** bildirir; süreç
   anlatımındaki durum sütunu bu atamalardan türetilir.
+- **Clause-düzeyi `calculate` (D4):** hesaplama komutlarında (ör. `System
+  calculates own Invoice`) `calculate` satırı `on success do` bloğu olmadan,
+  doğrudan clause olarak yazılır — kuralın kendisi hesaplamadır (`calculate
+  Invoice.total = sum of Invoice.items.price`). İfade dili §8 (aritmetik +
+  `sum of`).
 - `perform` zinciri geçişlidir ve kullanıcı niyeti içermez (arka plan yan etki).
 - `schedule:` taşıyan komut hiçbir akışta/süreçte geçmez; kullanıcıya açılmaz.
 - `requires <RuleAdı>, …` işlemi bir veya çok **adlandırılmış rule**'a bağlar (§10).

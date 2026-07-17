@@ -7,13 +7,13 @@
     "src/shared",
     "src/tech"
   ],
-  "qaSrcHash": "cd53b16a67b8",
+  "qaSrcHash": "251cd5a43260",
   "wrapperFiles": [
     "qcdsl.src.mts"
   ],
   "wrapperHash": "98389ad627fa",
-  "commit": "2b683d7",
-  "builtAt": "2026-07-16T21:59:41+03:00",
+  "commit": "dcbfd21",
+  "builtAt": "2026-07-17T10:46:33+03:00",
   "langium": "4.2.4",
   "emitOperations": "frontend-analiz kopyası (2026-07-03; src/business hash'i is-analizi-dsl kanonik üreticisiyle aynı repo durumundan)"
 }

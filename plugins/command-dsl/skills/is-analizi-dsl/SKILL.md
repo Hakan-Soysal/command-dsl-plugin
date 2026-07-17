@@ -182,6 +182,10 @@ buna referans vereceği için temel buradadır.
 - **İlişkiler:** Sahiplik "kendi ekibi / yönettiği şube" gibi bir bağ
   içeriyorsa bu bir `relation`'dır.
 - **Takvimler:** "Sadece mesai saatinde" gibi zaman pencereleri varsa `calendar`.
+  Sinyal gelince TANIMINI da sor: "**Mesai saatleri tam olarak ne** — hangi
+  günler/saatler, tatiller dahil mi?" — `calendar` yalnız bir etikettir, içeriği
+  modelde tanımlı DEĞİLDİR (`references/dsl-reference.md` §1); cevabı, takvimi
+  kullanan operation'a/dokümana `note """…"""` ile düşür ki tanım kaybolmasın.
 
 **Toplu öner + onayla.** Örnek kapanış:
 > "✅ *Kimler & Neler:* Çalışan, Yönetici (Çalışan'ın yaptıklarını da yapar),
@@ -197,7 +201,15 @@ DSL karşılıkları ve alan tipleri için: `references/dsl-reference.md` (§1).
 
 **Her süreç için elicit et:**
 - İsim + tek cümle açıklama.
-- **Tetikleyici → Sonuç** ("Neyle başlar, neyle biter?").
+- **Tetikleyici → Sonuç** ("Neyle başlar, neyle biter?"). Cevap **öksüz kalmasın** —
+  nereye indiğini bağla: tetikleyici tipik olarak sürecin İLK etabının (ilk akışın
+  ilk adımının) gerçekleştirdiği iştir, sonuç son etabın durum-geçişi/çıktısıdır;
+  yapısal karşılık kurulamıyorsa (dış olay, sistem-dışı tetik) process'e
+  `note """…"""` ile düşür.
+- **Etap sırası:** "Bu etapların **sırası önemli mi**, yoksa sırasız/aynı anda mı
+  olabilir?" — sırasız/eşzamanlı olabilenler `any order` bloğuna girer. Sormazsan
+  "bildirim sırası = zaman sırası" kanunu sırasız etaplara **sahte-sıralama-kısıtı**
+  dayatır (eksik = YANLIŞ model).
 - **Merkez varlık** (`of <Entity>`): sürecin yaşam döngüsünü taşıyan kayıt
   (ör. araç satışında Sipariş). "Bu süreç hangi kaydın etrafında dönüyor?"
 - **Hangi aktörler** dahil.
