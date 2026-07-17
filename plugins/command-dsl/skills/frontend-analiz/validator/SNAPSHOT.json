@@ -7,6 +7,10 @@
     "src/shared"
   ],
   "frontendSrcHash": "fc67b59f2059",
+  "wrapperFiles": [
+    "fcdsl.src.mts"
+  ],
+  "wrapperHash": "5935b3e47923",
   "commit": "2b683d7",
   "builtAt": "2026-07-16T21:59:41+03:00",
   "langium": "4.2.4"

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# pre-push — plugin-lokal wrapper (.src.mts) drifti dahil skill-bundle bayatlığını PUSH'TAN
+# ÖNCE denetler (Faz-3, 2026-07-17). CommandDSL'in .githooks/pre-push emsalinin SİMETRİĞİ:
+# orada gramer push'u kardeş plugin'i denetler (plugin yoksa graceful atlar); burada plugin
+# push'u check-skill-staleness'ı koşar (CommandDSL bulunamazsa UYARIP GEÇER — push engellenmez;
+# plugin-only wrapper push'u aksi halde tamamen denetimsizdi).
+#
+# CMDDSL aday yolları: env CMDDSL > $REPO_ROOT/../CommandDSL > $REPO_ROOT/../../CommandDSL.
+# Acil durum bypass: git push --no-verify
+set -uo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+CHECK="$REPO_ROOT/scripts/check-skill-staleness.mjs"
+
+CANDIDATES=()
+[ -n "${CMDDSL:-}" ] && CANDIDATES+=("$CMDDSL")
+CANDIDATES+=("$REPO_ROOT/../CommandDSL" "$REPO_ROOT/../../CommandDSL")
+
+FOUND=""
+for c in "${CANDIDATES[@]}"; do
+    if [ -f "$c/command-dsl.langium" ]; then FOUND="$c"; break; fi
+done
+
+if [ -z "$FOUND" ]; then
+    echo "pre-push UYARI: CommandDSL bulunamadı — skill-bayatlık denetimi ATLANDI (push engellenmedi)." >&2
+    echo "  Denenen: ${CANDIDATES[*]}" >&2
+    echo "  İstersen CMDDSL=<yol> git push ile denetimli push yap." >&2
+    exit 0
+fi
+
+echo "pre-push: skill bundle bayatlık denetimi (CommandDSL: $FOUND)…" >&2
+if CMDDSL="$FOUND" node "$CHECK"; then
+    exit 0
+fi
+
+echo "" >&2
+echo "pre-push DURDU: bundle/envanter/referans bayat — CommandDSL-drift YA DA plugin-wrapper" >&2
+echo "  drifti (elle değişen .src.mts rebuild edilmemiş) olabilir (yukarıdaki eksene bak)." >&2
+echo "  Düzelt: STALE skil(ler)in validator/ dizininde her build.*.mjs'i CMDDSL='$FOUND'" >&2
+echo "          ile koştur (aile-eşzamanlı) + gerekirse referans/envanter güncelle." >&2
+echo "  Acil bypass (bilinçli): git push --no-verify" >&2
+exit 1

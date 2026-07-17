@@ -20,7 +20,7 @@ import { createRequire } from 'node:module';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { resolve, dirname } from 'node:path';
+import { resolve, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -106,6 +106,23 @@ const srcDirs = [...new Set(
 )].sort();
 const businessSrcHash = shaTree(...srcDirs);
 
+// --- Faz-3 (2026-07-17): PLUGIN-LOKAL wrapper reçetesi ---
+// Bundle'a giren CommandDSL-src ve node_modules DIŞI girdiler = entry .src.mts + plugin-lokal
+// import zinciri (örn. report-index.src.mts). srcDirs/srcHash CommandDSL driftini izler ama
+// wrapper elle değişip rebuild edilmezse dedektör YEŞİL kalırdı — bu damga o deliği kapatır.
+// Filtre: sentetik girdiler ('<define:__BUILD_INFO__>') DIŞLANIR (dosya değil → readFileSync
+// ENOENT). Normalize: validator-dizini-göreli (pratikte çıplak 'X.src.mts'); cmdPath-göreli
+// '../DSL Business Analyses/…' KULLANILMAZ (taşınamaz + boşluklu).
+const wrapperFiles = [...new Set(
+    Object.keys(probe.metafile.inputs)
+        .filter(p => !p.startsWith('src/') && !p.includes('node_modules') && !p.startsWith('<'))
+        .map(p => relative(here, resolve(cmdPath, p))),
+)].sort();
+// Reçete check-skill-staleness shaWrapper ile BİREBİR: sorted rel-path → update(rel)+update(içerik).
+const wHash = createHash('sha256');
+for (const rel of wrapperFiles) { wHash.update(rel); wHash.update(readFileSync(resolve(here, rel))); }
+const wrapperHash = wHash.digest('hex').slice(0, 12);
+
 let commit = 'unknown';
 let commitDate = 'unknown';
 try {
@@ -131,6 +148,8 @@ const BUILD_INFO = {
     grammarHash,                     // grammar parmak izi (etikete de gömülü)
     srcDirs,                         // Pass-1 metafile'dan türetilen izlenen src/ dizinleri (check-staleness damgası)
     businessSrcHash,                 // validation-mantığı parmak izi (grammar-dışı bayatlık dedektörü; kapsam = srcDirs)
+    wrapperFiles,    // Faz-3: plugin-lokal wrapper girdileri (validator-dizini-göreli; check-staleness damgası)
+    wrapperHash,     // Faz-3: wrapper-drift parmak izi (entry .src.mts + plugin-lokal import zinciri)
     commit,                          // CommandDSL HEAD (izlenebilirlik)
     builtAt: commitDate,             // commit tarihi (deterministik; rebuild gürültüsü yok)
     langium,
@@ -153,4 +172,4 @@ await esbuild.build({
     logLevel: 'info',
 });
 
-console.error(`\n✓ validate.mjs yazıldı · grammar ${grammarHash} · src ${businessSrcHash} [${srcDirs.join(' ')}] · commit ${commit} · langium ${langium}`);
+console.error(`\n✓ validate.mjs yazıldı · grammar ${grammarHash} · src ${businessSrcHash} [${srcDirs.join(' ')}] · wrapper ${wrapperHash} · commit ${commit} · langium ${langium}`);

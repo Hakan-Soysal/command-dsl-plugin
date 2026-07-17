@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-94397168f2a1", grammarHash: "94397168f2a1", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "c3c70ae50f8a", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-94397168f2a1", grammarHash: "94397168f2a1", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "c3c70ae50f8a", wrapperFiles: ["report-business.src.mts", "report-index.src.mts"], wrapperHash: "05f903ac4bca", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
   }
 });
 

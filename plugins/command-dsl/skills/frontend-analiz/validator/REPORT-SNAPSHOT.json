@@ -7,6 +7,11 @@
     "src/playground"
   ],
   "srcHash": "708fb488265e",
+  "wrapperFiles": [
+    "report-frontend.src.mts",
+    "report-index.src.mts"
+  ],
+  "wrapperHash": "1d80610aab15",
   "commit": "2b683d7",
   "builtAt": "2026-07-16T21:59:41+03:00"
 }

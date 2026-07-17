@@ -77,10 +77,21 @@ skills/<skill>/
   statik reçete is-analizi'yi tam-kör, qa'yı `src/tech`'e kör bırakmıştı); yeni bir cross-dizin
   import otomatik kapsanır. **Faz-2 (2026-07-17):** aynı iki-pass mekanizması **CommandDSL-src
   taşıyan TÜM emit/report bundle'larına** genişledi (4× `build.emit.mjs` + `build.manifest.mjs`
-  + 3× `build.report.mjs`; qa `report-qa` HARİÇ — CommandDSL-src taşımaz, rebuild edilmez).
+  + 3× `build.report.mjs`).
   TYPE-ONLY import'lar metafile'da GÖRÜNMEZ → girdi-şemasını taşıyan dizin `EXTRA_SRC_DIRS` ile
   damgaya elle eklenir (report-tech → `src/tech`, report-frontend → `src/frontend`).
   emit-operations'ın grammar reçetesi primary ile hizalandı: `command-dsl.langium + shared.langium`.
+  **Faz-3 (2026-07-17) — plugin-wrapper drifti:** charter "CommandDSL-drift + plugin-wrapper-drift"
+  olarak GENİŞLEDİ. Her build Pass-1 metafile'ından **plugin-lokal wrapper girdilerini** de türetir
+  (CommandDSL-src + node_modules + sentetik `<define:…>` DIŞI = entry `.src.mts` + plugin-lokal
+  import zinciri, örn. skill-başına ayrı `report-index.src.mts` kopyası) ve `BUILD_INFO`'ya
+  **`wrapperFiles`** (validator-dizini-göreli, sorted) + **`wrapperHash`** damgalar — önceden
+  hiçbir bundle kendi wrapper kaynağını izlemiyordu: `.src.mts` elle değişip rebuild edilmezse
+  dedektör YEŞİL kalıyordu. Bu kapsamla **qa `report-qa` GERİ-KATILDI** (eski "CommandDSL-src
+  taşımaz, denetim-dışı" kararı SÜPERSEDE): `build.report.mjs` statik `SRC_FILES` listesinden
+  iki-pass metafile-türetimine geçti (`absWorkingDir: here`), `builtAt` artık **plugin git HEAD
+  tarihi** (eski `Date.now()` her rebuild'de farklı byte üretiyordu — idempotens fix); grammar
+  denetimi yok (saf json→html).
 - **Otomatik bayatlık-denetimi (meta-fix E, 2026-07-08):** `scripts/check-skill-staleness.mjs
   [<CommandDSL-yolu>]` — 4 skil'in bundle hash'ini (İKİ parmak izi), envanter-damgasını VE
   içerik-kapsamasını (gramerdeki keyword ref-doküman'da öğretiliyor mu) **CANLI gramere karşı**
@@ -94,10 +105,20 @@ skills/<skill>/
   (12 bundle). Eski "emit/report ayrı denetlenmez, aile-rebuild yeter" kararı SÜPERSEDE —
   kısmi-rebuild deliği ölçüldü: is-analizi emit `e680de0`'da kalmışken aile `2b683d7`'deydi ve
   denetçi 4/4 TAZE diyordu. Bundle-başına grammar reçetesi: skill grammar'ı (varsayılan) ·
-  `null` = grammar denetimi YOK (saf json→rapor aracı: report-tech) · açık liste (cross-DSL:
-  4 kopya emit-operations BUSINESS gramerine bağlı). **Tetik:** CommandDSL'in
+  `null` = grammar denetimi YOK (saf json→rapor aracı: report-tech, report-qa) · açık liste
+  (cross-DSL: 4 kopya emit-operations BUSINESS gramerine bağlı). **Faz-3 (2026-07-17): denetim
+  13 bundle'dır ve HER bundle'da EK bir wrapper-ekseni koşar** — `wrapperFiles` damgası canlı
+  validator dizininden yeniden-hash'lenip `wrapperHash` ile kıyaslanır (plugin-wrapper drifti);
+  hibrit sigorta: damga yok/deforme, entry-çıpası (`X.mjs → X.src.mts`) listede değil ya da
+  listelenen dosya canlıda yok → loud STALE. report-qa yalnız bu eksenle denetlenir
+  (`srcField: null` → srcDirs/srcHash denetimi atlanır). **Tetik (iki yönlü):** CommandDSL'in
   `.githooks/pre-push`'u (kardeş plugin'i denetler; `scripts/install-hooks.sh` ile kurulur) — gramer
-  push'undan ÖNCE stale bundle push'u durdurur. Gramer/validator değişince DoD: aile-eşzamanlı
+  push'undan ÖNCE stale bundle push'u durdurur; **Faz-3'ten beri plugin'in KENDİ
+  `.githooks/pre-push`'u da** aynı denetçiyi koşar (plugin-only wrapper push'u önceden
+  denetimsizdi) — CommandDSL klonu bulunamazsa UYARIP GEÇER (CommandDSL emsalindeki "plugin
+  yoksa graceful atla"nın simetriği; adaylar: env `CMDDSL` > `../CommandDSL` > `../../CommandDSL`).
+  Gramer/validator DEĞİL ama yalnız wrapper `.src.mts` değişince de DoD aynıdır: ilgili
+  `build.*.mjs` rebuild + `check-skill-staleness` yeşil. Gramer/validator değişince DoD: aile-eşzamanlı
   rebuild + referans/envanter + `check-skill-staleness` yeşil.
 
 ## 5. Capability deseni (ön-kapı / router skill'ler)

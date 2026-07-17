@@ -5,4 +5,4 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 git -C "$REPO_ROOT" config core.hooksPath .githooks
 chmod +x "$REPO_ROOT"/.githooks/* "$REPO_ROOT"/scripts/*.sh
-echo "hook kuruldu: core.hooksPath=.githooks — post-commit auto-bump aktif"
+echo "hook kuruldu: core.hooksPath=.githooks — post-commit auto-bump + pre-push skill-bayatlık denetimi aktif"

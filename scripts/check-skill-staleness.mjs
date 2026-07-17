@@ -9,12 +9,20 @@
  * bundle'ın gömülü hash'ini (--version BUILD_INFO) canlı repodan yeniden-hesaplanan
  * hash'le karşılaştırır. Fark → STALE (aile-eşzamanlı rebuild gerekir).
  *
+ * CHARTER (Faz-3 2026-07-17 GENİŞLEDİ): "CommandDSL-drift + plugin-wrapper-drift".
+ *
  * Kapsam: (1) skill'in CommandDSL-src taşıyan TÜM bundle'ları (primary + emit + report,
  * Faz-2) grammarHash + srcHash (HER İKİSİ — srcHash
  * grammar-DIŞI validator-mantık driftini yakalar, grammarHash tek başına kaçırırdı);
  * (2) envanter-snapshot damgası (ref doc canlı grammarHash'i içermeli); (3) içerik-
  * kapsaması (gramerdeki keyword'ler ref-doküman'da öğretiliyor mu — hash-eşitliğinin
- * yakalayamadığı "construct var ama belgesiz" sınıfı, örn. rule/requires).
+ * yakalayamadığı "construct var ama belgesiz" sınıfı, örn. rule/requires);
+ * (4) PLUGIN-WRAPPER drifti (Faz-3): her bundle'ın KENDİ plugin-lokal wrapper kaynağı
+ * (entry `.src.mts` + plugin-lokal import zinciri, örn. report-index.src.mts) —
+ * build Pass-1 metafile'ından `wrapperFiles`+`wrapperHash` damgalar, bu araç canlı
+ * validator dizininden yeniden-hash'ler. Önceden HİÇBİR bundle bunu izlemiyordu:
+ * wrapper elle değişip rebuild edilmezse dedektör YEŞİL kalıyordu (kör nokta).
+ * Bu kapsamla qa report-qa GERİ-KATILDI (wrapper-only: grammar/src denetimi yok).
  *
  * SRC-REÇETESİ BUNDLE-DAMGALIDIR (2026-07-17): hangi src/ dizinlerinin hash'leneceği
  * artık burada STATİK yazmaz — her build.*.mjs Pass-1 esbuild-metafile'ından türetir ve
@@ -72,6 +80,13 @@ function shaTree(...dirs) {
     for (const f of files) { h.update(f.slice(cmdPath.length)); h.update(readFileSync(f)); }
     return h.digest('hex').slice(0, 12);
 }
+// Faz-3: build'lerin wrapperHash reçetesinin BİREBİR kopyası — bundle'ın wrapperFiles
+// damgası (sorted, validator-dizini-göreli) üzerinden CANLI dosyalardan yeniden-hash.
+function shaWrapper(validatorDir, relFiles) {
+    const h = createHash('sha256');
+    for (const rel of relFiles) { h.update(rel); h.update(readFileSync(resolve(validatorDir, rel))); }
+    return h.digest('hex').slice(0, 12);
+}
 
 // Grammar reçetesi build.*.mjs'lerle eşleşir (drift olursa yanlış-STALE = loud, güvenli).
 // src reçetesi ise STATİK DEĞİL: bundle'ın srcDirs damgasından okunur; `mustInclude` o damganın
@@ -79,8 +94,10 @@ function shaTree(...dirs) {
 //
 // Skill başına BUNDLE LİSTESİ (Faz-2): CommandDSL-src taşıyan her bundle ayrı kayıt.
 // Bundle.grammar: undefined → skill grammar'ı · null → grammar denetimi YOK · array → o liste.
-// qa report-qa.mjs LİSTEDE YOK (kayıtlı): CommandDSL-src taşımaz (yalnız kendi .src.mts'leri),
-// CommandDSL değişince rebuild edilmez → bu araçla denetlenecek canlı-kaynak izi yok.
+// Bundle.srcField: null → CommandDSL-src denetimi YOK (wrapper-only bundle; Faz-3).
+// SÜPERSEDE (Faz-3 2026-07-17): eski karar "qa report-qa listede yok — CommandDSL-src taşımaz,
+// denetlenecek canlı-kaynak izi yok" idi; wrapper-drift kapsamı (Kapsam-4) o izi verdi →
+// report-qa GERİ-KATILDI (grammar:null + srcField:null → yalnız wrapperHash denetlenir).
 const CDSL_GRAMMAR = ['command-dsl.langium', 'shared.langium'];
 const SKILLS = {
     'is-analizi-dsl': {
@@ -105,6 +122,7 @@ const SKILLS = {
         bundles: [
             { bundleRel: 'validator/qcdsl.mjs',           srcField: 'qaSrcHash', mustInclude: 'src/qa' },
             { bundleRel: 'validator/emit-operations.mjs', srcField: 'srcHash',   mustInclude: 'src/generator', grammar: CDSL_GRAMMAR },
+            { bundleRel: 'validator/report-qa.mjs',       srcField: null,        grammar: null },  // Faz-3 geri-katılım: wrapper-only (saf json→html; CommandDSL-src taşımaz)
         ],
     },
     'frontend-analiz': {
@@ -163,32 +181,57 @@ for (const [name, s] of Object.entries(SKILLS)) {
     const problems = [];
     const freshLines = [];
 
-    // (1) bundle hash-tazeliği — skill'in HER CommandDSL-src taşıyan bundle'ı ayrı denetlenir.
+    // (1) bundle hash-tazeliği — skill'in HER bundle'ı ayrı denetlenir
+    //     (CommandDSL-src: grammar+src eksenleri · Faz-3: HER bundle'da wrapper ekseni).
     for (const b of s.bundles) {
         totalBundles += 1;
         const bundleProblems = [];
+        const noteParts = [];
         // grammar reçetesi: undefined → skill grammar'ı; null → denetim YOK; array → o liste.
         const grammarFiles = b.grammar === undefined ? s.grammar : b.grammar;
+        const validatorDir = dirname(resolve(dir, b.bundleRel));
         try {
             const info = bundleInfo(dir, b.bundleRel);
             if (grammarFiles !== null) {
                 const liveG = shaGrammar(grammarFiles);
                 if (info.grammarHash !== liveG) bundleProblems.push(`grammarHash STALE: bundle ${info.grammarHash} ≠ canlı ${liveG} (reçete: ${grammarFiles.join('+')})`);
             }
-            // srcDirs DAMGASI: reçete build'in metafile'ından (± EXTRA_SRC_DIRS) türer, buradan yalnız OKUNUR.
-            // HİBRİT SİGORTA: damga yok/deforme (eski-format bundle) ya da mustInclude çıpa(lar)ı
-            // eksik (metafile-türetim bug'ı VEYA EXTRA_SRC_DIRS düşmesi) → sessiz-yeşile dönüşemez, loud STALE.
-            // mustInclude dizi olabilir: ana dizin + elle EXTRA_SRC_DIRS (type-only şema) HEP çıpalanır.
-            const dirs = info.srcDirs;
-            const anchors = [].concat(b.mustInclude);
-            if (!Array.isArray(dirs) || !dirs.length || !dirs.every(d => /^src\/[^/]+$/.test(d)) || !anchors.every(mi => dirs.includes(mi))) {
-                bundleProblems.push(`srcDirs damgası yok/deforme (eski-format bundle ya da '${anchors.join("','")}' kapsam-dışı) → rebuild gerekir`);
-            } else {
-                const liveSrc = shaTree(...dirs);
-                const bundleSrc = info[b.srcField];
-                if (bundleSrc !== liveSrc) bundleProblems.push(`${b.srcField} STALE: bundle ${bundleSrc} ≠ canlı ${liveSrc} (mantık drifti · izlenen: ${dirs.join(' ')})`);
-                if (bundleProblems.length === 0) freshLines.push(`${b.bundleRel} · src ${liveSrc} [${dirs.join(' ')}]`);
+            // srcField === null → CommandDSL-src denetimi YOK (wrapper-only bundle: report-qa, Faz-3).
+            if (b.srcField !== null) {
+                // srcDirs DAMGASI: reçete build'in metafile'ından (± EXTRA_SRC_DIRS) türer, buradan yalnız OKUNUR.
+                // HİBRİT SİGORTA: damga yok/deforme (eski-format bundle) ya da mustInclude çıpa(lar)ı
+                // eksik (metafile-türetim bug'ı VEYA EXTRA_SRC_DIRS düşmesi) → sessiz-yeşile dönüşemez, loud STALE.
+                // mustInclude dizi olabilir: ana dizin + elle EXTRA_SRC_DIRS (type-only şema) HEP çıpalanır.
+                const dirs = info.srcDirs;
+                const anchors = [].concat(b.mustInclude);
+                if (!Array.isArray(dirs) || !dirs.length || !dirs.every(d => /^src\/[^/]+$/.test(d)) || !anchors.every(mi => dirs.includes(mi))) {
+                    bundleProblems.push(`srcDirs damgası yok/deforme (eski-format bundle ya da '${anchors.join("','")}' kapsam-dışı) → rebuild gerekir`);
+                } else {
+                    const liveSrc = shaTree(...dirs);
+                    const bundleSrc = info[b.srcField];
+                    if (bundleSrc !== liveSrc) bundleProblems.push(`${b.srcField} STALE: bundle ${bundleSrc} ≠ canlı ${liveSrc} (mantık drifti · izlenen: ${dirs.join(' ')})`);
+                    else noteParts.push(`src ${liveSrc} [${dirs.join(' ')}]`);
+                }
             }
+            // Faz-3 (Kapsam-4): PLUGIN-WRAPPER drifti — bundle kendi entry .src.mts + plugin-lokal
+            // import zincirini wrapperFiles/wrapperHash olarak damgalar; canlıdan yeniden-hash'lenir.
+            // HİBRİT SİGORTA: damga yok/boş/dizi-değil VEYA entry-çıpası (bundleRel'in X.mjs →
+            // X.src.mts karşılığı) listede değil VEYA listelenen dosya canlıda yok → loud STALE.
+            const wf = info.wrapperFiles;
+            const entryAnchor = b.bundleRel.split('/').pop().replace(/\.mjs$/, '.src.mts');
+            if (!Array.isArray(wf) || !wf.length || !wf.includes(entryAnchor)) {
+                bundleProblems.push(`wrapperFiles damgası yok/deforme (eski-format bundle ya da entry-çıpa '${entryAnchor}' kapsam-dışı) → rebuild gerekir`);
+            } else {
+                const missingW = wf.filter(f => !existsSync(resolve(validatorDir, f)));
+                if (missingW.length) {
+                    bundleProblems.push(`wrapperFiles canlıda yok: ${missingW.join(', ')} (taşındı/silindi) → rebuild gerekir`);
+                } else {
+                    const liveW = shaWrapper(validatorDir, wf);
+                    if (info.wrapperHash !== liveW) bundleProblems.push(`wrapperHash STALE: bundle ${info.wrapperHash} ≠ canlı ${liveW} (plugin-wrapper drifti · izlenen: ${wf.join(' ')})`);
+                    else noteParts.push(`wrapper ${liveW}`);
+                }
+            }
+            if (bundleProblems.length === 0) freshLines.push(`${b.bundleRel} · ${noteParts.join(' · ')}`);
         } catch (e) { bundleProblems.push(`bundle okunamadı: ${e.message}`); }
 
         if (bundleProblems.length === 0) freshBundles += 1;
