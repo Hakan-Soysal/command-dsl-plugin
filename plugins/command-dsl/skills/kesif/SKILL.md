@@ -252,6 +252,19 @@ kullanıcı kararıdır.
 
 **Amaç:** Eşleşen üretecin girdilerini deterministik, kayıtlı biçimde hazırla.
 **Yap:**
+- **Ev-garantisi kapısı (home-guarantee — sessiz öksüz-üretim YASAK):** Girdileri devretmeden ÖNCE,
+  keşfedilen modül(ler)in **çalışabileceği bir ev** olduğunu `integrationMode` (Faz 0b) × manifest
+  tutarlılığıyla teyit et. Ev yoksa **DUR** — hiçbir host'a bağlı olmayan, çalıştırılamaz öksüz modül üretme.
+  - `integrationMode = standalone` → ev = üretecin emit edeceği **kendi host'u** → `manifest.deployables`
+    **≥1 olmalı.** Boş/absent ise → **DUR**: profil "standalone (kendi `Program.cs`/`csproj`)" diyor ama
+    manifest hiç deployable içermiyor → üreteç host/AppHost emit etmez, modül evsiz kalır. (Kanıt: branded-pin
+    — `integrationMode=standalone` ∧ `deployables=[]` → `src/`'de yalnız modül+`.Contracts`, host YOK.)
+  - `integrationMode = integrated-module` → ev = **mevcut host app** → Faz 0b'de keşfedilen `hostComposition`
+    (entry/DI/DbContext/auth/csproj) çözülmüş olmalı; `manifest.deployables`'ın boş olması **NORMAL** (host dışarıda).
+    `hostComposition` çözülemezse → **DUR** (ne dış ev ne deployable).
+  - Çelişkiyi KESİN sun (hangi `integrationMode` · deployable sayısı / `hostComposition` durumu · neyin eksik).
+    Eylem: standalone-eksik → `back-to-teknik-analiz` (manifest bir deployable kazanmalı) **veya** integrationMode'u
+    düzelt; integrated-eksik → Faz 0b host keşfini tamamla. Sessiz standalone / otomatik ev YASAK.
 - **Domain DSL teyidi:** `manifest.json` (+ `operations.json`) hazır mı? Hazır olmalı (upstream
   `teknik-analiz`/brownfield). Yoksa **eksikliği bildir**, `teknik-analiz`'e yönlendir — uydurma.
 - **`gen.config.json` üret:** profilin üreteç-özel alt-detaylarını snapshot `inputs.config` şemasına
@@ -261,6 +274,8 @@ kullanıcı kararıdır.
 
 **⚠ Anti-pattern — şişirilmiş config:** snapshot şemasında olmayan alanı `gen.config.json`'a yazma;
 üreteç onları okumaz, determinizm yanılsaması yaratır.
+**⚠ Anti-pattern — öksüz-devret:** deployable de hedef host da yokken "modül üretilir ya, bir şekilde
+kullanılır" deyip devretme. Modül tek başına çalışamaz; evsizse üretim başlamamalı (ev-garantisi kapısı).
 
 ---
 
