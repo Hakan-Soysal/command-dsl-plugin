@@ -4,7 +4,7 @@
 > → TechDsl eşlemesini ve `realizes` köprüsünü tanımlar. Kaynak: `CommandDSL/src/tech/contract.ts`
 > (tüketilen şema) + gerçek `examples/tech/catalog.operations.json`.
 
-## 0. operations.json şeması (v3 — tüketilen alanlar; v3 = v2 + ADR-0033 `rules[]` [named-rule predicates] + guard'larda `kind:"rule"` referansları — additif)
+## 0. operations.json şeması (v3 — tüketilen alanlar; v3 = v2 + ADR-0033 `rules[]` [named rules] + guard'larda `kind:"rule"` referansları — additif. ⚠ business v1.2.0/ADR-0042: `rules[].body` artık **`ExprNode | null`** — business rule = **isim + `note`**; gövdesiz rule'da yapısal kaynak TECH'in realize-gövdesidir, `note` tech'i yazacak kişiye insan-brief'tir)
 
 ```jsonc
 {
@@ -12,6 +12,8 @@
   "actors":    [ { "id": "Admin", "extends": "Employee" }, … ],          // roles + yetkili-küme
   "relations": [ { "id": "managedBranch", "source": "BranchManager", "target": "Branch" }, … ],
   "entities":  [ { "id": "Order", "name": "Order", "fields": [ { "name":"status","type":"String","collection":false } ] }, … ],
+  "rules":     [ { "id": "PoiLimitExceeded", "reads": [], "body": null,   // ADR-0042: body ExprNode|null — null = predikat TECH'te realize edilir
+                   "note": "Org'un aktif POI sayısı tier limitini aşamaz…" } ],   // note = insan-brief (tech-yazarı için MERKEZ içerik)
   "operations":[ {
       "id": "CancelPendingOrder",
       "kind": "command",                                                  // command | query
@@ -19,7 +21,8 @@
       "access": { "writes": ["Order","Refund"], "reads": [] },            // KABA read/write
       "guards": [ { "id":"where:0", "kind":"where", "text":"status = 'pending'", "ast": {…} },
                   { "id":"during:0", "kind":"during", "calendar":"business-hours" },
-                  { "id":"if:0", "kind":"if", "text":"…", "ast": {…} } ],
+                  { "id":"if:0", "kind":"if", "text":"…", "ast": {…} },
+                  { "id":"rule:0", "kind":"rule", "ref":"PoiLimitExceeded" } ],   // adlı-kural REFERANSI (gövde top-level rules[]'te)
       "description":"…", "schedule":null, "delegation":null,
       "effects":[…], "flows":[…], "processes":[…], "domain":null
   }, … ]
@@ -45,7 +48,7 @@
 | `access.writes` (kaba) | `access { creates/updates/deletes <Entity> }` | "Yaratıyor mu / güncelliyor mu / siliyor mu?" Kaba write'ı **CRUD'a inceltirsin**. |
 | `access.reads` (kaba) | `access { reads <Entity> }` | "Hangi kayıtları okuyor?" |
 | `guards[].ast` (`where`/`if`/`when`) | `validation { … }` (400) / `rule { … }` (422) + `for guard "<id>"` | "Kontrol **request payload**'ında mı (→ validation, input-only) yoksa **stored state**'te mi (→ rule)?" **ARTIK YAPISAL ENFORCE (ADR-0031):** validation path kökü yalnız `op.params`; rule state-kökü `access` (entity/`as`-alias) veya `calls`-alias ile **bildirilmeli** — çıplak/bildirilmemiş kök → error. guard-id link (dik eksen) → ifade-divergence. ⚠ **İSTİSNA — `role="result-filter"` guard'ı (sorgu `only when`) EŞLENMEZ (ADR-0039):** o guard fail-check DEĞİL, dönen kümeyi satır-başına daraltan **filtredir**; validation/rule'a eşlersen "kümeyi daralt" sessizce 400/422 "hata ver"e döner → `role-mismatch` warning. Tech'e filtre clause'u da YAZMA — filtre `operations.json`'da `ast`+`role` ile zaten yapısal durur, **üreteç `.Where(ast)`'i oradan uygular** (manifest = realizes-mapping, süperset değil). `role=precondition` ve role'süz guard'lar normal eşlenir. |
-| `guards[].kind = "rule"` (`ref` → top-level `rules[]`, ADR-0033) | tech clause'a **EŞLENMEZ** (bu turda `for rule` realize mekanizması YOK) | Adlı-kural referansı: `rules[]` gövdesi tech için **OPAK**tır (AST-kıyas YOK, Karar 7) — codegen downstream tüketir; iş gerçeğini tech'e KOPYALAMA. Realized op'un requires ettiği rule → `checkRequiredRuleCoverage` **warning** (kapsam sinyali, gate değil) — kullanıcıya "bilinçli mi (codegen'e kalıyor)?" diye yansıt-belgele. |
+| `guards[].kind = "rule"` (`ref` → top-level `rules[]`, ADR-0033 → **ADR-0042 YÖN DÖNÜŞÜ**) | op-clause **`realizes rule <Ad> { <Seviye-2 predikat> }`** (tech v3.0.0) | ⚠ **ESKİ YÖN GEÇERSİZ** ("rules[] tech'e eşlenmez, opak" — ADR-0042 bunu TERSİNE çevirdi): adlı business kuralının **yapısal predikatı artık TECH'te yazılır**. `rules[].body` **`ExprNode\|null`** (business v1.2.0) — gövdesiz rule'da tek yapısal kaynak tech realize-gövdesidir; `note` = insan-brief (oku, kullanıcıyla doğrulat). Akış: business `requires <Ad>` gören her realize-eden op'ta → kural sınıfını çıkar (**var-mı `[not] exists`** / **filtreli `count` eşiği** / **param-korelasyon** / **join = iç-içe exists + FK-eşitliği**) → nicelenecek koleksiyonu **`access { reads <E> as <alias> [by <key>] }`** ile bildirt (`by <key>` = ön-filtre; predikat yalnız alias'ı referanslar) → gövdeyi o alias'lar üzerinde yaz. **İKİ-MOD:** gövdeli form TEK-AD; çoklu-ad (`realizes rule A, B`) HEP gövdesiz-işaret = kapsam devri (mekanizma serbest: denormalize sayaç, DB constraint…); `realizes rule A, B { … }` **parse-error**. `checkRequiredRuleCoverage` **warning**'ini gövdeli VE gövdesiz işaret düşürür; sözleşmede olmayan ad → **error**. Aynı kural op'a göre **FARKLI** realize edilebilir (PoiLimitExceeded: org-fazı `count(org POI'leri)` vs app-fazı `count(app'e bağlı POI'ler)` emsali). T4 denetimleri fail-closed (§tech-dsl-reference 6b). İş gerçeğini yine KOPYALAMA — realize-gövdesi AST-kıyasa girmez (Karar 7 identity-realize korunur); `rules[].body` doluysa bile üreteç default'u ORADAN üretir, işaret yalnız override'dır. |
 | (state-ihtiyacı, business'ta implicit) | `access { reads <E> as <alias> by <param> }` → `rule { alias.field … }` | "Bu kural **hangi kaydın** state'ine bakıyor, **hangi input** o kaydı seçiyor?" Aynı tipten ≥2 instance → her birine ayrı `as`/`by`. |
 | (başka module'ün verisi gerekli) | `calls <Module>.<Query> as <alias>` → `rule { alias.field … }` | "Bu op başka bir context'in verisini **senkron okumalı** mı? Hedef **query** olmalı (write → event/saga); sonuç consistency-garantisiz (ADR-0030)." |
 | `guards[].kind = during` | (calendar) — `@trigger.*`/policy | `during` AST taşımaz; ifade-divergence'a girmez. |

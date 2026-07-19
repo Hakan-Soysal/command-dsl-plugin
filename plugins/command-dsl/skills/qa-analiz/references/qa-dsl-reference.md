@@ -13,7 +13,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `2d0187885b3b` · src `251cd5a43260` · commit `dcbfd21`+**qa v3.0.0 (refinement dalı: `coverage.ts` `refinementViolation` — KIRICI çıktı)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `159e8bf58c84` · src `e065fdb1712d` · commit `0c5072b`+**qa v3.1.0 (`seed … @owner(persona)` sahiplik-pini — additive) + v4.0.0 (liste-literal `[…]` + eleman-tip denetimi + İQ2 muafiyet-kaldırma — KIRICI: çıktı `kind:'list'` + girdi)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 >
 > **⚠️ ADR-0040 · qa v2.0.0 — KIRICI (2026-07-16).** İki ayrı şey oldu, karıştırma:
 > 1. **Yankı (yüzey DEĞİL):** tech'e `principal`/`axis` girdi → qa gramerini import ettiği için hash
@@ -28,6 +28,24 @@
 >    `qa.json` `branch` union'ı genişledi → kapalı `switch`'li tüketici düşer = **KIRICI**.
 >
 > **⚠️ qa v3.0.0 — KIRICI çıktı (2026-07-17).** `coverage.ts` `Branch` union'ına **`{kind:'refinementViolation', id:'<param>.range|union'}`** eklendi: tech imza-param'ı `in <Range>|{union}` taşıyorsa (ör. `amount: Money in 1..10000`) sınır-ihlali (NotValid) artık **dal-uzayında** — strict onu ya test (`covers guard "<param>.range"`) ya waive ister (eskiden **görünmezdi** → strict yapısal kör). Girdi additive (mevcut `.qa` parse eder; `covers guard "<param>.<kind>"` artık geçerli) ama refinement'lı op'ta yeni `uncovered` warning doğar. Çıktı `branch` union'ı genişledi → kapalı-`switch` tüketici düşer = **KIRICI**. Bkz. `docs/releases/qa-dsl.md` v3.0.0.
+>
+> **⚠️ qa v3.1.0 (additive) + v4.0.0 (KIRICI) — 2026-07-18.** İki ayrı yüzey:
+> 1. **v3.1.0 — `seed … <Entity> @owner(<persona>) { … }` sahiplik-pini (§6).** Seed kaydının
+>    SAHİBİNİ görünür bir persona'ya bağlar; üreteç `OwnerId = PersonaUserId(persona)` üretir.
+>    Girdi additive (annotation — `owner` GLOBAL keyword DEĞİL, alan-anahtarı/bind/persona adı
+>    olarak yaşamaya devam eder); çıktı additive (seed kaydına OPSİYONEL `owner?: string` alanı,
+>    `kind` seti aynı). **Neden gerekli:** given-call arrange bu boşluğu KAPATAMAZ — create-op'lar
+>    çoğunlukla `@internal roles svc_*` → persona çağıramaz; svc çağırırsa create semantiği
+>    `OwnerId = çağıran(svc)` yapar. Kimlik-dikişli (OwnerId authored alan OLMAYAN) entity'de pin
+>    ancak seed'in kendisinde beyan edilir.
+> 2. **v4.0.0 — liste-literal `alan: [öğe, …]` (İQ2 kapanışı).** `list of` param/alan girdisinin
+>    BİRİNCİ-SINIF yazımı (boş `[]` dahil; öğe = literal | persona/seed-ref | step-path |
+>    obje-literal | iç-içe liste). **Girdi KIRICI (muafiyet-kaldırma):** (a) `list of` hedefe
+>    skaler/seedRef/obje yazımı artık **error** ("liste literal'i kullan: [öğe, …]" — eskiden
+>    sessizce geçip codegen'de patlıyordu), (b) koleksiyon alanlar **zorunlu-eksik denetimine
+>    girdi** — boş bırakmak "Eksik zorunlu alan(lar)" error'ı, boş liste `[]` ile AÇIKÇA beyan
+>    edilir. **Çıktı KIRICI:** `QaValueJson.kind` union'ına `'list'` varyantı (+ `items?:
+>    QaValueJson[]` özyineli) → kapalı-`switch` tüketici düşer. Bkz. `docs/releases/qa-dsl.md`.
 
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
@@ -40,6 +58,7 @@ QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kaps
 | `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ | **doğrulanmamış-etki** — dönüş doğru ama kalıcı etki (kayıt/event/dış-çağrı) hiç assert'lenmez; sığ-yeşil test |
 | `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ | **koşulmayan-zaman-dalı** — zaman-koşullu dal "covered" ama zaman ilerletilmediğinden hiç koşmaz |
 | `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ | **kurulumsuz-dal** — ön-durum (mevcut kayıt/başkasının kaydı/limit-aşımı) kurulmadığından dal gerçekten tetiklenmez |
+| `seed … @owner(persona)` sahiplik-pini (v3.1.0) | ownership/Filtered dalının seed'i "başkasının kaydı"nı mı kuruyor? Kaydın SAHİBİ görünür bir persona'ya pinli mi — özellikle **kimlik-dikişli** entity'de (OwnerId authored alan DEĞİL → seed gövdesinden yazılamaz, given-call arrange da kuramaz)? | 3/4 | ★ | **pinsiz-sahiplik** — OwnerId deterministik bir persona'ya bağlanmaz; ownership/Filtered testi yanlış kimlik-dikişi üstünde sahte-yeşil verir (dal "covered" ama sahiplik ilişkisi hiç kurulmamıştır) |
 | `waive … until` (süreli) | dalı kapsamak yerine waive ediyorsan süre koydun mu? `until`'siz waive = **kalıcı sessiz boşluk** | 2 | ★ | **kalıcı-sessiz-boşluk (bayat-istisna)** — süresiz waive; kapsanmayan dal kalıcı olarak sessizce muaf kalır |
 | senaryo `realizes flow/process` (yaşam döngüsü) | çok-adımlı / çok-aktör akış var mı? presence-coverage | 5 | ○ (warning-routed) | **kapsanmayan-yaşamdöngüsü** — çok-adım/çok-aktör akış senaryosu yok; uçtan-uca dizi doğrulanmaz |
 | senaryo `satisfies <outcome>` (ürün-hedefi presence) | operations.json'da ölçülebilir `outcome`/SuccessCriteria var mı — özellikle yalnız-**op** kapsayan (o outcome yalnız `satisfies` ile bağlanabilir, `realizes` asla)? her hedef bir senaryoyla karşılanıyor mu? | 5 | ★ (warning-routed; **waive KAPATMAZ**) | **kapsanmayan-ürün-hedefi** — ölçülebilir bir başarı-ölçütü hiçbir senaryoyla `satisfies` edilmiyor; "davranış doğru ama ürün-hedefi test-kanıtsız" (kapatılabilir açık-hedef sessizce kalır) |
@@ -99,12 +118,23 @@ dataset gecerliTeklif for SubmitProposal {
   literal-tip iddiası YOK.
 - Değer türleri: literal (STRING / NUMBER — negatif işaretli olabilir, F6 / true /
   false) · **persona referansı** (kimlik-tipli alan; üreteç kimliğe çözer) ·
-  **seed-binding referansı**. Step-binding path'i (`s1.result.id`) YALNIZ senaryo-içi
+  **seed-binding referansı** · **obje-literal** (kompozit param/alan) · **liste-literal**
+  `[öğe, …]` (v4.0.0 — aşağıda). Step-binding path'i (`s1.result.id`) YALNIZ senaryo-içi
   inline kullanımda geçerlidir — kök-düzey dataset'te yazılamaz.
 - Kompozisyon YOK (`extends` v1-dışı); kullanım yerinde **inline override**:
   `with gecerliTeklif { title: "" }`.
-- `list of` tipli param zorunlu-eksik denetiminden MUAFTIR (İQ2 — liste literal'i
-  yok; üreteç politikası doldurur).
+- **Liste-literal (v4.0.0 — İQ2 muafiyeti KALKTI):** `list of` tipli param/alan girdisi
+  `alan: [öğe, …]` ile yazılır — öğe = literal | persona/seed-ref | step-path (yalnız
+  senaryo-içi) | obje-literal | iç-içe liste; boş liste `[]` GEÇERLİDİR ve "kasıtlı boş"
+  beyanıdır. Üç kural:
+  1. `list of` hedefe skaler/seedRef/obje yazımı → **error** ("liste literal'i kullan:
+     [öğe, …]"); tek öğe de `[değer]` ile sarılır.
+  2. Koleksiyon alanlar artık **zorunlu-eksik denetiminde** (requireAll bağlamları:
+     dataset / inline-input / event-payload / obje-literal) — boş bırakmak "Eksik
+     zorunlu alan(lar)" error'ı; boş koleksiyon `[]` ile AÇIKÇA beyan edilir.
+  3. **Eleman-tip denetimi özyineli:** öğeler hedefin ELEMAN tipine doğrulanır —
+     enum-üyelik, path-kök görünürlüğü, obje-literal alan doğrulaması, iç-içe
+     liste→skaler eleman error'ı; liste→skaler hedef de error.
 
 ## 4. Defaults (§3.6, karar #25)
 
@@ -151,7 +181,7 @@ test "boş başlık reddedilir" of SubmitProposal covers guard "title-required" 
 ```
 given {
   time "2026-07-02T10:00:00Z"
-  seed p1 = Proposal { title: "t1", status: "Draft", owner: yonetici }
+  seed p1 = Proposal @owner(yonetici) { title: "t1", status: "Draft", owner: yonetici }
   seed 10 Proposal { status: "Active", owner: musteri }
   call ApproveProposal as yonetici with { id: p1 }
   stub Payments.Charge returns { receiptId: "r1" }
@@ -164,7 +194,7 @@ given {
 - `time STRING`: saat pini — **saat-dilimi offset'i ZORUNLU** (öneri `Z`; offset'siz
   ISO → error — QA-15); biçim + DEĞER sanity denetlenir (`T99:99` sınıfı → error, F7).
   Zamana duyarlı guard'lı op'larda şiddetle önerilir (P4).
-- `seed [<bindId> =] [<N>] <Entity> { alan: değer … }` (karar #22, K-C):
+- `seed [<bindId> =] [<N>] <Entity> [@owner(<persona>)] { alan: değer … }` (karar #22, K-C; @owner v3.1.0):
   - Doğrudan durum beyanı; alanlar Entity field'larına tip-doğrulanır (S18 degrade).
     İş kurallarını **bilerek** bypass eder (gerçekleme P5).
   - Çokluk `<N>`: N ≥ 1 (0 → error); çokluk-seed'i bind EDİLEMEZ (hangi kayıt? →
@@ -172,6 +202,16 @@ given {
   - Binding: sonraki seed/call/when değerlerinde **seedRef** olarak kullanılır
     (kimlik-tipli alana çözülür); dangling seedRef → error. FK zincirini string-literal'e
     emanet etme.
+  - **`@owner(<persona>)` — sahiplik-pini (v3.1.0):** seed kaydının SAHİBİNİ görünür bir
+    persona'ya bağlar; üreteç `OwnerId = PersonaUserId(<persona>)` üretir. Persona AYNI
+    dosyada tanımlı olmalı (değilse error: "@owner persona'sı bu dosyada tanımlı bir
+    persona olmalı"). **Ne zaman TEK yol:** entity'nin sahiplik anahtarı **kimlik-dikişi**
+    ise (OwnerId authored alan DEĞİL → seed gövdesinden yazılamaz — entity-dışı anahtar
+    error'du); given-call arrange da kuramaz (create-op çoğunlukla `@internal roles svc_*`
+    → persona çağıramaz; svc çağırırsa `OwnerId = çağıran(svc)` olur). Entity'de authored
+    `owner` ALANI da varsa `@owner` onunla çakışmaz — alan ve pin ayrı yüzeylerdir,
+    ownership testinde ikisini TUTARLI kur. Manifest: seed kaydına OPSİYONEL
+    `owner: "<persona>"` alanı (yalnız beyan edilmişse; @owner'sız çıktı bit-özdeş).
 - `call <Op> [as <persona>] with <girdi>`: API-driven kurulum; Success beklenir —
   dönmezse test **infra-fail** raporlanır (assert-fail değil — S7). Testte `as`
   yoksa testin etkin aktörü; **SENARYO given-call'ında `as` ZORUNLUDUR** (F8 —
@@ -191,6 +231,7 @@ given {
 when call with gecerliTeklif { title: "" }                        // dataset + inline override
 when call with { title: "X", amount: 5 }                          // tam inline
 when call with { request: { amount: 250, tip: 5 } }               // kompozit param → object-literal değer
+when call with { ids: [p1, p2], kanallar: [] }                    // `list of` param → liste-literal (v4.0.0; boş [] = kasıtlı boş)
 when event Proposals.ProposalSubmitted with { proposalId: "p1" }  // consumer op'lar
 ```
 
@@ -391,6 +432,14 @@ Bir Operation'ın zorunlu dalları tech kaynağından **türetilir**:
 - **S20 — `uses` anlam farkı:** frontend DSL'de `uses` bir op-arayüzü bildirir; qa'da
   **kaynak bağlar** (`uses tech/flows`). Cross-grammar keyword sızıntısı yoktur; anlam
   bağlamdan nettir — iki DSL arasında geçiş yaparken karıştırma.
+- **`@owner` bir annotation'dır, `owner` GLOBAL keyword DEĞİLDİR (v3.1.0):** `owner`
+  yalnız `@owner(` bağlamında keyword; alan-anahtarı (`owner: musteri`), bind adı ve
+  persona adı olarak YAŞAMAYA DEVAM eder. `owned by` yazımı YOKTUR (bilinçli — iki
+  bare-keyword'ü rezerve ederdi).
+- **`[` / `]` NOKTALAMADIR (v4.0.0):** keyword eklemez, identifier'larla çakışamaz;
+  liste-literal her QaValue konumunda geçerlidir (dataset / inline-input / seed /
+  stub-returns / event-payload / obje-literal içi / iç-içe). `list of` hedefe skaler
+  yazım error; boş koleksiyon `[]` ile beyan edilir (alansız bırakmak error).
 - Saat pini offset ZORUNLU: `"2026-07-02T10:00:00Z"` (offset'siz ISO → error, QA-15).
 - `advance time` birimleri: `minutes | hours | days` (başka birim yok).
 - NotAuthenticated / ServerError **grammar keyword'ü DEĞİLDİR** — dal değiller; S10

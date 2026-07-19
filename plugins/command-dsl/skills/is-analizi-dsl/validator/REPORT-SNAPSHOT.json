@@ -1,22 +1,22 @@
 {
   "source": "CommandDSL",
   "tool": "report-business.mjs",
-  "grammarVersion": "cdsl-v3.x-94397168f2a1",
-  "grammarHash": "94397168f2a1",
+  "grammarVersion": "cdsl-v3.x-69ca2866b8e8",
+  "grammarHash": "69ca2866b8e8",
   "srcDirs": [
     "src/generated",
     "src/generator",
     "src/language",
     "src/shared"
   ],
-  "srcHash": "c3c70ae50f8a",
+  "srcHash": "31e285180083",
   "wrapperFiles": [
     "report-business.src.mts",
     "report-index.src.mts"
   ],
   "wrapperHash": "05f903ac4bca",
-  "commit": "2b683d7",
-  "builtAt": "2026-07-16T21:59:41+03:00",
+  "commit": "0c5072b",
+  "builtAt": "2026-07-19T09:19:37+03:00",
   "langium": "4.2.4",
   "note": "İnsan-okur rapor bundle'ı — üreteçler: plantuml/plantuml-flow/plantuml-process/plantuml-blueprint/process-doc/cockburn/coverage + report-index (kanonik ortak kopya)"
 }

@@ -48,10 +48,19 @@ entity Refund {
 verb submits
 verb ships
 
-# rule (top-level, yeniden-kullanılabilir op-bağlamlı predikat) — reads + satisfies
-# BoolExpr (skaler cmp + and/or + [not] exists <alias> where <cond>). Kökler
-# (Order = requires eden op'un kaynağı; inv = reads-alias) çağrı yerinde bağlanır.
+# rule — ÖNERİLEN biçim (ADR-0042): isim + note-brief. Yapısal predikat business'a
+# YAZILMAZ; tech op-içi `realizes rule OrderSubmittable { <predicate> }` ile realize
+# eder (bağ isimle: requires <Ad> ↔ realizes rule <Ad>).
 rule OrderSubmittable {
+    note """Sipariş ancak toplamı 0'dan büyükse gönderilebilir. Tech ipucu:
+    Order.total > 0 alan-karşılaştırması (predikat tech'te realize edilir)."""
+}
+
+# rule — LEGACY biçim (geçerli kalır, retire yok; YENİ modelde önerilmez):
+# reads + satisfies gövdesi business'ta. BoolExpr (skaler cmp + and/or +
+# [not] exists <alias> where <cond>); kökler (Order = requires eden op'un
+# kaynağı; inv = reads-alias) çağrı yerinde bağlanır.
+rule NoOpenInvoice {
     reads Invoice as inv
     satisfies Order.total > 0 and not exists inv where Invoice.status = 'open'
 }
@@ -72,9 +81,10 @@ on success do
     calculate Order.total = sum of Order.items.price
     calculate Order.status = 'placed'
 
-# requires (K2-kardeşi): op-clause olarak adlandırılmış rule'a bağlanır
+# requires (K2-kardeşi): op-clause olarak adlandırılmış rule'lara bağlanır
+# (çoklu-ad: önerilen isim+note rule + legacy satisfies'lı rule bir arada)
 SubmitOrder: Customer submits own Order where status = 'placed'
-requires OrderSubmittable
+requires OrderSubmittable, NoOpenInvoice
 on success do
     calculate Order.status = 'submitted'
 

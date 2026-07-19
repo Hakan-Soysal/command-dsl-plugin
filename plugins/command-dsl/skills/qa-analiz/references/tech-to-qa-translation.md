@@ -88,7 +88,9 @@ Bu yüzden "çağrı geçti" ya da "N satır geldi" **hiçbir şey kanıtlamaz**
 Validator `count`-only testi error'lar ve bu tuzağı açıkça söyler.
 
 **Test verisi:** en az İKİ seed gerekir — biri kapsam içi, biri kapsam dışı (`ownership <axis>` ise
-axis'in kaynak satırı da seed'lenmeli: "delegasyon var" + "delegasyon yok" durumları).
+axis'in kaynak satırı da seed'lenmeli: "delegasyon var" + "delegasyon yok" durumları). Sahiplik
+anahtarı **kimlik-dikişi** ise (OwnerId authored alan değil) kapsam-üyeliği seed gövdesinden
+YAZILAMAZ — pin `seed … @owner(<persona>)` ile beyan edilir (qa v3.1.0; reference §6).
 
 **⚠ persona ↔ principal değer bağı (DUR-BİLDİR):** qa `persona`'nın **öznitelik-değer yüzeyi
 YOKTUR** (yalnız `persona <ad>: [role] <hedef>` — attribute yazılamaz). Çağıranın kapsam-alanı
@@ -134,9 +136,10 @@ eder misin?"* → (a) `result contains`, (b) `result absent`.
 - Sorgulama kalıbı (mekanizma-başına AYRI karar al): "Bu işleme iki ayrı kapı var —
   (a) yanlış roldeki kullanıcı, (b) doğru rolde ama **başkasının kaydına** erişen
   kullanıcı. Hangilerini test edelim, hangisini neden geçelim?" Tipik desen (spec §7
-  exemplar): ownership yolu elle test edilir (`as musteri` + `seed p1 = … owner:
-  baskaMusteri` + `when call with { id: p1 }`), roles yolu P1 jenerik-kimlik
-  gerekçesiyle waive edilir.
+  exemplar): ownership yolu elle test edilir (`as musteri` + `seed p1 = … @owner(baskaMusteri)
+  { … owner: baskaMusteri }` + `when call with { id: p1 }` — sahiplik-pini `@owner` ile;
+  entity'de authored `owner` alanı da varsa ikisini TUTARLI kur), roles yolu P1
+  jenerik-kimlik gerekçesiyle waive edilir.
 - Test verisi ipucu: ownership testi İKİ persona ister (çağıran + kaydın sahibi) —
   Faz 1'de `baskaMusteri` benzeri ikinci kimliği ekletmiş ol.
 - **Axis-tabanlı ownership'te (`ownership <axis> by …`) TEKİL-dönüşlü op'un

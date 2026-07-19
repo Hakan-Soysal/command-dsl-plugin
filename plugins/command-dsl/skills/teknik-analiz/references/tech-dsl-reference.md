@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `ed720eef8159` · src `b2c7fe3511f9` · commit `dcbfd21`+**tech v2.1.0** (negatif `Range` sınırı: `lat: Decimal in -90..90` + keyword-as-fieldname lint; +`manifest.ts` imza-refactor 2026-07-17: qa coverage'a duck-typed görünüm — manifest.json çıktısı **bit-özdeş**, sürüm İLERLEMEDİ) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `98157939f361` · src `05bc2cefe61f` · commit `0c5072b`+**tech v3.0.0** (ADR-0042: `realizes rule <Ad> { <Seviye-2 predikat> }` realize-gövdesi + **4 yeni SERT-REZERVE keyword `exists`/`count`/`where`/`not`** + 1b opak-Call deny-list [`sum/all/any/avg/min/max` → error; `exists(`/`count(` → parse-error] + manifest `realizesRules: string[] → {rule, predicate}[]` KIRICI reshape; §6b) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -26,6 +26,7 @@ Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sess
 | `sourceOfTruth` (field) | "başka modülün/servisin kaydına bağlı; asıl kaynağı orada" | 2 | ★ | **kaynak-drifti** — asıl-kaynak işaretlenmez; yerel kopya otorite sanılır, gerçek kaynaktan sapar |
 | `refinement` (field) | "yaş/limit 13-120 arası; durum şu 3 değerden biri; kapalı-liste/aralık" | 2 | ★ | **denetlenmeyen-domain** — alan-değeri izinli aralık/küme dışına çıkar; NotValid payload'ı üretilemez |
 | `refinement` (op param) + `violations[]` | "bu parametrenin izinli aralığı/kümesi var; sınır-dışı değer NotValid dönmeli — kural kimliğiyle" | 3 | ★ | **sentezlenmeyen-ihlal-payload** — param'a refinement yazılmazsa `violations[]` (ruleId/field/domain, manifest `op.violations`) hiç üretilmez; üreteç/tüketici sınır-dışı red'i kural-bazlı (NotValid ruleId) kuramaz, gevşek/elle doğrulamaya düşer |
+| `realizes rule <Ad> [{ <predikat> }]` (op) | "sözleşme bu op'a adlı bir iş-kuralı bağlıyor (`requires <Ad>` / guards `kind:"rule"`); 'aktif kampanyadaki POI silinemez', 'org limiti aşılmasın', 'sektör eşleşmeli' gibi var-mı/sayım/korelasyon kuralı" | 5 | ★★ | **realize-boşluğu (seam'e düşen kural)** — requires edilen adlı-kural ne işaretlenir ne gövdelenir; `rules[].body` ADR-0042 sonrası `null` olabildiğinden üreteç default üretemez → kural elle-seam workaround'una düşer ya da HİÇ enforce edilmez (coverage warning'ini sessiz geçme) |
 | `@audit.logged` (op) | "kim ne zaman erişti/değiştirdi izi; finansal işlem; uyum/denetim" | 3 | ★ | **izlenemez-değişiklik** — kim-ne-zaman izi tutulmaz; denetim/uyum kaydı oluşmaz |
 | `@metric.emit` (op) | "metrik/sayaç/ölçüm topla" | 3 | ○ | **ölçülemez-işlem** — sayaç/metrik yayılmaz; işlem gözlemlenemez |
 | `@http.*` (param-önü) | "`@rest`'li op; 'ID URL'de, gövde JSON'da'; girdi query-string'den/header'dan geliyor" | 3 | ○ | **belirsiz-param-bağlama** — girdinin URL/query/header/gövdeden hangisiyle geldiği bildirilmez (`@http.path`/`@http.query`/`@http.header`/`@http.payload`, §9); bağlama üretecin varsayımına kalır → uç sözleşmesi kayar |
@@ -243,8 +244,8 @@ operation Recalc(orderId: OrderId): Unit { … }
   hiçbiri yoksa → `checkVisibility` warning.
 
 ### OpClause'lar (hepsi op gövdesinde, §5–§7'de detay)
-`roles · ownership · permit when · scope · access · validation · rule · throws · calls ·
-idempotent by · emits · on · paginated by · consistency · note`
+`roles · ownership · permit when · scope · access · validation · rule · realizes rule (§6b) ·
+throws · calls · idempotent by · emits · on · paginated by · consistency · note`
 
 ---
 
@@ -389,6 +390,83 @@ operation Transfer(from: Iban, to: Iban, amount: Money): Unit {
   (komut `when`'i) ve role'süz guard'lar (where/if) mevcut davranışta kalır.
 - `throws` hedefi module-level `error`'a çözülür (dangling → linker error). ResultType ∈
   {NotAuthenticated, NotAuthorized, NotValid, NotProcessable}.
+
+---
+
+## 6b. `realizes rule` — adlı-kural realize'ı + Seviye-2 predikat dili (ADR-0042 · tech v3.0.0)
+
+Business rule artık **isim + `note`**'tur (business v1.2.0; `rules[].body` `ExprNode|null`) —
+**yapısal predikat TECH'te yazılır.** Bağ isimle: business `requires <Ad>` ↔ tech op-clause
+`realizes rule <Ad>`. Predikat op **bağlamında** koşar; **aynı kural op'a göre FARKLI realize
+edilebilir** (PoiLimitExceeded org-fazı vs app-fazı emsali) → mekanizma bu yüzden op-içidir.
+
+**İKİ-MOD (gramer `RealizesRuleClause`):**
+```
+realizes rule SeatAvailable                       // gövdesiz-işaret (v2.2.0 davranışı): kapsam devri
+realizes rule A, B, C                             // çoklu-ad — HEP gövdesiz-işaret
+realizes rule PoiLimitExceeded { count orgPois where orgPois.status = "active" < poiLimit }   // TEK-AD + gövde
+```
+- Gövdeli form **TEK-AD zorunlu** — `realizes rule A, B { … }` **parse-error** (gövde hangi ada
+  ait belirsiz olurdu). Gövdesiz işaret = realize sorumluluğu op'un authored gövdesine devredilir
+  (mekanizma serbest: denormalize sayaç, DB constraint, çağrı zinciri) — muafiyet-beyanı DEĞİL.
+- Rule adı **plain ID** (cross-ref değil): sözleşme `rules[]`'te yoksa → **error** (mesaj mevcut
+  adları listeler). `checkRequiredRuleCoverage` kapsam-warning'ini gövdeli VE gövdesiz işaret düşürür.
+
+**Seviye-2 predikat dili (K3 — sınırlı; tam-selector DEĞİL):**
+```
+realizes rule PoiInActiveCampaign {
+  not exists cps where exists camps where camps.id = cps.campaignId and camps.status in { active | paused }
+}
+realizes rule IneligibleIndustry { exists offices where offices.industry = industry }
+```
+- **`[not] exists <alias> where <koşul>`** — varlık sorgusu. **Join = iç-içe exists** (alias'lar
+  arası FK-eşitliği); relation-navigasyonu (`cp.campaign.status`) YOK.
+- **`count <alias> [where <koşul>] <cmp> <sayı|path>`** — filtreli sayım. **İKİ-AĞAÇ:** `count`
+  YALNIZ top-level; `where` içinde `count` **parse-error** (gramer şekliyle dışlı).
+- **Koşul yaprağı:** `path <cmp> path|literal` ya da `path in { a | b }` (literal-küme).
+  **Aritmetik / `sum of` / Call gövdeye GİREMEZ** (gramer şekliyle dışlı — K8 sınırlı-açılım).
+  `and`/`or` + parantez serbest.
+- **`<alias>` = op'un `access { reads <Entity> as <alias> [by <key>] }` alias'ı** (K4). Inline
+  entity-adı YOK, param nicelenemez — nicelenecek HER koleksiyon önce `access`'te bildirilir.
+  **`by <key>` koleksiyonu ÖN-FİLTRELER** (`reads Poi as orgPois by orgId` = o org'un POI'leri)
+  → `where`'in bir kısmını bedavaya üstlenir; predikat ön-filtreyi YENİDEN KODLAMAZ (üreteç
+  `by`-anlamını manifest'in `access` clause'undan okur).
+- **Korelasyon SERBEST (K5) — kök-kuralı:** **çıplak kök** (`industry`) = op-yüzeyi (param /
+  `access…as` alias'ı / `calls…as` sonucu); **alias'lı kök** (`camps.status`) = nicelenen satır.
+  Çıplak entity-adı korelasyon kökü DEĞİLDİR (fail-closed red).
+
+**T4 validasyonu (`checkRealizePredicate` — hepsi ERROR / fail-closed; 0-error kapısını kapatır):**
+- **Alias-çözümü (K4):** `exists/count <alias>` op'un `access … as` alias'ına çözülmeli; değilse
+  error (mevcut alias'lar listeli). İç-içe exists'te aynı alias'ı yeniden nicelemek (gölgeleme) → error.
+- **Kök-çözümü (K5):** her Path kökü ya çevreleyen niceleyici alias'ı (alias-yığını — join FK iki
+  alias'ı da görür) ya op param'ı ya `access…as` alias'ı ya `calls…as` sonucu; değilse error
+  (kullanılabilir kökler listeli).
+- **Kartezyen-barı (K6):** iç-exists kendi `where`'inin DOĞRUDAN ağacında dış niceleyiciyle en az
+  bir `<içAlias>.x = <dışAlias>.y` FK-eşitliği taşımalı; yoksa error (yalnız param'a korelasyon
+  KURTARMAZ — koleksiyonlar bağlanmamış kalır; `or`-dallarının HER İKİSİ de FK taşımalı).
+- **`count` sağ-tarafı SKALER:** sayı ya da op-yüzeyi Path'i; sayılan alias'ın kendisi sağda →
+  error; çözülemeyen kök → error (string-literal zaten parse-error).
+- Yaprak alan/enum denetimi bu dilimde YOK (kök-seviyesi); alan-typo'su T4'ü geçer → dikkatli yaz.
+
+**4 yeni SERT-REZERVE keyword: `exists` · `count` · `where` · `not`** — bu adları alan/param/
+entity/alias adı olarak KULLANMA (kullanan model parse etmez; keyword-hint ipucu verir).
+**Call-yazımı kapalı:** `exists(...)`/`count(...)` → **parse-error** (keyword; 1b deny-mesajı
+DEĞİL); `sum/all/any/avg/min/max` adlı Call → **deny-list error** (§10). Yapısal evi tech'in
+realize-gövdesidir — business'a itme yönü ADR-0042 ile DÖNDÜ.
+
+**Manifest (KIRICI reshape — tech v3.0.0):** op kaydında `realizesRules: string[]` →
+**`{ rule: string, predicate: RealizePredNode | null }[]`** (gövdesiz işaret / çoklu-ad →
+`predicate: null`). `RealizePredNode` TECH-YEREL tip (shared `ExprNode` union'ına GİRMEZ;
+qa/frontend tip-uzayı değişmedi):
+```
+{ node: 'exists', negated: bool, alias: string, where: RealizePredNode }
+{ node: 'count',  alias: string, where: RealizePredNode|null, op: '='|'!='|'>'|'<'|'>='|'<=', right: ExprNode }
+{ node: 'and'|'or', left: RealizePredNode, right: RealizePredNode }
+{ node: 'cmp', op: …|'in', left: ExprNode, right: ExprNode }     // yaprak; çocuklar shared ExprNode
+```
+Yaprak çocuklar shared serializer'dan aynen: `{path:[…]}` · `{kind:'string'|'number',…}` · `in`
+sağı `{node:'set', values:[…]}`. Üreteç alias'ları op'un `access` clause'undan çözer (`by <key>`
+ön-filtresi orada).
 
 ---
 
@@ -537,6 +615,14 @@ fn(arg, …)                                       // çağrı
 a.b.c                                            // path (segment'ler)
 "str" | 123 | true | false                       // literal
 ```
+**Opak-Call DENY-LIST'i (1b, tech v3.0.0):** `sum|all|any|avg|min|max` adlı bir fonksiyon çağrısı,
+Expr'in geçtiği **TÜM** yerlerde (validation/rule · permit · invariant · boundary-validation ·
+guarantee · iç-içe call argümanları dahil) → **ERROR** (*"Opak çağrı 'ad(...)' tech Expr'inde
+yasak — …"* önekli mesaj). Semantikleri yapısal karşılıksız opak `{node:'call'}` olarak manifest'e
+sızıyordu (fail-open; üreteç yorumlayamaz). **`exists(...)`/`count(...)` Call-yazımı ise
+parse-error** (keyword oldular — yapısal evleri realize-gövdesi, §6b; deny-mesajı BEKLEME).
+**Deny-dışı Call'lar SERBEST:** `ibanValid(x)` gibi yapısal predicate çağrıları geçerli ve
+manifest'e `{node:'call'}` olarak inmeye devam eder (frontend'in TOTAL ban'ı DEĞİL).
 **`in` — üyelik operatörü (ADR-0038):** skaler-ile-küme'yi `=` ile kıyaslamak **tip-yalanı**
 (küme asla skaler değildir) → ayrı operatör. Sağ operand **YALNIZ küme-şekli**: literal küme
 `{a|b}` (`SetLit` — Refinement'ın `LiteralUnion`'ından bilinçle AYRI üretim) **veya to-many path**.

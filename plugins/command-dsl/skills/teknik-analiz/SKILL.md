@@ -88,6 +88,8 @@ atlandı. Biri olduysa DUR, adını koy, düzelt.
   `calls Stripe.Charge compensate with Stripe.Refund`'a çevirirsin. "Havale, hesabın bakiyesi
   yeterliyse geçer" → `access { reads Account as src by from }` + `rule { amount <= src.balance }`.
   "Limit kontrolü için risk-module'üne bakmalı" → `calls Risk.GetLimit as cap` + `rule { amount <= cap }`.
+  (Bu anonim `rule {}` örnekleri **op-yerel** check'lerdir; sözleşmenin **adlandırdığı** bir iş-kuralı
+  — `requires <Ad>` — söz konusuysa ev `realizes rule <Ad> { <predikat> }`'tır, Faz 5/ADR-0042.)
 - **⭐ Jargon-gizlemenin İSTİSNASI = kavram-koçluğu.** Bazı teknik eksenler kullanıcının iş-cümlesinden
   TÜRETİLEMEZ, çünkü kavramın var olduğunu bilmez (OAuth scope, idempotency, optimistic-locking, PKCE…).
   Böyle bir eksende ne **sessizce atla** (spec eksik kalır) ne de **jargon dök**. Üçüncü yol: **düz-dille
@@ -318,11 +320,46 @@ yetkili aktör kümesini aşma. Bunlar **güvenlik-zayıflatma warning**'i — h
     bağımlılığı" error; aynı tipten ≥2 read → `as`/`by` zorunlu, B3.) Başka context'in verisi
     gerekiyorsa → cross-module query (Faz 6).
 
+- **Adlı-kural realize (ADR-0042 — sözleşme `requires <Ad>` taşıyorsa ZORUNLU blok).** Business
+  rule artık **isim + `note`**'tur (yapısal predikat TECH'te yazılır — eski "rules[] opak,
+  eşlenmez" yönü DÖNDÜ). Realize edilen op'un guard'larında `kind:"rule"` referansı görünce:
+  1. **Note'u oku ve doğrulat:** `rules[].note` insan-brief'tir — kullanıcıya geri söyle
+     ("Sözleşme bu işleme '<Ad>' kuralını bağlıyor; note şöyle diyor: … — doğru anlıyor muyum?").
+  2. **Kural sınıfını sor** (jargonsuz): "Bu kural **bir kaydın var/yok olmasına** mı bakıyor
+     (→ `[not] exists`), **bir sayının eşiği aşmasına** mı (→ filtreli `count <cmp> sayı|alan`),
+     yoksa **çağrının kendi verisiyle eşleşen kayıt aramaya** mı (→ param-korelasyonlu exists)?"
+  3. **Nicelenecek koleksiyonu `access`'e bağlat:** "Kural hangi tabloyu tarıyor? Ön-daraltma
+     var mı — ör. yalnız bu org'un satırları?" → `access { reads <E> as <alias> [by <key>] }`
+     (`by <key>` = ön-filtre; predikat ön-filtreyi YENİDEN kodlamaz, yalnız alias'ı referanslar).
+     Predikat YALNIZ bu alias'lar üzerinde koşar (inline entity-adı/param nicelenemez — T4 error).
+  4. **İki koleksiyon bağlanıyorsa (join):** "Bu iki tablo birbirine **hangi kolonla** bağlanıyor?"
+     → iç-içe exists + FK-eşitliği (`exists camps where camps.id = cps.campaignId and …`);
+     FK'sız iç-exists = kartezyen → T4 error. Relation-navigasyonu (`cp.campaign.status`) YOK.
+  5. **Op-başına farklı realize normaldir:** aynı kural farklı op'larda farklı gövde alabilir
+     (PoiLimitExceeded emsali: org-fazında org'un tüm POI'leri sayılır, app-fazında yalnız
+     app'e bağlı olanlar) — her realize-eden op'ta ayrı sor, kopyalama.
+  - **Gövdesiz işaret meşru ama BİLİNÇLİ olmalı:** `realizes rule <Ad>` (gövdesiz / çoklu-ad
+    `A, B, C`) = "bu op'un authored gövdesi kuralı başka mekanizmayla kapsıyor" devri —
+    kullanıcıya hangi mekanizmayla kapsandığını sorup belgele. Gövdeli form TEK-AD
+    (`realizes rule A, B { … }` parse-error). Coverage warning'ini ikisi de düşürür.
+
 **⚠ Anti-pattern — validation↔rule karışması + bildirilmemiş kök:** request-only deterministik-fail
 → validation; dış/stateful → rule (state-kökü access/calls ile **bildirilmiş**). state-in-validation
 → error; yalnız-input rule → misclassification warning; bildirilmemiş rule kökü → "gizli veri
 bağımlılığı" error. İş guard'ından ifade sapması → "differs" warning (dik eksen).
-**Kapatır:** `checkValidationInputScope`, `checkRuleStateScope`, `checkExprDivergence`; 6'lı result-type.
+**⚠ Anti-pattern — anonim `rule {}` ↔ `realizes rule` karışması:** anonim `rule { Expr }` =
+op-YEREL teknik check / business **where/if guard** eşlemesi; **adlı** business kuralının
+(`requires <Ad>`) evi DEĞİL — adlı kural `realizes rule <Ad> { <predikat> }` ile realize edilir
+(ADR-0042). Adlı kuralın mantığını anonim `rule`'a gömersen coverage warning'i AÇIK kalır ve
+isim-bağı kopar.
+**⚠ Anti-pattern — opak agregat/niceleyici Call'ı:** `exists(...)`/`count(...)` **Call-yazımı
+parse-error** (keyword'ler — yapısal construct olarak yazılır, §6b); `sum/all/any/avg/min/max`
+adlı Call **deny-list error** (her Expr-sitesinde). Agregat ihtiyacı Seviye-2'de karşılıksızsa
+uydurma — kullanıcıya bildir (genişletme yeni karar ister).
+**Kapatır:** `checkValidationInputScope`, `checkRuleStateScope`, `checkExprDivergence`,
+`checkRequiredRuleCoverage` (ad-çözümü error + kapsam warning), `checkRealizePredicate` (T4 —
+alias-çözümü · kök-çözümü · kartezyen-barı · count-sağ-skaler = hepsi ERROR), `checkExprCallPolicy`
+(1b deny-list); 6'lı result-type.
 
 ---
 

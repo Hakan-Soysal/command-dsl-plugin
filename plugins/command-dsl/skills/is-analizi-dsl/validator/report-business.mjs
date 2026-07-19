@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-94397168f2a1", grammarHash: "94397168f2a1", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "c3c70ae50f8a", wrapperFiles: ["report-business.src.mts", "report-index.src.mts"], wrapperHash: "05f903ac4bca", commit: "2b683d7", builtAt: "2026-07-16T21:59:41+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-69ca2866b8e8", grammarHash: "69ca2866b8e8", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "31e285180083", wrapperFiles: ["report-business.src.mts", "report-index.src.mts"], wrapperHash: "05f903ac4bca", commit: "0c5072b", builtAt: "2026-07-19T09:19:37+03:00", langium: "4.2.4" };
   }
 });
 
@@ -36513,20 +36513,26 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "cardinality": "?"
           },
           {
-            "$type": "Keyword",
-            "value": "satisfies"
-          },
-          {
-            "$type": "Assignment",
-            "feature": "body",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@50"
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "satisfies"
               },
-              "arguments": []
-            }
+              {
+                "$type": "Assignment",
+                "feature": "body",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@50"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
           },
           {
             "$type": "Group",
@@ -38484,7 +38490,7 @@ function registerValidationChecks(services) {
     EitherBlock: validator.checkEither,
     AbandonNote: validator.checkAbandon,
     ProcessDef: [validator.checkProcessBody, validator.checkNote],
-    RuleDef: [validator.checkNote, validator.checkRuleReads],
+    RuleDef: [validator.checkNote, validator.checkRuleReads, validator.checkRuleContent],
     OutcomeDef: [validator.checkOutcome, validator.checkNote],
     StageDef: validator.checkStage,
     AnyOrderBlock: validator.checkAnyOrder,
@@ -38712,6 +38718,17 @@ var CommandDslValidator = class {
           { node: el, property: "name" }
         );
       }
+    }
+  }
+  /** ADR-0042 K1: satisfies opsiyonel — ama body VE note ikisi birden yoksa
+   *  bildirim ölüdür (ne yapısal predikat ne insan-brief taşır) → warning. */
+  checkRuleContent(rule, accept) {
+    if (!rule.body && !rule.note) {
+      accept(
+        "warning",
+        `Rule '${rule.name}': ne 'satisfies' g\xF6vdesi ne 'note' var \u2014 \xF6l\xFC bildirim. En az bir insan-brief ('note') yaz (yap\u0131sal predikat tech'te realize edilir).`,
+        { node: rule, property: "name" }
+      );
     }
   }
   /** ADR-0033 K9: RuleDef-yerel reads denetimi. Kök=op aktörü/kaynağı denetimi

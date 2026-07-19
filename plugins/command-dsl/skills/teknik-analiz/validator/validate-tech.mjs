@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-ed720eef8159", grammarHash: "ed720eef8159", srcDirs: ["src/shared", "src/tech"], techSrcHash: "b2c7fe3511f9", wrapperFiles: ["validate-tech.src.mts"], wrapperHash: "b193075762a9", commit: "dcbfd21", builtAt: "2026-07-17T10:46:33+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-98157939f361", grammarHash: "98157939f361", srcDirs: ["src/shared", "src/tech"], techSrcHash: "05bc2cefe61f", wrapperFiles: ["validate-tech.src.mts"], wrapperHash: "b193075762a9", commit: "0c5072b", builtAt: "2026-07-19T09:19:37+03:00", langium: "4.2.4" };
   }
 });
 
@@ -32114,6 +32114,16 @@ var ContractDecl = {
   $type: "ContractDecl",
   path: "path"
 };
+var CountPred = {
+  $type: "CountPred",
+  alias: "alias",
+  condition: "condition",
+  op: "op",
+  right: "right"
+};
+function isCountPred(item) {
+  return reflection2.isInstance(item, CountPred.$type);
+}
 var Deployable = {
   $type: "Deployable",
   annotations: "annotations",
@@ -32188,6 +32198,15 @@ var EventRef = {
 };
 function isEventRef(item) {
   return reflection2.isInstance(item, EventRef.$type);
+}
+var ExistsPred = {
+  $type: "ExistsPred",
+  alias: "alias",
+  condition: "condition",
+  negated: "negated"
+};
+function isExistsPred(item) {
+  return reflection2.isInstance(item, ExistsPred.$type);
 }
 var Expr = {
   $type: "Expr"
@@ -32312,6 +32331,10 @@ var NoteClause = {
   $type: "NoteClause",
   text: "text"
 };
+var NumLit = {
+  $type: "NumLit",
+  value: "value"
+};
 var Obligation = {
   $type: "Obligation",
   entity: "entity",
@@ -32406,6 +32429,25 @@ var PermitClause = {
 function isPermitClause(item) {
   return reflection2.isInstance(item, PermitClause.$type);
 }
+var PredBinary = {
+  $type: "PredBinary",
+  left: "left",
+  op: "op",
+  right: "right"
+};
+function isPredBinary(item) {
+  return reflection2.isInstance(item, PredBinary.$type);
+}
+var PredComparison = {
+  $type: "PredComparison",
+  left: "left",
+  op: "op",
+  right: "right",
+  set: "set"
+};
+function isPredComparison(item) {
+  return reflection2.isInstance(item, PredComparison.$type);
+}
 var PrincipalDecl = {
   $type: "PrincipalDecl",
   annotations: "annotations",
@@ -32433,6 +32475,14 @@ var Range2 = {
   to: "to",
   toNeg: "toNeg"
 };
+var RealizesRuleClause = {
+  $type: "RealizesRuleClause",
+  predicate: "predicate",
+  rules: "rules"
+};
+function isRealizesRuleClause(item) {
+  return reflection2.isInstance(item, RealizesRuleClause.$type);
+}
 var Refinement = {
   $type: "Refinement",
   range: "range",
@@ -32462,6 +32512,9 @@ var RuleClause = {
 function isRuleClause(item) {
   return reflection2.isInstance(item, RuleClause.$type);
 }
+var RulePredicate = {
+  $type: "RulePredicate"
+};
 var ScopeClause = {
   $type: "ScopeClause",
   scopes: "scopes"
@@ -32548,6 +32601,9 @@ var ValidationClause = {
 function isValidationClause(item) {
   return reflection2.isInstance(item, ValidationClause.$type);
 }
+var WhereCond = {
+  $type: "WhereCond"
+};
 var TechDslAstReflection = class extends AbstractAstReflection {
   types = {
     AccessClause: {
@@ -32879,6 +32935,24 @@ var TechDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: []
     },
+    CountPred: {
+      name: CountPred.$type,
+      properties: {
+        alias: {
+          name: CountPred.alias
+        },
+        condition: {
+          name: CountPred.condition
+        },
+        op: {
+          name: CountPred.op
+        },
+        right: {
+          name: CountPred.right
+        }
+      },
+      superTypes: [RulePredicate.$type]
+    },
     DeployUnit: {
       name: DeployUnit.$type,
       properties: {},
@@ -33023,6 +33097,22 @@ var TechDslAstReflection = class extends AbstractAstReflection {
         }
       },
       superTypes: []
+    },
+    ExistsPred: {
+      name: ExistsPred.$type,
+      properties: {
+        alias: {
+          name: ExistsPred.alias
+        },
+        condition: {
+          name: ExistsPred.condition
+        },
+        negated: {
+          name: ExistsPred.negated,
+          defaultValue: false
+        }
+      },
+      superTypes: [RulePredicate.$type, WhereCond.$type]
     },
     Expr: {
       name: Expr.$type,
@@ -33283,6 +33373,15 @@ var TechDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [OpClause.$type]
     },
+    NumLit: {
+      name: NumLit.$type,
+      properties: {
+        value: {
+          name: NumLit.value
+        }
+      },
+      superTypes: []
+    },
     Obligation: {
       name: Obligation.$type,
       properties: {
@@ -33461,6 +33560,39 @@ var TechDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [OpClause.$type]
     },
+    PredBinary: {
+      name: PredBinary.$type,
+      properties: {
+        left: {
+          name: PredBinary.left
+        },
+        op: {
+          name: PredBinary.op
+        },
+        right: {
+          name: PredBinary.right
+        }
+      },
+      superTypes: [RulePredicate.$type, WhereCond.$type]
+    },
+    PredComparison: {
+      name: PredComparison.$type,
+      properties: {
+        left: {
+          name: PredComparison.left
+        },
+        op: {
+          name: PredComparison.op
+        },
+        right: {
+          name: PredComparison.right
+        },
+        set: {
+          name: PredComparison.set
+        }
+      },
+      superTypes: [RulePredicate.$type, WhereCond.$type]
+    },
     PrincipalDecl: {
       name: PrincipalDecl.$type,
       properties: {
@@ -33522,6 +33654,19 @@ var TechDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: []
     },
+    RealizesRuleClause: {
+      name: RealizesRuleClause.$type,
+      properties: {
+        predicate: {
+          name: RealizesRuleClause.predicate
+        },
+        rules: {
+          name: RealizesRuleClause.rules,
+          defaultValue: []
+        }
+      },
+      superTypes: [OpClause.$type]
+    },
     Refinement: {
       name: Refinement.$type,
       properties: {
@@ -33580,6 +33725,11 @@ var TechDslAstReflection = class extends AbstractAstReflection {
         }
       },
       superTypes: [OpClause.$type]
+    },
+    RulePredicate: {
+      name: RulePredicate.$type,
+      properties: {},
+      superTypes: []
     },
     ScopeClause: {
       name: ScopeClause.$type,
@@ -33757,6 +33907,11 @@ var TechDslAstReflection = class extends AbstractAstReflection {
         }
       },
       superTypes: [OpClause.$type]
+    },
+    WhereCond: {
+      name: WhereCond.$type,
+      properties: {},
+      superTypes: []
     }
   };
 };
@@ -33879,7 +34034,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -33907,7 +34062,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -33980,7 +34135,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -33998,7 +34153,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34017,7 +34172,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -34070,21 +34225,21 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@63"
+                  "$ref": "#/rules@76"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@64"
+                  "$ref": "#/rules@77"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@47"
+                  "$ref": "#/rules@60"
                 },
                 "arguments": []
               },
@@ -34127,7 +34282,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34147,7 +34302,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34166,7 +34321,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@49"
+                    "$ref": "#/rules@62"
                   },
                   "arguments": []
                 }
@@ -34182,12 +34337,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@53"
+                    "$ref": "#/rules@66"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -34209,7 +34364,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34228,7 +34383,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -34263,7 +34418,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34288,7 +34443,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -34307,7 +34462,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@49"
+                "$ref": "#/rules@62"
               },
               "arguments": []
             }
@@ -34323,12 +34478,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@66"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -34393,12 +34548,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@66"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -34425,12 +34580,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@66"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -34467,12 +34622,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@53"
+                        "$ref": "#/rules@66"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@83"
+                          "$ref": "#/rules@96"
                         },
                         "arguments": []
                       },
@@ -34497,7 +34652,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                             "terminal": {
                               "$type": "RuleCall",
                               "rule": {
-                                "$ref": "#/rules@57"
+                                "$ref": "#/rules@70"
                               },
                               "arguments": []
                             }
@@ -34518,7 +34673,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                             "terminal": {
                               "$type": "RuleCall",
                               "rule": {
-                                "$ref": "#/rules@56"
+                                "$ref": "#/rules@69"
                               },
                               "arguments": []
                             }
@@ -34539,7 +34694,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@84"
+                        "$ref": "#/rules@97"
                       },
                       "arguments": []
                     }
@@ -34555,12 +34710,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@53"
+                        "$ref": "#/rules@66"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@83"
+                          "$ref": "#/rules@96"
                         },
                         "arguments": []
                       },
@@ -34595,7 +34750,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34611,7 +34766,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34747,7 +34902,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34763,7 +34918,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34809,7 +34964,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -34821,7 +34976,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@85"
+                "$ref": "#/rules@98"
               },
               "arguments": []
             }
@@ -34867,7 +35022,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -34891,7 +35046,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -34918,7 +35073,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@83"
+                          "$ref": "#/rules@96"
                         },
                         "arguments": []
                       },
@@ -34959,7 +35114,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35023,35 +35178,35 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@50"
+                  "$ref": "#/rules@63"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@59"
+                  "$ref": "#/rules@72"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@60"
+                  "$ref": "#/rules@73"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@61"
+                  "$ref": "#/rules@74"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@62"
+                  "$ref": "#/rules@75"
                 },
                 "arguments": []
               }
@@ -35103,7 +35258,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35204,7 +35359,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -35259,7 +35414,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35331,7 +35486,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35343,7 +35498,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -35371,7 +35526,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35387,7 +35542,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35465,7 +35620,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35518,7 +35673,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35546,7 +35701,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@54"
+                "$ref": "#/rules@67"
               },
               "arguments": []
             },
@@ -35590,7 +35745,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35645,70 +35800,77 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@33"
+              "$ref": "#/rules@32"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@41"
+              "$ref": "#/rules@46"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@42"
+              "$ref": "#/rules@54"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@43"
+              "$ref": "#/rules@55"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@44"
+              "$ref": "#/rules@56"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@45"
+              "$ref": "#/rules@57"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@34"
+              "$ref": "#/rules@58"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@35"
+              "$ref": "#/rules@47"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@39"
+              "$ref": "#/rules@48"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@36"
+              "$ref": "#/rules@52"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@49"
             },
             "arguments": []
           }
@@ -35735,7 +35897,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -35754,7 +35916,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -35814,7 +35976,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -35884,12 +36046,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@50"
+                "$ref": "#/rules@63"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -35908,12 +36070,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@66"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36003,12 +36165,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@50"
+                "$ref": "#/rules@63"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36030,12 +36192,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@50"
+                    "$ref": "#/rules@63"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -36060,7 +36222,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -36084,7 +36246,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@83"
+                          "$ref": "#/rules@96"
                         },
                         "arguments": []
                       },
@@ -36125,7 +36287,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@32"
+                "$ref": "#/rules@45"
               },
               "arguments": []
             },
@@ -36162,7 +36324,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@32"
+                "$ref": "#/rules@45"
               },
               "arguments": []
             },
@@ -36173,6 +36335,760 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "value": "}"
           }
         ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "RealizesRuleClause",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "realizes"
+          },
+          {
+            "$type": "Keyword",
+            "value": "rule"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "rules",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@96"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": "{"
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "predicate",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@33"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": "}"
+                  }
+                ]
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "rules",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@96"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ],
+                "cardinality": "*"
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "RulePredicate",
+      "definition": {
+        "$type": "RuleCall",
+        "rule": {
+          "$ref": "#/rules@34"
+        },
+        "arguments": []
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "OrPred",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "RulePredicate"
+      },
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@35"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PredBinary"
+                },
+                "feature": "left",
+                "operator": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "or"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "right",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@35"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "AndPred",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "RulePredicate"
+      },
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@36"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PredBinary"
+                },
+                "feature": "left",
+                "operator": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "and"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "right",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@36"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "PrimaryPred",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "RulePredicate"
+      },
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "("
+              },
+              {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@33"
+                },
+                "arguments": []
+              },
+              {
+                "$type": "Keyword",
+                "value": ")"
+              }
+            ]
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@37"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@38"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@43"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ExistsPred",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "negated",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "not"
+            },
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "exists"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "alias",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@96"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "where"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "condition",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@39"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "CountPred",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "count"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "alias",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@96"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "where"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "condition",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@39"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "op",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "Keyword",
+                  "value": "="
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "!="
+                },
+                {
+                  "$type": "Keyword",
+                  "value": ">"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "<"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": ">="
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "<="
+                }
+              ]
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "right",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@44"
+                  },
+                  "arguments": []
+                },
+                {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@94"
+                  },
+                  "arguments": []
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "WhereCond",
+      "definition": {
+        "$type": "RuleCall",
+        "rule": {
+          "$ref": "#/rules@40"
+        },
+        "arguments": []
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "OrWhere",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "WhereCond"
+      },
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@41"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PredBinary"
+                },
+                "feature": "left",
+                "operator": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "or"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "right",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@41"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "AndWhere",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "WhereCond"
+      },
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@42"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PredBinary"
+                },
+                "feature": "left",
+                "operator": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Keyword",
+                  "value": "and"
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "right",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@42"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "PrimWhere",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "WhereCond"
+      },
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "("
+              },
+              {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@39"
+                },
+                "arguments": []
+              },
+              {
+                "$type": "Keyword",
+                "value": ")"
+              }
+            ]
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@37"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@43"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "PredComparison",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "left",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@94"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "op",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Alternatives",
+                      "elements": [
+                        {
+                          "$type": "Keyword",
+                          "value": "="
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": "!="
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": ">"
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": "<"
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": ">="
+                        },
+                        {
+                          "$type": "Keyword",
+                          "value": "<="
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "right",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Alternatives",
+                      "elements": [
+                        {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@94"
+                          },
+                          "arguments": []
+                        },
+                        {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@95"
+                          },
+                          "arguments": []
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "op",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Keyword",
+                      "value": "in"
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "set",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@87"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "NumLit",
+      "definition": {
+        "$type": "Assignment",
+        "feature": "value",
+        "operator": "=",
+        "terminal": {
+          "$type": "RuleCall",
+          "rule": {
+            "$ref": "#/rules@98"
+          },
+          "arguments": []
+        }
       },
       "entry": false,
       "fragment": false,
@@ -36191,7 +37107,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@83"
               },
               "arguments": []
             }
@@ -36214,7 +37130,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@84"
+                    "$ref": "#/rules@97"
                   },
                   "arguments": []
                 }
@@ -36245,7 +37161,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@59"
               },
               "arguments": []
             }
@@ -36264,7 +37180,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -36290,7 +37206,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@59"
                   },
                   "arguments": []
                 }
@@ -36330,7 +37246,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36357,7 +37273,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -36391,12 +37307,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@62"
+                "$ref": "#/rules@75"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36418,12 +37334,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@62"
+                    "$ref": "#/rules@75"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -36448,7 +37364,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@38"
+                    "$ref": "#/rules@51"
                   },
                   "arguments": []
                 }
@@ -36479,7 +37395,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@37"
+                "$ref": "#/rules@50"
               },
               "arguments": []
             }
@@ -36498,7 +37414,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@37"
+                    "$ref": "#/rules@50"
                   },
                   "arguments": []
                 }
@@ -36530,7 +37446,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36549,12 +37465,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@62"
+                "$ref": "#/rules@75"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36586,7 +37502,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36610,7 +37526,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36663,7 +37579,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@40"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -36682,7 +37598,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@40"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -36704,7 +37620,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@85"
+                    "$ref": "#/rules@98"
                   },
                   "arguments": []
                 }
@@ -36731,12 +37647,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@66"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36785,7 +37701,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -36851,7 +37767,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@83"
               },
               "arguments": []
             }
@@ -36879,7 +37795,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -36898,7 +37814,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@84"
+                    "$ref": "#/rules@97"
                   },
                   "arguments": []
                 }
@@ -36929,12 +37845,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@61"
+                "$ref": "#/rules@74"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -36956,12 +37872,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@61"
+                    "$ref": "#/rules@74"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -36996,7 +37912,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -37020,7 +37936,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -37051,7 +37967,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -37063,7 +37979,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -37082,7 +37998,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@84"
+                    "$ref": "#/rules@97"
                   },
                   "arguments": []
                 }
@@ -37101,7 +38017,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@84"
+                        "$ref": "#/rules@97"
                       },
                       "arguments": []
                     }
@@ -37123,7 +38039,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@48"
+                "$ref": "#/rules@61"
               },
               "arguments": []
             },
@@ -37136,7 +38052,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@41"
+                "$ref": "#/rules@54"
               },
               "arguments": []
             },
@@ -37176,7 +38092,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@59"
                   },
                   "arguments": []
                 }
@@ -37201,7 +38117,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@59"
                   },
                   "arguments": []
                 }
@@ -37217,7 +38133,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@84"
+                    "$ref": "#/rules@97"
                   },
                   "arguments": []
                 }
@@ -37242,7 +38158,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@49"
+                    "$ref": "#/rules@62"
                   },
                   "arguments": []
                 }
@@ -37261,7 +38177,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@84"
+                        "$ref": "#/rules@97"
                       },
                       "arguments": []
                     }
@@ -37289,7 +38205,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@59"
                   },
                   "arguments": []
                 }
@@ -37305,7 +38221,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -37336,7 +38252,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -37355,12 +38271,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@50"
+                "$ref": "#/rules@63"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -37391,7 +38307,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -37415,7 +38331,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@83"
+                      "$ref": "#/rules@96"
                     },
                     "arguments": []
                   },
@@ -37442,7 +38358,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@83"
+                          "$ref": "#/rules@96"
                         },
                         "arguments": []
                       },
@@ -37470,7 +38386,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@53"
+                    "$ref": "#/rules@66"
                   },
                   "arguments": []
                 }
@@ -37482,7 +38398,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@51"
+                    "$ref": "#/rules@64"
                   },
                   "arguments": []
                 }
@@ -37494,7 +38410,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@52"
+                    "$ref": "#/rules@65"
                   },
                   "arguments": []
                 }
@@ -37529,7 +38445,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@83"
               },
               "arguments": []
             }
@@ -37548,7 +38464,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@84"
+                    "$ref": "#/rules@97"
                   },
                   "arguments": []
                 }
@@ -37613,7 +38529,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -37641,7 +38557,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@58"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             },
@@ -37654,7 +38570,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@54"
+                "$ref": "#/rules@67"
               },
               "arguments": []
             },
@@ -37686,7 +38602,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@55"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -37698,7 +38614,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@56"
+                    "$ref": "#/rules@69"
                   },
                   "arguments": []
                 }
@@ -37734,7 +38650,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@85"
+                "$ref": "#/rules@98"
               },
               "arguments": []
             }
@@ -37760,7 +38676,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@85"
+                "$ref": "#/rules@98"
               },
               "arguments": []
             }
@@ -37788,7 +38704,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@57"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -37807,7 +38723,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -37838,7 +38754,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -37850,7 +38766,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -37862,7 +38778,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@85"
+                "$ref": "#/rules@98"
               },
               "arguments": []
             }
@@ -37899,7 +38815,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -37918,12 +38834,12 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@50"
+                "$ref": "#/rules@63"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@83"
+                  "$ref": "#/rules@96"
                 },
                 "arguments": []
               },
@@ -37958,7 +38874,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -37974,7 +38890,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@66"
               },
               "arguments": []
             },
@@ -38007,7 +38923,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -38023,7 +38939,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             },
@@ -38056,7 +38972,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -38114,7 +39030,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -38130,7 +39046,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@66"
               },
               "arguments": []
             },
@@ -38163,7 +39079,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -38179,7 +39095,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@66"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             },
@@ -38212,7 +39128,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -38228,7 +39144,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@65"
+                "$ref": "#/rules@78"
               },
               "arguments": []
             },
@@ -38269,28 +39185,28 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@66"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@50"
+                  "$ref": "#/rules@63"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@59"
+                  "$ref": "#/rules@72"
                 },
                 "arguments": []
               },
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@60"
+                  "$ref": "#/rules@73"
                 },
                 "arguments": []
               }
@@ -38342,7 +39258,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -38483,7 +39399,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@71"
+          "$ref": "#/rules@84"
         },
         "arguments": []
       },
@@ -38500,7 +39416,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@72"
+              "$ref": "#/rules@85"
             },
             "arguments": []
           },
@@ -38532,7 +39448,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@85"
                   },
                   "arguments": []
                 }
@@ -38555,7 +39471,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@73"
+              "$ref": "#/rules@86"
             },
             "arguments": []
           },
@@ -38587,7 +39503,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@73"
+                    "$ref": "#/rules@86"
                   },
                   "arguments": []
                 }
@@ -38614,7 +39530,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@76"
+                "$ref": "#/rules@89"
               },
               "arguments": []
             }
@@ -38666,7 +39582,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@76"
+                        "$ref": "#/rules@89"
                       },
                       "arguments": []
                     }
@@ -38695,14 +39611,14 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                         {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@74"
+                            "$ref": "#/rules@87"
                           },
                           "arguments": []
                         },
                         {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@81"
+                            "$ref": "#/rules@94"
                           },
                           "arguments": []
                         }
@@ -38737,7 +39653,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@75"
+                "$ref": "#/rules@88"
               },
               "arguments": []
             }
@@ -38756,7 +39672,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@75"
+                    "$ref": "#/rules@88"
                   },
                   "arguments": []
                 }
@@ -38787,7 +39703,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -38799,7 +39715,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -38811,7 +39727,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@85"
+                "$ref": "#/rules@98"
               },
               "arguments": []
             }
@@ -38831,7 +39747,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@77"
+              "$ref": "#/rules@90"
             },
             "arguments": []
           },
@@ -38872,7 +39788,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@77"
+                    "$ref": "#/rules@90"
                   },
                   "arguments": []
                 }
@@ -38895,7 +39811,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@91"
             },
             "arguments": []
           },
@@ -38936,7 +39852,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@78"
+                    "$ref": "#/rules@91"
                   },
                   "arguments": []
                 }
@@ -38966,7 +39882,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@83"
                 },
                 "arguments": []
               },
@@ -38979,28 +39895,28 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@79"
+              "$ref": "#/rules@92"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@80"
+              "$ref": "#/rules@93"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@82"
+              "$ref": "#/rules@95"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@81"
+              "$ref": "#/rules@94"
             },
             "arguments": []
           }
@@ -39036,7 +39952,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@81"
+                "$ref": "#/rules@94"
               },
               "arguments": []
             }
@@ -39060,7 +39976,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -39079,7 +39995,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@83"
                   },
                   "arguments": []
                 }
@@ -39098,7 +40014,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@70"
+                        "$ref": "#/rules@83"
                       },
                       "arguments": []
                     }
@@ -39132,7 +40048,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@83"
+                "$ref": "#/rules@96"
               },
               "arguments": []
             }
@@ -39151,7 +40067,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@83"
+                    "$ref": "#/rules@96"
                   },
                   "arguments": []
                 }
@@ -39178,7 +40094,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@85"
+                "$ref": "#/rules@98"
               },
               "arguments": []
             }
@@ -39190,7 +40106,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@84"
+                "$ref": "#/rules@97"
               },
               "arguments": []
             }
@@ -39273,7 +40189,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@64"
+              "$ref": "#/rules@77"
             }
           }
         ]
@@ -39288,13 +40204,13 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@63"
+              "$ref": "#/rules@76"
             }
           },
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@64"
+              "$ref": "#/rules@77"
             }
           },
           {
@@ -39315,7 +40231,7 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@66"
+              "$ref": "#/rules@79"
             }
           },
           {
@@ -40002,6 +40918,14 @@ function acceptWitness(accept, severity, message, subject, property2, verdict, e
 // src/tech/tech-dsl-validation.ts
 var TECH_UNREALIZED_OP_CODE = "tech.unrealized-op";
 var DUPLICATE_SHAPE_CODE = "tech.duplicate-shape";
+var CALL_DENY_SET = /* @__PURE__ */ new Set([
+  "sum",
+  "all",
+  "any",
+  "avg",
+  "min",
+  "max"
+]);
 var REDACTION_PATTERNS = [
   { label: "e-posta adresi", rx: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/ },
   { label: "TC-kimlik (11 hane)", rx: /\b[1-9]\d{10}\b/ },
@@ -40337,16 +41261,18 @@ var TechDslValidator = class {
   // ADR-0033 K9: requires edilen rule tech'te realize edilmemiş → coverage warning (gate DEĞİL).
   /**
    * LINKED: realized business-op'ların `requires` ettiği rule'lardan (contract guards[].kind:'rule')
-   * teknik realize edilmeyenler → warning. Bu turda tech rule-realize mekanizması (`for rule`) YOK
-   * (codegen downstream) → hepsi realize-edilmemiş sayılır (kapsam sinyali). Standalone → N/A.
+   * teknik realize edilmeyenler → warning. Realize-işareti = op-clause `realizes rule <Ad>[, <Ad>]*`
+   * (Kalem 1a, 2026-07-18): işaretlenen rule'lar kapsam-warning'inden DÜŞER. Rule adı plain ID —
+   * contract `rules[]`'e karşı çözülür; sözleşmede yoksa ERROR. Standalone → N/A.
    * NOT: rule GÖVDESİ divergence'a GİRMEZ (Karar 7) — bu check yalnız İSİM-kapsaması; AST-kıyas YOK.
    */
   checkRequiredRuleCoverage(model, accept) {
     if (!model.contract?.path) return;
     const contract = loadContract(model.contract.path, ast_utils_exports.getDocument(model).uri);
     if (!contract) return;
+    const ops = model.decls.filter(isModule).flatMap((m) => m.members.filter(isOperation));
     const realizedOpIds = new Set(
-      model.decls.filter(isModule).flatMap((m) => m.members.filter(isOperation)).map((op) => op.realizes?.$refText).filter((id) => id != null)
+      ops.map((op) => op.realizes?.$refText).filter((id) => id != null)
     );
     const required = /* @__PURE__ */ new Set();
     for (const id of realizedOpIds) {
@@ -40356,7 +41282,23 @@ var TechDslValidator = class {
         if (g.kind === "rule" && g.ref) required.add(g.ref);
       }
     }
-    const unrealizedRules = [...required].filter((r) => contract.rules.has(r)).sort();
+    const realizedRules = /* @__PURE__ */ new Set();
+    for (const op of ops) {
+      for (const clause of op.clauses.filter(isRealizesRuleClause)) {
+        clause.rules.forEach((name, i) => {
+          if (contract.rules.has(name)) {
+            realizedRules.add(name);
+          } else {
+            accept(
+              "error",
+              `\`realizes rule ${name}\`: s\xF6zle\u015Fmede (operations.json rules[]) bu adla bir rule yok. Mevcut rule'lar: ${[...contract.rules.keys()].sort().join(", ") || "(hi\xE7 yok)"}.`,
+              { node: clause, property: "rules", index: i }
+            );
+          }
+        });
+      }
+    }
+    const unrealizedRules = [...required].filter((r) => contract.rules.has(r) && !realizedRules.has(r)).sort();
     if (unrealizedRules.length > 0) {
       accept(
         "warning",
@@ -40843,13 +41785,12 @@ var TechDslValidator = class {
     const originModule = ast_utils_exports.getContainerOfType(op, isModule)?.name ?? "";
     this.validationInputScope(op.params, op.clauses.filter(isValidationClause), model, originModule, accept);
   }
-  // ADR-0031 K3/K4/K5: rule = data-bağımlı. Kökler: param | access-entity/alias (reads/updates/deletes) | call-alias.
-  checkRuleStateScope(op, accept) {
-    const rules = op.clauses.filter(isRuleClause);
-    if (rules.length === 0) return;
-    const model = ast_utils_exports.getDocument(op).parseResult.value;
-    const originModule = ast_utils_exports.getContainerOfType(op, isModule)?.name ?? "";
-    const index = buildTypeIndex(model);
+  /**
+   * Op kök-uzayı (ADR-0031 K3/K4 + ADR-0042 T4 ORTAK kaynak): param · access state-alias/entity
+   * (reads∪updates∪deletes; creates HARİÇ — henüz state yok) · call-alias. `checkRuleStateScope`
+   * ile `checkRealizePredicate` AYNI kümeleri paylaşır (tek kaynak — kopya drift etmesin).
+   */
+  opRootScope(op) {
     const paramNames = new Set(op.params.map((p) => p.name));
     const aliasToEntity = /* @__PURE__ */ new Map();
     const bareEntityCount = /* @__PURE__ */ new Map();
@@ -40876,6 +41817,16 @@ var TechDslValidator = class {
       if (isBoundaryOp(t) && t.readOnly !== true) nonGateableAlias.add(cl.alias);
       if ("returns" in t && t.returns) callAliasReturn.set(cl.alias, t.returns.name);
     }
+    return { paramNames, aliasToEntity, bareEntityCount, stateEntityNames, callAliasReturn, nonGateableAlias };
+  }
+  // ADR-0031 K3/K4/K5: rule = data-bağımlı. Kökler: param | access-entity/alias (reads/updates/deletes) | call-alias.
+  checkRuleStateScope(op, accept) {
+    const rules = op.clauses.filter(isRuleClause);
+    if (rules.length === 0) return;
+    const model = ast_utils_exports.getDocument(op).parseResult.value;
+    const originModule = ast_utils_exports.getContainerOfType(op, isModule)?.name ?? "";
+    const index = buildTypeIndex(model);
+    const { paramNames, aliasToEntity, bareEntityCount, stateEntityNames, callAliasReturn, nonGateableAlias } = this.opRootScope(op);
     for (const rule of rules) {
       let sawStateRoot = false, hadPath = false;
       for (const g of rule.checks) {
@@ -40920,6 +41871,126 @@ var TechDslValidator = class {
         else accept("warning", msg, { node: op, property: "name" });
       }
     }
+  }
+  // ───────────────── 1d T4 (ADR-0042 K4/K5/K6): realize-predikat alias/korelasyon çözümü ─────────────────
+  /**
+   * `realizes rule <Ad> { <predicate> }` gövdesinin denetimi (fail-closed — ADR-0031 K3
+   * "gizli veri bağımlılığı" error disiplini; 1b'nin kapadığı fail-open tekrar etmesin):
+   *   (a) `exists/count <alias>` YALNIZ op'un `access … as` alias'ına çözülür (K4; inline
+   *       entity-adı ve param nicelenemez) — değilse ERROR (mevcut alias'lar listeli).
+   *   (b) Path kökleri = alias-YIĞINI (çevreleyen niceleyiciler; iç-içe exists'te join FK
+   *       iki alias'ı da görür) ∪ op yüzeyi: param · `access … as` alias'ı (by-key
+   *       ön-filtreli korelasyon-kaynağı, K5) · `calls … as` sonucu — değilse ERROR.
+   *       Çıplak entity-adı korelasyon kökü DEĞİLDİR (K4 alias-disiplini; nicelenmemiş
+   *       koleksiyon referansı fail-closed reddedilir).
+   *   (c) İÇ-exists (bir dış niceleyicinin `where`'i içinde): kendi `where`'inin DOĞRUDAN
+   *       ağacında (daha derin exists'lere inilmez — o eşitlik o seviyeyi korele eder) en az
+   *       BİR `<içAlias>.x = <dışAlias>.y` FK-eşitliği yoksa KARTEZYEN → ERROR (kilitli karar).
+   *   (d) `count` sağ Path'i SKALER op-yüzeyi referansıdır: sayılan alias'ın kendisi olamaz
+   *       (satır agregat dışına taşamaz); param/alias/call-alias'a çözülmeli.
+   *   (e) rule-ADI çözümü BURADA DEĞİL — `checkRequiredRuleCoverage` (1a) contract.rules'a
+   *       karşı denetler; gövdeli clause o mantığı değiştirmez (`clause.rules` aynı).
+   * Alias-gölgeleme (iç exists dıştaki alias'ı yeniden niceler) ERROR — F3.7 alias-gölgeleme
+   * emsali (bağ belirsizleşir). Parse-kırık alt-düğümlerde sessiz atla (checkAbac guard emsali).
+   * Yaprak alan/enum denetimi (checkPathScope/enum-üyelik) bu dilimde YOK — kök-çözümü T4
+   * kapsamı; alan-seviyesi ayrı kalem adayı.
+   */
+  checkRealizePredicate(clause, accept) {
+    const pred = clause.predicate;
+    if (!pred) return;
+    const op = ast_utils_exports.getContainerOfType(clause, isOperation);
+    if (!op) return;
+    const { paramNames, aliasToEntity, callAliasReturn } = this.opRootScope(op);
+    const aliasList = () => [...aliasToEntity.keys()].sort().join(", ") || "(hi\xE7 yok)";
+    const rootResolves = (root2, stack) => stack.includes(root2) || paramNames.has(root2) || aliasToEntity.has(root2) || callAliasReturn.has(root2);
+    const rootUniverse = (stack) => [.../* @__PURE__ */ new Set([...stack, ...paramNames, ...aliasToEntity.keys(), ...callAliasReturn.keys()])].sort().join(", ") || "(hi\xE7 yok)";
+    const checkQuantAlias = (node, kw, stack) => {
+      if (!node.alias) return;
+      if (!aliasToEntity.has(node.alias)) {
+        accept(
+          "error",
+          `realize-predikat: '${kw} ${node.alias}' \u2014 '${node.alias}' op'un 'access \u2026 as' alias'\u0131 de\u011Fil (ADR-0042 K4; inline entity-ad\u0131/param nicelenemez). Mevcut alias'lar: ${aliasList()}. Nicelenecek koleksiyonu 'access { reads <Entity> as <alias> [by <param>] }' ile bildir.`,
+          { node, property: "alias" }
+        );
+      } else if (stack.includes(node.alias)) {
+        accept(
+          "error",
+          `realize-predikat: alias '${node.alias}' d\u0131\u015F niceleyicide zaten ba\u011Fl\u0131 \u2014 i\xE7-i\xE7e '${kw}' ayn\u0131 alias'\u0131 yeniden niceleyemez (g\xF6lgeleme; ba\u011F belirsizle\u015Fir).`,
+          { node, property: "alias" }
+        );
+      }
+    };
+    const hasJoinEquality = (cond, self2, outer) => {
+      if (!cond) return true;
+      if (isPredBinary(cond)) return cond.op === "or" ? hasJoinEquality(cond.left, self2, outer) && hasJoinEquality(cond.right, self2, outer) : hasJoinEquality(cond.left, self2, outer) || hasJoinEquality(cond.right, self2, outer);
+      if (isPredComparison(cond)) {
+        if (cond.op !== "=" || !cond.left || !cond.right || !isPath(cond.right)) return false;
+        const l = cond.left.segments?.[0];
+        const r = cond.right.segments?.[0];
+        if (l == null || r == null || l === r) return false;
+        return l === self2 && outer.includes(r) || r === self2 && outer.includes(l);
+      }
+      return false;
+    };
+    const checkCmpRoots = (node, stack) => {
+      for (const side of [node.left, node.right]) {
+        if (side == null || !isPath(side)) continue;
+        const root2 = side.segments?.[0];
+        if (root2 == null) continue;
+        if (!rootResolves(root2, stack)) {
+          accept(
+            "error",
+            `realize-predikat: '${root2}' k\xF6k\xFC \xE7\xF6z\xFClemedi \u2014 ne \xE7evreleyen niceleyici alias'\u0131, ne op param'\u0131, ne 'access \u2026 as' alias'\u0131 (korelasyon-kayna\u011F\u0131), ne 'calls \u2026 as' sonucu (ADR-0042 K5). Kullan\u0131labilir k\xF6kler: ${rootUniverse(stack)}.`,
+            { node: side }
+          );
+        }
+      }
+    };
+    const walk = (node, stack) => {
+      if (isPredBinary(node)) {
+        if (node.left) walk(node.left, stack);
+        if (node.right) walk(node.right, stack);
+        return;
+      }
+      if (isExistsPred(node)) {
+        checkQuantAlias(node, "exists", stack);
+        if (stack.length > 0 && node.alias && !hasJoinEquality(node.condition, node.alias, stack)) {
+          accept(
+            "error",
+            `realize-predikat: i\xE7 'exists ${node.alias}' d\u0131\u015F niceleyiciyle (${stack.join(", ")}) FK-e\u015Fitli\u011Fiyle ba\u011Flanmam\u0131\u015F \u2014 kartezyen \xE7arp\u0131m (ADR-0042 K6). 'where' i\xE7ine en az bir '${node.alias}.<alan> = <d\u0131\u015FAlias>.<alan>' e\u015Fitli\u011Fi koy.`,
+            { node, property: "alias" }
+          );
+        }
+        if (node.condition) walk(node.condition, node.alias ? [...stack, node.alias] : stack);
+        return;
+      }
+      if (isCountPred(node)) {
+        checkQuantAlias(node, "count", stack);
+        if (node.condition) walk(node.condition, node.alias ? [...stack, node.alias] : stack);
+        if (node.right && isPath(node.right)) {
+          const root2 = node.right.segments?.[0];
+          if (root2 != null && root2 === node.alias) {
+            accept(
+              "error",
+              `realize-predikat: 'count ${node.alias}' sa\u011F-taraf\u0131 say\u0131lan alias'\u0131n kendisine ('${root2}') bakamaz \u2014 agregat sonucu sat\u0131r-ba\u011Flam\u0131 d\u0131\u015F\u0131d\u0131r; sa\u011F taraf SKALER (say\u0131, param, tekil-okuma alias'\u0131 ya da call sonucu) olmal\u0131.`,
+              { node: node.right }
+            );
+          } else if (root2 != null && !rootResolves(root2, stack)) {
+            accept(
+              "error",
+              `realize-predikat: 'count' sa\u011F-taraf\u0131 '${root2}' op y\xFCzeyinde \xE7\xF6z\xFClemedi \u2014 param, 'access \u2026 as' alias'\u0131 ya da 'calls \u2026 as' sonucu olmal\u0131 (skaler). Kullan\u0131labilir k\xF6kler: ${rootUniverse(stack)}.`,
+              { node: node.right }
+            );
+          }
+        }
+        return;
+      }
+      if (isPredComparison(node)) {
+        checkCmpRoots(node, stack);
+        return;
+      }
+    };
+    walk(pred, []);
   }
   checkBoundaryValidationInputScope(bop, accept) {
     const model = ast_utils_exports.getDocument(bop).parseResult.value;
@@ -41103,6 +42174,7 @@ var TechDslValidator = class {
       accept("error", `'${op.name}': op ba\u015F\u0131na yaln\u0131z bir 'permit when' (ADR-0020)`, { node: extra, property: "expr" });
     }
     const permit = permits[0];
+    if (!permit.expr) return;
     const model = ast_utils_exports.getDocument(op).parseResult.value;
     const anchor = abacAnchorOf(op);
     let resourceEntity;
@@ -41990,6 +43062,21 @@ var TechDslValidator = class {
       seen.add(p.name);
     }
   }
+  /** Kalem 1b (K-1b: deny-list): opak-Call politikası. Kayıt AST-TİPİ (`Call`) bazlıdır —
+   *  frontend `checkCallBan` emsali (frontend-dsl-validation.ts) — Operation-check DEĞİL;
+   *  Langium tüm ağacı gezip her Call düğümünü dispatch eder → Expr'in geçtiği TÜM site'lar
+   *  (operation `validation`/`rule` · `permit when` · entity `invariant` · external/uncharted
+   *  boundary `validation` · guarantee ifadesi · İÇ-İÇE call argümanları) tek noktadan kapsanır;
+   *  yeni Expr-sitesi eklense de otomatik yakalanır. Deny-set dışı Call'lar (`ibanValid(x)`)
+   *  yapısal predicate olarak SERBEST kalır. */
+  checkExprCallPolicy(c, accept) {
+    if (!CALL_DENY_SET.has(c.name)) return;
+    accept(
+      "error",
+      `Opak \xE7a\u011Fr\u0131 '${c.name}(...)' tech Expr'inde yasak \u2014 '${c.name}' business niceleyici/agregat s\xF6zl\xFC\u011F\xFCn\xFCn ad\u0131d\u0131r (${[...CALL_DENY_SET].join(", ")}). Bu semantik tech'te yap\u0131sal kar\u015F\u0131l\u0131\u011F\u0131 olmayan opak bir call olarak manifest'e s\u0131zar ve \xFCrete\xE7 yorumlayamaz (fail-open). Niceleyiciyi/agregat\u0131 business (contract) taraf\u0131nda modelle ya da ifadeyi yap\u0131sal kur (kar\u015F\u0131la\u015Ft\u0131rma/aritmetik/koleksiyon-agregat\u0131 'sum of'). Yap\u0131sal predicate \xE7a\u011Fr\u0131lar\u0131 ('ibanValid(x)' gibi, deny-set d\u0131\u015F\u0131 ad) serbesttir.`,
+      { node: c, property: "name" }
+    );
+  }
   // ───────────────────────── F2.1: çapraz-modül yapısal duplikasyon-süpürmesi ─────────────────────────
   /** Bir alanın yapısal token'ı: `ad:tip[]?` (tip yoksa '?'). Shape-parmak-izinin yapı-taşı. */
   fieldToken(f) {
@@ -42165,6 +43252,10 @@ function registerTechValidationChecks(services) {
     Field: [validator.checkRefinement],
     Param: [validator.checkRefinement],
     // T-3.1: Field ile aynı check (yapısal-genelleştirme; reuse)
+    Call: [validator.checkExprCallPolicy],
+    // Kalem 1b (K-1b deny-list): AST-tipi kaydı → TÜM Expr-site'ları (validation/rule/permit/invariant/boundary, iç-içe dahil) tek noktadan
+    RealizesRuleClause: [validator.checkRealizePredicate],
+    // 1d T4 (ADR-0042 K4/K5/K6): realize-gövdesi alias/korelasyon/kartezyen/count-skaler denetimi
     NoteClause: [validator.checkRedaction, validator.checkNoteLint],
     // F2.7 redaction + F2.3 note-lint (op-notu)
     Module: [validator.checkEntityCoverage, validator.checkSharedUtils, validator.checkDuplicateErrorName, validator.checkDuplicateEventName],

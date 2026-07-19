@@ -25,9 +25,12 @@ geçen biçim **gerçek CommandDSL parser'ında doğrulanmıştır**.
 - **Flow:** `flow … for`, `note`, `step`, `optional`, `repeat`, `optional repeat`,
   `using`, `include` (+`optional repeat`), `either/or`, `outside`, `abandon anytime`.
 - **Process:** `process … of`, `note`, flow-`stage … by`, operation-`stage`, `any order … and`.
-- **rule + requires:** top-level `rule … { reads … satisfies … }` (`OrderSubmittable`,
-  `reads Invoice as inv` + `[not] exists <alias> where …` niceleyicisi) + op-clause
-  `requires` (`SubmitOrder`).
+- **rule + requires:** ÖNERİLEN biçim `rule … { note """…""" }` (`OrderSubmittable`
+  — isim + insan-brief; yapısal predikat tech'in `realizes rule`'unda, ADR-0042) +
+  LEGACY biçim `rule … { reads … satisfies … }` (`NoOpenInvoice`, `reads Invoice as
+  inv` + `[not] exists <alias> where …` niceleyicisi — geçerli kalır, yeni modelde
+  önerilmez) + op-clause çoklu `requires` (`SubmitOrder: requires OrderSubmittable,
+  NoOpenInvoice`).
 - **outcome:** `outcome … { measure '<metrik>' <op> <sayı> unit … within … · covers
   flow/process/op }` (`FastFulfilment`, iki `measure` + `covers Fulfil, SalesProcess,
   ApproveBigOrder`).

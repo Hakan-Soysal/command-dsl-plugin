@@ -94,9 +94,13 @@ atlandı. Biri olduysa DUR, adını koy, düzelt.
   DSL'in formalize edemediği ama işe-ait bir kural/kısıt/dikkat-noktası (ör. "onay 48
   saat içinde yapılmalı", karmaşık bir istisna) gelirse **kaybetme** — ilgili
   operation/flow/process'e `note """…"""` ile yaz (`#` yorumu derlemede atılır; `note`
-  makinece taşınır → alt katmanlara/geliştiriciye ulaşır). Ayrım: gerçek **iş-kuralı →
-  note**; saf proje-yönetimi (paydaş-siyaseti, fizibilite, maliyet, milestone) `.cdsl`'e
-  GİRMEZ — bunlar aile-üstüdür.
+  makinece taşınır → alt katmanlara/geliştiriciye ulaşır). **AYRAÇ (ADR-0042):
+  çapraz-varlık ya da çok-op'lu ÖN-KOŞUL çıplak note'a DÜŞMEZ** — o bir adlandırılmış
+  `rule`'dur (isim + `note`-brief) ve ilgili op'lara `requires <Ad>` ile bağlanır
+  (yapısal predikatı tech realize eder; bkz. Faz 3 + `references/dsl-reference.md` §10).
+  Çıplak `note`, TEK op'a yapışık serbest-proza (süre-politikası, istisna, dikkat-noktası)
+  için kalır. Ayrım: gerçek **iş-kuralı → note/rule**; saf proje-yönetimi
+  (paydaş-siyaseti, fizibilite, maliyet, milestone) `.cdsl`'e GİRMEZ — bunlar aile-üstüdür.
 - **Üretim en sondadır.** Doküman/DSL üretimi en son adımdır; onay eksikse emit yok —
   bu ÇİFT-SIFIR'ın (Değişmez-2) sonucudur, ayrı bir kural değil.
 
@@ -288,11 +292,17 @@ Bu çeviri en hassas iş olduğu için **adım adım prosedürü ayrı dosyada**
 - **Tekrar eden / gezinen ön-koşulu `rule`'a yükselt.** Bir ön-koşul `only if`'in
   **tek karşılaştırma** sınırını aşıyorsa — aynı kural birden çok işlemde geçiyor,
   bir ilişki gezmesi gerekiyor ("yöneticinin şubesindeki …"), ya da "böyle bir kayıt
-  VAR mı / YOK mu" (`exists`) sorusu içeriyorsa — bunu adlandırılmış bir `rule`'a
-  çıkar ve ilgili işlemlere `requires <RuleAdı>` ile bağla. Tetik-soruları düz dille:
+  VAR mı / YOK mu" sorusu içeriyorsa — bunu adlandırılmış bir `rule`'a çıkar ve
+  ilgili işlemlere `requires <RuleAdı>` ile bağla. **Çıktının biçimi (ADR-0042
+  K1/K2):** business'a YALNIZ isim + insan-brief yazılır —
+  `rule <Ad> { note """insan-brief: kural ne demek + tech ipucu (hangi kayıtlar /
+  hangi koşul sınıfı: var-mı, sayım, karşılaştırma)""" }` + op'ta `requires <Ad>`.
+  **Yapısal predikat business'a YAZILMAZ** — kuralın checkable gövdesi tech'in
+  `realizes rule <Ad> { <predicate> }`'una devredilir; bağ isimledir
+  (`requires <Ad>` ↔ `realizes rule <Ad>`). Tetik-soruları düz dille:
   "Bu aynı koşul başka işlemlerde de geçerli mi?" · "Bu kural başka bir kaydın
-  var/yok olmasına mı bakıyor?" (Kullanıcıya `rule`/`exists` deme; düz cümlesinden
-  *sen* türet.) Sözdizimi ve örtük-kök kuralı: `references/dsl-reference.md` §10.
+  var/yok olmasına mı bakıyor?" (Kullanıcıya `rule`/`realizes` deme; düz cümlesinden
+  *sen* türet.) Sözdizimi ve legacy-`satisfies` durumu: `references/dsl-reference.md` §10.
 - **Durum geçişlerini** burada yakala: "onaylanınca durumu ne olur?" →
   `on success do: calculate <Entity>.status = 'onaylandı'`. Durum yaşam döngüsü
   ayrı bir Faz-0 ürünü değildir; bu atamalardan **türetilir**.

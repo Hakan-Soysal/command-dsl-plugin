@@ -82,6 +82,18 @@
   (yetersiz bakiye)?" → validation (400) vs rule (422).
 - **⚠ validation/rule karışması:** "retry edilse, veri değişmeden, hep mi başarısız?" → evet =
   validation; "veri değişirse başarılı olabilir" = rule.
+- **rule-realize — adlı iş-kuralı (ADR-0042):** sözleşme op'a `requires <Ad>` bağlıyorsa (guards
+  `kind:"rule"`) **zorunlu devam-bloku**: "Sözleşme bu işleme '<Ad>' kuralını bağlıyor; note'u
+  şöyle diyor: '…' — doğru mu? Bu kural **bir kaydın var/yok olmasına** mı bakıyor, **bir sayının
+  eşiği aşmasına** mı, yoksa **isteğin kendi verisiyle eşleşen kayıt aramaya** mı? Kuralın taradığı
+  **koleksiyon hangi tabloda** — ön-daraltma var mı (yalnız bu org'un satırları → `by <key>`)?
+  İki tablo bağlanıyorsa **hangi kolon hangi kolona** eşleniyor (FK)? Eşik sabit bir **sayı** mı,
+  yoksa bir **alandan** mı geliyor (tier limiti)?" → `access { reads <E> as <alias> [by <key>] }`
+  + `realizes rule <Ad> { [not] exists <alias> where … / count <alias> [where …] <cmp> <sayı|alan> }`.
+  ⟦sormazsan kural ya seam'e düşer ya hiç enforce edilmez — `rules[].body` artık `null` olabilir;
+  yapısal kaynak TECH'tir.⟧ Aynı kural op'a göre **farklı** realize edilebilir (org-fazı vs app-fazı
+  sayımı) — her realize-eden op'ta ayrı sor. Gövdesiz işaret (`realizes rule <Ad>` / çoklu-ad) =
+  bilinçli devir → "hangi mekanizma kapsıyor?" diye sorup belgele.
 
 ## F. Etkileşim & tutarlılık (Faz 6)
 
@@ -128,6 +140,21 @@ kapsamdaki HER satır sete girer — yaşam-döngüsü durumu varsa `when` eklet
 [principal'sız `actor.*` — principal bildirimini sor, §D]), bunu **kullanıcıya geri sor** —
 warning'ler senin discharge etmediğin belirsizlikleri işaret eder. 0 error'a indir; warning'leri
 ya gider ya da "bilinçli, kabul ediyorum" onayıyla belgele.
+
+**T4 realize-predikat ERROR'ları da ikinci tur sorgudur** (error olsa da düzeltmesi çoğu kez
+**authored bilgi** ister — uydurup kapatma, sor):
+- **alias-çözümü** (`'X' op'un 'access … as' alias'ı değil`) → "kural hangi tabloyu tarıyor,
+  ön-daraltması var mı?" diye sorup `access { reads <E> as <alias> [by <key>] }` bildirt.
+- **kök-çözümü** (`'X' kökü çözülemedi`) → o değer nereden geliyor: op param'ı mı, okunan bir
+  kayıt mı (`access…as`), başka module'ün sorgusu mu (`calls…as`)? — kullanıcıdan al.
+- **kartezyen-barı** (`iç 'exists' FK-eşitliğiyle bağlanmamış`) → "bu iki tablo **hangi kolonla**
+  birbirine bağlanıyor?" diye FK çiftini SOR (ad-benzerliğinden çıkarma).
+- **count-sağ-skaler** → "eşik sabit sayı mı, hangi alandan geliyor?" (sayılan alias'ın kendisi
+  sağda olamaz).
+- **`realizes rule <Ad>` ad-çözümü error'u** (sözleşmede yok) → typo mu, sözleşme mi bayat?
+  Sözleşmeyi yeniden ürettir ya da adı düzelt.
+- **coverage warning'i** (`requires edilen şu rule'lar … realize edilmemiş`) → her ad için:
+  gövdeyle mi realize edilecek, gövdesiz devir mi (mekanizmasını belgele), bilinçli erteleme mi?
 
 **Kapsam (op-düzeyi fidelity):** Linked doğrulayıcı, sözleşmedeki (operations.json) **hiçbir
 tech operation'a bağlanmamış** business-op'ları tek-toplu warning olarak listeler. Bu, iş'in tam

@@ -26,7 +26,7 @@ DSL'ini** (`.cdsl`) üretir; tech DSL (`.tcdsl`) bu skill'in konusu değildir.
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `94397168f2a1` · commit `1ca2337`+ADR-0038 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar — bu turdaki değişim ADR-0038'in shared-Expr'idir (business grameri shared'ı import ETMEZ; business yazım-yüzeyi DEĞİŞMEDİ).
+> **Snapshot:** grammar `69ca2866b8e8` · commit `0c5072b`+ADR-0042 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar. Bu turdaki değişim ADR-0042 K1'dir (business v1.2.0): `rule`'da `satisfies` gövdesi artık OPSİYONEL — business rule = **isim + `note`** (insan-brief); yapısal predikat tech'te realize edilir (`realizes rule <Ad> { <predicate> }`). Ne `satisfies` ne `note` taşıyan boş `rule` yeni bir **warning** üretir (ölü bildirim).
 
 Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate) — riski soyut değil **"Atlanırsa"** kolonundaki adıyla teşhir et. Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
 
@@ -35,7 +35,7 @@ Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını
 | Construct | Gerçek-dünya sinyali (tetikleyici) | Faz | Risk | Atlanırsa (adlandırılmış mod) |
 |---|---|---|---|---|
 | Guard ailesi: `where` / `only if` / `only when` / `only during` | "yalnız şu koşulda / şu durumdaysa / mesai saatinde / bakiye yeterse geçer / reddedilir" | 3 | ★ | **koşulsuz-geçiş** — ön-koşul kaybolur; reddedilmesi gereken kayıt işlemi geçer |
-| `rule <Ad> { … }` + op'ta `requires` (yeniden-kullanılabilir predikat) | "aynı ön-koşul birden çok işlemde geçerli / ilişki-gezinmeli kural / 'şöyle bir kayıt VAR mı' kontrolü (`exists`)" | 3 | ★ | **note'a-düşen-yapısal-kural** — çok-op'lu / `exists`'li iş-kuralı `rule` yerine proza `note`'a düşer; makinece zorlanamaz, yeniden kullanılamaz |
+| `rule <Ad> { note … }` + op'ta `requires` (adlandırılmış iş-kuralı: isim + `note`-brief; yapısal predikat TECH'te realize edilir — ADR-0042) | "aynı ön-koşul birden çok işlemde geçerli / ilişki-gezinmeli kural / 'şöyle bir kayıt VAR mı / kaç tane' kontrolü" | 3 | ★ | **note'a-düşen-adsız-kural** — çok-op'lu / çapraz-varlık iş-kuralı adlandırılmadan çıplak proza `note`'a düşer; tech'in realize-bağı (`requires <Ad>` ↔ `realizes rule <Ad>`) kurulamaz, kural makinece izlenemez |
 | `calculate <Entity>.status = '…'` (durum geçişi) | "onaylanınca durumu X olur / şu aşamaya geçer" (süreç durum-zinciri bundan türer; yoksa UNKNOWN) | 3 | ★ | **UNKNOWN-durum-zinciri** — durum geçişi kaybolur; süreç durum-sütunu türetilemez |
 | `perform <İşlem>` (otomatik zincir) | "bu olunca şu da otomatik yapılır (arka planda, kullanıcı istemeden)" | 3 | ★ | **kopuk-otomasyon** — arka-plan zinciri kopar; downstream işlem hiç tetiklenmez |
 | `schedule: every …` (zamanlanmış komut) | "her gün/ay / gece otomatik çalışır / periyodik iş" | 3 | ★ | **tetiklenmeyen-periyodik-iş** — zamanlanmış komut hiç koşmaz |
@@ -157,8 +157,10 @@ on success do                             # K4 — başarı sonrası etkiler (gi
 - `schedule:` taşıyan komut hiçbir akışta/süreçte geçmez; kullanıcıya açılmaz.
 - `requires <RuleAdı>, …` işlemi bir veya çok **adlandırılmış rule**'a bağlar (§10).
   `only if`'in tek-karşılaştırma sınırını aşan — çok işlemde tekrar eden, ilişki
-  gezinen ya da "böyle bir kayıt VAR mı" (`exists`) soran — ön-koşulu buraya taşı.
-  Rule gövdesi requires eden op'un kaynağını/aktörünü/reads-alias'larını görür.
+  gezinen ya da "böyle bir kayıt VAR mı" soran — ön-koşulu buraya taşı. Rule'un
+  business-tarafı isim + `note`-brief'tir; yapısal predikat tech'te realize edilir
+  (ADR-0042, §10). Legacy `satisfies` gövdesi varsa requires eden op'un
+  kaynağını/aktörünü/reads-alias'larını görür.
 
 ## §4 Sorgular
 
@@ -247,10 +249,12 @@ process <Ad> [of <Entity>]
 
 - **Karşılaştırma:** `=, !=, >, <, >=, <=`; bağlaç `and`/`or`, parantez `( )`.
   Sağ taraf: STRING (`'...'`), sayı, süre, ya da `Varlık.alan` yolu.
-- **`exists` niceleyicisi (yalnız `rule` gövdesinde — §10):** `[not] exists <alias>
+- **`exists` niceleyicisi (yalnız LEGACY `rule` gövdesinde — §10):** `[not] exists <alias>
   where <koşul>` — "şu koşulu sağlayan bir kayıt VAR mı / YOK mu". `<alias>` bir
   `reads` girdisinin adıdır; iç `where` yalnız o kaydın alanlarını görür (bağıntısız).
   `exists` guard'a (`only if`/`where`) **giremez**; ayrı ağaçtır, sadece rule'da.
+  YENİ modellerde bu sınıf sorgu business'a yazılmaz — tech'in realize-predikatına
+  gider (ADR-0042; §10 legacy kutusu).
 - **İfade (calculate sağı):** `+ - * /`, parantez, `sum of <koleksiyon.alan>`,
   `Varlık.alan`, sayı, STRING. String ataması yalnız durum geçişi içindir
   (aritmetiğe giremez, sayısal alana atanamaz).
@@ -280,20 +284,60 @@ import './actors.cdsl'        # dosya başında; göreli veya mutlak path (tek t
 
 ```
 rule <Ad> {
+    note """insan-brief: kural ne demek + tech ipucu"""   # ÖNERİLEN biçim — isim + note
+}
+```
+
+Top-level **adlandırılmış iş-kuralı** (ADR-0033, ADR-0042 ile amend). İşlem
+bildiriminde `requires <RuleAdı>, …` clause'u ile kullanılır (§3). Aynı ön-koşul
+birden çok işlemde geçerliyse, ilişki-gezinen ya da "böyle bir kayıt var mı /
+kaç tane" sınıfı bir kural gerekiyorsa `only if`'in tek-karşılaştırma sınırını
+burada aş.
+
+- **Katman bölünmesi (ADR-0042 K1/K2 — merkez kural):** business rule = **isim +
+  `note`**. `note`, tech'i yazacak kişiye **insan-dilinde detaylı brief**tir:
+  kural ne demek + tech ipucu (hangi kayıtlara bakılır, koşulun sınıfı — var-mı,
+  filtreli sayım, alan-karşılaştırma). **Yapısal predikat business'a YAZILMAZ** —
+  kuralın checkable, kod-üreten gövdesi TECH'te yazılır: op-içi
+  `realizes rule <Ad> { <predicate> }` (tech-dsl v3.0.0). Bağ **isimle** kurulur:
+  business `requires <Ad>` ↔ tech `realizes rule <Ad>`.
+- **≥1 içerik:** ne `satisfies` ne `note` taşıyan boş `rule` **warning**dir
+  (ölü bildirim) — en azından `note`-brief yaz.
+- `rule` yalın ID olamaz (keyword; `verb`/`import`/`outcome` emsali) — işlem/akış/
+  süreç adı seçerken bundan kaçın.
+
+```
+# çok işlemde tekrar eden + "açık fatura var mı" sınıfı ön-koşul → adlandırılmış rule
+verb submits                              # 'submits' özel fiil (D13); bildirilmezse "bilinmeyen fiil" uyarısı
+rule OrderSubmittable {
+    note """Sipariş ancak toplamı 0'dan büyükse VE müşterinin açık (ödenmemiş)
+    faturası yoksa gönderilebilir. Tech ipucu: Order.total kontrolü + Invoice
+    kayıtlarında 'status = open' var-mı sorgusu (predikat tech'te realize edilir)."""
+}
+
+SubmitOrder: Customer submits own Order where status = 'placed'
+requires OrderSubmittable                 # isim-bağı: tech'te `realizes rule OrderSubmittable { … }`
+on success do
+    calculate Order.status = 'submitted'
+```
+
+### Legacy biçim: `satisfies` gövdesi (geçerli kalır — retire YOK, yeni modelde önerilmez)
+
+```
+rule <Ad> {
     reads <girdi> [, <girdi> …]           # opsiyonel — çağrı yerinde bağlanan kökler
-    satisfies <BoolExpr>                  # ZORUNLU — kuralın gövdesi (tek predikat)
+    satisfies <BoolExpr>                  # opsiyonel (v1.2.0'dan beri) — yapısal gövde
     note """…"""                          # opsiyonel
 }
 ```
 
-Top-level, **yeniden-kullanılabilir, op-bağlamlı yapısal predikat** (ADR-0033).
-İşlem bildiriminde `requires <RuleAdı>, …` clause'u ile kullanılır (§3). Aynı
-ön-koşul birden çok işlemde geçerliyse, ilişki-gezinen ya da `exists`'li bir kural
-gerekiyorsa `only if`'in tek-karşılaştırma sınırını burada aş.
+`satisfies` gövdesi **legacy-uyumluluktur**: mevcut `.cdsl`'ler aynen parse/emit
+eder, migrasyon zorunlu değil. YENİ modellerde kullanma — yapısal predikatın evi
+artık tech'in realize-gövdesidir (yukarıda). Legacy semantik:
 
 - **Bağlam (örtük kökler):** rule gövdesi, kendisini `requires` eden **op'un
   kaynağını** (örtük), **aktörünü** ve **`reads` alias'larını** görür; kökler
-  **çağrı yerinde** bağlanır (yani rule tek yerde yazılır, her `requires` edende
+  **çağrı yerinde** bağlanır (rule tek yerde yazılır, her `requires` edende
   yeniden çözülür). Bir op bir rule'u `requires` ederken op'un kaynağı, rule'un
   gövdesinde andığı ana entity ile uyumlu olmalıdır.
 - **`reads` girdisi** iki biçim: (a) çıplak entity — `Invoice` ya da `Invoice as inv`
@@ -306,22 +350,8 @@ gerekiyorsa `only if`'in tek-karşılaştırma sınırını burada aş.
   `exists`'in `<alias>`'ı bir `reads` girdisinin adıdır; iç `where` yalnız o
   kaydın alanlarını görür (bağıntısız). `exists` guard'lara sızmaz (§8).
 - Gövde **tek satır**dır (INDENT-duyarlı içerik yok); brace-blok `entity` emsali.
-- `rule` yalın ID olamaz (keyword; `verb`/`import`/`outcome` emsali) — işlem/akış/
-  süreç adı seçerken bundan kaçın.
-
-```
-# çok işlemde tekrar eden + exists'li ön-koşul → tek rule
-verb submits                              # 'submits' özel fiil (D13); bildirilmezse "bilinmeyen fiil" uyarısı
-rule OrderSubmittable {
-    reads Invoice as inv
-    satisfies Order.total > 0 and not exists inv where Invoice.status = 'open'
-}
-
-SubmitOrder: Customer submits own Order where status = 'placed'
-requires OrderSubmittable                 # Order = op'un kaynağı; inv = reads-alias
-on success do
-    calculate Order.status = 'submitted'
-```
+- Örnek (legacy — `references/examples/shop.cdsl`'de etiketli):
+  `rule NoOpenInvoice { reads Invoice as inv  satisfies Order.total > 0 and not exists inv where Invoice.status = 'open' }`
 
 ## §11 Başarı ölçütü (outcome)
 
@@ -365,4 +395,7 @@ outcome FastFulfilment {
 ```
 
 Emit: `outcome` → `operations.json` `successCriteria[]` (measures + covers + note);
-`rule` → `rules[]`; op'taki `requires` → op'un `guards[]`'ında `{kind:'rule', ref}`.
+`rule` → `rules[]` — `rules[].body` **nullable**dır: gövdesiz (isim+note) rule
+`body: null` + `reads: []` + `note` dolu yayınlar, legacy `satisfies`'lı rule
+ExprNode gövdesini taşımaya devam eder (business v1.2.0); op'taki `requires` →
+op'un `guards[]`'ında `{kind:'rule', ref}`.

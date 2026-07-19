@@ -84,6 +84,10 @@ yalnız testi bloke eden çelişki durdurur; üslup/tercih nitpick'i durdurmaz.
 - "Bu işlemi testlerde genelde kim çağırıyor?" → `defaults … as`.
 - Kimlik-tipli alan görürsen: "sahibi kim olsun?" → persona referansı (string-literal
   kimlik yazma).
+- Koleksiyon alan (`list of`) görürsen (v4.0.0): "bu listeye hangi öğeler girecek —
+  yoksa bilerek boş mu?" → `alan: [öğe, …]`; "boş" da açık beyandır → `alan: []`.
+  Alanı ATLAMA (eksik-zorunlu error) ve skaler YAZMA (tek öğe de `[değer]` — error
+  mesajı yol gösterir).
 
 **⚠ Guard — Stub körlüğü:** birleşimi hesaplamadan stub sorma; iç-modül çağrıya stub
 İSTEME (karar #10). Eksik-stub error'ını ihtiyaç cümlesiyle taşı ("araç kızdı" değil).
@@ -96,6 +100,11 @@ değeri kullanıcı beyanıyla yaz, doğrulama iddiasında bulunma.
   sıfır tutar mı?" → inline override.
 - Ön-durum: "Testten önce sistemde ne olsun — kaç kayıt, hangi durumda?" → seed
   (çokluk/binding'i sen kur). "Bu hazırlık gerçek iş akışından mı geçsin?" → given-call.
+- Sahiplik ön-durumu (ownership/Filtered dalı — v3.1.0): "bu kayıt KİMİN olsun —
+  testi koşan kullanıcının mı, başkasının mı?" → `seed … @owner(<persona>)` sahiplik-pini
+  (kimlik-dikişli entity'de OwnerId ancak böyle kurulur; given-call arrange KURAMAZ —
+  create-op'u persona çağıramaz/çağırsa sahip çağıran olur). Entity'de authored `owner`
+  alanı da varsa pin+alanı tutarlı yaz.
 - Başarı kanıtı: "Başarıda ayrıca neyi kanıtlayalım — kayıt oluştu mu, bildirim
   yayınlandı mı, dış servise doğru tutarla mı gidildi?" → state/emitted/called.
 - Çöküş dalı: "Dış servis çökünce nelerin OLMAMASI gerekiyor (kayıt kalmasın, bildirim
