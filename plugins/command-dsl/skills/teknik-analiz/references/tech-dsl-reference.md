@@ -12,7 +12,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `98157939f361` · src `05bc2cefe61f` · commit `0c5072b`+**tech v3.0.0** (ADR-0042: `realizes rule <Ad> { <Seviye-2 predikat> }` realize-gövdesi + **4 yeni SERT-REZERVE keyword `exists`/`count`/`where`/`not`** + 1b opak-Call deny-list [`sum/all/any/avg/min/max` → error; `exists(`/`count(` → parse-error] + manifest `realizesRules: string[] → {rule, predicate}[]` KIRICI reshape; §6b) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
+> **Snapshot:** grammar `b727382dcf1a` · src `ef34d236b0cb` · commit `0bf9c1d`+**tech v3.0.0** (ADR-0042: `realizes rule <Ad> { <Seviye-2 predikat> }` realize-gövdesi + **4 yeni SERT-REZERVE keyword `exists`/`count`/`where`/`not`** + 1b opak-Call deny-list [`sum/all/any/avg/min/max` → error; `exists(`/`count(` → parse-error] + manifest `realizesRules: string[] → {rule, predicate}[]` KIRICI reshape + **Kalem-0: manifest `accessBindings` alias→{entity,verb,key,column} + gramer `access … by <param> on <col>` + 2 validator (checkAccessColumn · keyNoCol)**; §6b) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı tablo.
 
 Bu tablo yalnız **opsiyonel/authored** construct'ları listeler — yani **sessizce atlanabilecekleri.** Zorunlular (module/entity/imza/access) zaten faz+validator'ca zorlanır; sessiz-eksik riskleri yoktur (onların **yanlış-değer** riski ayrı bir hata-modudur → SKILL "Emit" geçidinin teşhir maddesi). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle — kullanıcı düz cümlesinde sinyali verir, construct'ın adını sen bilirsin; eşleşme aday-soru kuyruğuna girer (hibrit onay ile toplu sor). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok — sor, uydurma).
 
@@ -426,11 +426,15 @@ realizes rule IneligibleIndustry { exists offices where offices.industry = indus
 - **Koşul yaprağı:** `path <cmp> path|literal` ya da `path in { a | b }` (literal-küme).
   **Aritmetik / `sum of` / Call gövdeye GİREMEZ** (gramer şekliyle dışlı — K8 sınırlı-açılım).
   `and`/`or` + parantez serbest.
-- **`<alias>` = op'un `access { reads <Entity> as <alias> [by <key>] }` alias'ı** (K4). Inline
-  entity-adı YOK, param nicelenemez — nicelenecek HER koleksiyon önce `access`'te bildirilir.
-  **`by <key>` koleksiyonu ÖN-FİLTRELER** (`reads Poi as orgPois by orgId` = o org'un POI'leri)
-  → `where`'in bir kısmını bedavaya üstlenir; predikat ön-filtreyi YENİDEN KODLAMAZ (üreteç
-  `by`-anlamını manifest'in `access` clause'undan okur).
+- **`<alias>` = op'un `access { reads <Entity> as <alias> [by <param> [on <col>]] }` alias'ı** (K4).
+  Inline entity-adı YOK, param nicelenemez — nicelenecek HER koleksiyon önce `access`'te bildirilir.
+  **`by <param> on <col>` koleksiyonu ÖN-FİLTRELER** (`reads Poi as orgPois by orgId on orgId` =
+  `WHERE orgPois.orgId = orgId` → o org'un POI'leri) → `where`'in bir kısmını bedavaya üstlenir;
+  predikat ön-filtreyi YENİDEN KODLAMAZ. **`on <col>` ZORUNLU eğer by-key alias predikatta
+  nicelenirse** (keyNoCol validator; aksi halde üreteç ön-filtre kolonunu bilemez = error).
+  Kolonu AÇIK yaz: **param adı ≠ kolon adı olabilir** (`by fromIban on iban` — payments emsali;
+  kolon tahminle türetilmez). Üreteç bağı manifest'in **`accessBindings`** alanından okur (`access`
+  DEĞİL — o çıplak entity-adı taşır, alias'ı düşürür).
 - **Korelasyon SERBEST (K5) — kök-kuralı:** **çıplak kök** (`industry`) = op-yüzeyi (param /
   `access…as` alias'ı / `calls…as` sonucu); **alias'lı kök** (`camps.status`) = nicelenen satır.
   Çıplak entity-adı korelasyon kökü DEĞİLDİR (fail-closed red).
@@ -446,6 +450,10 @@ realizes rule IneligibleIndustry { exists offices where offices.industry = indus
   KURTARMAZ — koleksiyonlar bağlanmamış kalır; `or`-dallarının HER İKİSİ de FK taşımalı).
 - **`count` sağ-tarafı SKALER:** sayı ya da op-yüzeyi Path'i; sayılan alias'ın kendisi sağda →
   error; çözülemeyen kök → error (string-literal zaten parse-error).
+- **`on <col>` kolon-varlığı (checkAccessColumn):** `access … by <param> on <col>`'daki `col`
+  aliaslı entity'de bir alan olmalı; yoksa error (mevcut alanlar listeli), çoklu-entity+on → error.
+- **keyNoCol:** by-key ön-filtreli (`by <param>`) bir alias realize-predikatında nicelenir ama
+  `on <col>` yoksa → error (üreteç ön-filtreyi kod-üretemez = görünmez sessiz-enforcement fail-open).
 - Yaprak alan/enum denetimi bu dilimde YOK (kök-seviyesi); alan-typo'su T4'ü geçer → dikkatli yaz.
 
 **4 yeni SERT-REZERVE keyword: `exists` · `count` · `where` · `not`** — bu adları alan/param/
@@ -465,8 +473,12 @@ qa/frontend tip-uzayı değişmedi):
 { node: 'cmp', op: …|'in', left: ExprNode, right: ExprNode }     // yaprak; çocuklar shared ExprNode
 ```
 Yaprak çocuklar shared serializer'dan aynen: `{path:[…]}` · `{kind:'string'|'number',…}` · `in`
-sağı `{node:'set', values:[…]}`. Üreteç alias'ları op'un `access` clause'undan çözer (`by <key>`
-ön-filtresi orada).
+sağı `{node:'set', values:[…]}`. **Üreteç predikat alias'larını op kaydının YENİ `accessBindings`
+alanından çözer** (`access` DEĞİL — o çıplak entity-adı taşır, alias'ı düşürür):
+`accessBindings: { alias, entity, verb, key, column }[]` (yalnız aliaslı-tek-entity). `key!=null ∧
+column!=null` → by-key ön-filtresi `WHERE <alias>.<column> = <key-param>` (kolon validator'ca
+kanıtlı var). `key!=null ∧ column==null` (eski `by <param>` on-suz, predikatta nicelenmemiş) →
+üreteç by-key kod-üretemez, DUR.
 
 ---
 
@@ -475,17 +487,21 @@ sağı `{node:'set', values:[…]}`. Üreteç alias'ları op'un `access` clause'
 **`access`** — CRUD-net entity erişim kümesi (+ rule için instance-binding):
 ```
 access { reads Cart  creates Order  updates Order  deletes TempFile }
-access { reads Account as src by from }        // instance-binding: alias + input-key (rule kökü)
+access { reads Account as src by from on iban } // instance-binding: alias + input-key + kolon (WHERE src.iban = from)
 ```
 `creates`/`updates`/`deletes` = write-sınıfı. Entity ref'leri **tech** entity'lere çözülür.
 `checkEntityCoverage`: realized op'un business write-set entity'sinin her biri **aynı module'de**
 realizes edilmeli (yoksa error). `checkAccessDivergence`: business salt-okunur + tech write →
 güvenlik-zayıflatma warning.
-**Instance-binding (`as <alias> by <param>`, ADDİTİF — `entities` listesi değişmez):** bir reads
-effect'ine isim (`as src`) + onu seçen input-key (`by from`, op param'ına çözülür) verir; `rule`
-o alias'ı state-kökü olarak gezer (`src.balance`). Aynı tipten ≥2 instance gerekiyorsa her birini
-ayrı `reads … as … by …` ile bildir (transfer: `reads Account as src by from`, `reads Account as
-dst by to`). Tek-instance'ta çıplak entity-adı yeter. (Bkz. §6 provenance.)
+**Instance-binding (`as <alias> by <param> [on <col>]`, ADDİTİF — `entities` listesi değişmez):**
+bir reads effect'ine isim (`as src`) + onu seçen input-key (`by from`, op param'ına çözülür) +
+opsiyonel filtre-kolonu (`on iban` → `WHERE src.iban = from`) verir; `rule`/realize-predikat o
+alias'ı state-kökü olarak gezer (`src.balance`). **`on <col>`**: kolon aliaslı entity'de var olmalı
+(checkAccessColumn); **param adı ≠ kolon adı olabilir** (`by from on iban`) — kolon tahminle
+türetilmez, açık yazılır. Realize-predikatında nicelenen by-key alias için `on <col>` ZORUNLU
+(keyNoCol). Aynı tipten ≥2 instance gerekiyorsa her birini ayrı `reads … as … by … on …` ile
+bildir (transfer: `reads Account as src by from on iban`, `reads Account as dst by to on iban`).
+Tek-instance'ta çıplak entity-adı yeter. (Bkz. §6 provenance.)
 
 **`calls`** — cross-boundary etkileşim (saga adımı VE/VEYA cross-module senkron read):
 ```

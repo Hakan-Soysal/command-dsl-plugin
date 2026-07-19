@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-159e8bf58c84", grammarHash: "159e8bf58c84", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "e065fdb1712d", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "0c5072b", builtAt: "2026-07-19T09:19:37+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "256314b064d2", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "0bf9c1d", builtAt: "2026-07-19T16:49:39+03:00", langium: "4.2.4" };
   }
 });
 
@@ -31973,6 +31973,7 @@ function isAccessClause(item) {
 var AccessEffect = {
   $type: "AccessEffect",
   alias: "alias",
+  col: "col",
   entities: "entities",
   key: "key",
   verb: "verb"
@@ -32890,6 +32891,9 @@ var QaWorkspaceAstReflection = class extends AbstractAstReflection {
       properties: {
         alias: {
           name: AccessEffect.alias
+        },
+        col: {
+          name: AccessEffect.col
         },
         entities: {
           name: AccessEffect.entities,
@@ -40424,6 +40428,28 @@ var QaDslGrammar = () => loadedQaDslGrammar ?? (loadedQaDslGrammar = loadGrammar
                       "deprecatedSyntax": false,
                       "isMulti": false
                     }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": "on"
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "col",
+                        "operator": "=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@140"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "?"
                   }
                 ],
                 "cardinality": "?"
@@ -46784,6 +46810,28 @@ var TechDslGrammar = () => loadedTechDslGrammar ?? (loadedTechDslGrammar = loadG
                       "deprecatedSyntax": false,
                       "isMulti": false
                     }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": "on"
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "col",
+                        "operator": "=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@96"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "?"
                   }
                 ],
                 "cardinality": "?"
@@ -50866,6 +50914,7 @@ function isAccessClause2(item) {
 var AccessEffect2 = {
   $type: "AccessEffect",
   alias: "alias",
+  col: "col",
   entities: "entities",
   key: "key",
   verb: "verb"
@@ -51540,6 +51589,9 @@ var TechDslAstReflection = class extends AbstractAstReflection {
       properties: {
         alias: {
           name: AccessEffect2.alias
+        },
+        col: {
+          name: AccessEffect2.col
         },
         entities: {
           name: AccessEffect2.entities,
@@ -54286,6 +54338,7 @@ var TechDslValidator = class {
     const aliasToEntity = /* @__PURE__ */ new Map();
     const bareEntityCount = /* @__PURE__ */ new Map();
     const stateEntityNames = /* @__PURE__ */ new Set();
+    const keyNoColAlias = /* @__PURE__ */ new Set();
     for (const c of op.clauses.filter(isAccessClause2)) {
       for (const eff of c.effects) {
         if (eff.verb === "creates") continue;
@@ -54297,6 +54350,7 @@ var TechDslValidator = class {
         }
         if (eff.alias && eff.entities.length === 1 && eff.entities[0].ref) {
           aliasToEntity.set(eff.alias, eff.entities[0].ref);
+          if (eff.key != null && eff.col == null) keyNoColAlias.add(eff.alias);
         }
       }
     }
@@ -54308,7 +54362,7 @@ var TechDslValidator = class {
       if (isBoundaryOp2(t) && t.readOnly !== true) nonGateableAlias.add(cl.alias);
       if ("returns" in t && t.returns) callAliasReturn.set(cl.alias, t.returns.name);
     }
-    return { paramNames, aliasToEntity, bareEntityCount, stateEntityNames, callAliasReturn, nonGateableAlias };
+    return { paramNames, aliasToEntity, bareEntityCount, stateEntityNames, callAliasReturn, nonGateableAlias, keyNoColAlias };
   }
   // ADR-0031 K3/K4/K5: rule = data-bağımlı. Kökler: param | access-entity/alias (reads/updates/deletes) | call-alias.
   checkRuleStateScope(op, accept) {
@@ -54391,7 +54445,7 @@ var TechDslValidator = class {
     if (!pred) return;
     const op = ast_utils_exports.getContainerOfType(clause, isOperation2);
     if (!op) return;
-    const { paramNames, aliasToEntity, callAliasReturn } = this.opRootScope(op);
+    const { paramNames, aliasToEntity, callAliasReturn, keyNoColAlias } = this.opRootScope(op);
     const aliasList = () => [...aliasToEntity.keys()].sort().join(", ") || "(hi\xE7 yok)";
     const rootResolves = (root2, stack) => stack.includes(root2) || paramNames.has(root2) || aliasToEntity.has(root2) || callAliasReturn.has(root2);
     const rootUniverse = (stack) => [.../* @__PURE__ */ new Set([...stack, ...paramNames, ...aliasToEntity.keys(), ...callAliasReturn.keys()])].sort().join(", ") || "(hi\xE7 yok)";
@@ -54407,6 +54461,12 @@ var TechDslValidator = class {
         accept(
           "error",
           `realize-predikat: alias '${node.alias}' d\u0131\u015F niceleyicide zaten ba\u011Fl\u0131 \u2014 i\xE7-i\xE7e '${kw}' ayn\u0131 alias'\u0131 yeniden niceleyemez (g\xF6lgeleme; ba\u011F belirsizle\u015Fir).`,
+          { node, property: "alias" }
+        );
+      } else if (keyNoColAlias.has(node.alias)) {
+        accept(
+          "error",
+          `realize-predikat: '${kw} ${node.alias}' by-key \xF6n-filtreli ('access \u2026 as ${node.alias} by <param>') ama kolonu bildirilmemi\u015F \u2014 \xFCrete\xE7 \xF6n-filtreyi kod-\xFCretemez. 'by <param> on <col>' ile kolonu ekle (param ad\u0131 \u2260 kolon ad\u0131 olabilir; \xF6r. 'by fromIban on iban').`,
           { node, property: "alias" }
         );
       }
@@ -54482,6 +54542,35 @@ var TechDslValidator = class {
       }
     };
     walk(pred, []);
+  }
+  /**
+   * ADR-0042 açık-kalem #1 KAPANIŞ — `access … as <alias> by <param> on <col>`'daki `on <col>`
+   * KOLON denetimi: `<col>` aliaslı entity'de bir FIELD olmalı (fail-closed). Neden açık kolon:
+   * param adı ≠ kolon adı olabilir (payments `by fromIban on iban` — fromIban param, iban kolon);
+   * bu yüzden kolon tahminle (heuristic) türetilemez, açıkça yazılır ve VAR olduğu denetlenir —
+   * aksi halde üreteç var-olmayan kolona `WHERE`  üretir = sessiz downstream-kırılma. `on` yoksa
+   * denetim N/A (eski `by <param>` formu geçerli; üreteç o formda by-key kod-üretemez, DUR).
+   * Çoklu-entity + `on` → hangi entity belirsiz → error (aliaslı by-key zaten tek-entity semantiği).
+   */
+  checkAccessColumn(eff, accept) {
+    if (eff.col == null) return;
+    if (eff.entities.length !== 1 || !eff.entities[0]?.ref) {
+      accept(
+        "error",
+        `access: 'on ${eff.col}' tek bir aliasl\u0131 entity ister \u2014 \xE7oklu-entity effect'te kolon hangi entity'ye ait belirsiz. Kolonu ayr\u0131 'reads <Entity> as <alias> by <param> on <col>' effect'inde bildir.`,
+        { node: eff, property: "col" }
+      );
+      return;
+    }
+    const entity = eff.entities[0].ref;
+    if (!entity.fields.some((f) => f.name === eff.col)) {
+      const avail = entity.fields.map((f) => f.name).sort().join(", ") || "(hi\xE7 yok)";
+      accept(
+        "error",
+        `access: 'on ${eff.col}' \u2014 '${eff.col}' '${entity.name}' entity'sinde bir alan de\u011Fil (by-key \xF6n-filtresi 'WHERE ${eff.alias ?? "<alias>"}.${eff.col} = ${eff.key?.$refText ?? "<param>"}' \xFCretir; kolon var olmal\u0131). Mevcut alanlar: ${avail}.`,
+        { node: eff, property: "col" }
+      );
+    }
   }
   checkBoundaryValidationInputScope(bop, accept) {
     const model = ast_utils_exports.getDocument(bop).parseResult.value;
@@ -55747,6 +55836,8 @@ function registerTechValidationChecks(services) {
     // Kalem 1b (K-1b deny-list): AST-tipi kaydı → TÜM Expr-site'ları (validation/rule/permit/invariant/boundary, iç-içe dahil) tek noktadan
     RealizesRuleClause: [validator.checkRealizePredicate],
     // 1d T4 (ADR-0042 K4/K5/K6): realize-gövdesi alias/korelasyon/kartezyen/count-skaler denetimi
+    AccessEffect: [validator.checkAccessColumn],
+    // ADR-0042 açık-kalem #1: `by <param> on <col>` kolon var-olma denetimi (fail-closed)
     NoteClause: [validator.checkRedaction, validator.checkNoteLint],
     // F2.7 redaction + F2.3 note-lint (op-notu)
     Module: [validator.checkEntityCoverage, validator.checkSharedUtils, validator.checkDuplicateErrorName, validator.checkDuplicateEventName],

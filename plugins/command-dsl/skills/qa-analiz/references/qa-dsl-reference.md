@@ -13,7 +13,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `159e8bf58c84` · src `e065fdb1712d` · commit `0c5072b`+**qa v3.1.0 (`seed … @owner(persona)` sahiplik-pini — additive) + v4.0.0 (liste-literal `[…]` + eleman-tip denetimi + İQ2 muafiyet-kaldırma — KIRICI: çıktı `kind:'list'` + girdi)** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `912002af9beb` · src `256314b064d2` · commit `0bf9c1d`+**qa v3.1.0 (`seed … @owner(persona)` sahiplik-pini — additive) + v4.0.0 (liste-literal `[…]` + eleman-tip denetimi + İQ2 muafiyet-kaldırma — KIRICI: çıktı `kind:'list'` + girdi)** (grammarHash tech-gramerini embed eder → Kalem-0 tech `by <param> on <col>` grameriyle güncellendi; qa-authoring construct'ı DEĞİŞMEDİ) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 >
 > **⚠️ ADR-0040 · qa v2.0.0 — KIRICI (2026-07-16).** İki ayrı şey oldu, karıştırma:
 > 1. **Yankı (yüzey DEĞİL):** tech'e `principal`/`axis` girdi → qa gramerini import ettiği için hash
