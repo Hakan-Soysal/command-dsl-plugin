@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "256314b064d2", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "0bf9c1d", builtAt: "2026-07-19T16:49:39+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "c4bac2a3f22e", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
   }
 });
 
@@ -56829,6 +56829,11 @@ function condLiteral(expr) {
   while (isCmp(n) && n.op === void 0) n = n.left;
   return isLit(n) ? n : null;
 }
+function condPath(expr) {
+  let n = expr;
+  while (isCmp(n) && n.op === void 0) n = n.left;
+  return isPath(n) ? n : null;
+}
 function detectWaiveExcuse(reason) {
   if (!reason) return null;
   for (const re of WAIVE_EXCUSE_RES) {
@@ -57023,6 +57028,9 @@ var QaDslValidator = class {
   checkPersona(persona, accept) {
     const model = ast_utils_exports.getContainerOfType(persona, isQaModel);
     if (!model) return;
+    if (persona.name === "input") {
+      accept("error", `'input' ad\u0131 girdi k\xF6k\xFCne ayr\u0131lm\u0131\u015Ft\u0131r \u2014 persona/seed/step bind'i bu ad\u0131 alamaz (2.A).`, { node: persona, property: "name" });
+    }
     const u = this.universeOf(model);
     if (u.techRootUris.length === 0) return;
     if (persona.roleBinding) {
@@ -57041,7 +57049,7 @@ var QaDslValidator = class {
     const op = dataset.op?.ref;
     const model = ast_utils_exports.getContainerOfType(dataset, isQaModel);
     if (!op || !model) return;
-    const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false };
+    const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false, inputParams: null };
     this.validateEntries(dataset.entries, this.paramSpecs(op), true, ctx, model, accept, `'${op.name}' parametreleri`, dataset);
   }
   // ── Defaults (§3.6, karar #25) ────────────────────────────────────────────
@@ -57071,7 +57079,7 @@ var QaDslValidator = class {
     if (!test.actor && !defaults.get(op)?.actor) {
       accept("error", `\xC7a\u011F\u0131ran kimlik zorunlu: test 'as' yazmal\u0131 ya da '${shape.qualified}' i\xE7in defaults 'as' sa\u011Flamal\u0131 (\xA73.3).`, { node: test, property: "title" });
     }
-    const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false };
+    const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false, inputParams: null };
     if (test.given) this.checkGiven(test.given, model, ctx, false, accept);
     const executed = [op];
     for (const item of test.given?.items ?? []) {
@@ -57090,7 +57098,7 @@ var QaDslValidator = class {
       }
     }
     const asserts = test.then?.asserts ?? [];
-    const assertCtx = { ...ctx, allowResult: true };
+    const assertCtx = { ...ctx, allowResult: true, inputParams: test.when.call ? this.paramSpecs(op) : null };
     for (const a2 of asserts) this.checkAssert(a2, shape, assertCtx, model, accept);
     this.checkFilteredMembership(test.covers, res.branch, asserts, shape, test, accept);
   }
@@ -57151,7 +57159,7 @@ var QaDslValidator = class {
     if (sc.time && !validTime(sc.time.at)) {
       accept("error", `time pini offset'li ISO-8601 olmal\u0131 (QA-15): '${sc.time.at}'.`, { node: sc.time, property: "at" });
     }
-    const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false };
+    const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false, inputParams: null };
     if (sc.given) {
       this.checkGiven(sc.given, model, ctx, true, accept);
     }
@@ -57191,6 +57199,9 @@ var QaDslValidator = class {
       if (item.bind && binds.has(item.bind)) {
         accept("error", `Step bind ad\u0131 senaryoda tekil olmal\u0131: '${item.bind}'.`, { node: item, property: "bind" });
       }
+      if (item.bind === "input") {
+        accept("error", `'input' ad\u0131 girdi k\xF6k\xFCne ayr\u0131lm\u0131\u015Ft\u0131r \u2014 persona/seed/step bind'i bu ad\u0131 alamaz (2.A).`, { node: item, property: "bind" });
+      }
       if (item.after !== void 0) {
         const target = binds.get(item.after);
         if (!shape.paginated) {
@@ -57201,9 +57212,9 @@ var QaDslValidator = class {
           accept("error", `'after' hedefi AYNI operasyonu \xE7a\u011F\u0131ran bir step olmal\u0131 (S4).`, { node: item, property: "after" });
         }
       }
-      const stepCtx = { ...ctx, stepBinds: new Set(binds.keys()), allowResult: false };
+      const stepCtx = { ...ctx, stepBinds: new Set(binds.keys()), allowResult: false, inputParams: null };
       this.checkInput(item.input, op, model, stepCtx, accept);
-      const assertCtx = { ...ctx, stepBinds: new Set(binds.keys()), allowResult: true };
+      const assertCtx = { ...ctx, stepBinds: new Set(binds.keys()), allowResult: true, inputParams: this.paramSpecs(op) };
       for (const a2 of item.asserts ?? []) this.checkAssert(a2, shape, assertCtx, model, accept);
       if (item.bind && item.expect.success) binds.set(item.bind, item);
     }
@@ -57258,6 +57269,9 @@ var QaDslValidator = class {
       accept("error", `seed \xE7oklu\u011Fu \u22651 olmal\u0131 (karar #22).`, { node: seed, property: "count" });
     }
     if (seed.bind) {
+      if (seed.bind === "input") {
+        accept("error", `'input' ad\u0131 girdi k\xF6k\xFCne ayr\u0131lm\u0131\u015Ft\u0131r \u2014 persona/seed/step bind'i bu ad\u0131 alamaz (2.A).`, { node: seed, property: "bind" });
+      }
       if (ctx.seedBinds.has(seed.bind) || ctx.personas.has(seed.bind)) {
         accept("error", `seed bind ad\u0131 persona/\xF6nceki-bind'lerle \xE7ak\u0131\u015F\u0131yor: '${seed.bind}'.`, { node: seed, property: "bind" });
       }
@@ -57279,7 +57293,7 @@ var QaDslValidator = class {
     if (!target || stub.fails) return;
     const fields = this.resolveStructural(target.returns, target, model);
     if (fields) {
-      const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false };
+      const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false, inputParams: null };
       this.validateEntries(stub.entries ?? [], fields, false, ctx, model, accept, `'${target.name}' d\xF6n\xFC\u015F alanlar\u0131`, stub);
     }
   }
@@ -57372,7 +57386,7 @@ var QaDslValidator = class {
     } else if (isCmpAssert(a2)) {
       if (!a2.left || !a2.right) return;
       this.checkCmpLhs(a2.left.segments, shape, ctx, accept, a2, model);
-      this.checkExprPaths(a2.right, ctx, accept, a2);
+      this.checkExprPaths(a2.right, ctx, model, accept, a2);
     }
   }
   checkCmpLhs(segments, shape, ctx, accept, node, model) {
@@ -57398,12 +57412,15 @@ var QaDslValidator = class {
   }
   checkConds(conds, fields, ctx, model, accept) {
     for (const c of conds) {
-      if (fields && !fields.some((f) => f.name === c.field)) {
+      const spec = fields?.find((f) => f.name === c.field);
+      if (fields && !spec) {
         accept("error", `Bilinmeyen alan: '${c.field}' (${fields.map((f) => f.name).join(", ")}).`, { node: c, property: "field" });
       } else if (c.path.length > 0) {
-        this.checkCondPath(c, fields, model, accept);
+        this.checkCondPath(c, fields, ctx, model, accept);
+      } else if (spec) {
+        this.checkInputRhsType(c, spec, c.field, ctx, model, accept);
       }
-      this.checkExprPaths(c.value, ctx, accept, c);
+      this.checkExprPaths(c.value, ctx, model, accept, c);
     }
   }
   /**
@@ -57412,7 +57429,7 @@ var QaDslValidator = class {
    * S18-degrade İSTİSNASI (bilinçli sapma): noktalı path bir yapı İDDİASIDIR — çözülemeyen
    * tipe sessizce geçit verilmez, error verilir (aksi hâlde `request.olmayanAlan` sessiz geçerdi).
    */
-  checkCondPath(c, fields, model, accept) {
+  checkCondPath(c, fields, ctx, model, accept) {
     const full = `${c.field}.${c.path.join(".")}`;
     const base = fields?.find((f) => f.name === c.field);
     if (!base) {
@@ -57437,10 +57454,10 @@ var QaDslValidator = class {
       }
       cur = next;
     }
-    this.checkCondLeaf(c, cur, full, model, accept);
+    this.checkCondLeaf(c, cur, full, ctx, model, accept);
   }
   /** Yaprak denetimi: kompozitte bitemez; literal değer yaprak tipiyle (enum üyeliği / sayısal / metin) uyumlu olmalı. */
-  checkCondLeaf(c, leaf, full, model, accept) {
+  checkCondLeaf(c, leaf, full, ctx, model, accept) {
     const t = leaf.typeName;
     if (!t) return;
     if (this.compositeFieldsByName(t, model)) {
@@ -57462,7 +57479,10 @@ var QaDslValidator = class {
       return;
     }
     const lit = condLiteral(c.value);
-    if (!lit) return;
+    if (!lit) {
+      this.checkInputRhsType(c, leaf, full, ctx, model, accept);
+      return;
+    }
     const en = this.resolveEnum(t, model);
     if (en) {
       if (lit.str !== void 0) {
@@ -57487,16 +57507,85 @@ var QaDslValidator = class {
     const candidates = [...u.entities, ...u.typeDecls].filter((x) => x.node.name === name);
     return candidates.length === 1 ? this.fieldSpecs(candidates[0].node.fields ?? []) : null;
   }
-  /** Expr içindeki Path köklerini doğrular (persona/seed-bind/step-bind/result). */
-  checkExprPaths(expr, ctx, accept, owner) {
+  /** Expr içindeki Path köklerini doğrular (input/persona/seed-bind/step-bind/result). */
+  checkExprPaths(expr, ctx, model, accept, owner) {
     if (!expr || typeof expr !== "object") return;
     for (const node of ast_utils_exports.streamAst(expr)) {
       if (!isPath(node)) continue;
       const root2 = node.segments[0];
+      if (root2 === "input") {
+        this.resolveInputPath(node.segments, ctx, model, { accept, owner });
+        continue;
+      }
       if (ctx.personas.has(root2) || ctx.seedBinds.has(root2)) continue;
       if (ctx.stepBinds.has(root2) && node.segments[1] === "result") continue;
       if (ctx.allowResult && root2 === "result") continue;
-      accept("error", `Bilinmeyen ifade k\xF6k\xFC: '${root2}' (persona / seed-bind / step-bind.result / result \u2014 \xA75).`, { node: owner, property: isCmpAssert(owner) ? "right" : "value" });
+      accept("error", `Bilinmeyen ifade k\xF6k\xFC: '${root2}' (input / persona / seed-bind / step-bind.result / result \u2014 \xA75).`, { node: owner, property: isCmpAssert(owner) ? "right" : "value" });
+    }
+  }
+  /**
+   * `input.<param>[.<alt-alan>…]` path'ini aktif girdi yüzeyine çözer (2.A İK-2). İki mod:
+   * `report` verilirse hatalar raporlanır (checkExprPaths); verilmezse SESSİZ çözüm (İK-3
+   * tip-uyumu — varlık/yapı hataları raporlu modda ZATEN çıktı, çift-rapor yok). Yürüyüş
+   * checkCondPath emsali: koleksiyon-içine-inme / kompozit-olmayana-inme / kompozitte-bitme → error.
+   */
+  resolveInputPath(segments, ctx, model, report2) {
+    const err = (msg) => {
+      report2?.accept("error", msg, { node: report2.owner, property: isCmpAssert(report2.owner) ? "right" : "value" });
+      return null;
+    };
+    if (ctx.inputParams === null) {
+      return err(`'input' k\xF6k\xFC bu ba\u011Flamda yok (yaln\u0131z 'when call' testinin ve senaryo step'inin assert'lerinde; 'given' ve 'when event' ba\u011Flam\u0131nda girdi y\xFCzeyi yoktur \u2014 2.A).`);
+    }
+    if (segments.length < 2) {
+      return err(`'input' tek ba\u015F\u0131na yaz\u0131lamaz \u2014 bir parametre se\xE7: 'input.<param>'.`);
+    }
+    const full = segments.join(".");
+    const first2 = ctx.inputParams.find((f) => f.name === segments[1]);
+    if (!first2) {
+      return err(`Op girdi y\xFCzeyinde '${segments[1]}' yok (${ctx.inputParams.map((f) => f.name).join(", ")}).`);
+    }
+    let cur = first2;
+    for (const seg of segments.slice(2)) {
+      if (cur.collection) {
+        return err(`Koleksiyon alan\u0131n\u0131n i\xE7ine input path'i inemez: '${cur.name}' ('${full}').`);
+      }
+      const inner = cur.typeName ? this.compositeFieldsByName(cur.typeName, model) : null;
+      if (!inner) {
+        return err(`Input path'i kompozit olmayan / yap\u0131sal \xE7\xF6z\xFClemeyen tipe iniyor: '${cur.name}' ('${cur.typeName ?? "?"}', '${full}').`);
+      }
+      const next = inner.find((f) => f.name === seg);
+      if (!next) {
+        return err(`'${cur.typeName}' i\xE7inde '${seg}' alan\u0131 yok (${inner.map((f) => f.name).join(", ")}).`);
+      }
+      cur = next;
+    }
+    if (cur.typeName && this.compositeFieldsByName(cur.typeName, model)) {
+      return err(`Input path'i skaler/enum bir yaprakta bitmeli: '${full}' '${cur.typeName}' kompozitinde bitiyor \u2014 bir alt-alan se\xE7.`);
+    }
+    return cur;
+  }
+  /**
+   * 2.A İK-3 (karar 3): cond RHS'i YALIN `input.…` path'i ise LHS yaprağıyla tip-uyumu denetlenir —
+   * path-RHS muafiyeti YALNIZ input kökü için kaldırıldı (seed-bind/step-path RHS muaf KALIR,
+   * onların tip çözümü ayrı iş — kapsam dışı). Ölçüt kapalı sınıflandırma (sayısal/metin);
+   * sınıflandırılamayan tip SESSİZ geçer (S18 degrade — yanlış-pozitif üretme).
+   */
+  checkInputRhsType(c, lhs, full, ctx, model, accept) {
+    if (c.op === "in") return;
+    const p = condPath(c.value);
+    if (!p || p.segments[0] !== "input") return;
+    const rhs = this.resolveInputPath(p.segments, ctx, model);
+    if (!rhs) return;
+    const rhsFull = p.segments.join(".");
+    if (!lhs.collection && rhs.collection) {
+      accept("error", `Tip uyu\u015Fmazl\u0131\u011F\u0131: '${full}' skaler \u2014 '${rhsFull}' koleksiyon ('list of ${rhs.typeName ?? "?"}').`, { node: c, property: "value" });
+      return;
+    }
+    const klass = (t) => t === null ? null : REFINEMENT_NUMERIC_TYPES.has(t) ? "say\u0131sal" : TEXTUAL_TYPES.has(t) ? "metin" : null;
+    const lk = klass(lhs.typeName), rk = klass(rhs.typeName);
+    if (lk && rk && lk !== rk) {
+      accept("error", `Tip uyu\u015Fmazl\u0131\u011F\u0131: '${full}' '${lhs.typeName}' (${lk}) \u2014 '${rhsFull}' '${rhs.typeName}' (${rk}).`, { node: c, property: "value" });
     }
   }
   // ── değer-blok doğrulaması (S18 degrade kurallı) ─────────────────────────

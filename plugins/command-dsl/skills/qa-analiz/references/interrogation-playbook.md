@@ -107,6 +107,19 @@ değeri kullanıcı beyanıyla yaz, doğrulama iddiasında bulunma.
   alanı da varsa pin+alanı tutarlı yaz.
 - Başarı kanıtı: "Başarıda ayrıca neyi kanıtlayalım — kayıt oluştu mu, bildirim
   yayınlandı mı, dış servise doğru tutarla mı gidildi?" → state/emitted/called.
+- **İçerik-oracle'ı — alan başına "kopya mı, hesaplanan mı" (v5.0.0, ref §8.1):** bir alanın
+  DEĞERİNİ assert'liyorsan (`state Order exists { total = … }`) bu **SORULACAK bir karardır,
+  türetilecek bir olgu değil** — çünkü tech DSL op'un **alan-atama gövdesini modellemez**
+  (create/update yazım gövdesi Generation-Gap HOLE'udur; `access creates Order` HANGİ entity'yi
+  der, alanın NASIL dolduğunu DEMEZ). Tech'ten "kopya mı" diye çıkarım yapma — **uydurma olur.**
+  Düz dille sor: *"Sipariş toplamı, gönderilen tutarın aynısı mı olmalı, yoksa üstüne bir şey
+  mi biniyor (vergi, indirim, yuvarlama)?"* → "aynısı" = `total = input.amount`;
+  "üstüne biniyor" = hesaplanmış **literal** (**beklenen sayıyı da ona doğrulat** — literal'in
+  değeri onun kararıdır, senin aritmetiğin değil).
+  **⚠ Guard — anlaşmalı-oracle:** hesaplanan alana `input.<param>` YAZMA. Cond ile handler
+  aynı hatayı paylaşırsa (ikisi de vergiyi atlar) test yeşil yanar, gereksinim ihlal kalır —
+  strict gate bunu AYIRT EDEMEZ. Ters yön (kopya alana literal) daha ucuzdur ama drift borcu
+  doğurur: girdi değişince cond bayatlar.
 - Çöküş dalı: "Dış servis çökünce nelerin OLMAMASI gerekiyor (kayıt kalmasın, bildirim
   çıkmasın) ve telafi çağrısı koşmalı mı?" → compensated + not emitted + state absent.
 - Zamana duyarlı guard: "Bu kural tarihe/saate bakıyor — testi sabit bir ana

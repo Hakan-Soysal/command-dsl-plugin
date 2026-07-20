@@ -428,6 +428,12 @@ Branch-coverage tam olsa bile YETMEZ: bir dal SAYILDI diye gerçekten test edild
 2. Her komut/Success testinde kalıcı etki (`state`/`emitted`/`called`) doğrulandı mı, yoksa
    assert'siz sığ mı? Zamana-duyarlı op'ta `time` pini, state-rule'da `seed` var mı? `until`'siz
    waive kaldı mı? Sorulmamış her ★'ı göster ya da tek soruyla kapat.
+   **2b. İçerik-oracle'ı (v5.0.0, reference §8.1):** bir alanın DEĞERİNİ assert'lediğin her yerde —
+   o alan girdinin **birebir kopyası** mı (`total = input.amount`), yoksa **hesaplanmış** mı
+   (**literal** beklenen değer)? Bu tech'ten TÜRETİLMEZ (alan-atama gövdesi Generation-Gap
+   HOLE'u) → **sorulmuş olmalı**. Hesaplanan alana `input.<param>` yazıldıysa oracle handler'la
+   *anlaşır* → **false-green**; kopya alana literal yazıldıysa **drift** borcu. Strict gate ikisini
+   AYIRT EDEMEZ — bu süpürme tek savunmadır.
 3. **Sınır-devri (köprü süpürmesi):** çok-aktör bir süreç ya da event-zinciri (üretici `emits` →
    tüketici `on`) var mı? Tek-op testi sınırı geçmez — bir `scenario realizes process` gerekli mi?
    (NOT: uçtan-uca üretici→tüketici gözlemi qa v1'de YOK — playbook §P/P9: emit edilen event consumer'ı TETİKLEMEZ; consumer'ın izole testi `when event` (reference §7). Sınırı **bildir**, niyeti

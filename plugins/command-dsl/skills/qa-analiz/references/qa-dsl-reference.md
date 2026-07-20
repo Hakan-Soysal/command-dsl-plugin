@@ -13,7 +13,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `912002af9beb` · src `256314b064d2` · commit `0bf9c1d`+**qa v3.1.0 (`seed … @owner(persona)` sahiplik-pini — additive) + v4.0.0 (liste-literal `[…]` + eleman-tip denetimi + İQ2 muafiyet-kaldırma — KIRICI: çıktı `kind:'list'` + girdi)** (grammarHash tech-gramerini embed eder → Kalem-0 tech `by <param> on <col>` grameriyle güncellendi; qa-authoring construct'ı DEĞİŞMEDİ) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `912002af9beb` · src `c4bac2a3f22e` · commit `704eb7f`+**qa v3.1.0 (`seed … @owner(persona)` sahiplik-pini — additive) + v4.0.0 (liste-literal `[…]` + eleman-tip denetimi + İQ2 muafiyet-kaldırma — KIRICI: çıktı `kind:'list'` + girdi) + v5.0.0 (`input.<param>` cond-RHS kökü — KIRICI: girdi ad-rezervasyonu + çıktı path-kök uzayı)** (grammarHash tech-gramerini embed eder → Kalem-0 tech `by <param> on <col>` grameriyle güncellendi; qa-authoring construct'ı DEĞİŞMEDİ. **v5.0.0'da grammarHash DEĞİŞMEDİ — yetenek gramersiz geldi (validator-only); srcHash değişti**) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 >
 > **⚠️ ADR-0040 · qa v2.0.0 — KIRICI (2026-07-16).** İki ayrı şey oldu, karıştırma:
 > 1. **Yankı (yüzey DEĞİL):** tech'e `principal`/`axis` girdi → qa gramerini import ettiği için hash
@@ -46,6 +46,20 @@
 >    girdi** — boş bırakmak "Eksik zorunlu alan(lar)" error'ı, boş liste `[]` ile AÇIKÇA beyan
 >    edilir. **Çıktı KIRICI:** `QaValueJson.kind` union'ına `'list'` varyantı (+ `items?:
 >    QaValueJson[]` özyineli) → kapalı-`switch` tüketici düşer. Bkz. `docs/releases/qa-dsl.md`.
+>
+> **⚠️ qa v5.0.0 — KIRICI (2026-07-20) · `input.<param>` cond-RHS kökü (§8.1).** Assert/cond
+> sağ tarafı koşulan çağrının girdisine referans verebilir: `state Order exists { total = input.amount }`.
+> **Gramer DEĞİŞMEDİ** — yetenek validator-only geldi (ifade zaten `Path` olarak parse ediyordu),
+> bu yüzden `grammarHash` sabit kaldı; **bayatlık dedektörü bu yeteneği yakalayamaz** (içerik-kapsaması
+> keyword-tabanlı, `input` keyword değil düz ID) → envanter damgası ELLE tazelendi.
+> 1. **Girdi KIRICI (dar, ölçülmüş):** `input` adı **rezerve** — `input` adlı persona/seed-bind/
+>    step-bind artık error (beyan-yerinde; sessiz gölgeleme yok). Corpus'ta 0 dosya etkilendi.
+>    Additive parçası: `input.<param>` eskiden *"Bilinmeyen ifade kökü"* error'ıydı.
+> 2. **Çıktı KIRICI (İLKE-dayanaklı):** düğüm ŞEKLİ aynı (`{path:['input','amount']}` — yeni `kind`
+>    YOK, union genişletilMEDİ), genişleyen **path-kök string uzayı**; kapalı kök-listeli tüketici
+>    düşer. CommandDSL'de ölçülemez (tüketici downstream) → ilkeye dayalı sınıflandırma.
+> 3. **Yazım disiplini (§8.1) — gate zorlamaz:** `input.<param>` yalnız **birebir-kopya** alanlar
+>    için; hesaplanan alanlar **literal** ister. Envanter'de ★ satırı var, Pre-Emit Gate süpürür.
 
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
@@ -56,6 +70,7 @@ QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kaps
 | Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8). **Refinement dalı** (`covers guard "<param>.range\|union"`, v3.0.0) da bu sınıftadır: girdi gerçekten **sınır-dışı** mı (in-range değer boundary'yi tetiklemez)? | 4 | ★★ | **yalancı-kapsam (tetiklemeyen-negatif)** — dal "covered" sayılır ama ihlal hiç tetiklenmez; yetkisiz/hatalı yol (ya da sınır-içi kalıp boundary'yi ıskalayan refinement testi) sessizce geçebilir |
 | **`Filtered` dalında üyelik İKİLİSİ** (`result contains` + `result absent`) | op `list of X` dönüyor VE `ownership`/`permit` taşıyor → dal `Filtered <via>` (ADR-0040). Filtre **bozukken de `Success` döner** → "çağrı geçti"/"N satır geldi" hiçbir şey kanıtlamaz | 4 | ★★ | **kanıtsız-filtre** — `contains` yoksa **aşırı-filtreleme** (hak edilen satır düşüyor), `absent` yoksa **SIZINTI** (kapsam-dışı satır dönüyor) görünmez. `result count` = **false-negative üreteci** (yanlış satırlar dönse de sayı tutar). *(Validator bu ikiliyi error'la zorlar — tablo tetikleyici olarak durur.)* |
 | `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ | **doğrulanmamış-etki** — dönüş doğru ama kalıcı etki (kayıt/event/dış-çağrı) hiç assert'lenmez; sığ-yeşil test |
+| **İçerik-oracle'ında kopya/hesaplanan ayrımı** (`input.<param>` vs literal — v5.0.0, §8.1) | create/update testinde bir alanın DEĞERİNİ assert'liyorsun. Alan başına **SOR** (tech söylemez — alan-atama gövdesi Generation-Gap HOLE'u): bu alan girdinin **birebir kopyası** mı (→ `input.<param>`), yoksa **hesaplanmış/türetilmiş** mi (→ **literal** beklenen değer)? | 4 | ★ | **anlaşmalı-oracle (false-green)** — hesaplanan alana `input.<param>` yazılırsa cond ile handler AYNI hatayı paylaşır (ikisi de vergiyi/dönüşümü atlar) → test yeşil, gereksinim ihlal; ters yön **oracle-drift**: kopya alana literal yazılırsa girdi değişince cond bayatlar (false-red). **Strict gate ikisini ayırt EDEMEZ** (ikisi de authored) — yalnız bu süpürme yakalar |
 | `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ | **koşulmayan-zaman-dalı** — zaman-koşullu dal "covered" ama zaman ilerletilmediğinden hiç koşmaz |
 | `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ | **kurulumsuz-dal** — ön-durum (mevcut kayıt/başkasının kaydı/limit-aşımı) kurulmadığından dal gerçekten tetiklenmez |
 | `seed … @owner(persona)` sahiplik-pini (v3.1.0) | ownership/Filtered dalının seed'i "başkasının kaydı"nı mı kuruyor? Kaydın SAHİBİ görünür bir persona'ya pinli mi — özellikle **kimlik-dikişli** entity'de (OwnerId authored alan DEĞİL → seed gövdesinden yazılamaz, given-call arrange da kuramaz)? | 3/4 | ★ | **pinsiz-sahiplik** — OwnerId deterministik bir persona'ya bağlanmaz; ownership/Filtered testi yanlış kimlik-dikişi üstünde sahte-yeşil verir (dal "covered" ama sahiplik ilişkisi hiç kurulmamıştır) |
@@ -312,6 +327,53 @@ then {
   yalnız o yüzeyde denetler; ters asimetri yaratılmadı).
 - Senaryo step-bloğu aynı yüzeyi kullanır; step-assert'lerde önceki **bağlanmış**
   step'lerin `sN.result.<path>`'i çözülür (QA-12).
+
+### 8.1 `input.<param>` — girdi-referanslı oracle değeri (v5.0.0)
+
+Bir assert/cond değeri, **koşulan çağrının girdisine** referans verebilir:
+
+```
+then {
+  state Order exists { total = input.amount }            // basit param
+  state Order exists { total = input.request.amount }    // kompozit param yolu
+  result.total = input.amount                             // CmpAssert'te de geçerli
+}
+```
+
+**İfade kökleri (§5 — tam liste):** `input` · persona · seed-bind · `<step-bind>.result.…` ·
+`result`. `input` **step-lokaldir**: op-testte `when call`'un girdisi, senaryoda **o step'in**
+girdisidir (bir önceki step'in değil). `given` bloğunda ve `when event` bağlamında girdi yüzeyi
+YOKTUR → `input` kökü orada **error**.
+
+Yapısal doğrulama: param var mı (yoksa mevcut paramlar listelenir) · kompozit yol
+`resolveStructural` ile yürünür (koleksiyon-içine-inme / kompozit-olmayana-inme / kompozitte-bitme
+→ error) · **tip uyumu** LHS yaprağına karşı denetlenir (sayısal↔metin, skaler↔koleksiyon).
+`input` adı **rezervedir**: bir persona / seed-bind / step-bind bu adı alırsa **beyan yerinde
+error** (sessiz gölgeleme yok).
+
+**Ne İDDİA ettiğini bil — `input.<param>` bir "birebir-kopya" iddiasıdır.**
+"Bu alan, girdinin değiştirilmemiş kopyasıdır." Alan başına doğru yazımı seç —
+ve bu seçim **KULLANICIYA SORULUR, tech'ten TÜRETİLMEZ**: tech DSL op'un alan-atama
+gövdesini modellemez (Generation-Gap HOLE'u; `access creates Order` hangi entity'yi der,
+alanın nasıl dolduğunu DEMEZ). Tech'e bakıp "kopyadır" diye çıkarım yapmak uydurmadır.
+
+| Alan nasıl doğuyor? | Yaz | Neden |
+|---|---|---|
+| Girdinin **birebir kopyası** (`Total = c.Amount`) | `total = input.amount` | Tek-kaynak: girdi değişince oracle kendiliğinden takip eder |
+| **Hesaplanmış / türetilmiş / dönüştürülmüş** (`Total = c.Amount + vergi`, birleştirme, normalize) | **literal beklenen değer** (`total = 110`) | Oracle'ın bağımsız kalması için |
+
+**Hesaplanan alanda `input.<param>` YAZMA — false-green üretir.** Gerekçe: gereksinim
+"total = amount + vergi" iken hem cond (`total = input.amount`) hem handler (`Total = c.Amount`)
+vergiyi unutmuşsa **ikisi anlaşır**, test yeşil yanar, gereksinim ihlal edilmiş kalır. Yazar
+literal `110` yazsaydı bu yakalanırdı. Ters yön daha ucuzdur: kopya alanda literal yazmak
+**drift borcu** doğurur (girdi 200'e çekilince cond 100'de kalır → false-red).
+
+**Strict gate bu ikisini AYIRT EDEMEZ** (ikisi de authored değer) — bu **belgelenmiş
+yazım disiplinidir**, zorlanan bir kural değil. Emit öncesi Envanter'in
+**"içerik-oracle'ında kopya/hesaplanan ayrımı"** ★ satırını süpür.
+
+> Güvenliğin kaynağı **opt-in** olmasıdır: `input.<param>` yazarın bilinçli
+> "bu alan bir kopyadır" beyanıdır, üretecin tahmini değil.
 
 ## 9. Scenario (§3.4, karar #3/#12/#13/#14/#23)
 
