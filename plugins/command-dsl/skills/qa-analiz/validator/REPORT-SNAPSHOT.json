@@ -4,7 +4,7 @@
     "report-index.src.mts",
     "report-qa.src.mts"
   ],
-  "wrapperHash": "1d9bc1a3b29b",
-  "builtAt": "2026-07-17T15:36:09+03:00",
+  "wrapperHash": "bfda6141370b",
+  "builtAt": "2026-07-20T18:19:37+03:00",
   "note": "SAF json→html rapor aracı; grammar/dil servisi gömülmez. Girdi şeması: CommandDSL spec qa-dsl-tasarim-spec-2026-07-02.md §6.2 (merged qa.json). HTML yapısı: playground qa-main.ts renderCoverage/branchLabel portu + emsal reports/qa/kapsama.html CSS."
 }

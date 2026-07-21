@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "1d9bc1a3b29b", builtAt: "2026-07-17T15:36:09+03:00" };
+var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "bfda6141370b", builtAt: "2026-07-20T18:19:37+03:00" };
 
 // report-qa.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync } from "node:fs";
@@ -118,6 +118,7 @@ var BRANCH_KINDS = /* @__PURE__ */ new Set([
   "ruleGuard",
   "anonymousNotValid",
   "anonymousNotProcessable",
+  "refinementViolation",
   "error",
   "notAuthorized",
   "callFailure",
@@ -177,6 +178,9 @@ function branchLabel(b) {
       return "NotValid (anonim)";
     case "anonymousNotProcessable":
       return "NotProcessable (anonim)";
+    case "refinementViolation":
+      return `guard "${b.id}" (refinement s\u0131n\u0131r-ihlali)`;
+    // qa v3.0.0 (qa-main birebir)
     case "error":
       return `error ${b.id}`;
     case "notAuthorized":
@@ -186,6 +190,12 @@ function branchLabel(b) {
     case "filtered":
       return `Filtered \xB7 ${b.via} (Success + alt-k\xFCme)`;
   }
+}
+function obligationLabel(o) {
+  if (o.kind === "guard") return `${o.op} \xB7 guard "${o.guard}"`;
+  if (o.kind === "throws") return `${o.op} \xB7 throws ${o.error}`;
+  if (o.kind === "invariant") return `invariant ${o.entity}${o.label ? ` "${o.label}"` : ""}`;
+  return `operation ${o.op}`;
 }
 function coverRefLabel(ref) {
   if (ref.test !== void 0) return `test "${ref.test}"`;
@@ -254,6 +264,28 @@ function renderHtml(merged2, title2, sourceLabel) {
       h.push(`<tr><td>${r.kind}</td><td><code>${esc(r.id)}</code></td><td><span class="chip chip-${r.status}">${r.status}</span></td><td class="cov-info">${esc(info)}</td></tr>`);
     }
     h.push("</table>");
+  }
+  const guarantees = merged2.coverage.guarantees ?? [];
+  if (guarantees.length > 0) {
+    h.push("<h2>Garantiler (izlenebilirlik \u2192 test kapsamas\u0131)</h2>");
+    for (const g of guarantees) {
+      const testable = g.obligations.filter((o) => o.testable).length;
+      const coveredN = g.obligations.filter((o) => o.testable && o.status === "covered").length;
+      const badge = `${g.status}${testable ? ` \xB7 ${coveredN}/${testable} testable covered` : " \xB7 testable y\xFCk\xFCml\xFCl\xFCk yok"}`;
+      const cls = g.status === "covered" ? "ok" : g.status === "structural" ? "" : "warn";
+      h.push('<section class="cov-op">');
+      h.push(`<h3><code>${esc(g.id)}</code><span class="cov-badge ${cls}">${esc(badge)}</span></h3>`);
+      if (g.text) {
+        const traces = (g.traces ?? []).length ? `  \xB7 traces: ${(g.traces ?? []).join(", ")}` : "";
+        h.push(`<p class="wf-note">${esc(g.text + traces)}</p>`);
+      }
+      h.push('<table class="cov-table">');
+      for (const o of g.obligations) {
+        const info = o.status === "covered" ? (o.coveredBy ?? []).map(coverRefLabel).join(" \xB7 ") : o.status === "structural" ? "yap\u0131sal (tech validator kapsar; QA-dal\u0131 de\u011Fil)" : o.status === "waived" ? "waive" : "kapsanmad\u0131 \u2014 bu testable y\xFCk\xFCml\xFCl\xFCk i\xE7in test/step yaz\u0131n";
+        h.push(`<tr><td><span class="chip chip-${o.status}">${o.status}</span></td><td class="cov-branch">${esc(obligationLabel(o))}</td><td class="cov-info">${esc(info)}</td></tr>`);
+      }
+      h.push("</table></section>");
+    }
   }
   const waives = merged2.coverage.operations.flatMap((op) => op.branches.filter((b) => b.status === "waived").map((b) => ({ op: op.id, branch: branchLabel(b.branch), reason: b.reason, until: b.until })));
   if (waives.length > 0) {

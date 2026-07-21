@@ -28,9 +28,18 @@ const BUILD_INFO = typeof __BUILD_INFO__ !== 'undefined'
 // Merged qa.json şeması (spec §6.2) — raporun tükettiği alt-küme
 // ---------------------------------------------------------------------------
 
+// ⚠ ELLE-KOPYA SÖZLEŞME (2026-07-21): bu union CommandDSL `src/qa/coverage.ts` `Branch`ının
+// kopyasıdır — IMPORT DEĞİL. Sonuçları: (a) TS exhaustiveness burada koruma sağlamaz,
+// (b) bundle rebuild'i BUNU TAZELEMEZ (liste plugin-yerel kaynakta sabittir),
+// (c) `validateMerged` fail-CLOSED'dur → bilinmeyen kind = HİÇ rapor yazılmaz.
+// CommandDSL'de yeni bir dal kind'ı doğduğunda ÜÇÜ BİRDEN elle güncellenir:
+// bu tip · BRANCH_KINDS seti · branchLabel switch'i.
+// Emsal: `refinementViolation` (qa v3.0.0, 2026-07-17) tam bu yolla kaçtı ve HTML raporu
+// tümüyle düşürdü (downstream 2026-07-21 bildirimi).
 type BranchKind =
     | 'success' | 'validationGuard' | 'ruleGuard' | 'anonymousNotValid'
-    | 'anonymousNotProcessable' | 'error' | 'notAuthorized' | 'callFailure' | 'filtered';
+    | 'anonymousNotProcessable' | 'refinementViolation' | 'error' | 'notAuthorized'
+    | 'callFailure' | 'filtered';
 
 interface Branch { kind: BranchKind; id?: string; via?: string; target?: string }
 interface CoverRef { file: string; test?: string; scenario?: string; step?: number }
@@ -43,14 +52,33 @@ interface BranchCoverage {
 }
 interface OpCoverage { id: string; tech?: string; branches: BranchCoverage[] }
 interface RealizeCoverage { id: string; status: 'covered' | 'uncovered'; coveredBy?: CoverRef[] }
+// Guarantee-coverage (tech guarantee → testable yükümlülük dal-durumu) — qa-main.ts:433-484 portu.
+// `guarantees` OPSİYONEL okunur: eski merged qa.json'lar (v3.0.0 öncesi) alanı taşımaz → bölüm atlanır
+// (fail-open BİLİNÇLİ: yokluk ≠ bozukluk; dal-kind'ının aksine burada şema-kapısı YOK).
+interface Obligation {
+    kind: 'operation' | 'guard' | 'throws' | 'invariant';
+    op?: string | null; guard?: string; error?: string; entity?: string; label?: string;
+    testable: boolean; status: 'covered' | 'waived' | 'uncovered' | 'structural';
+    coveredBy?: CoverRef[];
+}
+interface GuaranteeCoverage {
+    id: string; tech?: string; text?: string; traces?: string[];
+    status: 'covered' | 'partial' | 'uncovered' | 'structural';
+    obligations: Obligation[];
+}
 interface QaMerged {
     meta: { dsl: string; schemaVersion: number; merged?: boolean; sources?: string[]; hasErrors?: boolean; errorCount?: number };
-    coverage: { operations: OpCoverage[]; flows: RealizeCoverage[]; processes: RealizeCoverage[]; outcomes?: RealizeCoverage[] };
+    coverage: {
+        operations: OpCoverage[]; flows: RealizeCoverage[]; processes: RealizeCoverage[];
+        outcomes?: RealizeCoverage[]; guarantees?: GuaranteeCoverage[];
+    };
 }
 
+// ⚠ BranchKind ile SENKRON tutulur (yukarıdaki elle-kopya uyarısı).
 const BRANCH_KINDS = new Set<string>([
     'success', 'validationGuard', 'ruleGuard', 'anonymousNotValid',
-    'anonymousNotProcessable', 'error', 'notAuthorized', 'callFailure', 'filtered',
+    'anonymousNotProcessable', 'refinementViolation', 'error', 'notAuthorized',
+    'callFailure', 'filtered',
 ]);
 const STATUSES = new Set<string>(['covered', 'waived', 'uncovered']);
 
@@ -107,11 +135,20 @@ function branchLabel(b: Branch): string {
         case 'ruleGuard': return `guard "${b.id}" (rule)`;
         case 'anonymousNotValid': return 'NotValid (anonim)';
         case 'anonymousNotProcessable': return 'NotProcessable (anonim)';
+        case 'refinementViolation': return `guard "${b.id}" (refinement sınır-ihlali)`;   // qa v3.0.0 (qa-main birebir)
         case 'error': return `error ${b.id}`;
         case 'notAuthorized': return `NotAuthorized${b.via ? ` · ${b.via}` : ''}`;
         case 'callFailure': return `callFailure ${b.target}`;
         case 'filtered': return `Filtered · ${b.via} (Success + alt-küme)`;   // ADR-0040 satır-kapsayan sorgu dalı (qa-main branchLabel birebir)
     }
+}
+
+/** qa-main.ts obligationLabel BİREBİR portu. */
+function obligationLabel(o: Obligation): string {
+    if (o.kind === 'guard') return `${o.op} · guard "${o.guard}"`;
+    if (o.kind === 'throws') return `${o.op} · throws ${o.error}`;
+    if (o.kind === 'invariant') return `invariant ${o.entity}${o.label ? ` "${o.label}"` : ''}`;
+    return `operation ${o.op}`;
 }
 
 function coverRefLabel(ref: CoverRef): string {
@@ -197,6 +234,36 @@ function renderHtml(merged: QaMerged, title: string | undefined, sourceLabel: st
                 `<td class="cov-info">${esc(info)}</td></tr>`);
         }
         h.push('</table>');
+    }
+
+    // Garantiler (izlenebilirlik → test kapsaması) — qa-main.ts:433-484 BİREBİR portu.
+    // tech guarantee'nin testable yükümlülükleri (guard/throws) hangi dal-durumunda.
+    const guarantees = merged.coverage.guarantees ?? [];
+    if (guarantees.length > 0) {
+        h.push('<h2>Garantiler (izlenebilirlik → test kapsaması)</h2>');
+        for (const g of guarantees) {
+            const testable = g.obligations.filter(o => o.testable).length;
+            const coveredN = g.obligations.filter(o => o.testable && o.status === 'covered').length;
+            const badge = `${g.status}${testable ? ` · ${coveredN}/${testable} testable covered` : ' · testable yükümlülük yok'}`;
+            const cls = g.status === 'covered' ? 'ok' : g.status === 'structural' ? '' : 'warn';
+            h.push('<section class="cov-op">');
+            h.push(`<h3><code>${esc(g.id)}</code><span class="cov-badge ${cls}">${esc(badge)}</span></h3>`);
+            if (g.text) {
+                const traces = (g.traces ?? []).length ? `  · traces: ${(g.traces ?? []).join(', ')}` : '';
+                h.push(`<p class="wf-note">${esc(g.text + traces)}</p>`);
+            }
+            h.push('<table class="cov-table">');
+            for (const o of g.obligations) {
+                const info = o.status === 'covered' ? (o.coveredBy ?? []).map(coverRefLabel).join(' · ')
+                    : o.status === 'structural' ? 'yapısal (tech validator kapsar; QA-dalı değil)'
+                    : o.status === 'waived' ? 'waive'
+                    : 'kapsanmadı — bu testable yükümlülük için test/step yazın';
+                h.push(`<tr><td><span class="chip chip-${o.status}">${o.status}</span></td>` +
+                    `<td class="cov-branch">${esc(obligationLabel(o))}</td>` +
+                    `<td class="cov-info">${esc(info)}</td></tr>`);
+            }
+            h.push('</table></section>');
+        }
     }
 
     // Waiver konsolidasyonu (F2.2 tam-parite): TÜM authored waive'ler durum-sınıflı
