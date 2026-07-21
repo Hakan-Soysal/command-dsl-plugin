@@ -20,7 +20,13 @@ zaman görülebilir), Tutarlılık self-check'inden (`§A`) **önce**. Bu adımd
 eklenen her yeni operation, sonra §A'nın tüm kurallarından geçmek zorundadır
 (özellikle benzersiz 4'lü imza, foundation bildirimi, tip kuralları).
 
-## Kapsam kullanıcı tercihidir (D1 / D2 / D3)
+> ⚠ **İki eksen vardır.** D1-D3 **üretim** eksenidir ("tüketilenin üreticisi var mı?").
+> **D4 yıkım eksenidir** ("yok edilenin bağımlıları ne oluyor?") — kullanıcı tercihi
+> DEĞİL, modelde bir `deletes`/terminal işlem varsa **zorunlu** koşar. Uzun süre yalnız
+> üretim ekseni vardı; bunun bedeli **öksüz-kayıt** (gizlilik + depolama + keyfî
+> geliştirici kararı) olarak ölçüldü.
+
+## Kapsam kullanıcı tercihidir (D1 / D2 / D3 — D4 hariç)
 
 Hangi "clause"ların ön-gereksinim sayılacağı **her kullanımda kullanıcıya
 sorulur** — bazen yalnızca varlık var-oluşu yeter, bazen durum/ilişki de
@@ -41,6 +47,7 @@ seviye bir öncekini kapsar.
 | **D1 — Varlık var-oluşu** | Tüketilen her entity'nin bir üreticisi var | Düşük |
 | **D2 — Durum ulaşılabilirliği** | `where`/`only when` durum geçidinin üreticisi var | Orta |
 | **D3 — İlişki popülasyonu** | `<relation>'s` ownership ilişkisi doldurulabiliyor | Yüksek (çoğu seed/kurulum) |
+| **D4 — Yıkım kapanışı** (ZORUNLU) | Silinen/terminal-duruma giden kaydın bağımlılarının akıbeti authored | Düşük (yalnız `deletes`/terminal varsa) |
 
 ---
 
@@ -101,6 +108,53 @@ ilişkiyi **dolduran/atayan** bir mekanizma modelde var mı? Çoğu zaman yoktur
 atanır). Bu yüzden D3 en gürültülü boyuttur — varsayılan olarak kapalıdır,
 yalnızca kullanıcı isterse koş.
 
+## D4 — Yıkım kapanışı (ZORUNLU — D1-D3'ün aynası)
+
+> Adlandırma uyarısı: buradaki `D1-D4` **kapanış boyutlarıdır**; validator kural-kodu
+> `D4` (clause-düzeyi `calculate`, `dsl-reference.md` §3) ile ilgisi yoktur.
+
+D1-D3 "tüketilenin üreticisi var mı?" diye sorar. D4 tersini sorar: **"yok edilenin
+bağımlıları ne oluyor?"** Cevapsız kalırsa model **öksüz kayıt** üretir — gizlilik
+(silinmiş analizin sohbet mesajları duruyor), depolama, ve en kötüsü: geliştirici
+keyfî karar verir, QA test edecek bir davranış bulamaz.
+
+**Terminal işlem kümesini topla.** Bir operation terminaldir, eğer:
+- fiili `deletes` ise, **veya**
+- `on success do`'da kaydı **terminal duruma** taşıyan bir durum-geçişi varsa
+  (`calculate E.status = 'iptal' | 'arşiv' | 'kapandı'` — o durumdan çıkaran başka
+  bir `calculate` YOKSA terminaldir; D2'nin durum grafiğinden okunur).
+
+**Bağımlı (dependent) kümesini MEKANİK topla** — LLM sezgisi değil, kapalı ölçüt.
+Terminal işlemin kaynağı E ise, E'ye bağlı entity kümesi = **ayrı yaşam döngüsü olan**
+şu entity'ler:
+- **`on` hedefi E olan her operation'ın KAYNAĞI** (Resource) — o kayıt E'nin ÜZERİNE
+  kurulur. Ör. `creates own Comment on any Photo` → bağımlı **Comment**'tir (E = Photo);
+  bağımlı, `on`'un hedefi değil operation'ın kaynağıdır. **Ve**
+- **`from` girdisi E olan her operation'ın KAYNAĞI** — o kayıt E'den türer
+  (`creates any PurchaseOrder from any PurchaseRequest` → E = PurchaseRequest için
+  bağımlı **PurchaseOrder**).
+
+**Muafiyet:** `list of E` alanı olarak gömülü entity'ler D4'e girmez — sahibiyle
+birlikte doğar ve **birlikte gider** (D1 muafiyetinin aynası). Öksüz riski
+gömülülerde değil, **ayrı yaşam döngüsü olan referans-verenlerdedir.**
+
+> ⚠ `relation` bu tespitte KULLANILMAZ: `relation <ad> of <Aktör> with <Entity>`
+> aktör↔kayıt eksenidir; kayıt↔kayıt kapsamasını taşımaz (`dsl-reference.md` §1).
+
+**Her bağımlı için üç authored karar** (kullanıcıya düz dille sor — jargon yok:
+*"Analiz silinince ona bağlı sohbet mesajları da gitsin mi, kalsın mı, yoksa silme
+hiç mümkün olmasın mı?"*):
+
+| Karar | Yapısal ev | Not |
+|---|---|---|
+| **Birlikte silinir (kaskad)** | terminal op'un `on success do`'suna `perform <BağımlıSilmeOp>` + o silme operation'ını modele ekle (ör. `SohbetleriSil: System deletes all SohbetMesaji on any Analiz` — doğrulandı, 0 error) | ⚠ **`on success do` içinde `delete` EYLEMİ YOKTUR** (§3 kapalı liste: `calculate`/`send`/`create`/`perform`); `delete` yazmak parse hatasıdır. ⚠⚠ **`perform` KAPSAM TAŞIMAZ** — argüman almaz, "silinen ŞU kaydın bağımlıları" bağı business'ta ifade EDİLEMEZ. Business kaskad **niyetini** taşır (hangi bağımlı, hangi karar); kapsam predikatı **tech'te realize edilir** — ADR-0042'deki `rule` bölünmesinin aynısı. Niyeti `note` ile açıkça yaz: `note """Analiz silinince YALNIZ o analizin sohbet mesajları silinir (kapsam tech'te)."""` |
+| **Öksüz kalır (bilinçli)** | terminal op'a `note """…"""` | Bilinçli ise bilinçli yazılır; sessiz bırakılamaz. |
+| **Silme engellenir** | terminal op'a guard: `where` / `only if` / `requires <Ad>` ("bağlı kayıt varken silinemez" → çapraz-varlık var-mı sınıfı → `rule` + `requires`, §10) | Predikatı tech realize eder. |
+
+**Kapanış:** (1) ile eklenen her `<BağımlıSilmeOp>` yeni bir terminal işlemdir →
+**kendi D4'ünü doğurur** (mesajın da bağımlısı olabilir). Sabit-noktaya kadar yürüt,
+döngü korumasıyla (her entity bir kez).
+
 ---
 
 ## Her bulguyu sınıflandır (körü körüne EKLEME)
@@ -155,3 +209,7 @@ doküman taslağına not düş, sonra Tutarlılık self-check'ine (`§A`) geç.
   4'lü imza kuralını ihlal etmemeli; etmesi gerekiyorsa gerçekten ayrı bir iş
   mi diye netleştir.
 - **İteratif sorgulama.** Kapanışı tamamla, sonra tek toplu öneri sun.
+- **Yalnız üretim eksenini koşma.** D1-D3 temiz çıkması modeli "kapalı" yapmaz;
+  `deletes`/terminal işlem varsa D4 zorunludur (öksüz-kayıt kör noktası).
+- **`on success do: delete …` yazma.** Böyle bir eylem YOK (§3); kaskad `perform`'la kurulur.
+- **Gömülü (`list of`) entity için kaskad kararı sorma** — sahibiyle birlikte gider (muaf).

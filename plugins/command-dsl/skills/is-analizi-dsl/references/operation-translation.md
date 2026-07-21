@@ -134,6 +134,37 @@ Yapısal ev yine `where` / `only if` guard'ı ya da note'tur; bu mercek gramer E
 ve wire-kod eşlemesi tech-katmanının konusudur; burada yalnız *hangi kolun
 sorulmadığını* işaretler.
 
+### ⚠ Arka plan / `System` / üretim işlemleri MUAF DEĞİLDİR (ölçülmüş kör nokta)
+
+Bu mercek **her operation için** koşar — `System` aktörlü işler, `schedule:`'lı işler,
+`perform` zincirinin ara halkaları ve "paket/özet/taslak üretir" sınıfı işlemler dahil.
+SKILL.md Faz 3'teki *"arka plan işlemleri kullanıcıya endpoint gibi gösterilmez"* kuralı
+**sunum** hakkındadır, **soru-muafiyeti değildir**; ikisi karıştırılırsa arka plan
+işlemlerinin hata dalı sistematik olarak sorulmadan kalır (ölçüldü: altı `System`
+işleminden yalnız birinin hata dalı vardı — o da tesadüfen).
+
+İkinci kör nokta yapısaldır: arka plan işlemi **kullanıcı cümlesinden doğmaz** →
+yukarıdaki dinleme dedektörlerinin hiçbirini tetiklemez → kayıt açılmaz → süpürme
+temiz görünür (**sahte-sıfır**). Bu yüzden kapanışları dinlemeye değil, **model-türevli
+ElicitationState kayıtlarına** bağlıdır (SKILL.md "İKİ BESLEME KANALI"): modeldeki her
+operation için hata-dalı satırı otomatik açılır ve `cevaplandı` ∨ `atlandı` olmadan emit
+geçmez.
+
+Soruyu kullanıcıya **mekanik değil sonuç diliyle** sor:
+> *"X üretilemezse (çökerse, boş dönerse) kullanıcı ne görsün, kayıt ne olsun?"*
+
+⚠ **Yapısal sınır — `on failure` YOKTUR.** CommandDSL yalnız `on success do` dalını
+tanır (§3 kapalı eylem listesi). Bu yüzden hata dalının evi:
+- **önlenebilir** koşul ("bakiye yetmezse / durum uygun değilse") → guard (`where` /
+  `only if` / `requires`) — işlem hiç başlamaz;
+- **çalışma-anı başarısızlığı** ("üretici servis çöktü, paket oluşmadı") → **kanonik ev
+  `note`** (makinece tech + QA'ya taşınır). İş gerçekten bir "başarısız" durumu tutuyorsa
+  o durumu üreten **ayrı authored bir işlem** modellenir — ama `on success do` içine
+  başarısızlık dalı UYDURMA.
+
+Cevapsız bırakılırsa: zincir yarıda kalır, kayıtlar tutarsız kalır, QA o yolu test edemez,
+geliştirici davranışı uydurur.
+
 **Türkçe normal-form geri-okuma:** teyitli her cevabı DSL'i göstermeden düz cümleyle
 geri oku — kalıp: *"… olduğunda sistem … yapacak; … ise reddedecek. Doğru mu?"*
 (çalışan örnek: bu dosyanın sonundaki **Tam örnek** geri-okuması). Geri-okuma yalnız

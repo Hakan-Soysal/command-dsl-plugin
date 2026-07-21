@@ -8,8 +8,10 @@ bilinçli/belgelenmiş istisna olana kadar).
 > Bu liste **referans bütünlüğüne** bakar (ID'ler çözülüyor mu, foundation
 > bildirilmiş mi). **Üretici-tüketici bütünlüğü** (tüketilen kaydı biri üretiyor
 > mu) ayrı bir konudur ve buradan **önce**, Faz 3.5'te yürütülür:
-> `references/dependency-closure.md`. Bu adımda eklenen yeni operation'lar
-> aşağıdaki tüm kurallardan da geçmelidir.
+> `references/dependency-closure.md`. **Herhangi bir anda eklenen ya da değiştirilen**
+> construct — Faz 3.5'te eklenen üretici, düzeltme turunda türetilen işlem, emit'ten
+> SONRA gelen revizyon — aşağıdaki tüm kurallardan **yeniden** geçmelidir
+> (SKILL.md Değişmez-6: "değişiklik kapıyı yeniden açar"; "zaten geçmiştik" gerekçe değildir).
 
 ## A. Tutarlılık kontrol listesi
 
@@ -157,4 +159,13 @@ DSL'den önce, sonra veya yalnız başına isteyebilir (SKILL.md "Üretim").
 
 ## 7. Açık varsayımlar & bilinçli istisnalar
 - <otonom modda yapılan varsayım / P8 destek akışı / schedule muafiyeti vb.>
+- <dış kaynak/seed olarak kapsam dışı bırakılan üreticiler (Faz 3.5 · D1-D3)>
+- <yıkım kararları: bilinçli öksüz bırakılan bağımlı kayıtlar (D4)>
+
+### 7.1 Bu analizin kapsamadıkları (sabit alt-başlık — ATLAMA)
+Bu paket bir **davranış modelidir**. Aşağıdakiler bilinçli olarak kapsam dışıdır ve
+**ayrı ele alınmalıdır** — yoklukları "atlanmış" değil **sınır**dır (SKILL.md
+"Bu skill neyi KAPSAMAZ"): problem tanımı/iş gerekçesi · paydaş analizi (sistemi
+kullanmayan taraflar) · NFR (performans, gizlilik/KVKK, maliyet, erişilebilirlik,
+saklama) · risk kaydı (RAID) · kimlik/hesap yaşam döngüsü · eşzamanlılık (kilit/yarış).
 ```

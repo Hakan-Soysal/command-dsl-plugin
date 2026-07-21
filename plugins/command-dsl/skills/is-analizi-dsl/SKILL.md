@@ -61,6 +61,13 @@ hata-düzeltme döngüsünden sonra **harfiyen** yeniden okunur (parafraz = anch
    serbest-proza `note`. Yorumlar makinece anlamsızdır.
 5. **Gate ≠ niyet.** Gate'ler yalnız MEKANİĞİ kanıtlar; niyet-uyumunun tek
    otoritesi KULLANICIDIR — hiçbir gate-geçişi AskUser'ı iptal edemez.
+6. **Değişiklik kapıyı yeniden açar.** Kapılar "emit öncesi bir kez" DEĞİL, **her
+   construct için** geçerlidir. Emit'ten SONRA bir construct eklenir/değişirse
+   (validator warning'i giderme, dış denetim bulgusu, kullanıcı revizyonu, çözüm
+   olarak türetilen yeni işlem) o construct Faz 3 çeviri prosedüründen + Faz 3.5
+   kapanışından + emit-öncesi süpürmelerin TAMAMINDAN yeniden geçer ve deftere yeni
+   sıra-no'lu girdi açar. **"Zaten geçmiştik" geçerli bir gerekçe değildir** — kapı
+   modele değil, construct'a bakar. Oturum döngüseldir; fazlar bir kez akmaz.
 
 ## In-flight öz-denetim (bahane → çürütme · red-flags)
 
@@ -73,6 +80,8 @@ gerekçeye karşı — Gate ÇIKIŞTA kilitler, bu blok SÜREÇ-İÇİNDE, Gate'
 | "Kullanıcı acele ediyor" | ÇİFT-SIFIR hiçbir tempoda kısalmaz; hız = daha az laf, daha az soru DEĞİL. |
 | "Cevabı tahmin edebiliyorum" | Tahmin = çıkarım; çıkarım cevap değil SORU üretir (Değişmez-1). |
 | "Bunu sonra hallederiz" | Ertelenen ★ authored-kayıt olur (durum=beklemede), sessizce düşmez. |
+| "Sadece küçük bir düzeltme / o kapıdan zaten geçtik" | Düzeltme de **authored bir construct** doğurur; kapılar o construct için yeniden koşar (Değişmez-6). |
+| "Bu işlemi ben türettim, kullanıcı sormadı" | Yazarı skill olan construct daha da riskli: kullanıcı sinyali yok → dedektör tetiklenmez. Model-türevli kayıt eksenlerinden geçmesi ZORUNLU (bkz. ElicitationState iki-besleme). |
 
 **Red flags (kendini yakala):** ★-soru atlandı · faz-sırası bozuldu · kullanıcıya
 sorulmadan clause dolduruldu · warning sessiz kapatıldı · gate-geçti diye AskUser
@@ -129,6 +138,26 @@ geri-alınabilirlik onu gevşetmez (Değişmez-1).
 döngüye devam etme; **blocker'ı adlandır** ("Şu karar olmadan ilerleyemiyorum, çünkü…")
 ve kullanıcıya net bir seçenek kümesi sun.
 
+## Bu skill neyi KAPSAMAZ (bilinçli sınır — "atlandı" değil)
+
+CommandDSL bir **davranış modelidir**: kim, hangi kayıt üzerinde, hangi koşulda ne yapar.
+Aşağıdakiler bilinçli olarak kapsam dışıdır — modelde yoklukları **eksiklik değil sınırdır**;
+ama sessiz bırakılırsa paketi devralan ekip onları "atlanmış" sanar. Bu yüzden kapanışta
+**açıkça söylenir** ve doküman §7'ye sabit alt-başlık olarak yazılır:
+
+- **Problem tanımı / iş gerekçesi** (neden bu ürün) — `outcome` yalnız ölçülebilir başarıyı taşır.
+- **Paydaş analizi** — sistemi kullanmayan ama etkilenen taraflar. Modelde yalnız `actor` (sistemi
+  kullanan rol) vardır.
+- **NFR** — performans, gizlilik/KVKK, maliyet, erişilebilirlik, saklama süresi. Gramerde karşılığı yok.
+- **Risk kaydı (RAID'in R'si)** ve proje-yönetimi (milestone, fizibilite) — aile-üstüdür, `.cdsl`'e girmez.
+- **Kimlik/hesap yaşam döngüsü** — kayıt olma, giriş, şifre, hesap kapatma; `actor` bir roldür,
+  hesap değil. Uygulamanın gerçek bir gereksinimiyse **ayrı bir modül olarak modellenmelidir**.
+- **Eşzamanlılık** — iki aktörün aynı kayda aynı anda dokunması, kilit/yarış. `where` guard'ı
+  ön-koşuldur, atomiklik garantisi değil; bu tech katmanının konusudur.
+
+⚠ Bu liste bir **muafiyet değil devir**dir: kullanıcı bunlardan birini iş-kuralı olarak dile
+getirirse (ör. "kayıtlar 6 ay sonra silinmeli") **kaybetme** — `note` ile taşı (Altın kurallar).
+
 ## Başlamadan
 
 Kullanıcıdan **tek cümlelik amaç** al: "Bu uygulama temelde ne işe yarayacak?"
@@ -147,11 +176,36 @@ kapanışını (Faz 3.5) çalıştır.
 doğrulayıcı bunu YAKALAMAZ. Bu yüzden her opsiyonel sinyal hafızada değil, **açık bir durum-kaydında**
 yaşar:
 
-- **ElicitationState kaydı:** `{sinyal; hedefConstruct; risk (★/○); durum: cevaplandı | atlandı |
-  beklemede}`. Dinlerken `references/dsl-reference.md` **Yetenek Envanteri**nin "sinyal" kolonunu tara
-  (kullanıcı "gece otomatik çalışır" der, `schedule`'ı *sen* bilirsin) ve eşleşen her sinyali bu kayıt
-  olarak kuyruğa al. **★-süpürme artık ezberden Envanter gezme değil, MEKANİK sorgudur:** "durum=beklemede
-  ∧ risk=★ kaydı var mı?" — varsa emit geçemez (Değişmez-2, ÇİFT-SIFIR).
+- **ElicitationState kaydı:** `{kaynak: elicitation | model; sinyal; hedefConstruct; risk (★/○);
+  durum: cevaplandı | atlandı | beklemede}`. **★-süpürme ezberden Envanter gezme değil, MEKANİK
+  sorgudur:** "durum=beklemede ∧ risk=★ kaydı var mı?" — varsa emit geçemez (Değişmez-2, ÇİFT-SIFIR).
+
+- **İKİ BESLEME KANALI (kritik — tek kanal sahte-sıfır üretir).** Kayıtlar iki bağımsız kaynaktan doğar:
+  1. **`kaynak: elicitation` — kullanıcı sinyalinden.** Dinlerken `references/dsl-reference.md`
+     **Yetenek Envanteri**nin "sinyal" kolonunu tara (kullanıcı "gece otomatik çalışır" der,
+     `schedule`'ı *sen* bilirsin) ve eşleşen her sinyali kuyruğa al.
+  2. **`kaynak: model` — modelin KENDİSİNDEN (yazarı kim olursa olsun).** Kanal-1 yalnız kullanıcının
+     söylediğine bakar; **skill'in kendi ürettiği yapı hiçbir sinyal doğurmaz** — `System` işlemleri,
+     `perform` zincirindeki ara işlemler, Faz 3.5'te eklenen üreticiler, düzeltme turunda türetilen
+     işlemler. Kayıt yok → beklemede-★ yok → süpürme temiz görünür = **sahte-sıfır**. Bu yüzden
+     modeldeki **her operation için**, kim yazdıysa yazsın, şu **beş eksende** birer kayıt otomatik
+     açılır (risk ★):
+
+     | Eksen | Kapanış sorusu (düz dille) | Yapısal ev |
+     |---|---|---|
+     | guard / ön-koşul | "Bu işlemin bir ön-koşulu var mı — hangi durumda reddedilir?" | `where` · `only if` · `only when` · `requires` |
+     | ownership genişliği | "Bu işlemi kim yapabiliyor — herkes mi, kendi kaydı mı, ilişkiye bağlı mı?" | ownership anahtarı (`own`/`any`/`all`/`public`/`<ilişki>'s`) |
+     | hata dalı | "Bu iş yapılamazsa/başarısız olursa kullanıcı ne görsün, kayıt ne olsun?" | **önlenebilir** ise guard (`where`/`only if`/`requires`); **çalışma-anı başarısızlığı** için `on failure` YOKTUR → kanonik ev `note` (+ istenirse başarısız-durumu üreten ayrı authored işlem) |
+     | durum etkisi | "Bu olunca kaydın durumu değişiyor mu?" | `on success do: calculate <E>.status = '…'` |
+     | bağımlı-kayıt etkisi | "Bu kayıt gidince/kapanınca ona bağlı kayıtlara ne olacak?" | `perform <SilmeOp>` (niyet; kapsam tech'te) · engelleme guard'ı · `note` — yıkım kapanışı D4, `references/dependency-closure.md` |
+
+- **Model-türevli kayıtlar İKİNCİ BİR SORGULAMA DEĞİLDİR.** Faz 3 çeviri prosedürünü izleyen her
+  operation bu eksenleri **yan ürün olarak** kapatır (Adım 3 ownership · Adım 6 guard · Adım 7 durum ·
+  EARS kalıp-2 hata dalı) — o op'un satırları anında `cevaplandı` işaretlenir. Süpürme bir
+  **defter-sorgusudur**, tekrar soru sormak değil: amaç, Faz 3'ten HİÇ geçmemiş op'ları (arka plan,
+  `perform` hedefi, düzeltme-turu ürünü) görünür kılmaktır. Kapanmamış eksen ya cevaplanır ya
+  `/atla` ile authored-atlanır; üçüncü hâl yok. Ölçüt: **N operation × 5 eksen** satırın tamamı
+  `cevaplandı` ∨ `atlandı`.
 - **İki-modlu soru (tek-soru-tek-cevap):** cevabı **önerebiliyorsan** → toplu öner + tek onay (hibrit
   onay). Öneremiyorsan (gerçek bilinmeyen) → **tek soru sor, cevabı bekle** — birden çok bilinmeyeni tek
   mesaja yığma.
@@ -185,6 +239,13 @@ buna referans vereceği için temel buradadır.
   unutma — kullanıcıya sormana gerek yok, ama modelde vardır.
 - **İlişkiler:** Sahiplik "kendi ekibi / yönettiği şube" gibi bir bağ
   içeriyorsa bu bir `relation`'dır.
+- **Kapsama / birlikte-yaşama (yıkım ekseni):** "Bu kayıtlardan biri silinirse ona
+  bağlı olanlar (mesajlar, bölümler, özetler…) ne olsun — onlar da gitsin mi, kalsın
+  mı, yoksa silme hiç mümkün olmasın mı?" Bu soru **`relation` ile karşılanmaz** —
+  `relation` aktör↔kayıt eksenidir, kayıt↔kayıt kapsaması DEĞİL (`references/dsl-reference.md` §1).
+  Cevap, ilgili silme/arşivleme işleminin yıkım kapanışına girer (Faz 3.5 · D4).
+  Sormazsan **öksüz-kayıt** doğar: geliştirici keyfî karar verir, gizlilik/depolama
+  sorunu modelde görünmez.
 - **Takvimler:** "Sadece mesai saatinde" gibi zaman pencereleri varsa `calendar`.
   Sinyal gelince TANIMINI da sor: "**Mesai saatleri tam olarak ne** — hangi
   günler/saatler, tatiller dahil mi?" — `calendar` yalnız bir etikettir, içeriği
@@ -307,8 +368,17 @@ Bu çeviri en hassas iş olduğu için **adım adım prosedürü ayrı dosyada**
   `on success do: calculate <Entity>.status = 'onaylandı'`. Durum yaşam döngüsü
   ayrı bir Faz-0 ürünü değildir; bu atamalardan **türetilir**.
 - **Otomatik yan etkiler** (`perform`, `send`, `create`) ve **sistem işleri**
-  (`System` aktörü, `schedule:`) kullanıcıya endpoint gibi gösterilmez — arka
-  plan etkisidir.
+  (`System` aktörü, `schedule:`) kullanıcıya **endpoint olarak** gösterilmez — arka
+  plan etkisidir. ⚠ **Bu bir soru-muafiyeti DEĞİLDİR:** arka plan işleminin de
+  **hata dalı ve durum etkisi yine sorulur** — ama kullanıcıya mekanik diliyle değil
+  **sonuç diliyle**: *"X üretilemezse kullanıcı ne görsün, kayıt ne olsun?"* ⚠ CommandDSL'de
+  **`on failure` bloğu YOKTUR** (`on success do` tek dal; §3 kapalı liste) — cevap **önlenebilir**
+  bir koşulsa guard'a iner, **çalışma-anı başarısızlığı** ise kanonik ev `note`'tur (istenirse
+  başarısız-durumu üreten ayrı bir authored işlem). Uydurma dal yazma.
+  Bu işlemler kullanıcı cümlesinden doğmadığı için hiçbir dinleme-dedektörünü
+  tetiklemez; kapanışları **model-türevli ElicitationState kayıtlarıyla** zorlanır
+  (bkz. "İKİ BESLEME KANALI"). Sorulmazsa: zincir yarıda kalır, kayıtlar tutarsız
+  kalır, QA o yolu test edemez.
 
 **⚠ Anti-pattern — Sihirli adım:** "Sistem ödemeyi işler" gibi belirsiz
 tanımlar. Her eylemin kim/ne/hangi kayıt/hangi koşul'u net olmalı.
@@ -333,7 +403,7 @@ bu yüzden **skill adımıdır, validator kuralı değil**.
 varken görülür), Tutarlılık self-check'inden önce. Burada eklenen her yeni
 operation sonra §A'nın tüm kurallarından geçmelidir.
 
-**Kapsam = kullanıcı tercihi.** Hangi clause'ların ön-gereksinim sayılacağını
+**Kapsam = kullanıcı tercihi (D1-D3); D4 ZORUNLU.** Hangi clause'ların ön-gereksinim sayılacağını
 **her kullanımda** kullanıcıya düz dille sor; varsayılan en az gürültülü
 seviyedir, kullanıcı derinleştirebilir:
 - **D1 — Varlık var-oluşu** (varsayılan): tüketilen her entity'nin bir üreticisi
@@ -343,6 +413,14 @@ seviyedir, kullanıcı derinleştirebilir:
   (`calculate …status='X'` veya oluşturma-anı başlangıç durumu) olmalı.
 - **D3 — İlişki popülasyonu:** `<relation>'s` ownership ilişkisi bir yerde
   doldurulabilmeli (çoğu zaman seed/kurulum → en gürültülü; sadece istenirse).
+- **D4 — Yıkım kapanışı (ZORUNLU, kullanıcı tercihi DEĞİL):** D1-D3 üretim eksenlidir
+  ("tüketilenin üreticisi var mı?"); aynası yoktu. Modelde bir `deletes` (ve durum-terminali
+  olan `archives`/`cancels` sınıfı) işlem varsa, silinen entity'ye **ayrı yaşam döngüsüyle
+  bağlı** her entity için "birlikte silinir / öksüz kalır (bilinçli) / silme engellenir"
+  kararı **authored** alınır. Yapısal ev `perform <SilmeOp>`'tur (`on success do`'da `delete`
+  eylemi YOKTUR — uydurma); engelleme ise guard/`requires`. ⚠ `perform` **kapsam taşımaz**
+  (argümansız): business kaskad **niyetini** taşır, "şu kaydın bağımlıları" predikatı tech'te
+  realize edilir → niyeti `note` ile açıkça yaz. Hiçbir karar yoksa emit engellenir.
 
 **Her bulguyu KÖRÜ KÖRÜNE eklemeden sınıflandır:** (1) iç boşluk → `Create<E>`
 operation öner; (2) dış kaynak/seed (ERP'den ürün, SSO'dan kullanıcı, admin'in
@@ -373,12 +451,14 @@ düzelt, tekrar denetle.
 
 **"Ne sormadım?" geçidi — ÇİFT-SIFIR (0-tutarsızlık VE 0-sessiz-eksik).** Tutarlılık tek başına
 YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyonel guard / `calculate` /
-`perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). Dört süpürme:
-1. **Sessiz-eksik (★ süpürmesi):** ElicitationState/defter üzerinde **MEKANİK sorgu** çalıştır —
-   "durum=beklemede ∧ risk=★ kaydı var mı?" (Yetenek Envanteri'ni ezberden gezme; kayıt-tablosunu
-   sorgula). Kalan her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu sor ("Bu işlemin bir
-   ön-koşulu var mı? / Onaylanınca durum değişiyor mu? / Otomatik tetiklenen bir şey var mı?"). Hiçbir
-   ★'ı sessizce atlama.
+`perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). Beş süpürme:
+1. **Sessiz-eksik (★ süpürmesi) — İKİ KAYNAK BİRDEN:** ElicitationState/defter üzerinde **MEKANİK
+   sorgu** çalıştır — "durum=beklemede ∧ risk=★ kaydı var mı?" (Yetenek Envanteri'ni ezberden gezme;
+   kayıt-tablosunu sorgula). Sorgu **`kaynak: elicitation` VE `kaynak: model` kayıtlarının ikisini de**
+   kapsar; yalnız elicitation-türevlileri sorgulamak sahte-sıfırdır (skill'in kendi ürettiği yapı hiç
+   sinyal doğurmaz). Ek mekanik ölçüt: **modeldeki her operation için beş eksenin (guard · ownership
+   genişliği · hata dalı · durum etkisi · bağımlı-kayıt etkisi) satırı `cevaplandı` ∨ `atlandı` mı?**
+   Kalan her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu sor. Hiçbir ★'ı sessizce atlama.
 2. **Sessiz-yanlış (teşhir):** zorunlu **ownership** yanlış-değerle de tutarlı görünür — `any` /
    `public` genişliği güvenlik-kritiktir. Seçtiğin ownership'i sessiz emit etme: "Bu işlemi herkes
    (any) yapabiliyor — kendi kaydıyla (own) sınırlı olmalı mı?" diye açıkça onaylat.
@@ -392,6 +472,17 @@ YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyo
    "geçti" damgası VERMEZ** — soru-üreticidir, hakem değil (pass-otoritesi deterministik validator +
    kullanıcı; aksi Değişmez-5 ihlali — gate≠niyet, niyet-otoritesi kullanıcıdır). Defter diske düzenli yazılmadıysa gözlemci boş-kümeyle "fark yok"
    der = sahte-sıfır; bu yüzden defter-kadansı (bkz. "Oturum karar-defteri") bu süpürmenin ön-koşuludur.
+5. **İddia-sınaması (note ↔ model) — karşı-olgusal gerekçeler:** `note`/`rule`-brief makinece aşağı
+   katmanlara taşınır (tech + QA onu okur), ama içeriğini hiçbir validator sınamaz — business `rule`
+   ADR-0042'den beri **isim + insan-brief**tir, denetlenemeyen prozadır. Bu yüzden emit'ten önce
+   **KAPALI kip-listesiyle** tara (skorlama/benzerlik yok): *"… olmadan · aksi halde · yoksa …
+   olurdu · bu sayede … engellenir · bu olmasa … yapabilirdi"*. Eşleşen her **karşı-olgusal iddia**
+   için tek soru: *"Bu iddia, modeldeki diğer işlemler ve `perform` zincirleri göz önüne alındığında
+   hâlâ doğru mu?"* Üç meşru kapanış: (a) iddia modelde ayakta → bırak, (b) yanlış → **davranış-diline
+   indir** ("ne engeller" yerine "ne yapar"), (c) iddia doğru olmalıydı ama model onu tutmuyor →
+   kuralı/guard'ı güçlendir. **Sınanmamış karşı-olgusal iddia emit'i engeller.** ⚠ Bu tarama iddiayı
+   **yüzeye çıkarır, KANITLAMAZ** — kanıt modele bakan muhakemedir; doğrulanamıyorsa (b)'ye in
+   (Değişmez-1: doğruluğu gösterilemeyen nedensel iddia = uydurma). Yazım kuralı: `dsl-reference.md` §10.
 
 **Kalan warning = çözülmemiş soru (üçüncü hâl — tutarsızlık değil, sessiz-eksik değil).** Warning'i
 skill KENDİ uydurduğu düzeltmeyle kapatamaz — çözüm **authored**'dır (büyü yok). Meşru kapanış üç:
@@ -488,8 +579,8 @@ cümleyle not düş). Sözleşme detayı: `references/validator.md` (§7).
 - `references/operation-translation.md` — düz cümle → 4'lü imza çeviri prosedürü.
   **Faz 3'te her operation'da oku.** En kritik dosya.
 - `references/dependency-closure.md` — ön-gereksinim kapanışı: üretici-tüketici
-  tespiti, D1/D2/D3 kapsam seçimi, seed/embedded muafiyetleri, sabit-nokta
-  kapanış. **Faz 3.5'te oku.**
+  tespiti, D1/D2/D3 kapsam seçimi + **D4 yıkım kapanışı (zorunlu)**, seed/embedded
+  muafiyetleri, sabit-nokta kapanış. **Faz 3.5'te oku.**
 - `references/consistency-and-emit.md` — emit öncesi tutarlılık self-check'i +
   dependency-order emit + dosya bölme. **Emit'ten önce oku.**
 - `references/validator.md` — doğrulayıcı konum zinciri + diagnostics + düzeltme

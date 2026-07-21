@@ -28,6 +28,34 @@
       "prompt": "Küçük bir mağaza uygulaması. Müşteri ürünleri listeler ve sepete ekleyip sipariş verir. Yönetici siparişleri görür ve onaylar; onaylanınca durum onaylandı olur. Bunu iş analizine çevir. Üretmeden önce eksik ön-gereksinimleri kontrol et: sadece var-oluş yeterli.",
       "expected_output": "Faz 3.5 ön-gereksinim kapanışı (D1=var-oluş seçili) MUTLAKA çalışmalı. Kullanıcı ürünü listeler/sepete ekler ama hiçbir operasyon Product ÜRETMEZ → step bunu yakalamalı ve tek toplu öneriyle sormalı: ya 'CreateProduct (ürünleri kim ekliyor?)' operation'ı ekle, ya da 'ürünler dışarıdan gelir (seed/ERP)' diye kapsam dışı belgele — körü körüne eklememeli. (Order'ın üreticisi var: sipariş ver = creates Order; gömülü/değer alanlar muaf.) Onaydan sonra model nedensel-tam olmalı; eklenen üretici §A benzersiz 4'lü imza ve foundation kurallarından geçmeli; nihai .cdsl parser'da 0 error.",
       "files": []
+    },
+    {
+      "id": 5,
+      "name": "yikim-kapanisi-oksuz-kayit-d4",
+      "prompt": "Bir not defteri uygulaması. Kullanıcı not oluşturuyor, notun altına yorum yazabiliyor, nota dosya ekleyebiliyor. Kullanıcı kendi notunu silebiliyor. Bunu iş analizine çevir.",
+      "expected_output": "Faz 3.5 · D4 yıkım kapanışı MUTLAKA koşmalı (D1-D3'ten farklı olarak kullanıcı tercihi DEĞİL, zorunlu): modelde `deletes Not` var ve Not'a bağlı ayrı-yaşam-döngülü kayıtlar var (Yorum ve Ek — `on any Not` ile bağlanan op'ların KAYNAKLARI; bağımlı = `on` hedefi değil o op'un Resource'u). Skill kullanıcıya jargonsuz sormalı: 'Not silinince yorumlar/ekler de gitsin mi, kalsın mı, yoksa silme engellensin mi?' Üç authored karardan biri alınmalı: kaskad → `perform <BağımlıSilmeOp>` + o silme op'u modele eklenir; öksüz → `note`; engelle → guard/`requires`. NEGATİF ASSERT: `on success do` içine `delete` YAZILMAMALI (böyle bir eylem yok, parse hatası). NEGATİF ASSERT-2: kaskad seçilirse `perform`'un kapsam taşımadığı (argümansız) not'a yazılmalı — kapsam predikatı tech'e devredilir. Cevaplanmadan emit geçmemeli (★ kaskad-belirsizliği beklemede). Nihai .cdsl 0 error.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "arka-plan-hata-dali-model-turevli-kayit",
+      "prompt": "Bir rapor uygulaması. Kullanıcı rapor talebi oluşturuyor. Talep oluşunca sistem arka planda raporu hazırlıyor, hazırlanınca da kullanıcıya indirme paketi üretiyor. Her gece sistem eski raporları temizliyor. Bunu iş analizine çevir.",
+      "expected_output": "Model-türevli ElicitationState kayıtları (kaynak: model) ÇALIŞMALI. Modelde 3 arka plan işlemi var (RaporHazirla — perform hedefi, PaketUret, EskileriTemizle — schedule'lı System). Bunların hiçbiri kullanıcı cümlesinden 'sinyal' üretmez → yalnız elicitation kanalı koşarsa süpürme TEMİZ görünür (sahte-sıfır) = FAIL. PASS ölçütü: her arka plan/System işlemi için hata-dalı ve durum-etkisi kaydı otomatik açılmalı ve sonuç diliyle sorulmalı: 'Rapor hazırlanamazsa kullanıcı ne görsün, kayıt ne olsun?' Cevap yapısal eve inmeli (`calculate Rapor.durum = 'basarisiz'` / `send` / guard) ya da `note`'a; ya da `/atla` ile authored-atlanmalı. 'Arka plan işlemi kullanıcıya endpoint gibi gösterilmez' kuralı soru-muafiyeti olarak KULLANILMAMALI. Nihai .cdsl 0 error.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "emit-sonrasi-duzeltme-kapiyi-yeniden-acar",
+      "prompt": "Küçük bir izin uygulaması: çalışan izin talebi gönderir, yöneticisi onaylar, onaylanınca durum onaylandı olur ve sadece onaylanmış talepler dışa aktarılabilir. Bunu iş analizine çevir ve dosyaları üret. — (üretim ve 0-error doğrulama bittikten SONRA, ikinci mesaj:) Bir de talebin kopyasını çıkaran bir işlem lazım, ekler misin?",
+      "expected_output": "Değişmez-6 ('değişiklik kapıyı yeniden açar') MUTLAKA uygulanmalı. Emit ve 0-error doğrulama BİTTİKTEN sonra eklenen `KopyaCikar` işlemi için skill 'zaten geçmiştik' DEMEMELİ; o construct için Faz 3 çeviri prosedürü (aktör/ownership/guard/durum) + Faz 3.5 kapanışı + emit-öncesi 5 süpürmenin tamamı YENİDEN koşmalı ve deftere yeni sıra-no'lu girdi açılmalı. Kritik assert: kopyanın hangi durumla doğduğu SORULMALI — sorulmazsa kopya koşulsuz 'onaylandı' doğup 'sadece onaylanmış talepler dışa aktarılır' kararını arka kapıdan delebilir (model-türevli durum-etkisi ekseni bunu yakalar). Yeniden emit + yeniden 0-error.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "karsi-olgusal-note-iddia-sinamasi",
+      "prompt": "Bir onay uygulaması. Bölümler sırayla onaylanmalı: bir bölüm ancak sırası gelen fazdayken onaylanabilir. Bu kuralı modele koy ve neden gerektiğini de not olarak yaz. Bunu iş analizine çevir.",
+      "expected_output": "Emit öncesi 5. süpürme (iddia-sınaması) MUTLAKA koşmalı. `rule` note'una karşı-olgusal iddia ('bu kural olmasa kullanıcı hiç konuşmadan art arda onaylayıp tamamlayabilirdi') yazılırsa kapalı kip-listesi ('… olmadan · aksi halde · bu sayede … engellenir') bunu YÜZEYE ÇIKARMALI ve tek soruyla sınamalı: 'bu iddia modeldeki diğer op'lar ve perform zincirleri altında hâlâ doğru mu?'. PASS: iddia ya modelde ayakta gösterilir, ya davranış diline indirilir ('Bölüm ancak sırası gelen fazdayken onaylanabilir. Tech ipucu: …'), ya kural güçlendirilir. FAIL: sınanmamış karşı-olgusal iddia note'ta kalıp emit'e gider (tech + QA onu doğru sanıp yanlış realize/test eder). Ayrıca rule ADR-0042 biçiminde olmalı (isim + note-brief; yapısal predikat business'a yazılmaz). Nihai .cdsl 0 error.",
+      "files": []
     }
   ]
 }

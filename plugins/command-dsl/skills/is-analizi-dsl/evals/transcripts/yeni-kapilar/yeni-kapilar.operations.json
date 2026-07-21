@@ -1,0 +1,505 @@
+{
+    "operations": [
+        {
+            "id": "DosyaEkle",
+            "kind": "command",
+            "signature": {
+                "actor": "Kullanici",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Ek"
+            },
+            "delegation": null,
+            "target": {
+                "ownership": "any",
+                "resource": "Not"
+            },
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Ek",
+                    "Not"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "EkleriSil",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "deletes",
+                "ownership": "all",
+                "resource": "Ek"
+            },
+            "delegation": null,
+            "target": {
+                "ownership": "any",
+                "resource": "Not"
+            },
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Ek",
+                    "Not"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "NotOlustur",
+            "kind": "command",
+            "signature": {
+                "actor": "Kullanici",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Not"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Not",
+                        "durum"
+                    ],
+                    "text": "'aktif'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "aktif"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Not"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "NotOnayla",
+            "kind": "command",
+            "signature": {
+                "actor": "Kullanici",
+                "verb": "updates",
+                "ownership": "own",
+                "resource": "Not"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [
+                {
+                    "id": "where:0",
+                    "kind": "where",
+                    "text": "durum = 'aktif'",
+                    "ast": {
+                        "node": "cmp",
+                        "op": "=",
+                        "left": {
+                            "path": [
+                                "durum"
+                            ]
+                        },
+                        "right": {
+                            "kind": "string",
+                            "value": "aktif"
+                        }
+                    }
+                },
+                {
+                    "id": "rule:0",
+                    "kind": "rule",
+                    "ref": "SirasiGelenBolum"
+                }
+            ],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Not",
+                        "durum"
+                    ],
+                    "text": "'onaylandi'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "onaylandi"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Not"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "NotSil",
+            "kind": "command",
+            "signature": {
+                "actor": "Kullanici",
+                "verb": "deletes",
+                "ownership": "own",
+                "resource": "Not"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Yıkım kapanışı (D4): Not silinince YALNIZ o nota ait yorumlar ve ekler de\nsilinir. `perform` argüman taşımadığı için kapsam ('o notun') business'ta ifade\nedilemez — kapsam predikatı tech'te realize edilir. Öksüz kayıt bırakılmaz.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "perform",
+                    "target": "YorumlariSil"
+                },
+                {
+                    "kind": "perform",
+                    "target": "EkleriSil"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Not"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "RaporHazirla",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "hazirlar",
+                "ownership": "all",
+                "resource": "Rapor"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": "Arka plan hata dalı: rapor hazırlanamazsa kayıt 'basarisiz' durumunda kalır\nve kullanıcı bu durumu listede görür — zincir sessizce yarıda kalmaz.",
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Rapor",
+                        "durum"
+                    ],
+                    "text": "'hazir'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "hazir"
+                    },
+                    "condition": null
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Rapor"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "RaporlariListele",
+            "kind": "query",
+            "signature": {
+                "actor": "Kullanici",
+                "verb": "lists",
+                "ownership": "own",
+                "resource": "Rapor"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [],
+                "reads": [
+                    "Rapor"
+                ]
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "RaporTalepEt",
+            "kind": "command",
+            "signature": {
+                "actor": "Kullanici",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Rapor"
+            },
+            "delegation": null,
+            "target": null,
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [
+                {
+                    "kind": "calculate",
+                    "target": [
+                        "Rapor",
+                        "durum"
+                    ],
+                    "text": "'bekliyor'",
+                    "expr": {
+                        "kind": "string",
+                        "value": "bekliyor"
+                    },
+                    "condition": null
+                },
+                {
+                    "kind": "perform",
+                    "target": "RaporHazirla"
+                }
+            ],
+            "access": {
+                "writes": [
+                    "Rapor"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "YorumEkle",
+            "kind": "command",
+            "signature": {
+                "actor": "Kullanici",
+                "verb": "creates",
+                "ownership": "own",
+                "resource": "Yorum"
+            },
+            "delegation": null,
+            "target": {
+                "ownership": "any",
+                "resource": "Not"
+            },
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Not",
+                    "Yorum"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        },
+        {
+            "id": "YorumlariSil",
+            "kind": "command",
+            "signature": {
+                "actor": "System",
+                "verb": "deletes",
+                "ownership": "all",
+                "resource": "Yorum"
+            },
+            "delegation": null,
+            "target": {
+                "ownership": "any",
+                "resource": "Not"
+            },
+            "source": null,
+            "recipient": null,
+            "description": null,
+            "schedule": null,
+            "orderBy": null,
+            "limit": null,
+            "guards": [],
+            "calculate": [],
+            "effects": [],
+            "access": {
+                "writes": [
+                    "Not",
+                    "Yorum"
+                ],
+                "reads": []
+            },
+            "flows": [],
+            "processes": [],
+            "domain": "NotDefteri"
+        }
+    ],
+    "entities": [
+        {
+            "id": "Ek",
+            "name": "Ek",
+            "domain": "NotDefteri",
+            "fields": [
+                {
+                    "name": "adi",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Not",
+            "name": "Not",
+            "domain": "NotDefteri",
+            "fields": [
+                {
+                    "name": "baslik",
+                    "type": "String",
+                    "collection": false
+                },
+                {
+                    "name": "durum",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Rapor",
+            "name": "Rapor",
+            "domain": "NotDefteri",
+            "fields": [
+                {
+                    "name": "durum",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        },
+        {
+            "id": "Yorum",
+            "name": "Yorum",
+            "domain": "NotDefteri",
+            "fields": [
+                {
+                    "name": "metin",
+                    "type": "String",
+                    "collection": false
+                }
+            ]
+        }
+    ],
+    "flows": [],
+    "processes": [],
+    "relations": [],
+    "actors": [
+        {
+            "id": "Kullanici",
+            "extends": null
+        },
+        {
+            "id": "System",
+            "extends": null
+        }
+    ],
+    "rules": [
+        {
+            "id": "SirasiGelenBolum",
+            "reads": [],
+            "body": null,
+            "note": "Bir bölüm ancak sırası gelen fazdayken onaylanabilir. Tech ipucu:\n    onaylanacak bölümün faz numarası ile kaydın aktif fazının karşılaştırması.\n    (Davranış dili — \"bu kural olmasa şöyle olurdu\" biçimli karşı-olgusal iddia\n    yazılmadı: sınanmamış nedensel iddia aşağı katmanlara yanlış brief taşır.)"
+        }
+    ],
+    "successCriteria": [],
+    "calendars": [],
+    "verbs": [
+        "hazirlar"
+    ],
+    "domains": [
+        "NotDefteri"
+    ],
+    "coverage": {
+        "uncoveredEntities": []
+    },
+    "meta": {
+        "schemaVersion": 3,
+        "hasErrors": false,
+        "errorCount": 0
+    }
+}

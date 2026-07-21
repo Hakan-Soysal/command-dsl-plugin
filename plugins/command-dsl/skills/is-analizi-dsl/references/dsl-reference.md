@@ -45,6 +45,8 @@ Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını
 | `outcome <Ad> { measure … }` (ürün başarı ölçütü) | "başarıyı NASIL ölçeceğiz — onay süresi 2 güne insin / dönüşüm ≥ %95 / P95 < 200ms / reddedilen oranı < %5" | 1 | ★ | **kaybolan-başarı-ölçütü** — ölçülebilir ürün-hedefi yapısallaşmaz; başarı ölçütü (measure/eşik/pencere) modelden düşer |
 | `any order` (sıra-bağımsız etaplar) | "aynı anda / sırası fark etmez / ikisi de olur / hangisi önce olursa" | 1 | ★ | **sahte-sıralama-kısıtı** — "bildirim sırası = zaman sırası" kanunu yüzünden eksik `any order` = YANLIŞ model; sırasız etaplara olmayan bir sıra dayatılır |
 | türetilmiş/hesaplanan sayısal alan: `calculate <E>.<alan> = <formül>` (`sum of` dahil) | "otomatik hesaplanır / …toplamıdır / X'ten türer / …dan oluşur" | 3 | ★ | **kaybolan-formül** — türetme formülü modelden düşer, alan elle-girilir sanılır (üstteki `calculate …status` satırı YALNIZ durum-geçişini kapsar; bu ayrı yüzeydir) |
+| **Yıkım kapanışı:** terminal op'ta `perform <BağımlıSilmeOp>` / engelleyici guard / `note` (kaskad kararı — `on success do`'da `delete` eylemi YOKTUR; `perform` kapsam taşımaz → kapsam predikatı tech'te) | "şu kaydı silebilsin / iptal etsin / arşivlesin" + o kayda bağlı (`on`/`from` ile referans veren, ayrı yaşam döngülü) başka kayıt var | 0/3.5 | ★ | **kaskad-belirsizliği (öksüz-kayıt)** — silme/arşivleme var ama bağımlı kayıtların akıbeti kararsız; kayıtlar öksüz kalır (gizlilik + depolama), geliştirici keyfî karar verir |
+| **Arka plan hata dalı:** `System`/`schedule:`/`perform`-hedefi/üretim işleminde başarısızlık yolu (önlenebilir → guard; çalışma-anı → `note` — `on failure` bloğu YOK) | *(kullanıcı cümlesinden DOĞMAZ — model-türevli zorunlu kayıt; her `System`/üretim op'u için otomatik açılır)* | 3 | ★ | **hata-dalsız-arka-plan** — `perform` zincirindeki işlem başarısız olursa davranış tanımsız: zincir yarıda kalır, kayıtlar tutarsız kalır, QA yolu test edemez |
 | `grant/revoke` (çalışma-anı yetki devri) | "geçici erişim ver (24s sonra kalksın) / vekâlet" | 3 | ○ | **kalıcı-veya-eksik-yetki** — geçici devir modellenmez; erişim ya süresiz ya hiç yok |
 | `send <Mesaj> to` (bildirim) | "onaylanınca / olunca haber gitsin, bildirim" | 3 | ○ | **sessiz-bildirim-kaybı** — haber gitmez; alıcı olaydan habersiz |
 | `create … from` (türetilmiş kayıt) | "talepten sipariş / şundan bu üretilir" | 3 | ○ | **üretilmeyen-türev-kayıt** — kaynaktan doğması gereken kayıt oluşmaz |
@@ -303,6 +305,21 @@ burada aş.
   business `requires <Ad>` ↔ tech `realizes rule <Ad>`.
 - **≥1 içerik:** ne `satisfies` ne `note` taşıyan boş `rule` **warning**dir
   (ölü bildirim) — en azından `note`-brief yaz.
+- **⚠ `note` DENETLENMEZ — karşı-olgusal iddia yazma (ADR-0042'nin bedeli).** Yapısal
+  predikat tech'e taşındığı için business `rule` artık **denetlenemeyen bir prozadır**:
+  validator yalnız biçime bakar (EARS-şekilli not info'su), **doğruluğa bakmaz**; kör
+  kabul-gözlemcisi defter↔DSL kıyaslar, DSL↔DSL değil. Ama bu not makinece tech'e ve
+  QA'ya taşınır — **yanlış bir gerekçe yanlış realize/test doğurur.**
+  - **Yaz:** "ne YAPAR" — davranış dili. *"Bölüm ancak sırası gelen fazdayken onaylanabilir.
+    Tech ipucu: Bolum.faz == Analiz.aktifFaz karşılaştırması."*
+  - **YAZMA (sınamadıysan):** "ne ENGELLER" — karşı-olgusal iddia. *"Bu kural olmasa
+    kullanıcı hiç konuşmadan art arda onaylayıp analizi tamamlayabilirdi."* Böyle bir
+    iddia ancak **modelin geri kalanına** (diğer op'lar + `perform` zincirleri) karşı
+    sınandıysa yazılır; sınanmamışsa uydurmadır (Değişmez-1) → davranış diline indir.
+  - Emit öncesi 5. süpürme (SKILL.md) bu kalıpları kapalı kip-listesiyle tarar
+    ("… olmadan · aksi halde · bu sayede … engellenir"); tarama iddiayı **yüzeye çıkarır,
+    kanıtlamaz** — kanıt yoksa (b) yolu: davranış diline indir.
+  - Aynı disiplin çıplak `note`'lar için de geçerlidir.
 - `rule` yalın ID olamaz (keyword; `verb`/`import`/`outcome` emsali) — işlem/akış/
   süreç adı seçerken bundan kaçın.
 

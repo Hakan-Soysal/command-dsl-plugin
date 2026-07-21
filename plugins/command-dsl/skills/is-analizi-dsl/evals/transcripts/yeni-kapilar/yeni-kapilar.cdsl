@@ -1,0 +1,64 @@
+# Fixture: 2026-07-21 alan-raporu kapıları (D4 yıkım kapanışı · arka plan hata dalı ·
+# davranış-dilli note). Yeniden-koşulabilir: validate.mjs bu dizinde 0 error vermeli.
+domain NotDefteri
+
+actor Kullanici
+actor System
+
+entity Not { baslik: String  durum: String }
+entity Yorum { metin: String }
+entity Ek { adi: String }
+entity Rapor { durum: String }
+
+verb hazirlar
+
+# --- D4 yıkım kapanışı: Not'a bağlı ayrı-yaşam-döngülü kayıtlar (Yorum, Ek) ---
+# Bağımlı tespiti: `on any Not` taşıyan op'ların KAYNAKLARI = Yorum, Ek.
+YorumEkle: Kullanici creates own Yorum on any Not
+DosyaEkle: Kullanici creates own Ek on any Not
+
+YorumlariSil: System deletes all Yorum on any Not
+EkleriSil: System deletes all Ek on any Not
+
+NotOlustur: Kullanici creates own Not
+on success do
+    calculate Not.durum = 'aktif'
+
+# Kaskad kararı authored: birlikte silinir. `perform` KAPSAM TAŞIMAZ (argümansız) →
+# "yalnız bu notun" bağı business'ta ifade edilemez; niyet note ile taşınır,
+# kapsam predikatı tech'te realize edilir (ADR-0042 kalıbı).
+NotSil: Kullanici deletes own Not
+note """Yıkım kapanışı (D4): Not silinince YALNIZ o nota ait yorumlar ve ekler de
+silinir. `perform` argüman taşımadığı için kapsam ('o notun') business'ta ifade
+edilemez — kapsam predikatı tech'te realize edilir. Öksüz kayıt bırakılmaz."""
+on success do
+    perform YorumlariSil
+    perform EkleriSil
+
+# --- Arka plan hata dalı: System/perform-hedefi işlemin başarısızlık yolu authored ---
+# Model-türevli kayıt ekseni: bu op kullanıcı cümlesinden doğmaz, yine de hata dalı sorulur.
+RaporHazirla: System hazirlar all Rapor
+note """Arka plan hata dalı: rapor hazırlanamazsa kayıt 'basarisiz' durumunda kalır
+ve kullanıcı bu durumu listede görür — zincir sessizce yarıda kalmaz."""
+on success do
+    calculate Rapor.durum = 'hazir'
+
+RaporTalepEt: Kullanici creates own Rapor
+on success do
+    calculate Rapor.durum = 'bekliyor'
+    perform RaporHazirla
+
+RaporlariListele: Kullanici lists own Rapor
+
+# --- Davranış-dilli note (karşı-olgusal iddia YOK) ---
+rule SirasiGelenBolum {
+    note """Bir bölüm ancak sırası gelen fazdayken onaylanabilir. Tech ipucu:
+    onaylanacak bölümün faz numarası ile kaydın aktif fazının karşılaştırması.
+    (Davranış dili — "bu kural olmasa şöyle olurdu" biçimli karşı-olgusal iddia
+    yazılmadı: sınanmamış nedensel iddia aşağı katmanlara yanlış brief taşır.)"""
+}
+
+NotOnayla: Kullanici updates own Not where durum = 'aktif'
+requires SirasiGelenBolum
+on success do
+    calculate Not.durum = 'onaylandi'
