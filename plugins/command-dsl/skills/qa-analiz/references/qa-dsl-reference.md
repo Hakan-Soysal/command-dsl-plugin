@@ -238,6 +238,16 @@ given {
   → error. `returns` gövdesi BoundaryOp dönüş tipine tip-doğrulanır (S18). İç-modül
   calls gerçek koşar, stub'lanamaz (karar #10). Hesap yöntemi:
   `tech-to-qa-translation.md` §D.
+- **Kanonik yazım (Q3) — skaler/opak dönen stub da `returns { }` blok biçimini kullanır:**
+  gramer yalnız `returns '{' … '}'` (blok) | `fails` tanır; **çıplak skaler dönüş biçimi
+  YOKTUR**. Boundary op skaler/opak dönüyorsa (ör. `: Ack`) değer S18 ile degrade edilir
+  (doğrulanmaz) — biçim yine blok'tur, gerekirse boş `{ }`:
+  ```
+  // YANLIŞ — çıplak skaler (gramerde yok → parse error)
+  stub Payments.ReleaseFee returns "OK"
+  // DOĞRU — blok biçim; `Ack` opak dönüşü S18 ile degrade (değer iddia edilmez)
+  stub Payments.ReleaseFee returns { }
+  ```
 - Senaryoda `given` senaryo-başında bir kezdir; step-arası stub değişimi v1-dışı.
 
 ## 7. when — act (§5.2) ve S10 türetim tablosu (§5.3)
@@ -257,6 +267,16 @@ when event Proposals.ProposalSubmitted with { proposalId: "p1" }  // consumer op
   serving'siz op'lar da çağrılabilir (in-process gerçekleme — P15).
 - `event`: yalnız `on` clause'lu op'larda (karar #11); event op'un `on`
   aboneliklerinden biri değilse → error; payload event field'larına tip-doğrulanır.
+- **Kanonik yazım (Q5) — parametresiz op'ta dataset YOK → `when call with { }`:** gramer
+  `when call` sonrası `with <girdi>`i ZORUNLU kılar (`with` atlanamaz) ve parametresiz op'un
+  dataset'i olamaz (alan yok) → boş inline girdi `{ }` yazılır. (Ölçüldü: **17 op** etkilendi.)
+  ```
+  // YANLIŞ — `with` atlandı (parse error) / paramsız op'a olmayan dataset
+  when call
+  when call with hicbirDataset
+  // DOĞRU — boş inline girdi
+  when call with { }
+  ```
 
 **Beklenen outcome türetimi (S10 — normatif tablo, spec §5.3 BİREBİR):**
 
@@ -391,6 +411,29 @@ scenario "teklif yaşam döngüsü" realizes flow ProposalFlow satisfies Proposa
   }
 }
 ```
+
+> **Kanonik yazım (Q4) — senaryo clause sırası GRAMER'CE SABİTTİR:** önce `time`, sonra
+> `given`, sonra `as`/`step`/`advance` **dizisi** (grammar `Scenario`: `time?` → `given?` →
+> `ScenarioItem*`). `time`/`given` bu iki bloğun ÖNÜNE konur; onlardan SONRA `as` ve `step`
+> serbestçe dizilir (`as→step→as→step` meşru). Sıra bozulursa **parse error**.
+> ```
+> // YANLIŞ — `as`/`step`, `given`'dan ÖNCE (sıra bozuk → parse error)
+> scenario "…" {
+>   as musteri
+>   given { seed p1 = Proposal { … } }
+>   step GetProposal with { id: p1 } expect Success
+> }
+> // DOĞRU — time · given ÖNCE; sonra as/step dizisi
+> scenario "…" {
+>   time "2026-07-02T09:00:00Z"
+>   given { seed p1 = Proposal { … } }
+>   as musteri
+>   step GetProposal with { id: p1 } expect Success
+> }
+> ```
+> Emsal: **business operation** clause'ları da sabit sıralıdır (aynı sınıf); tek gevşetme
+> P1'dir (M3-01) ve **YALNIZ `note`**'u konumdan bağımsız yapar — diğer clause'lar
+> (business'ta ve qa senaryosunda) sıralı KALIR.
 
 - `realizes flow <id>` / `realizes process <id>`: uses-flows bağlıysa yazılabilir;
   presence-coverage'a sayılır (#23/#24). Çok-aktör orkestrasyon → `realizes process`.

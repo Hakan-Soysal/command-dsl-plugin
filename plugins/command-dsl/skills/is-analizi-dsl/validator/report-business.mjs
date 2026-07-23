@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-69ca2866b8e8", grammarHash: "69ca2866b8e8", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "31e285180083", wrapperFiles: ["report-business.src.mts", "report-index.src.mts"], wrapperHash: "05f903ac4bca", commit: "0c5072b", builtAt: "2026-07-19T09:19:37+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-29314388e3fe", grammarHash: "29314388e3fe", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "63bacb478283", wrapperFiles: ["report-business.src.mts", "report-index.src.mts"], wrapperHash: "05f903ac4bca", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
   }
 });
 
@@ -31959,6 +31959,9 @@ var AggregateExpr = {
   $type: "AggregateExpr",
   path: "path"
 };
+function isAggregateExpr(item) {
+  return reflection2.isInstance(item, AggregateExpr.$type);
+}
 var AnyOrderBlock = {
   $type: "AnyOrderBlock",
   branches: "branches"
@@ -32057,6 +32060,9 @@ var CreateAction = {
   source: "source",
   target: "target"
 };
+function isCreateAction(item) {
+  return reflection2.isInstance(item, CreateAction.$type);
+}
 var DomainDef = {
   $type: "DomainDef",
   name: "name"
@@ -32125,6 +32131,9 @@ var FieldExpr = {
   $type: "FieldExpr",
   path: "path"
 };
+function isFieldExpr(item) {
+  return reflection2.isInstance(item, FieldExpr.$type);
+}
 var FieldPath = {
   $type: "FieldPath",
   segments: "segments"
@@ -32222,6 +32231,13 @@ var Model = {
 function isModel(item) {
   return reflection2.isInstance(item, Model.$type);
 }
+var NoteClause = {
+  $type: "NoteClause",
+  text: "text"
+};
+function isNoteClause(item) {
+  return reflection2.isInstance(item, NoteClause.$type);
+}
 var NumberExpr = {
   $type: "NumberExpr",
   value: "value"
@@ -32310,6 +32326,7 @@ var ReadEntry = {
 };
 var RelationDef = {
   $type: "RelationDef",
+  inherited: "inherited",
   name: "name",
   source: "source",
   target: "target"
@@ -32365,6 +32382,9 @@ var SendAction = {
   message: "message",
   recipient: "recipient"
 };
+function isSendAction(item) {
+  return reflection2.isInstance(item, SendAction.$type);
+}
 var StageDef = {
   $type: "StageDef",
   actor: "actor",
@@ -32934,6 +32954,15 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: []
     },
+    NoteClause: {
+      name: NoteClause.$type,
+      properties: {
+        text: {
+          name: NoteClause.text
+        }
+      },
+      superTypes: [OperationClause.$type]
+    },
     NumberExpr: {
       name: NumberExpr.$type,
       properties: {
@@ -33097,6 +33126,10 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
     RelationDef: {
       name: RelationDef.$type,
       properties: {
+        inherited: {
+          name: RelationDef.inherited,
+          defaultValue: false
+        },
         name: {
           name: RelationDef.name
         },
@@ -33719,6 +33752,16 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "deprecatedSyntax": false,
               "isMulti": false
             }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "inherited",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "inherited"
+            },
+            "cardinality": "?"
           }
         ]
       },
@@ -34562,6 +34605,34 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "$ref": "#/rules@25"
             },
             "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "NoteClause"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "note"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@72"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
           },
           {
             "$type": "Group",
@@ -38387,6 +38458,790 @@ function deriveStateChain(p, input) {
   return { axis: axisList, stages };
 }
 
+// src/generator/operations.ts
+init_define_BUILD_INFO();
+
+// src/generator/ops-expr.ts
+init_define_BUILD_INFO();
+
+// src/generator/plantuml.ts
+init_define_BUILD_INFO();
+
+// src/generator/generator.ts
+init_define_BUILD_INFO();
+
+// src/generator/expressions.ts
+init_define_BUILD_INFO();
+
+// src/generator/naming.ts
+init_define_BUILD_INFO();
+function lowerFirst(s) {
+  return s.charAt(0).toLowerCase() + s.slice(1);
+}
+function kebab(s) {
+  return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+}
+
+// src/generator/cockburn.ts
+init_define_BUILD_INFO();
+function genFlowDocFiles(model, units2) {
+  const flows2 = elementsOf(model).filter(isFlowDef).filter((f) => f.name);
+  if (flows2.length === 0) return [];
+  const unitBySig = unitsBySignature(units2);
+  return flows2.map((flow) => ({
+    path: `docs/flows/${kebab(flow.name)}.md`,
+    content: genFlowDoc(flow, unitBySig)
+  }));
+}
+function goalText(name) {
+  return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+}
+function genFlowDoc(flow, unitBySig) {
+  const actorName = flow.actor?.ref?.name ?? flow.actor?.$refText ?? "?";
+  const main = [];
+  const extensions = [];
+  const onceSuffix = (item) => {
+    if (item.optional && item.repeat) return " *(iste\u011Fe ba\u011Fl\u0131, tekrarlanabilir)*";
+    if (item.optional) return " *(iste\u011Fe ba\u011Fl\u0131)*";
+    if (item.repeat) return " *(tekrarlanabilir)*";
+    return "";
+  };
+  const onceExtension = (label, item) => {
+    if (item.optional && item.repeat) return `${label} atlanabilir ya da tekrarlanabilir (optional repeat).`;
+    if (item.optional) return `${label} atlanabilir (optional).`;
+    return `${label} tekrarlanabilir (repeat).`;
+  };
+  const stepLabel = (step) => {
+    const sig = stepSignature(step);
+    const unit = sig ? unitBySig.get(sig) : void 0;
+    const using = step.source?.ref?.name ? ` *(using ${step.source.ref.name} ad\u0131m\u0131n\u0131n sonucu)*` : "";
+    if (unit) return `\`${step.name}\` \u2014 ${unitLabel(unit)}${using}`;
+    const text = step.target?.$refText ?? "?";
+    return `\`${step.name}\` \u2014 ${text} *(\xE7\xF6z\xFClemeyen/imzas\u0131z referans)*${using}`;
+  };
+  const includePath = /* @__PURE__ */ new Set([flow]);
+  const emitItems = (items, prefix, indent) => {
+    let n = 0;
+    for (const item of items) {
+      if (isFlowStep(item)) {
+        n += 1;
+        const num = `${prefix}${n}`;
+        main.push(`${indent}${num}. ${stepLabel(item)}${onceSuffix(item)}`);
+        const stepOp = stepOperation(item);
+        const stepNote = stepOp ? effectiveNote(stepOp) : void 0;
+        if (stepNote) {
+          main.push(`${indent}   > Not: ${stepNote.split("\n").join(" ")}`);
+        }
+        if (item.optional || item.repeat) {
+          extensions.push(`- **${num}a.** ${onceExtension(`\`${item.name}\``, item)}`);
+        }
+        const op = stepOperation(item);
+        if (op) {
+          for (const target2 of performClosure(op)) {
+            main.push(`${indent}   - *Sistem otomatik (perform):* ${target2.name}`);
+          }
+        }
+      } else if (isIncludeStep(item)) {
+        n += 1;
+        const num = `${prefix}${n}`;
+        const name = item.target?.ref?.name ?? item.target?.$refText ?? "?";
+        const target2 = item.target?.ref;
+        if (!target2) {
+          main.push(`${indent}${num}. include **${name}** *(\xE7\xF6z\xFClemeyen include)*${onceSuffix(item)}`);
+        } else if (includePath.has(target2)) {
+          main.push(`${indent}${num}. include **${name}** *(d\xF6ng\xFCsel include \u2014 geni\u015Fletilmedi)*${onceSuffix(item)}`);
+        } else {
+          main.push(`${indent}${num}. include **${name}** (inline geni\u015Fletildi):${onceSuffix(item)}`);
+          includePath.add(target2);
+          emitItems(target2.items ?? [], `${num}.`, indent + "   ");
+          includePath.delete(target2);
+        }
+        if (item.optional || item.repeat) {
+          extensions.push(`- **${num}a.** ${onceExtension(`include **${name}**`, item)}`);
+        }
+      } else if (isEitherBlock(item)) {
+        n += 1;
+        const num = `${prefix}${n}`;
+        main.push(`${indent}${num}. **Se\xE7im** \u2014 ana senaryoda ilk dal (${num}a) ko\u015Fulur:`);
+        item.branches.forEach((branch, i) => {
+          const letter = String.fromCharCode(97 + i);
+          if (i === 0) {
+            emitItems(branch.items, `${num}${letter}.`, indent + "   ");
+          } else {
+            extensions.push(`- **${num}${letter}.** Alternatif dal:`);
+            const start = main.length;
+            emitItems(branch.items, `${num}${letter}.`, "  ");
+            extensions.push(...main.splice(start));
+          }
+        });
+      } else if (isOutsideNote(item)) {
+        main.push(`${indent}   > *\u2014 ${item.text} (sistem d\u0131\u015F\u0131)*`);
+      }
+    }
+  };
+  emitItems(flow.items ?? [], "", "");
+  for (const item of flow.items ?? []) {
+    if (isAbandonNote(item)) {
+      extensions.push(`- ***a.** Her noktada: "${item.text}" \u2014 kullan\u0131c\u0131 ak\u0131\u015F\u0131 terk edebilir (abandon anytime).`);
+    }
+  }
+  const lines = [
+    `# ${flow.name}`,
+    "",
+    "> Modelden \xFCretildi; elle de\u011Fi\u015Ftirmeyin. Ak\u0131\u015Flar komutlar\u0131 zorlamaz \u2014 bu dok\xFCman anlat\u0131md\u0131r (ADR-0001).",
+    "",
+    `- **Akt\xF6r:** ${actorName}`,
+    `- **Hedef:** ${goalText(flow.name)}`,
+    ...flow.note ? ["", "> " + flow.note.split("\n").join("\n> ")] : [],
+    "",
+    "## Ana senaryo",
+    ""
+  ];
+  if (main.length === 0) {
+    lines.push("*Ak\u0131\u015F g\xF6vdesi bo\u015F \u2014 en az bir \xF6\u011Fe ekleyin (F5).*");
+  } else {
+    lines.push(...main);
+  }
+  if (extensions.length > 0) {
+    lines.push("", "## Uzant\u0131lar", "", ...extensions);
+  }
+  lines.push("");
+  return lines.join("\n");
+}
+
+// src/generator/coverage.ts
+init_define_BUILD_INFO();
+var READ_VERBS2 = /* @__PURE__ */ new Set(["reads", "lists"]);
+function genCoverageFiles(model, units2) {
+  const flows2 = elementsOf(model).filter(isFlowDef);
+  const note = "> Modelden \xFCretildi; elle de\u011Fi\u015Ftirmeyin. Ak\u0131\u015Flar komutlar\u0131 zorlamaz \u2014 bu rapor bilgi ama\xE7l\u0131d\u0131r (\xA75.5).";
+  if (flows2.length === 0) {
+    return [
+      {
+        path: "COVERAGE.md",
+        content: `# Kapsama Raporu (F6)
+
+${note}
+
+Ak\u0131\u015F tan\u0131mlanmam\u0131\u015F \u2014 kapsama hesaplanmad\u0131.
+`
+      },
+      {
+        path: "coverage.json",
+        content: JSON.stringify({ flowsDefined: false, note: "Ak\u0131\u015F tan\u0131mlanmam\u0131\u015F \u2014 kapsama hesaplanmad\u0131" }, null, 4) + "\n"
+      }
+    ];
+  }
+  const cov = computeCoverage(model);
+  const unitBySig = unitsBySignature(units2);
+  const sigs = catalogSignatures(model);
+  const rows = [];
+  for (const [sig, op] of sigs) {
+    const unit = unitBySig.get(sig);
+    const slug = unit?.slug ?? kebab(op.name);
+    const kind = unit?.isQuery ? "query" : "command";
+    const label = unit ? `${shortUnitLabel(unit)} (${unit.actor})` : op.name;
+    const vias = cov.covered.get(sig) ?? [];
+    rows.push({
+      slug,
+      signature: sig,
+      kind,
+      domain: unit?.domain,
+      label,
+      covered: vias.length > 0,
+      scheduled: cov.scheduledSigs.has(sig),
+      coveredBy: vias.map(viaJson)
+    });
+  }
+  rows.sort((a2, b) => a2.slug.localeCompare(b.slug));
+  const coveredRows = rows.filter((r) => r.covered);
+  const uncoveredRows = rows.filter((r) => !r.covered && !r.scheduled);
+  const scheduledRows = rows.filter((r) => !r.covered && r.scheduled);
+  const performDerived = coveredRows.filter((r) => r.coveredBy.every((v) => v.via === "perform"));
+  const includedBy = /* @__PURE__ */ new Map();
+  for (const flow of flows2) {
+    for (const item of flowItemsDeep(flow)) {
+      if (isIncludeStep(item) && item.target?.ref?.name) {
+        const list = includedBy.get(item.target.ref.name) ?? [];
+        list.push(flow.name);
+        includedBy.set(item.target.ref.name, list);
+      }
+    }
+  }
+  const flowRows = flows2.map((f) => ({
+    name: f.name,
+    includedBy: includedBy.get(f.name) ?? [],
+    /** Kendi (include'suz) adımlarında yazma fiili var mı? */
+    hasCommandStep: hasOwnCommandStep(f)
+  }));
+  const commandless = cov.commandlessRootFlows.map((f) => f.name);
+  const md = [
+    "# Kapsama Raporu (F6)",
+    "",
+    note,
+    "> perform-t\xFCrevi kapsama say\u0131l\u0131r: F10 bu komutlar\u0131n ak\u0131\u015Fa a\xE7\u0131k ad\u0131m olarak yaz\u0131lmas\u0131n\u0131 zaten redundant kabul eder.",
+    "",
+    "## \xD6zet",
+    "",
+    "| | |",
+    "|---|---|",
+    `| \u0130\u015Flem (komut/sorgu) | ${rows.length} |`,
+    `| Kapsanan | ${coveredRows.length}${performDerived.length ? ` (${coveredRows.length - performDerived.length} ad\u0131m/include + ${performDerived.length} yaln\u0131z perform-t\xFCrevi)` : ""} |`,
+    `| Kapsanmayan | ${uncoveredRows.length} |`,
+    ...scheduledRows.length ? [`| Zamanlanm\u0131\u015F (muaf) | ${scheduledRows.length} |`] : [],
+    `| Ak\u0131\u015F | ${flows2.length}${commandless.length === 0 ? " (komutsuz k\xF6k ak\u0131\u015F yok)" : ""} |`,
+    ""
+  ];
+  if (coveredRows.length) {
+    md.push("## Kapsanan i\u015Flemler", "", "| \u0130\u015Flem | T\xFCr | Ak\u0131\u015F | Yol |", "|---|---|---|---|");
+    for (const r of coveredRows) {
+      const flowNames = [...new Set(r.coveredBy.map((v) => v.flow))].join(", ");
+      const paths = [...new Set(r.coveredBy.map(viaText))].join("; ");
+      md.push(`| ${r.label} | ${r.kind === "query" ? "sorgu" : "komut"} | ${flowNames} | ${paths} |`);
+    }
+    md.push("");
+  }
+  if (uncoveredRows.length) {
+    md.push(`## Kapsanmayan i\u015Flemler (${uncoveredRows.length})`, "");
+    for (const r of uncoveredRows) {
+      md.push(`- ${r.label}${r.domain ? ` \u2014 ${r.domain}` : ""}`);
+    }
+    md.push("");
+  }
+  if (scheduledRows.length) {
+    md.push("## Zamanlanm\u0131\u015F (ak\u0131\u015F kapsam\u0131 beklenmez)", "");
+    for (const r of scheduledRows) {
+      md.push(`- ${r.label}${r.domain ? ` \u2014 ${r.domain}` : ""} \u2014 schedule: kural\u0131 ta\u015F\u0131yor`);
+    }
+    md.push("");
+  }
+  if (commandless.length) {
+    md.push("## Komutsuz k\xF6k ak\u0131\u015Flar", "");
+    for (const name of commandless) {
+      md.push(`- ${name} \u2014 huni bir d\xF6n\xFC\u015F\xFCm (yazma) ad\u0131m\u0131yla bitmiyor`);
+    }
+    md.push("");
+  }
+  const processes2 = elementsOf(model).filter(isProcessDef);
+  let processRows = [];
+  let flowsWithoutProcess = [];
+  if (processes2.length > 0) {
+    const pc = processStagedFlows(model);
+    processRows = processes2.map((p) => {
+      const stages = processItemsDeep(p).filter(isStageDef);
+      return {
+        name: p.name,
+        stages: stages.length,
+        stagedFlows: stages.map((s) => s.flow?.ref?.name).filter((n) => n !== void 0)
+      };
+    });
+    flowsWithoutProcess = flows2.filter((f) => !pc.closure.has(f)).map((f) => f.name);
+    md.push(
+      "## S\xFCre\xE7 kapsamas\u0131 (P8)",
+      "",
+      "> S\xFCre\xE7ler ak\u0131\u015Flar\u0131 zorlamaz; etap-ak\u0131\u015Flar\u0131n include kapan\u0131\u015F\u0131 kapsanm\u0131\u015F say\u0131l\u0131r (ADR-0003).",
+      ""
+    );
+    for (const r of processRows) {
+      md.push(`- **${r.name}** \u2014 ${r.stages} etap${r.stagedFlows.length ? ` (ak\u0131\u015F etaplar\u0131: ${r.stagedFlows.join(", ")})` : ""}`);
+    }
+    md.push("");
+    if (flowsWithoutProcess.length) {
+      md.push(`Hi\xE7bir s\xFCrecin etab\u0131 olmayan ak\u0131\u015Flar (${flowsWithoutProcess.length}):`, "");
+      for (const name of flowsWithoutProcess) md.push(`- ${name}`);
+    } else {
+      md.push("T\xFCm ak\u0131\u015Flar en az bir s\xFCrecin etab\u0131 (ya da etap-ak\u0131\u015F\u0131n alt-ak\u0131\u015F\u0131).");
+    }
+    md.push("");
+  }
+  return [
+    { path: "COVERAGE.md", content: md.join("\n") },
+    {
+      path: "coverage.json",
+      content: JSON.stringify({
+        flowsDefined: true,
+        totals: {
+          operations: rows.length,
+          covered: coveredRows.length,
+          uncovered: uncoveredRows.length,
+          scheduled: scheduledRows.length,
+          performDerived: performDerived.length
+        },
+        operations: rows,
+        flows: flowRows,
+        commandlessRootFlows: commandless,
+        // additive alanlar (yalnız süreç varsa) — totals şekli değişmez
+        ...processes2.length > 0 ? { processes: processRows, flowsWithoutProcess } : {}
+      }, null, 4) + "\n"
+    }
+  ];
+}
+function viaJson(v) {
+  return {
+    flow: v.flow.name,
+    via: v.kind,
+    ...v.step?.name ? { step: v.step.name } : {},
+    ...v.throughFlow?.name ? { through: v.throughFlow.name } : {}
+  };
+}
+function viaText(v) {
+  if (v.via === "step") return `ad\u0131m \`${v.step ?? "?"}\``;
+  if (v.via === "perform") return `perform (\`${v.step ?? "?"}\` zinciri)`;
+  return `include \`${v.through ?? "?"}\``;
+}
+function hasOwnCommandStep(flow) {
+  for (const item of flowItemsDeep(flow)) {
+    if (!isFlowStep(item)) continue;
+    const sig = stepSignature(item);
+    const verb = sig?.split("|")[1];
+    if (verb && !READ_VERBS2.has(verb)) return true;
+  }
+  return false;
+}
+
+// src/generator/e2e.ts
+init_define_BUILD_INFO();
+
+// src/generator/routing.ts
+init_define_BUILD_INFO();
+
+// src/generator/process-doc.ts
+init_define_BUILD_INFO();
+function genProcessDocFiles(model, units2) {
+  const processes2 = elementsOf(model).filter(isProcessDef).filter((p) => p.name);
+  if (processes2.length === 0) return [];
+  const unitBySig = unitsBySignature(units2);
+  return processes2.map((p) => ({
+    path: `docs/processes/${kebab(p.name)}.md`,
+    content: genProcessDoc(p, model, unitBySig)
+  }));
+}
+function stageRef(stage, unitBySig) {
+  if (stage.flow?.ref) return `flow **${stage.flow.ref.name}**`;
+  if (stage.flow) return `flow **${stage.flow.$refText}** *(\xE7\xF6z\xFClemedi \u2014 P1)*`;
+  const sig = stageSignature(stage);
+  const unit = sig ? unitBySig.get(sig) : void 0;
+  if (unit) return unitLabel(unit);
+  const text = stage.target?.$refText ?? "?";
+  return `${text} *(\xE7\xF6z\xFClemeyen/imzas\u0131z referans)*`;
+}
+function transitionCell(info) {
+  if (!info) return "\u2014";
+  const parts = [];
+  for (const e of info.expects) {
+    if (e.internal) continue;
+    parts.push(`giri\u015F ${e.entity.name}.${e.field} = '${e.value}'`);
+  }
+  const seen = /* @__PURE__ */ new Set();
+  for (const pr of info.produces) {
+    if (pr.intermediate) continue;
+    const text = pr.unknown ? `\xE7\u0131k\u0131\u015F ${pr.entity.name} \u2192 ?` : `\xE7\u0131k\u0131\u015F ${pr.entity.name}.${pr.field} = '${pr.value}'`;
+    if (!seen.has(text)) {
+      seen.add(text);
+      parts.push(text);
+    }
+  }
+  return parts.length === 0 ? "\u2014" : parts.join("; ");
+}
+function genProcessDoc(p, model, unitBySig) {
+  const chain = deriveStateChain(p, model);
+  const stateByStage = /* @__PURE__ */ new Map();
+  for (const info of chain?.stages ?? []) stateByStage.set(info.stage, info);
+  const levels = processLevels(p);
+  const lines = [
+    `# ${p.name}`,
+    "",
+    "> Modelden \xFCretildi; elle de\u011Fi\u015Ftirmeyin. S\xFCre\xE7ler ak\u0131\u015Flar\u0131 zorlamaz, y\xFCr\xFCt\xFClmez \u2014 bu dok\xFCman anlat\u0131md\u0131r (ADR-0003).",
+    ""
+  ];
+  if (p.entity?.ref) {
+    lines.push(`- **Merkez varl\u0131k (of):** ${p.entity.ref.name} \u2014 s\xFCrecin her ko\u015Fusu bu varl\u0131\u011F\u0131n tek bir \xF6rne\u011Finin ya\u015Fam\u0131n\u0131 izler`);
+    if (chain && chain.axis.length > 1) {
+      lines.push(`- **Omurga ekseni:** ${chain.axis.map((e) => e.name).join(" \u2192 ")} *(katalogdaki from/on \xF6beklerinden t\xFCretildi)*`);
+    }
+    lines.push("");
+  }
+  if (p.note) {
+    lines.push("", "> " + p.note.split("\n").join("\n> "), "");
+  }
+  const stages = levels.flatMap((l) => l.stages);
+  if (stages.length === 0) {
+    lines.push("*S\xFCre\xE7 g\xF6vdesi bo\u015F \u2014 en az iki etap ekleyin (P5).*", "");
+    return lines.join("\n");
+  }
+  const hasState = p.entity?.ref !== void 0;
+  lines.push("## Etaplar", "");
+  lines.push(hasState ? "| # | Etap | Akt\xF6r | G\xF6nderge | Durum ge\xE7i\u015Fi (t\xFCretilmi\u015F) |" : "| # | Etap | Akt\xF6r | G\xF6nderge |");
+  lines.push(hasState ? "|---|---|---|---|---|" : "|---|---|---|---|");
+  levels.forEach((level, i) => {
+    for (const stage of level.stages) {
+      const num = level.parallel ? `${i + 1} \u2225` : `${i + 1}`;
+      const actor = stageActor(stage)?.name ?? "?";
+      const row = [num, `\`${stage.name}\``, actor, stageRef(stage, unitBySig)];
+      if (hasState) row.push(transitionCell(stateByStage.get(stage)));
+      lines.push(`| ${row.join(" | ")} |`);
+      const stageOp = stage.target?.ref;
+      const stageNote = stageOp ? effectiveNote(stageOp) : void 0;
+      if (stageNote) {
+        lines.push(`  > Not: ${stageNote.split("\n").join(" ")}`);
+      }
+    }
+  });
+  lines.push("");
+  if (levels.some((l) => l.parallel)) {
+    lines.push("> \u2225 \u2014 s\u0131ra-ba\u011F\u0131ms\u0131z etaplar (`any order`): aralar\u0131nda zaman s\u0131ras\u0131 vaat edilmez; e\u015Fzamanl\u0131l\u0131k/y\xFCr\xFCtme anlam\u0131 YOKTUR.", "");
+  }
+  const handoffs = [];
+  for (let i = 1; i < levels.length; i++) {
+    for (const prev of levels[i - 1].stages) {
+      for (const next of levels[i].stages) {
+        const a2 = stageActor(prev)?.name;
+        const b = stageActor(next)?.name;
+        if (a2 && b && a2 !== b) {
+          handoffs.push(`- \`${prev.name}\` (${a2}) \u2192 \`${next.name}\` (${b})`);
+        }
+      }
+    }
+  }
+  if (handoffs.length > 0) {
+    lines.push(
+      "## El de\u011Fi\u015Ftirmeler (handoff)",
+      "",
+      "Etaplar\u0131 ba\u011Flayan \u015Fey kullan\u0131c\u0131 niyeti de\u011Fil devir-teslimdir; akt\xF6r de\u011Fi\u015Fimleri:",
+      "",
+      ...handoffs,
+      ""
+    );
+  }
+  return lines.join("\n");
+}
+
+// src/generator/process-e2e.ts
+init_define_BUILD_INFO();
+
+// src/generator/generator.ts
+function collectCommands(model) {
+  const map2 = /* @__PURE__ */ new Map();
+  const domains = computeDomains(model);
+  for (const el of elementsOf(model)) {
+    if (!isOperationDecl(el) || !isStandardCommand(el.command)) continue;
+    const cmd = el.command;
+    const actor = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
+    const resource = cmd.resource?.ref;
+    if (!actor || !resource || !el.name) continue;
+    const sig = commandSignature(actor, cmd.verb, ownershipKey(cmd.ownership), resource.name);
+    if (map2.has(sig)) continue;
+    map2.set(sig, {
+      command: cmd,
+      op: el,
+      slug: kebab(el.name),
+      fnName: lowerFirst(el.name),
+      actor,
+      verb: cmd.verb,
+      resource,
+      isQuery: READ_VERBS.has(cmd.verb),
+      domain: domains.get(el)
+    });
+  }
+  return [...map2.values()];
+}
+
+// src/generator/plantuml.ts
+var SKIN_BASE = `skinparam backgroundColor #1e1e1e
+skinparam defaultFontColor #cccccc
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #252526
+  BorderColor #4fc1ff
+  FontColor #cccccc
+  StereotypeFontColor #8a8a8a
+}
+skinparam actor {
+  BackgroundColor #252526
+  BorderColor #4fc1ff
+  FontColor #cccccc
+}
+skinparam package {
+  BackgroundColor #252526
+  BorderColor #3c3c3c
+  FontColor #cccccc
+}
+skinparam arrow {
+  Color #8a8a8a
+  FontColor #8a8a8a
+}
+skinparam note {
+  BackgroundColor #2d2d30
+  BorderColor #3c3c3c
+  FontColor #cccccc
+}`;
+var DARK_STYLE = "left to right direction\n" + SKIN_BASE;
+function cstText2(node) {
+  return (node?.$cstNode?.text ?? "").replace(/\s+/g, " ").trim();
+}
+function escapeLabel(s) {
+  return s.replace(/"/g, "'").replace(/[\r\n]+/g, " ");
+}
+function unitLabel(unit) {
+  const text = cstText2(unit.command);
+  if (text) {
+    return text.startsWith(unit.actor) ? text.slice(unit.actor.length).trim() : text;
+  }
+  return shortUnitLabel(unit);
+}
+function shortUnitLabel(unit) {
+  return unit.op.name;
+}
+function ucId(slug) {
+  return "uc_" + slug.replace(/-/g, "_");
+}
+function flowId(name) {
+  return "flow_" + kebab(name).replace(/-/g, "_");
+}
+function unitsBySignature(units2) {
+  return new Map(units2.map((u) => [
+    commandSignature(u.actor, u.verb, ownershipKey(u.command.ownership), u.resource.name),
+    u
+  ]));
+}
+var NO_DOMAIN_KEY = "";
+function generateUseCaseDiagram(model, options) {
+  const lines = ["@startuml", DARK_STYLE, ""];
+  const edges = [];
+  const notes = [];
+  const domains = computeDomains(model);
+  const domainVisible = (m) => !options?.domains || options.domains.has(m ?? NO_DOMAIN_KEY);
+  const actorVisible = (name) => name === void 0 || !options?.actors || options.actors.has(name);
+  const declaredActors = elementsOf(model).filter(isActorDef).filter((a2) => a2.name);
+  const actorNames = /* @__PURE__ */ new Set();
+  for (const actor of declaredActors) {
+    if (!actorVisible(actor.name)) continue;
+    actorNames.add(actor.name);
+    lines.push(`actor ${actor.name}`);
+  }
+  for (const actor of declaredActors) {
+    const parent = actor.parent?.ref;
+    if (parent?.name && actorVisible(actor.name) && actorVisible(parent.name)) {
+      edges.push(`${actor.name} --|> ${parent.name}`);
+    }
+  }
+  const units2 = collectCommands(model);
+  const byRuleSet = new Map(units2.map((u) => [u.op, u]));
+  const declare = (unit) => {
+    const stereo = unit.isQuery ? " <<query>>" : "";
+    return `usecase "${escapeLabel(shortUnitLabel(unit))}" as ${ucId(unit.slug)}${stereo}`;
+  };
+  const grouped = /* @__PURE__ */ new Map();
+  const groupAdd = (domainName, line) => {
+    const list = grouped.get(domainName) ?? [];
+    list.push(line);
+    grouped.set(domainName, list);
+  };
+  const drawnUnits = /* @__PURE__ */ new Set();
+  for (const unit of units2) {
+    if (!domainVisible(unit.domain) || !actorVisible(unit.actor)) continue;
+    drawnUnits.add(unit);
+    groupAdd(unit.domain, declare(unit));
+  }
+  let grantIndex = 0;
+  let drawnGrants = 0;
+  for (const el of elementsOf(model)) {
+    if (!isOperationDecl(el) || !el.name) continue;
+    const g = el.command;
+    if (!isGrantCommand(g) && !isRevokeCommand(g)) continue;
+    const actor = g.actor?.ref?.name ?? g.actor?.$refText;
+    if (!actor) continue;
+    grantIndex += 1;
+    if (!domainVisible(domains.get(el)) || !actorVisible(actor)) continue;
+    drawnGrants += 1;
+    const id = ucId(kebab(el.name));
+    groupAdd(domains.get(el), `usecase "${escapeLabel(el.name)}" as ${id}`);
+    edges.push(`${actor} --> ${id}`);
+    if (!actorNames.has(actor)) {
+      actorNames.add(actor);
+      lines.push(`actor ${actor}`);
+    }
+    const grantee = g.grantee?.ref?.name ?? g.grantee?.$refText;
+    if (grantee && actorVisible(grantee)) {
+      edges.push(`${grantee} -- ${id} : ${isGrantCommand(g) ? "to" : "from"}`);
+      if (!actorNames.has(grantee)) {
+        actorNames.add(grantee);
+        lines.push(`actor ${grantee}`);
+      }
+    }
+  }
+  for (const unit of drawnUnits) {
+    const id = ucId(unit.slug);
+    edges.push(`${unit.actor} --> ${id}`);
+    if (!actorNames.has(unit.actor)) {
+      actorNames.add(unit.actor);
+      lines.push(`actor ${unit.actor}`);
+    }
+    const recipient = unit.command.recipient?.ref?.name ?? unit.command.recipient?.$refText;
+    if (recipient && actorVisible(recipient)) {
+      edges.push(`${recipient} -- ${id} : for`);
+      if (!actorNames.has(recipient)) {
+        actorNames.add(recipient);
+        lines.push(`actor ${recipient}`);
+      }
+    }
+    const schedule = unit.op.clauses.find(isSchedule);
+    if (schedule) notes.push(`note right of ${id} : ${escapeLabel(cstText2(schedule))}`);
+    for (const action of unit.op.success?.actions ?? []) {
+      if (!isPerformAction(action) || !action.target?.ref) continue;
+      const target2 = byRuleSet.get(action.target.ref);
+      if (target2 && drawnUnits.has(target2)) edges.push(`${id} ..> ${ucId(target2.slug)} : <<include>>`);
+    }
+  }
+  const unitBySig = unitsBySignature(units2);
+  const flows2 = elementsOf(model).filter(isFlowDef).filter((f) => f.name);
+  const drawnFlows = /* @__PURE__ */ new Set();
+  for (const flow of flows2) {
+    const actorName = flow.actor?.ref?.name ?? flow.actor?.$refText;
+    if (domainVisible(domains.get(flow)) && actorVisible(actorName)) drawnFlows.add(flow.name);
+  }
+  for (const flow of flows2) {
+    if (!drawnFlows.has(flow.name)) continue;
+    const fid = flowId(flow.name);
+    groupAdd(domains.get(flow), `usecase "${escapeLabel(flow.name)}" as ${fid} <<flow>>`);
+    const actorName = flow.actor?.ref?.name ?? flow.actor?.$refText;
+    if (actorName) {
+      edges.push(`${actorName} --> ${fid}`);
+      if (!actorNames.has(actorName)) {
+        actorNames.add(actorName);
+        lines.push(`actor ${actorName}`);
+      }
+    }
+    const walkItems = (items, prefix) => {
+      let n = 0;
+      for (const item of items) {
+        if (isFlowStep(item)) {
+          n += 1;
+          const sig = stepSignature(item);
+          const unit = sig ? unitBySig.get(sig) : void 0;
+          if (unit && drawnUnits.has(unit)) {
+            const usingTag = item.source?.ref?.name ? ` (using ${escapeLabel(item.source.ref.name)})` : "";
+            edges.push(`${fid} ..> ${ucId(unit.slug)} : <<include>> ${prefix}${n}${usingTag}`);
+          }
+        } else if (isIncludeStep(item)) {
+          n += 1;
+          const target2 = item.target?.ref;
+          if (target2?.name && drawnFlows.has(target2.name)) {
+            edges.push(`${fid} ..> ${flowId(target2.name)} : <<include>> ${prefix}${n}`);
+          }
+        } else if (isEitherBlock(item)) {
+          n += 1;
+          item.branches.forEach((branch, i) => {
+            const letter = String.fromCharCode(97 + i);
+            walkItems(branch.items, `${prefix}${n}${letter}.`);
+          });
+        }
+      }
+    };
+    walkItems(flow.items ?? [], "");
+  }
+  lines.push("");
+  for (const [domainName, decls] of grouped) {
+    if (domainName === void 0) continue;
+    lines.push(`package ${domainName} {`, ...decls.map((d) => "  " + d), "}");
+  }
+  lines.push(...grouped.get(void 0) ?? []);
+  if (units2.length === 0 && grantIndex === 0 && flows2.length === 0) {
+    lines.push("note as empty_note", "  Model bo\u015F \u2014 diyagram i\xE7in komut ya da sorgu ekleyin.", "end note");
+  } else if (drawnUnits.size === 0 && drawnGrants === 0 && drawnFlows.size === 0) {
+    lines.push("note as filtered_note", "  Filtre t\xFCm \xF6\u011Feleri gizledi \u2014 domain/akt\xF6r se\xE7imini geni\u015Fletin.", "end note");
+  }
+  lines.push("", ...edges, ...notes, "", "@enduml");
+  return lines.join("\n");
+}
+
+// src/generator/operations.ts
+function pathEntity(path, entityNames) {
+  const head = path?.segments?.[0];
+  return head && entityNames.has(head) ? head : void 0;
+}
+function conditionPaths(c, out2) {
+  if (!c || typeof c !== "object") return;
+  const n = c;
+  if (isBinaryCondition(c)) {
+    conditionPaths(n.left, out2);
+    conditionPaths(n.right, out2);
+    return;
+  }
+  if (isComparison(c)) {
+    if (c.left) out2.push(c.left);
+    if (isFieldValue(c.right)) out2.push(c.right.path);
+    return;
+  }
+}
+function exprPaths(e, out2) {
+  if (!e || typeof e !== "object") return;
+  if (isBinaryExpr(e)) {
+    exprPaths(e.left, out2);
+    exprPaths(e.right, out2);
+    return;
+  }
+  if (isFieldExpr(e) || isAggregateExpr(e)) {
+    out2.push(e.path);
+    return;
+  }
+}
+function effectiveNote(op) {
+  return op.note ?? (op.clauses ?? []).find(isNoteClause)?.text;
+}
+function deriveOpAccess(op) {
+  const writes = /* @__PURE__ */ new Set();
+  const reads = /* @__PURE__ */ new Set();
+  const model = ast_utils_exports.getContainerOfType(op, isModel);
+  const entityNames = /* @__PURE__ */ new Set();
+  if (model) {
+    for (const el of model.elements) if (isEntityDef(el) && el.name) entityNames.add(el.name);
+  }
+  const cmd = op.command;
+  if (cmd && isStandardCommand(cmd)) {
+    const isQuery = operationKind(op) === "query";
+    const primary = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
+    if (primary) (isQuery ? reads : writes).add(primary);
+    const target2 = cmd.targetResource?.ref?.name ?? cmd.targetResource?.$refText;
+    if (target2) (isQuery ? reads : writes).add(target2);
+    const source = cmd.sourceResource?.ref?.name ?? cmd.sourceResource?.$refText;
+    if (source) reads.add(source);
+    if (cmd.where) {
+      const ps = [];
+      conditionPaths(cmd.where, ps);
+      for (const p of ps) {
+        const e = pathEntity(p, entityNames);
+        if (e) reads.add(e);
+      }
+    }
+    const actions = [...op.clauses, ...op.success?.actions ?? []];
+    for (const a2 of actions) {
+      if (isCalculateAction(a2)) {
+        const te = pathEntity(a2.target, entityNames);
+        if (te) writes.add(te);
+        const ps = [];
+        exprPaths(a2.expr, ps);
+        if (a2.condition) conditionPaths(a2.condition, ps);
+        for (const p of ps) {
+          const e = pathEntity(p, entityNames);
+          if (e) reads.add(e);
+        }
+      } else if (isCreateAction(a2)) {
+        const t = a2.target?.ref?.name ?? a2.target?.$refText;
+        if (t) writes.add(t);
+        const s = a2.source?.ref?.name ?? a2.source?.$refText;
+        if (s) reads.add(s);
+      } else if (isSendAction(a2)) {
+        const e = pathEntity(a2.recipient, entityNames);
+        if (e) reads.add(e);
+      }
+    }
+  }
+  for (const w of writes) reads.delete(w);
+  return { writes, reads };
+}
+
 // src/shared/note-lint.ts
 init_define_BUILD_INFO();
 var AMBIGUOUS_NOTE_CODE = "note.ambiguous";
@@ -38466,12 +39321,34 @@ var KNOWN_VERBS = [
   "rejects",
   "calculates"
 ];
+function stageHasUnresolvedRef(stage) {
+  if (stage.target && !stage.target.ref) return true;
+  if (stage.flow) {
+    if (!stage.flow.ref) return true;
+    const seen = /* @__PURE__ */ new Set();
+    const walk2 = (flow) => {
+      if (seen.has(flow)) return false;
+      seen.add(flow);
+      for (const item of flowItemsDeep(flow)) {
+        if (isFlowStep(item)) {
+          if (item.target && !item.target.ref) return true;
+        } else if (isIncludeStep(item)) {
+          if (item.target && !item.target.ref) return true;
+          if (item.target?.ref && walk2(item.target.ref)) return true;
+        }
+      }
+      return false;
+    };
+    return walk2(stage.flow.ref);
+  }
+  return false;
+}
 function registerValidationChecks(services) {
   const registry = services.validation.ValidationRegistry;
   const validator = services.validation.CommandDslValidator;
   const checks = {
-    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules],
-    OperationDecl: [validator.checkOperationClauses, validator.checkNote, validator.checkRequires],
+    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules, validator.checkBlindWrites],
+    OperationDecl: [validator.checkOperationClauses, validator.checkOperationNote, validator.checkRequires],
     ImportDecl: validator.checkImport,
     EntityDef: validator.checkEntityFields,
     StandardCommand: validator.checkStandardCommand,
@@ -38853,18 +39730,48 @@ var CommandDslValidator = class {
   }
   /** ADR-0005: not tanımlı ama boş → uyarı. İçerik aksi halde doğrulanmaz. */
   checkNote(node, accept) {
-    const note = node.note;
+    this.lintNoteText(node.note, node, "note", accept);
+  }
+  /**
+   * P1 (plan 2.5) — OperationDecl notu KONUM-BAĞIMSIZ: eski başlık-ardı slot VEYA
+   * NoteClause cümleciği. Adet tek: slot + clause'lar toplamı ≥2 → error (fail-closed;
+   * hangi note emit edilir belirsiz kalırdı, sessiz seçim = bilgi kaybı). Aksi halde
+   * etkin not (effectiveNote) sahibine (slot: op/'note', clause: NoteClause/'text')
+   * çıpalanarak lint'lenir — konumdan bağımsız aynı boş/belirsizlik/EARS/refinement denetimi.
+   */
+  checkOperationNote(op, accept) {
+    const noteClauses = (op.clauses ?? []).filter(isNoteClause);
+    const total = (op.note !== void 0 ? 1 : 0) + noteClauses.length;
+    if (total >= 2) {
+      accept(
+        "error",
+        "Bir i\u015Flemde en fazla bir 'note' olabilir (konumu serbest, adedi tek \u2014 P1).",
+        { node: op }
+      );
+      return;
+    }
+    if (op.note !== void 0) {
+      this.lintNoteText(op.note, op, "note", accept);
+    } else if (noteClauses.length === 1) {
+      this.lintNoteText(noteClauses[0].text, noteClauses[0], "text", accept);
+    }
+  }
+  /** ADR-0005 boş-not uyarısı + F2.3 belirsizlik/EARS/refinement lint (ADR-0036; dedektör
+   *  shared/note-lint.ts, tech ile TEK-KAYNAK). Her tespit AYRI code (talep-sayacı). Sessiz
+   *  sınıflandırma YOK — tanı SORAR. Not sahibi node/property çağıran tarafından verilir
+   *  (fixed slot: 'note'; NoteClause: 'text') — konum-bağımsız tek gövde. */
+  lintNoteText(note, node, property2, accept) {
     if (note === void 0) return;
     if (note.trim() === "") {
       accept(
         "warning",
         'Bo\u015F not: silin ya da i\xE7erik yaz\u0131n (note """...""").',
-        { node, property: "note" }
+        { node, property: property2 }
       );
       return;
     }
     for (const hit of detectNoteLint(note)) {
-      accept(hit.severity, hit.message, { node, property: "note", code: hit.code });
+      accept(hit.severity, hit.message, { node, property: property2, code: hit.code });
     }
   }
   /**
@@ -39027,10 +39934,11 @@ var CommandDslValidator = class {
     if (!source || !isActorDef(source)) return;
     const holder = ast_utils_exports.getContainerOfType(ownership, isStandardCommand) ?? ast_utils_exports.getContainerOfType(ownership, isGrantCommand) ?? ast_utils_exports.getContainerOfType(ownership, isRevokeCommand);
     const actor = holder?.actor?.ref;
-    if (actor && actor !== source) {
+    const compatible = !actor || actor === source || relation.inherited === true && actorAncestors(actor).includes(source);
+    if (actor && !compatible) {
       accept(
         "warning",
-        `'${relation.name}' ili\u015Fkisi '${source.name}' akt\xF6r\xFC i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}'`,
+        relation.inherited ? `'${relation.name}' ili\u015Fkisi ('inherited') '${source.name}' soy-zinciri i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}' bu zincirde de\u011Fil` : `'${relation.name}' ili\u015Fkisi '${source.name}' akt\xF6r\xFC i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}' (kal\u0131t\u0131m istiyorsan\u0131z ili\u015Fkiye 'inherited' yaz\u0131n \u2014 P2 opt-in)`,
         { node: ownership }
       );
     }
@@ -39392,6 +40300,26 @@ var CommandDslValidator = class {
         { node: p, property: "name" }
       );
     }
+    const ofEntity = p.entity?.ref;
+    if (ofEntity && !stages.some(stageHasUnresolvedRef)) {
+      const touched = /* @__PURE__ */ new Set();
+      let anyResolved = false;
+      for (const stage of stages) {
+        for (const stageOp of stageUnits(stage).map((u) => u.op)) {
+          const acc = deriveOpAccess(stageOp);
+          if (acc.writes.size + acc.reads.size > 0) anyResolved = true;
+          for (const e of acc.writes) touched.add(e);
+          for (const e of acc.reads) touched.add(e);
+        }
+      }
+      if (anyResolved && !touched.has(ofEntity.name)) {
+        accept(
+          "warning",
+          `S\xFCre\xE7 '${p.name}' hi\xE7bir etab\u0131 merkez kayd\u0131 '${ofEntity.name}'e dokunmuyor (dokunulan: ${[...touched].sort().join(", ") || "\u2014"}). S\xFCre\xE7 'of ${ofEntity.name}' diyorsa en az bir etap o kayd\u0131n ya\u015Fam d\xF6ng\xFCs\xFCn\xFC ilerletmeli (P6-merkez, per-process).`,
+          { node: p, property: "entity" }
+        );
+      }
+    }
     const model = ast_utils_exports.getContainerOfType(p, isModel);
     if (!model) return;
     const chain = deriveStateChain(p, this.visible(model));
@@ -39437,6 +40365,67 @@ var CommandDslValidator = class {
         `Zamanlanm\u0131\u015F komut s\xFCre\xE7 etab\u0131 olamaz: '${op.name}' schedule kural\u0131 ta\u015F\u0131yor \u2014 zamanlanm\u0131\u015F i\u015Fler hi\xE7bir etaba ait de\u011Fildir, s\xFCre\xE7 d\u0131\u015F\u0131d\u0131r (P7)`,
         { node: stage, property: "name" }
       );
+    }
+  }
+  /**
+   * F3 (plan 1.5): kör-oluşturma taraması. Bir entity ≥1 op tarafından yazılıyor ama
+   * hiçbir query onu DÖNDÜRMÜYOR → o veriyle ekran/panel kurulamaz (7-kayıt vakası).
+   * Ölçüt DÖNDÜRME'dir, okuma değil (kullanıcı kararı 2026-07-22): `reads ⊋ returns`;
+   * yalnız filtre/join için okunan (query'de `from`/`on` → `access.reads`) entity ekranda
+   * gösterilemez, o yüzden `reads` proxy'si yanlış-negatif üretir. Döndürülen entity =
+   * query'nin BİRİNCİL kaynağı (`cmd.resource` / emit `signature.resource`);
+   * `targetResource`/`sourceResource`/koşul-yolları query'de `reads`'e girer ama DÖNÜŞ değildir.
+   * Kapsam (reachability): "döndürülen" küme, görünürlük kümesi ∪ bu dokümanı import eden
+   * YÜKLÜ dokümanların görünürlük kümeleri üzerinden hesaplanır (checkCoverage/F6 emsali —
+   * `reverseImporterModels`). Aksi halde kardeş bir modülde E'yi döndüren query, E'yi yazan
+   * modül TEK BAŞINA doğrulanırken görünmez ve sahte-pozitif üretirdi (ölçülmüş: examples/real —
+   * procurement PurchaseOrder yazar, onu döndüren query fulfillment'tadır). Uyarı ise YALNIZ
+   * bu dokümanın yazan op'ları için üretilir (çapraz-doküman çift-uyarı olmaz).
+   * Sınır: `deriveOpAccess` çözemediği (kırık cross-import ref) erişimleri zaten taramaya
+   * katmaz → fail-open (bilinçli; çözüm hatası kendi diagnostic'ini üretir). Çözülen dünyada
+   * yazılan-ama-döndürülmeyen her entity KOŞULSUZ warning alır (fail-closed). Heuristik → warning.
+   */
+  checkBlindWrites(model, accept) {
+    const union = /* @__PURE__ */ new Map();
+    const add = (m) => {
+      const key = m.$document?.uri.toString() ?? `anon:${union.size}`;
+      if (!union.has(key)) union.set(key, m);
+    };
+    for (const m of this.visible(model)) add(m);
+    for (const importer of reverseImporterModels(model, this.documents)) {
+      for (const m of visibleModels(importer, this.documents)) add(m);
+    }
+    const returnedEntities = /* @__PURE__ */ new Set();
+    for (const m of union.values()) {
+      for (const el of m.elements) {
+        if (!isOperationDecl(el) || operationKind(el) !== "query") continue;
+        const cmd = el.command;
+        if (isStandardCommand(cmd)) {
+          const r = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
+          if (r) returnedEntities.add(r);
+        }
+      }
+    }
+    const writers = /* @__PURE__ */ new Map();
+    for (const el of model.elements) {
+      if (!isOperationDecl(el) || operationKind(el) === "query") continue;
+      for (const e of deriveOpAccess(el).writes) {
+        let arr = writers.get(e);
+        if (!arr) {
+          arr = [];
+          writers.set(e, arr);
+        }
+        arr.push(el);
+      }
+    }
+    for (const [entity, ws] of [...writers.entries()].sort()) {
+      if (!returnedEntities.has(entity)) {
+        accept(
+          "warning",
+          `'${entity}' ${ws.length} i\u015Flemce yaz\u0131l\u0131yor ama hi\xE7bir sorgu onu D\xD6ND\xDCRM\xDCYOR \u2014 bu kay\u0131tla ekran/panel kurulamaz (F3 k\xF6r-olu\u015Fturma). Yaln\u0131z filtre/join i\xE7in okunmas\u0131 yetmez. Onu d\xF6nd\xFCren bir query ekleyin ya da yaz\u0131m\u0131n amac\u0131n\u0131 'note' ile kayda ge\xE7irin.`,
+          { node: ws[0], property: "name" }
+        );
+      }
     }
   }
   /** P9: any order en az iki dal; iç içe any order yok (v1 düz) */
@@ -39865,702 +40854,6 @@ function createCommandDslServices(context) {
   shared2.ServiceRegistry.register(CommandDsl);
   registerValidationChecks(CommandDsl);
   return { shared: shared2, CommandDsl };
-}
-
-// src/generator/generator.ts
-init_define_BUILD_INFO();
-
-// src/generator/expressions.ts
-init_define_BUILD_INFO();
-
-// src/generator/naming.ts
-init_define_BUILD_INFO();
-function lowerFirst(s) {
-  return s.charAt(0).toLowerCase() + s.slice(1);
-}
-function kebab(s) {
-  return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-// src/generator/cockburn.ts
-init_define_BUILD_INFO();
-
-// src/generator/plantuml.ts
-init_define_BUILD_INFO();
-var SKIN_BASE = `skinparam backgroundColor #1e1e1e
-skinparam defaultFontColor #cccccc
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam usecase {
-  BackgroundColor #252526
-  BorderColor #4fc1ff
-  FontColor #cccccc
-  StereotypeFontColor #8a8a8a
-}
-skinparam actor {
-  BackgroundColor #252526
-  BorderColor #4fc1ff
-  FontColor #cccccc
-}
-skinparam package {
-  BackgroundColor #252526
-  BorderColor #3c3c3c
-  FontColor #cccccc
-}
-skinparam arrow {
-  Color #8a8a8a
-  FontColor #8a8a8a
-}
-skinparam note {
-  BackgroundColor #2d2d30
-  BorderColor #3c3c3c
-  FontColor #cccccc
-}`;
-var DARK_STYLE = "left to right direction\n" + SKIN_BASE;
-function cstText(node) {
-  return (node?.$cstNode?.text ?? "").replace(/\s+/g, " ").trim();
-}
-function escapeLabel(s) {
-  return s.replace(/"/g, "'").replace(/[\r\n]+/g, " ");
-}
-function unitLabel(unit) {
-  const text = cstText(unit.command);
-  if (text) {
-    return text.startsWith(unit.actor) ? text.slice(unit.actor.length).trim() : text;
-  }
-  return shortUnitLabel(unit);
-}
-function shortUnitLabel(unit) {
-  return unit.op.name;
-}
-function ucId(slug) {
-  return "uc_" + slug.replace(/-/g, "_");
-}
-function flowId(name) {
-  return "flow_" + kebab(name).replace(/-/g, "_");
-}
-function unitsBySignature(units2) {
-  return new Map(units2.map((u) => [
-    commandSignature(u.actor, u.verb, ownershipKey(u.command.ownership), u.resource.name),
-    u
-  ]));
-}
-var NO_DOMAIN_KEY = "";
-function generateUseCaseDiagram(model, options) {
-  const lines = ["@startuml", DARK_STYLE, ""];
-  const edges = [];
-  const notes = [];
-  const domains = computeDomains(model);
-  const domainVisible = (m) => !options?.domains || options.domains.has(m ?? NO_DOMAIN_KEY);
-  const actorVisible = (name) => name === void 0 || !options?.actors || options.actors.has(name);
-  const declaredActors = elementsOf(model).filter(isActorDef).filter((a2) => a2.name);
-  const actorNames = /* @__PURE__ */ new Set();
-  for (const actor of declaredActors) {
-    if (!actorVisible(actor.name)) continue;
-    actorNames.add(actor.name);
-    lines.push(`actor ${actor.name}`);
-  }
-  for (const actor of declaredActors) {
-    const parent = actor.parent?.ref;
-    if (parent?.name && actorVisible(actor.name) && actorVisible(parent.name)) {
-      edges.push(`${actor.name} --|> ${parent.name}`);
-    }
-  }
-  const units2 = collectCommands(model);
-  const byRuleSet = new Map(units2.map((u) => [u.op, u]));
-  const declare = (unit) => {
-    const stereo = unit.isQuery ? " <<query>>" : "";
-    return `usecase "${escapeLabel(shortUnitLabel(unit))}" as ${ucId(unit.slug)}${stereo}`;
-  };
-  const grouped = /* @__PURE__ */ new Map();
-  const groupAdd = (domainName, line) => {
-    const list = grouped.get(domainName) ?? [];
-    list.push(line);
-    grouped.set(domainName, list);
-  };
-  const drawnUnits = /* @__PURE__ */ new Set();
-  for (const unit of units2) {
-    if (!domainVisible(unit.domain) || !actorVisible(unit.actor)) continue;
-    drawnUnits.add(unit);
-    groupAdd(unit.domain, declare(unit));
-  }
-  let grantIndex = 0;
-  let drawnGrants = 0;
-  for (const el of elementsOf(model)) {
-    if (!isOperationDecl(el) || !el.name) continue;
-    const g = el.command;
-    if (!isGrantCommand(g) && !isRevokeCommand(g)) continue;
-    const actor = g.actor?.ref?.name ?? g.actor?.$refText;
-    if (!actor) continue;
-    grantIndex += 1;
-    if (!domainVisible(domains.get(el)) || !actorVisible(actor)) continue;
-    drawnGrants += 1;
-    const id = ucId(kebab(el.name));
-    groupAdd(domains.get(el), `usecase "${escapeLabel(el.name)}" as ${id}`);
-    edges.push(`${actor} --> ${id}`);
-    if (!actorNames.has(actor)) {
-      actorNames.add(actor);
-      lines.push(`actor ${actor}`);
-    }
-    const grantee = g.grantee?.ref?.name ?? g.grantee?.$refText;
-    if (grantee && actorVisible(grantee)) {
-      edges.push(`${grantee} -- ${id} : ${isGrantCommand(g) ? "to" : "from"}`);
-      if (!actorNames.has(grantee)) {
-        actorNames.add(grantee);
-        lines.push(`actor ${grantee}`);
-      }
-    }
-  }
-  for (const unit of drawnUnits) {
-    const id = ucId(unit.slug);
-    edges.push(`${unit.actor} --> ${id}`);
-    if (!actorNames.has(unit.actor)) {
-      actorNames.add(unit.actor);
-      lines.push(`actor ${unit.actor}`);
-    }
-    const recipient = unit.command.recipient?.ref?.name ?? unit.command.recipient?.$refText;
-    if (recipient && actorVisible(recipient)) {
-      edges.push(`${recipient} -- ${id} : for`);
-      if (!actorNames.has(recipient)) {
-        actorNames.add(recipient);
-        lines.push(`actor ${recipient}`);
-      }
-    }
-    const schedule = unit.op.clauses.find(isSchedule);
-    if (schedule) notes.push(`note right of ${id} : ${escapeLabel(cstText(schedule))}`);
-    for (const action of unit.op.success?.actions ?? []) {
-      if (!isPerformAction(action) || !action.target?.ref) continue;
-      const target2 = byRuleSet.get(action.target.ref);
-      if (target2 && drawnUnits.has(target2)) edges.push(`${id} ..> ${ucId(target2.slug)} : <<include>>`);
-    }
-  }
-  const unitBySig = unitsBySignature(units2);
-  const flows2 = elementsOf(model).filter(isFlowDef).filter((f) => f.name);
-  const drawnFlows = /* @__PURE__ */ new Set();
-  for (const flow of flows2) {
-    const actorName = flow.actor?.ref?.name ?? flow.actor?.$refText;
-    if (domainVisible(domains.get(flow)) && actorVisible(actorName)) drawnFlows.add(flow.name);
-  }
-  for (const flow of flows2) {
-    if (!drawnFlows.has(flow.name)) continue;
-    const fid = flowId(flow.name);
-    groupAdd(domains.get(flow), `usecase "${escapeLabel(flow.name)}" as ${fid} <<flow>>`);
-    const actorName = flow.actor?.ref?.name ?? flow.actor?.$refText;
-    if (actorName) {
-      edges.push(`${actorName} --> ${fid}`);
-      if (!actorNames.has(actorName)) {
-        actorNames.add(actorName);
-        lines.push(`actor ${actorName}`);
-      }
-    }
-    const walkItems = (items, prefix) => {
-      let n = 0;
-      for (const item of items) {
-        if (isFlowStep(item)) {
-          n += 1;
-          const sig = stepSignature(item);
-          const unit = sig ? unitBySig.get(sig) : void 0;
-          if (unit && drawnUnits.has(unit)) {
-            const usingTag = item.source?.ref?.name ? ` (using ${escapeLabel(item.source.ref.name)})` : "";
-            edges.push(`${fid} ..> ${ucId(unit.slug)} : <<include>> ${prefix}${n}${usingTag}`);
-          }
-        } else if (isIncludeStep(item)) {
-          n += 1;
-          const target2 = item.target?.ref;
-          if (target2?.name && drawnFlows.has(target2.name)) {
-            edges.push(`${fid} ..> ${flowId(target2.name)} : <<include>> ${prefix}${n}`);
-          }
-        } else if (isEitherBlock(item)) {
-          n += 1;
-          item.branches.forEach((branch, i) => {
-            const letter = String.fromCharCode(97 + i);
-            walkItems(branch.items, `${prefix}${n}${letter}.`);
-          });
-        }
-      }
-    };
-    walkItems(flow.items ?? [], "");
-  }
-  lines.push("");
-  for (const [domainName, decls] of grouped) {
-    if (domainName === void 0) continue;
-    lines.push(`package ${domainName} {`, ...decls.map((d) => "  " + d), "}");
-  }
-  lines.push(...grouped.get(void 0) ?? []);
-  if (units2.length === 0 && grantIndex === 0 && flows2.length === 0) {
-    lines.push("note as empty_note", "  Model bo\u015F \u2014 diyagram i\xE7in komut ya da sorgu ekleyin.", "end note");
-  } else if (drawnUnits.size === 0 && drawnGrants === 0 && drawnFlows.size === 0) {
-    lines.push("note as filtered_note", "  Filtre t\xFCm \xF6\u011Feleri gizledi \u2014 domain/akt\xF6r se\xE7imini geni\u015Fletin.", "end note");
-  }
-  lines.push("", ...edges, ...notes, "", "@enduml");
-  return lines.join("\n");
-}
-
-// src/generator/cockburn.ts
-function genFlowDocFiles(model, units2) {
-  const flows2 = elementsOf(model).filter(isFlowDef).filter((f) => f.name);
-  if (flows2.length === 0) return [];
-  const unitBySig = unitsBySignature(units2);
-  return flows2.map((flow) => ({
-    path: `docs/flows/${kebab(flow.name)}.md`,
-    content: genFlowDoc(flow, unitBySig)
-  }));
-}
-function goalText(name) {
-  return name.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
-}
-function genFlowDoc(flow, unitBySig) {
-  const actorName = flow.actor?.ref?.name ?? flow.actor?.$refText ?? "?";
-  const main = [];
-  const extensions = [];
-  const onceSuffix = (item) => {
-    if (item.optional && item.repeat) return " *(iste\u011Fe ba\u011Fl\u0131, tekrarlanabilir)*";
-    if (item.optional) return " *(iste\u011Fe ba\u011Fl\u0131)*";
-    if (item.repeat) return " *(tekrarlanabilir)*";
-    return "";
-  };
-  const onceExtension = (label, item) => {
-    if (item.optional && item.repeat) return `${label} atlanabilir ya da tekrarlanabilir (optional repeat).`;
-    if (item.optional) return `${label} atlanabilir (optional).`;
-    return `${label} tekrarlanabilir (repeat).`;
-  };
-  const stepLabel = (step) => {
-    const sig = stepSignature(step);
-    const unit = sig ? unitBySig.get(sig) : void 0;
-    const using = step.source?.ref?.name ? ` *(using ${step.source.ref.name} ad\u0131m\u0131n\u0131n sonucu)*` : "";
-    if (unit) return `\`${step.name}\` \u2014 ${unitLabel(unit)}${using}`;
-    const text = step.target?.$refText ?? "?";
-    return `\`${step.name}\` \u2014 ${text} *(\xE7\xF6z\xFClemeyen/imzas\u0131z referans)*${using}`;
-  };
-  const includePath = /* @__PURE__ */ new Set([flow]);
-  const emitItems = (items, prefix, indent) => {
-    let n = 0;
-    for (const item of items) {
-      if (isFlowStep(item)) {
-        n += 1;
-        const num = `${prefix}${n}`;
-        main.push(`${indent}${num}. ${stepLabel(item)}${onceSuffix(item)}`);
-        const stepOp = stepOperation(item);
-        if (stepOp?.note) {
-          main.push(`${indent}   > Not: ${stepOp.note.split("\n").join(" ")}`);
-        }
-        if (item.optional || item.repeat) {
-          extensions.push(`- **${num}a.** ${onceExtension(`\`${item.name}\``, item)}`);
-        }
-        const op = stepOperation(item);
-        if (op) {
-          for (const target2 of performClosure(op)) {
-            main.push(`${indent}   - *Sistem otomatik (perform):* ${target2.name}`);
-          }
-        }
-      } else if (isIncludeStep(item)) {
-        n += 1;
-        const num = `${prefix}${n}`;
-        const name = item.target?.ref?.name ?? item.target?.$refText ?? "?";
-        const target2 = item.target?.ref;
-        if (!target2) {
-          main.push(`${indent}${num}. include **${name}** *(\xE7\xF6z\xFClemeyen include)*${onceSuffix(item)}`);
-        } else if (includePath.has(target2)) {
-          main.push(`${indent}${num}. include **${name}** *(d\xF6ng\xFCsel include \u2014 geni\u015Fletilmedi)*${onceSuffix(item)}`);
-        } else {
-          main.push(`${indent}${num}. include **${name}** (inline geni\u015Fletildi):${onceSuffix(item)}`);
-          includePath.add(target2);
-          emitItems(target2.items ?? [], `${num}.`, indent + "   ");
-          includePath.delete(target2);
-        }
-        if (item.optional || item.repeat) {
-          extensions.push(`- **${num}a.** ${onceExtension(`include **${name}**`, item)}`);
-        }
-      } else if (isEitherBlock(item)) {
-        n += 1;
-        const num = `${prefix}${n}`;
-        main.push(`${indent}${num}. **Se\xE7im** \u2014 ana senaryoda ilk dal (${num}a) ko\u015Fulur:`);
-        item.branches.forEach((branch, i) => {
-          const letter = String.fromCharCode(97 + i);
-          if (i === 0) {
-            emitItems(branch.items, `${num}${letter}.`, indent + "   ");
-          } else {
-            extensions.push(`- **${num}${letter}.** Alternatif dal:`);
-            const start = main.length;
-            emitItems(branch.items, `${num}${letter}.`, "  ");
-            extensions.push(...main.splice(start));
-          }
-        });
-      } else if (isOutsideNote(item)) {
-        main.push(`${indent}   > *\u2014 ${item.text} (sistem d\u0131\u015F\u0131)*`);
-      }
-    }
-  };
-  emitItems(flow.items ?? [], "", "");
-  for (const item of flow.items ?? []) {
-    if (isAbandonNote(item)) {
-      extensions.push(`- ***a.** Her noktada: "${item.text}" \u2014 kullan\u0131c\u0131 ak\u0131\u015F\u0131 terk edebilir (abandon anytime).`);
-    }
-  }
-  const lines = [
-    `# ${flow.name}`,
-    "",
-    "> Modelden \xFCretildi; elle de\u011Fi\u015Ftirmeyin. Ak\u0131\u015Flar komutlar\u0131 zorlamaz \u2014 bu dok\xFCman anlat\u0131md\u0131r (ADR-0001).",
-    "",
-    `- **Akt\xF6r:** ${actorName}`,
-    `- **Hedef:** ${goalText(flow.name)}`,
-    ...flow.note ? ["", "> " + flow.note.split("\n").join("\n> ")] : [],
-    "",
-    "## Ana senaryo",
-    ""
-  ];
-  if (main.length === 0) {
-    lines.push("*Ak\u0131\u015F g\xF6vdesi bo\u015F \u2014 en az bir \xF6\u011Fe ekleyin (F5).*");
-  } else {
-    lines.push(...main);
-  }
-  if (extensions.length > 0) {
-    lines.push("", "## Uzant\u0131lar", "", ...extensions);
-  }
-  lines.push("");
-  return lines.join("\n");
-}
-
-// src/generator/coverage.ts
-init_define_BUILD_INFO();
-var READ_VERBS3 = /* @__PURE__ */ new Set(["reads", "lists"]);
-function genCoverageFiles(model, units2) {
-  const flows2 = elementsOf(model).filter(isFlowDef);
-  const note = "> Modelden \xFCretildi; elle de\u011Fi\u015Ftirmeyin. Ak\u0131\u015Flar komutlar\u0131 zorlamaz \u2014 bu rapor bilgi ama\xE7l\u0131d\u0131r (\xA75.5).";
-  if (flows2.length === 0) {
-    return [
-      {
-        path: "COVERAGE.md",
-        content: `# Kapsama Raporu (F6)
-
-${note}
-
-Ak\u0131\u015F tan\u0131mlanmam\u0131\u015F \u2014 kapsama hesaplanmad\u0131.
-`
-      },
-      {
-        path: "coverage.json",
-        content: JSON.stringify({ flowsDefined: false, note: "Ak\u0131\u015F tan\u0131mlanmam\u0131\u015F \u2014 kapsama hesaplanmad\u0131" }, null, 4) + "\n"
-      }
-    ];
-  }
-  const cov = computeCoverage(model);
-  const unitBySig = unitsBySignature(units2);
-  const sigs = catalogSignatures(model);
-  const rows = [];
-  for (const [sig, op] of sigs) {
-    const unit = unitBySig.get(sig);
-    const slug = unit?.slug ?? kebab(op.name);
-    const kind = unit?.isQuery ? "query" : "command";
-    const label = unit ? `${shortUnitLabel(unit)} (${unit.actor})` : op.name;
-    const vias = cov.covered.get(sig) ?? [];
-    rows.push({
-      slug,
-      signature: sig,
-      kind,
-      domain: unit?.domain,
-      label,
-      covered: vias.length > 0,
-      scheduled: cov.scheduledSigs.has(sig),
-      coveredBy: vias.map(viaJson)
-    });
-  }
-  rows.sort((a2, b) => a2.slug.localeCompare(b.slug));
-  const coveredRows = rows.filter((r) => r.covered);
-  const uncoveredRows = rows.filter((r) => !r.covered && !r.scheduled);
-  const scheduledRows = rows.filter((r) => !r.covered && r.scheduled);
-  const performDerived = coveredRows.filter((r) => r.coveredBy.every((v) => v.via === "perform"));
-  const includedBy = /* @__PURE__ */ new Map();
-  for (const flow of flows2) {
-    for (const item of flowItemsDeep(flow)) {
-      if (isIncludeStep(item) && item.target?.ref?.name) {
-        const list = includedBy.get(item.target.ref.name) ?? [];
-        list.push(flow.name);
-        includedBy.set(item.target.ref.name, list);
-      }
-    }
-  }
-  const flowRows = flows2.map((f) => ({
-    name: f.name,
-    includedBy: includedBy.get(f.name) ?? [],
-    /** Kendi (include'suz) adımlarında yazma fiili var mı? */
-    hasCommandStep: hasOwnCommandStep(f)
-  }));
-  const commandless = cov.commandlessRootFlows.map((f) => f.name);
-  const md = [
-    "# Kapsama Raporu (F6)",
-    "",
-    note,
-    "> perform-t\xFCrevi kapsama say\u0131l\u0131r: F10 bu komutlar\u0131n ak\u0131\u015Fa a\xE7\u0131k ad\u0131m olarak yaz\u0131lmas\u0131n\u0131 zaten redundant kabul eder.",
-    "",
-    "## \xD6zet",
-    "",
-    "| | |",
-    "|---|---|",
-    `| \u0130\u015Flem (komut/sorgu) | ${rows.length} |`,
-    `| Kapsanan | ${coveredRows.length}${performDerived.length ? ` (${coveredRows.length - performDerived.length} ad\u0131m/include + ${performDerived.length} yaln\u0131z perform-t\xFCrevi)` : ""} |`,
-    `| Kapsanmayan | ${uncoveredRows.length} |`,
-    ...scheduledRows.length ? [`| Zamanlanm\u0131\u015F (muaf) | ${scheduledRows.length} |`] : [],
-    `| Ak\u0131\u015F | ${flows2.length}${commandless.length === 0 ? " (komutsuz k\xF6k ak\u0131\u015F yok)" : ""} |`,
-    ""
-  ];
-  if (coveredRows.length) {
-    md.push("## Kapsanan i\u015Flemler", "", "| \u0130\u015Flem | T\xFCr | Ak\u0131\u015F | Yol |", "|---|---|---|---|");
-    for (const r of coveredRows) {
-      const flowNames = [...new Set(r.coveredBy.map((v) => v.flow))].join(", ");
-      const paths = [...new Set(r.coveredBy.map(viaText))].join("; ");
-      md.push(`| ${r.label} | ${r.kind === "query" ? "sorgu" : "komut"} | ${flowNames} | ${paths} |`);
-    }
-    md.push("");
-  }
-  if (uncoveredRows.length) {
-    md.push(`## Kapsanmayan i\u015Flemler (${uncoveredRows.length})`, "");
-    for (const r of uncoveredRows) {
-      md.push(`- ${r.label}${r.domain ? ` \u2014 ${r.domain}` : ""}`);
-    }
-    md.push("");
-  }
-  if (scheduledRows.length) {
-    md.push("## Zamanlanm\u0131\u015F (ak\u0131\u015F kapsam\u0131 beklenmez)", "");
-    for (const r of scheduledRows) {
-      md.push(`- ${r.label}${r.domain ? ` \u2014 ${r.domain}` : ""} \u2014 schedule: kural\u0131 ta\u015F\u0131yor`);
-    }
-    md.push("");
-  }
-  if (commandless.length) {
-    md.push("## Komutsuz k\xF6k ak\u0131\u015Flar", "");
-    for (const name of commandless) {
-      md.push(`- ${name} \u2014 huni bir d\xF6n\xFC\u015F\xFCm (yazma) ad\u0131m\u0131yla bitmiyor`);
-    }
-    md.push("");
-  }
-  const processes2 = elementsOf(model).filter(isProcessDef);
-  let processRows = [];
-  let flowsWithoutProcess = [];
-  if (processes2.length > 0) {
-    const pc = processStagedFlows(model);
-    processRows = processes2.map((p) => {
-      const stages = processItemsDeep(p).filter(isStageDef);
-      return {
-        name: p.name,
-        stages: stages.length,
-        stagedFlows: stages.map((s) => s.flow?.ref?.name).filter((n) => n !== void 0)
-      };
-    });
-    flowsWithoutProcess = flows2.filter((f) => !pc.closure.has(f)).map((f) => f.name);
-    md.push(
-      "## S\xFCre\xE7 kapsamas\u0131 (P8)",
-      "",
-      "> S\xFCre\xE7ler ak\u0131\u015Flar\u0131 zorlamaz; etap-ak\u0131\u015Flar\u0131n include kapan\u0131\u015F\u0131 kapsanm\u0131\u015F say\u0131l\u0131r (ADR-0003).",
-      ""
-    );
-    for (const r of processRows) {
-      md.push(`- **${r.name}** \u2014 ${r.stages} etap${r.stagedFlows.length ? ` (ak\u0131\u015F etaplar\u0131: ${r.stagedFlows.join(", ")})` : ""}`);
-    }
-    md.push("");
-    if (flowsWithoutProcess.length) {
-      md.push(`Hi\xE7bir s\xFCrecin etab\u0131 olmayan ak\u0131\u015Flar (${flowsWithoutProcess.length}):`, "");
-      for (const name of flowsWithoutProcess) md.push(`- ${name}`);
-    } else {
-      md.push("T\xFCm ak\u0131\u015Flar en az bir s\xFCrecin etab\u0131 (ya da etap-ak\u0131\u015F\u0131n alt-ak\u0131\u015F\u0131).");
-    }
-    md.push("");
-  }
-  return [
-    { path: "COVERAGE.md", content: md.join("\n") },
-    {
-      path: "coverage.json",
-      content: JSON.stringify({
-        flowsDefined: true,
-        totals: {
-          operations: rows.length,
-          covered: coveredRows.length,
-          uncovered: uncoveredRows.length,
-          scheduled: scheduledRows.length,
-          performDerived: performDerived.length
-        },
-        operations: rows,
-        flows: flowRows,
-        commandlessRootFlows: commandless,
-        // additive alanlar (yalnız süreç varsa) — totals şekli değişmez
-        ...processes2.length > 0 ? { processes: processRows, flowsWithoutProcess } : {}
-      }, null, 4) + "\n"
-    }
-  ];
-}
-function viaJson(v) {
-  return {
-    flow: v.flow.name,
-    via: v.kind,
-    ...v.step?.name ? { step: v.step.name } : {},
-    ...v.throughFlow?.name ? { through: v.throughFlow.name } : {}
-  };
-}
-function viaText(v) {
-  if (v.via === "step") return `ad\u0131m \`${v.step ?? "?"}\``;
-  if (v.via === "perform") return `perform (\`${v.step ?? "?"}\` zinciri)`;
-  return `include \`${v.through ?? "?"}\``;
-}
-function hasOwnCommandStep(flow) {
-  for (const item of flowItemsDeep(flow)) {
-    if (!isFlowStep(item)) continue;
-    const sig = stepSignature(item);
-    const verb = sig?.split("|")[1];
-    if (verb && !READ_VERBS3.has(verb)) return true;
-  }
-  return false;
-}
-
-// src/generator/e2e.ts
-init_define_BUILD_INFO();
-
-// src/generator/routing.ts
-init_define_BUILD_INFO();
-
-// src/generator/process-doc.ts
-init_define_BUILD_INFO();
-function genProcessDocFiles(model, units2) {
-  const processes2 = elementsOf(model).filter(isProcessDef).filter((p) => p.name);
-  if (processes2.length === 0) return [];
-  const unitBySig = unitsBySignature(units2);
-  return processes2.map((p) => ({
-    path: `docs/processes/${kebab(p.name)}.md`,
-    content: genProcessDoc(p, model, unitBySig)
-  }));
-}
-function stageRef(stage, unitBySig) {
-  if (stage.flow?.ref) return `flow **${stage.flow.ref.name}**`;
-  if (stage.flow) return `flow **${stage.flow.$refText}** *(\xE7\xF6z\xFClemedi \u2014 P1)*`;
-  const sig = stageSignature(stage);
-  const unit = sig ? unitBySig.get(sig) : void 0;
-  if (unit) return unitLabel(unit);
-  const text = stage.target?.$refText ?? "?";
-  return `${text} *(\xE7\xF6z\xFClemeyen/imzas\u0131z referans)*`;
-}
-function transitionCell(info) {
-  if (!info) return "\u2014";
-  const parts = [];
-  for (const e of info.expects) {
-    if (e.internal) continue;
-    parts.push(`giri\u015F ${e.entity.name}.${e.field} = '${e.value}'`);
-  }
-  const seen = /* @__PURE__ */ new Set();
-  for (const pr of info.produces) {
-    if (pr.intermediate) continue;
-    const text = pr.unknown ? `\xE7\u0131k\u0131\u015F ${pr.entity.name} \u2192 ?` : `\xE7\u0131k\u0131\u015F ${pr.entity.name}.${pr.field} = '${pr.value}'`;
-    if (!seen.has(text)) {
-      seen.add(text);
-      parts.push(text);
-    }
-  }
-  return parts.length === 0 ? "\u2014" : parts.join("; ");
-}
-function genProcessDoc(p, model, unitBySig) {
-  const chain = deriveStateChain(p, model);
-  const stateByStage = /* @__PURE__ */ new Map();
-  for (const info of chain?.stages ?? []) stateByStage.set(info.stage, info);
-  const levels = processLevels(p);
-  const lines = [
-    `# ${p.name}`,
-    "",
-    "> Modelden \xFCretildi; elle de\u011Fi\u015Ftirmeyin. S\xFCre\xE7ler ak\u0131\u015Flar\u0131 zorlamaz, y\xFCr\xFCt\xFClmez \u2014 bu dok\xFCman anlat\u0131md\u0131r (ADR-0003).",
-    ""
-  ];
-  if (p.entity?.ref) {
-    lines.push(`- **Merkez varl\u0131k (of):** ${p.entity.ref.name} \u2014 s\xFCrecin her ko\u015Fusu bu varl\u0131\u011F\u0131n tek bir \xF6rne\u011Finin ya\u015Fam\u0131n\u0131 izler`);
-    if (chain && chain.axis.length > 1) {
-      lines.push(`- **Omurga ekseni:** ${chain.axis.map((e) => e.name).join(" \u2192 ")} *(katalogdaki from/on \xF6beklerinden t\xFCretildi)*`);
-    }
-    lines.push("");
-  }
-  if (p.note) {
-    lines.push("", "> " + p.note.split("\n").join("\n> "), "");
-  }
-  const stages = levels.flatMap((l) => l.stages);
-  if (stages.length === 0) {
-    lines.push("*S\xFCre\xE7 g\xF6vdesi bo\u015F \u2014 en az iki etap ekleyin (P5).*", "");
-    return lines.join("\n");
-  }
-  const hasState = p.entity?.ref !== void 0;
-  lines.push("## Etaplar", "");
-  lines.push(hasState ? "| # | Etap | Akt\xF6r | G\xF6nderge | Durum ge\xE7i\u015Fi (t\xFCretilmi\u015F) |" : "| # | Etap | Akt\xF6r | G\xF6nderge |");
-  lines.push(hasState ? "|---|---|---|---|---|" : "|---|---|---|---|");
-  levels.forEach((level, i) => {
-    for (const stage of level.stages) {
-      const num = level.parallel ? `${i + 1} \u2225` : `${i + 1}`;
-      const actor = stageActor(stage)?.name ?? "?";
-      const row = [num, `\`${stage.name}\``, actor, stageRef(stage, unitBySig)];
-      if (hasState) row.push(transitionCell(stateByStage.get(stage)));
-      lines.push(`| ${row.join(" | ")} |`);
-      const stageOp = stage.target?.ref;
-      if (stageOp?.note) {
-        lines.push(`  > Not: ${stageOp.note.split("\n").join(" ")}`);
-      }
-    }
-  });
-  lines.push("");
-  if (levels.some((l) => l.parallel)) {
-    lines.push("> \u2225 \u2014 s\u0131ra-ba\u011F\u0131ms\u0131z etaplar (`any order`): aralar\u0131nda zaman s\u0131ras\u0131 vaat edilmez; e\u015Fzamanl\u0131l\u0131k/y\xFCr\xFCtme anlam\u0131 YOKTUR.", "");
-  }
-  const handoffs = [];
-  for (let i = 1; i < levels.length; i++) {
-    for (const prev of levels[i - 1].stages) {
-      for (const next of levels[i].stages) {
-        const a2 = stageActor(prev)?.name;
-        const b = stageActor(next)?.name;
-        if (a2 && b && a2 !== b) {
-          handoffs.push(`- \`${prev.name}\` (${a2}) \u2192 \`${next.name}\` (${b})`);
-        }
-      }
-    }
-  }
-  if (handoffs.length > 0) {
-    lines.push(
-      "## El de\u011Fi\u015Ftirmeler (handoff)",
-      "",
-      "Etaplar\u0131 ba\u011Flayan \u015Fey kullan\u0131c\u0131 niyeti de\u011Fil devir-teslimdir; akt\xF6r de\u011Fi\u015Fimleri:",
-      "",
-      ...handoffs,
-      ""
-    );
-  }
-  return lines.join("\n");
-}
-
-// src/generator/process-e2e.ts
-init_define_BUILD_INFO();
-
-// src/generator/operations.ts
-init_define_BUILD_INFO();
-
-// src/generator/ops-expr.ts
-init_define_BUILD_INFO();
-
-// src/generator/generator.ts
-function collectCommands(model) {
-  const map2 = /* @__PURE__ */ new Map();
-  const domains = computeDomains(model);
-  for (const el of elementsOf(model)) {
-    if (!isOperationDecl(el) || !isStandardCommand(el.command)) continue;
-    const cmd = el.command;
-    const actor = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
-    const resource = cmd.resource?.ref;
-    if (!actor || !resource || !el.name) continue;
-    const sig = commandSignature(actor, cmd.verb, ownershipKey(cmd.ownership), resource.name);
-    if (map2.has(sig)) continue;
-    map2.set(sig, {
-      command: cmd,
-      op: el,
-      slug: kebab(el.name),
-      fnName: lowerFirst(el.name),
-      actor,
-      verb: cmd.verb,
-      resource,
-      isQuery: READ_VERBS.has(cmd.verb),
-      domain: domains.get(el)
-    });
-  }
-  return [...map2.values()];
 }
 
 // src/generator/plantuml-flow.ts

@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "c4bac2a3f22e", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "116004e099ab", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
   }
 });
 
@@ -53803,35 +53803,24 @@ var TechDslValidator = class {
   }
   // ADR-0033 K9: requires edilen rule tech'te realize edilmemiş → coverage warning (gate DEĞİL).
   /**
-   * LINKED: realized business-op'ların `requires` ettiği rule'lardan (contract guards[].kind:'rule')
-   * teknik realize edilmeyenler → warning. Realize-işareti = op-clause `realizes rule <Ad>[, <Ad>]*`
-   * (Kalem 1a, 2026-07-18): işaretlenen rule'lar kapsam-warning'inden DÜŞER. Rule adı plain ID —
-   * contract `rules[]`'e karşı çözülür; sözleşmede yoksa ERROR. Standalone → N/A.
-   * NOT: rule GÖVDESİ divergence'a GİRMEZ (Karar 7) — bu check yalnız İSİM-kapsaması; AST-kıyas YOK.
+   * LINKED: bir op'un realize ettiği business-op'un `requires` ettiği rule'lardan (contract
+   * guards[].kind:'rule') O OP tarafından realize edilmeyenler → warning. Kapsam kıyası
+   * OP-BAZINDA eşleşir: başka bir op'un `realizes rule` işareti BU op'u KAPSAMAZ (plan 1.1, T9 —
+   * eski global-küme örtüşmesi sahte-yeşil üretiyordu). Realize-işareti = op-clause
+   * `realizes rule <Ad>[, <Ad>]*` (Kalem 1a, 2026-07-18): op'un kendi işaretlediği rule'lar o op'un
+   * kapsam-warning'inden DÜŞER. Rule adı plain ID — contract `rules[]`'e karşı çözülür; sözleşmede
+   * yoksa ERROR. Standalone → N/A. NOT: rule GÖVDESİ divergence'a GİRMEZ (ADR-0033 Karar 7/K9) —
+   * bu check yalnız İSİM-kapsaması; AST-kıyas YOK.
    */
   checkRequiredRuleCoverage(model, accept) {
     if (!model.contract?.path) return;
     const contract = loadContract(model.contract.path, ast_utils_exports.getDocument(model).uri);
     if (!contract) return;
     const ops = model.decls.filter(isModule2).flatMap((m) => m.members.filter(isOperation2));
-    const realizedOpIds = new Set(
-      ops.map((op) => op.realizes?.$refText).filter((id) => id != null)
-    );
-    const required = /* @__PURE__ */ new Set();
-    for (const id of realizedOpIds) {
-      const cop = contract.operations.get(id);
-      if (!cop) continue;
-      for (const g of cop.guards ?? []) {
-        if (g.kind === "rule" && g.ref) required.add(g.ref);
-      }
-    }
-    const realizedRules = /* @__PURE__ */ new Set();
     for (const op of ops) {
       for (const clause of op.clauses.filter(isRealizesRuleClause)) {
         clause.rules.forEach((name, i) => {
-          if (contract.rules.has(name)) {
-            realizedRules.add(name);
-          } else {
+          if (!contract.rules.has(name)) {
             accept(
               "error",
               `\`realizes rule ${name}\`: s\xF6zle\u015Fmede (operations.json rules[]) bu adla bir rule yok. Mevcut rule'lar: ${[...contract.rules.keys()].sort().join(", ") || "(hi\xE7 yok)"}.`,
@@ -53841,13 +53830,31 @@ var TechDslValidator = class {
         });
       }
     }
-    const unrealizedRules = [...required].filter((r) => contract.rules.has(r) && !realizedRules.has(r)).sort();
-    if (unrealizedRules.length > 0) {
-      accept(
-        "warning",
-        `requires edilen \u015Fu rule'lar teknik olarak hen\xFCz realize edilmemi\u015F (kapsam eksik; codegen downstream): ${unrealizedRules.join(", ")}.`,
-        { node: model.contract, property: "path" }
+    for (const op of ops) {
+      const bizId = op.realizes?.$refText;
+      if (!bizId) continue;
+      const cop = contract.operations.get(bizId);
+      if (!cop) continue;
+      const requiredHere = (cop.guards ?? []).filter((g) => g.kind === "rule" && g.ref).map((g) => g.ref);
+      const realizedHere = new Set(
+        op.clauses.filter(isRealizesRuleClause).flatMap((c) => c.rules)
       );
+      const missing = [...new Set(requiredHere)].filter((r) => contract.rules.has(r) && !realizedHere.has(r)).sort();
+      if (missing.length > 0) {
+        accept(
+          "warning",
+          `'${op.name}' requires etti\u011Fi \u015Fu rule'lar\u0131 KEND\u0130S\u0130 realize etmiyor (ba\u015Fka op'un realize etmesi bu op'u kapsamaz; kapsam eksik, codegen downstream): ${missing.join(", ")}.`,
+          { node: op, property: "realizes" }
+        );
+      }
+      const undefinedReq = [...new Set(requiredHere)].filter((r) => !contract.rules.has(r)).sort();
+      if (undefinedReq.length > 0) {
+        accept(
+          "warning",
+          `'${op.name}' realizes etti\u011Fi '${bizId}' \u015Fu rule'lar\u0131 requires ediyor ama s\xF6zle\u015Fme rules[]'te tan\u0131ms\u0131z: ${undefinedReq.join(", ")}. (S\xF6zle\u015Fme ile tech modeli uyumsuz \u2014 rule ya operations.json'a eklenmeli ya requires d\xFC\u015Fmeli.)`,
+          { node: op, property: "realizes" }
+        );
+      }
     }
   }
   // T-3.1: rolemap ters-indeks (repr) yardımcısı
@@ -56809,6 +56816,109 @@ function push(map2, key, ref) {
   map2.set(key, list);
 }
 
+// src/qa/validation-eval.ts
+init_define_BUILD_INFO();
+var un = (reason) => ({ ok: false, reason });
+function paramOf(path) {
+  if (path.length === 1) return path[0];
+  if (path.length === 2 && path[0] === "input") return path[1];
+  return null;
+}
+function asBool(val) {
+  if (!val.ok) return val;
+  if (typeof val.v !== "boolean") return { ok: false, reason: "boolean olmayan operand (mant\u0131ksal ba\u011Flam)" };
+  return { ok: true, b: val.v };
+}
+var ORDER_OPS = /* @__PURE__ */ new Set(["<", "<=", ">", ">="]);
+function evalCmp(op, left, right, inputs) {
+  if (op === void 0) return un("op'suz cmp");
+  if (op === "in") return un("`in` \xFCyelik operat\xF6r\xFC \u2014 kapsam d\u0131\u015F\u0131");
+  const l = evalVal(left, inputs);
+  if (!l.ok) return l;
+  const r = evalVal(right, inputs);
+  if (!r.ok) return r;
+  if (op === "=" || op === "!=") {
+    if (typeof l.v !== typeof r.v) return un("tip-uyumsuz e\u015Fitlik k\u0131yas\u0131");
+    const eq2 = l.v === r.v;
+    return { ok: true, v: op === "=" ? eq2 : !eq2 };
+  }
+  if (ORDER_OPS.has(op)) {
+    if (typeof l.v !== "number" || typeof r.v !== "number") return un("say\u0131sal olmayan s\u0131ralama k\u0131yas\u0131");
+    switch (op) {
+      case "<":
+        return { ok: true, v: l.v < r.v };
+      case "<=":
+        return { ok: true, v: l.v <= r.v };
+      case ">":
+        return { ok: true, v: l.v > r.v };
+      default:
+        return { ok: true, v: l.v >= r.v };
+    }
+  }
+  return un(`bilinmeyen k\u0131yas operat\xF6r\xFC ('${op}')`);
+}
+function evalAnd(left, right, inputs) {
+  const l = asBool(evalVal(left, inputs));
+  if (l.ok && !l.b) return { ok: true, v: false };
+  const r = asBool(evalVal(right, inputs));
+  if (r.ok && !r.b) return { ok: true, v: false };
+  if (!l.ok) return un(l.reason);
+  if (!r.ok) return un(r.reason);
+  return { ok: true, v: true };
+}
+function evalOr(left, right, inputs) {
+  const l = asBool(evalVal(left, inputs));
+  if (l.ok && l.b) return { ok: true, v: true };
+  const r = asBool(evalVal(right, inputs));
+  if (r.ok && r.b) return { ok: true, v: true };
+  if (!l.ok) return un(l.reason);
+  if (!r.ok) return un(r.reason);
+  return { ok: true, v: false };
+}
+function evalVal(ast, inputs) {
+  if ("node" in ast) {
+    switch (ast.node) {
+      case "and":
+        return evalAnd(ast.left, ast.right, inputs);
+      case "or":
+        return evalOr(ast.left, ast.right, inputs);
+      case "cmp":
+        return evalCmp(ast.op, ast.left, ast.right, inputs);
+      case "add":
+      case "sub":
+      case "mul":
+      case "div":
+        return un(`aritmetik ('${ast.node}') \u2014 kapsam d\u0131\u015F\u0131 (ADR-0042 Seviye-2)`);
+      case "agg":
+        return un(`agregasyon ('${ast.fn}') \u2014 kapsam d\u0131\u015F\u0131`);
+      case "call":
+        return un(`fonksiyon \xE7a\u011Fr\u0131s\u0131 ('${ast.name}') \u2014 kapsam d\u0131\u015F\u0131`);
+      case "set":
+        return un("k\xFCme literali (`in` sa\u011F operand\u0131) \u2014 kapsam d\u0131\u015F\u0131");
+      default:
+        return un("bilinmeyen d\xFC\u011F\xFCm t\xFCr\xFC \u2014 kapsam d\u0131\u015F\u0131");
+    }
+  }
+  if ("kind" in ast) {
+    if (ast.kind === "string" || ast.kind === "number" || ast.kind === "boolean") {
+      return { ok: true, v: ast.value };
+    }
+    return un("s\xFCre (duration) literali \u2014 kapsam d\u0131\u015F\u0131");
+  }
+  if ("path" in ast) {
+    const p = paramOf(ast.path);
+    if (p === null) return un(`input-d\u0131\u015F\u0131 yol k\xF6k\xFC ('${ast.path.join(".")}')`);
+    if (!inputs.has(p)) return un(`girdi verilmedi ('${p}')`);
+    return { ok: true, v: inputs.get(p) };
+  }
+  return un("bilinmeyen AST \u015Fekli");
+}
+function evalValidationAst(ast, inputs) {
+  const r = asBool(evalVal(ast, inputs));
+  if (!r.ok) return { kind: "unevaluable", reason: r.reason };
+  return r.b ? { kind: "satisfied" } : { kind: "violated" };
+}
+
 // src/qa/qa-dsl-validation.ts
 var UNCOVERED_BRANCHES_CODE = "qa.uncovered-branches";
 var UNCOVERED_GUARANTEE_CODE = "qa.uncovered-guarantee";
@@ -56841,6 +56951,47 @@ function detectWaiveExcuse(reason) {
     if (m) return m[0];
   }
   return null;
+}
+function parseStatusGuard(text) {
+  const t = text.trim();
+  if (!t) return null;
+  if (/(?<![\p{L}\p{N}_])(?:and|or)(?![\p{L}\p{N}_])/iu.test(t)) return null;
+  const m = /^(?:where\s+)?([A-Za-z_][\w.]*)\s*=\s*(['"])(.*)\2$/u.exec(t);
+  if (!m) return null;
+  return { field: m[1], value: m[3] };
+}
+function guardConditionText(op, guardId) {
+  for (const clause of op.clauses ?? []) {
+    if (isValidationClause(clause) || isRuleClause(clause)) {
+      for (const c of clause.checks) {
+        if (c.guardId === guardId) return c.expr?.$cstNode?.text ?? null;
+      }
+    }
+  }
+  return null;
+}
+function validationGuardExpr(op, guardId) {
+  for (const clause of op.clauses ?? []) {
+    if (!isValidationClause(clause)) continue;
+    for (const c of clause.checks) {
+      if (c.guardId === guardId) {
+        return { text: (c.expr?.$cstNode?.text ?? "").trim(), ast: serializeExpr(c.expr) };
+      }
+    }
+  }
+  return null;
+}
+function collectInlineInputs(input) {
+  const map2 = /* @__PURE__ */ new Map();
+  if (!input || !isInlineInput(input)) return map2;
+  for (const e of input.entries ?? []) {
+    if (!isQaLiteral(e.value)) continue;
+    const lit = e.value;
+    if (lit.str != null) map2.set(e.key, lit.str);
+    else if (lit.boolLit != null) map2.set(e.key, lit.boolLit === "true");
+    else if (lit.num != null) map2.set(e.key, lit.neg ? -lit.num : lit.num);
+  }
+  return map2;
 }
 var TEXTUAL_TYPES = /* @__PURE__ */ new Set(["Text", "String"]);
 var TIME_RX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/;
@@ -56926,6 +57077,54 @@ var QaDslValidator = class {
     }
     this.checkNameUniqueness(model, accept);
     this.checkWorkspaceCoverage(model, techUses, flowsUses[0], flowsUri, accept);
+    this.checkNegativeBranchTriggers(model, accept);
+  }
+  /**
+   * ADR-0043 / plan 3.1 (Q6a, M4-02c) — negatif-dal (validation-kaynaklı NotValid) TETİKLEYİCİ doğrulaması.
+   *
+   * Bir test `covers guard "<id>"` ile bir VALIDATION guard-dalını sınadığını iddia eder; o dal ancak
+   * validation İHLAL edildiğinde tetiklenir. ADR-0031: validation YALNIZ input-param'lara bakar →
+   * testin `with {…}` girdileri validation ifadesini SAĞLIYORsa (ihlal ETMİYORsa) hata tetiklenemez →
+   * sahte-kapsam → error. Değerler ifadeyi İHLAL ediyorsa (violated) sessiz (doğru test).
+   *
+   * checkTest DEĞİL checkModel'den koşar (BİLİNÇLİ — task Step 5.2/5.3 çelişkisinin çözümü): toplu
+   * `info` (Step 5.3) MODEL düğümüne TEK sefer basılmalı, ama Langium ön-sıralı gezer (model çocuklardan
+   * ÖNCE) → per-test biriktir + model-boşalt GÜVENSİZ (model zaten gezilmiş olur). Bu yüzden tüm testler
+   * burada tek geçişte gezilir; per-test error test düğümüne, toplu info model düğümüne (checkWorkspaceCoverage
+   * emsali — model-düzeyi kapanış).
+   *
+   * SINIR (fail-open, SESSİZ DEĞİL — nerede-kaldik #39): ifade değerlendirilemezse (kapsam-dışı düğüm /
+   * opak-tip / eksik girdi / input-dışı yol) → error YOK; çift tek toplu `info`'ya eklenir.
+   */
+  checkNegativeBranchTriggers(model, accept) {
+    if (this.universeOf(model).techRootUris.length === 0) return;
+    const unevaluable = [];
+    for (const test of model.members.filter(isQaTest)) {
+      const op = test.op?.ref;
+      if (!op || !test.covers || !test.when?.call) continue;
+      const res = coversToBranch(test.covers, this.shapeOf(op));
+      const branch = res.branch;
+      if (!branch || branch.kind !== "validationGuard") continue;
+      const v = validationGuardExpr(op, branch.id);
+      if (!v) continue;
+      const result = evalValidationAst(v.ast, collectInlineInputs(test.when.input));
+      if (result.kind === "satisfied") {
+        accept(
+          "error",
+          `Bu test '${branch.id}' NotValid dal\u0131n\u0131 kaps\u0131yor iddias\u0131nda ama verilen girdiler '${v.text}' ifadesini \u0130HLAL ETM\u0130YOR \u2014 hata tetiklenemez (sahte-kapsam, ADR-0043). Girdileri validation'\u0131 \u0130HLAL edecek \u015Fekilde kurun.`,
+          { node: test, property: "covers" }
+        );
+      } else if (result.kind === "unevaluable") {
+        unevaluable.push(`${test.title} / ${branch.id} (${result.reason})`);
+      }
+    }
+    if (unevaluable.length > 0) {
+      accept(
+        "info",
+        `${unevaluable.length} negatif-dal tetikleyici-do\u011Frulamas\u0131n\u0131n d\u0131\u015F\u0131nda kald\u0131 \u2014 ifade de\u011Ferlendirilemedi (fail-open, ADR-0043): ${unevaluable.join(" \xB7 ")}.`,
+        { node: model, property: "title" }
+      );
+    }
   }
   checkNameUniqueness(model, accept) {
     const seenPersona = /* @__PURE__ */ new Set();
@@ -57081,6 +57280,8 @@ var QaDslValidator = class {
     }
     const ctx = { personas: this.personasOf(model), seedBinds: /* @__PURE__ */ new Set(), stepBinds: /* @__PURE__ */ new Set(), allowResult: false, inputParams: null };
     if (test.given) this.checkGiven(test.given, model, ctx, false, accept);
+    this.checkGuardSeedConflict(test, op, res.branch, shape, accept);
+    this.checkOwnershipTargetSeed(test, op, res.branch, shape, accept);
     const executed = [op];
     for (const item of test.given?.items ?? []) {
       if (isGivenCall(item) && item.op?.ref) executed.push(item.op.ref);
@@ -57125,6 +57326,97 @@ var QaDslValidator = class {
     accept(
       "error",
       `'${shape.qualified}' \u2014 'Filtered ${branch.via}' dal\u0131 sonu\xE7-k\xFCmesi \xDCYEL\u0130K ikilisini kan\u0131tlamal\u0131; eksik: ${missing.join(" + ")}. ` + (countOnly ? `'result count' \xDCYEL\u0130K DE\u011E\u0130LD\u0130R: yanl\u0131\u015F sat\u0131rlar d\xF6nse de say\u0131 tutar \u2192 bozuk filtre testten GE\xC7ER. ` : "") + `Filtre bozukken de sonu\xE7 'Success'tir \u2014 kan\u0131t yaln\u0131z \xFCyelikle olur (ADR-0040).`,
+      { node: test, property: "covers" }
+    );
+  }
+  /**
+   * ADR-0043 / plan 3.2 — yaşam-döngüsü (guard) hata-dalı SAHTE-KAPSAM denetimi.
+   *
+   * Bir test `covers guard "<id>"` ile bir guard-dalını sınadığını İDDİA eder; o dal ancak guard
+   * koşulu İHLAL edildiğinde (hata üretildiğinde) tetiklenir. Ama `given` seed'i guard koşulunu
+   * SAĞLIYORsa (aynı alana guard değerini yazıyorsa), guard geçer → hata üretilmez → negatif dal
+   * HİÇ sınanmaz ama strict yeşil kalır (sahte-kapsam). Bu → error (dal İDDİASI çürük; eşitse error).
+   *
+   * SINIRLAR (bilinçli fail-open — sessiz değil, S18):
+   *  - Guard metni `parseStatusGuard` ile `<alan>='<değer>'` yapısına ÇÖZÜLEMİYORSA (and/or, sayısal,
+   *    ifade) → denetim dışı (null yolu).
+   *  - Hedef entity eşlemesi: op'un access ettiği entity'ler arasında guard alanını taşıyan TAM 1
+   *    entity varsa o kullanılır; 0 veya ≥2 ise → fail-open (hangi entity belirsiz; yanlış-pozitif
+   *    üretmemek için atlanır). Guard alanının hangi entity'e ait olduğu semantik çözümü v1'de yok.
+   */
+  checkGuardSeedConflict(test, op, branch, shape, accept) {
+    if (!branch || branch.kind !== "validationGuard" && branch.kind !== "ruleGuard") return;
+    const text = guardConditionText(op, branch.id);
+    if (!text) return;
+    const parsed = parseStatusGuard(text);
+    if (!parsed) return;
+    const field = parsed.field.split(".").pop();
+    const candidates = shape.accessEntities.filter((e) => (e.fields ?? []).some((f) => f.name === field));
+    if (candidates.length !== 1) return;
+    const target = candidates[0];
+    for (const item of test.given?.items ?? []) {
+      if (!isSeedItem(item) || item.entity?.ref !== target) continue;
+      for (const e of item.entries) {
+        if (e.key !== field || !isQaLiteral(e.value)) continue;
+        if (e.value.str !== parsed.value) continue;
+        accept(
+          "error",
+          `Bu senaryo '${branch.id}' guard-dal\u0131n\u0131 test ediyor ama seed '${target.name}.${field} = '${parsed.value}'' guard ko\u015Fulunu SA\u011ELIYOR \u2014 dal bu seed'le tetiklenemez (sahte-kapsam, ADR-0043). Seed'i guard'\u0131 \u0130HLAL eden bir duruma kurun.`,
+          { node: e, property: "value" }
+        );
+      }
+    }
+  }
+  /**
+   * ADR-0043 / plan 3.3 (Q6b) — `ownership any/all` op'un NEGATİF-dal testinde HEDEF-KAYIT varlığı denetimi.
+   *
+   * `ownership any/all` bir satır-kapsama ekseni kurar ama satır-KISITI getirmez (herkes/tümü) →
+   * bu op'lar tipik olarak MEVCUT kayıtlar üzerinde çalışır (moderasyon vb.). Bir NEGATİF dal
+   * (Success DIŞI) test edilirken op'un HEDEF entity'sine ait HİÇ `seed` YOKSA, op boş küme
+   * üzerinde koşar → dal gerçekten TETİKLENMEDEN de "negatif" görünebilir (test guard'ı değil
+   * BOŞLUĞU sınıyor). Bu → **warning** (error DEĞİL): seed'siz negatif dal MEŞRU bir "hiç kayıt
+   * yok" senaryosu OLABİLİR (örn. boş tabloda red beklemek) — bu yüzden zorlamaz, uyarır ve meşru
+   * çıkışı (hedef kaydı seed'le · niyeti waive/not ile belirt) mesajda GÖSTERİR.
+   *
+   * HEDEF entity = op'un `access`'inde `reads`/`updates`/`deletes` ile geçen entity'ler (MEVCUT
+   * kayıt TÜKETEN fiiller). `creates` DIŞLANIR: yaratılan kayıt seed'lenemez ve guard yaratma
+   * girdisini denetler, ön-var satırı değil (aksi halde her create-op'ta yanlış-pozitif).
+   *
+   * SINIRLAR (bilinçli fail-open — sessiz değil, S18):
+   *  - op tech'ten çözülemezse (uses tech yok / op ref çözülemedi) → checkTest zaten erken döner
+   *    (§F1 partial-AST guard); denetim KOŞMAZ — unlinked kullanım meşru.
+   *  - op `ownership any/all` TAŞIMIYORSA → denetim dışı (bu sınıf yalnız satır-kısıtsız sahiplik;
+   *    `own`/relation zaten ihlal-girdisi kurulabilir dal doğurur, `public` sahiplik değildir).
+   *  - reads/updates/deletes hedef entity'si YOKSA → hedef belirsiz → fail-open.
+   *  - Denetim HERHANGİ bir non-Success/non-filtered dalda ateşler; `callFailure`/`notAuthorized:roles`
+   *    gibi kayıt-varlığına bağlı OLMAYAN dallarda AŞIRI-geniş olabilir — warning zaten meşru-çıkış
+   *    sunduğu için bilinçle allowlist'lenmedi (warning'in bedeli düşük, yanlış-error'dan güvenli).
+   */
+  checkOwnershipTargetSeed(test, op, branch, shape, accept) {
+    if (!branch || branch.kind === "success" || branch.kind === "filtered") return;
+    let ownKw = null;
+    for (const c of op.clauses ?? []) {
+      if (isOwnershipClause(c) && (c.kw === "any" || c.kw === "all")) {
+        ownKw = c.kw;
+        break;
+      }
+    }
+    if (!ownKw) return;
+    const targets = /* @__PURE__ */ new Set();
+    for (const c of op.clauses ?? []) {
+      if (!isAccessClause(c)) continue;
+      for (const eff of c.effects) {
+        if (eff.verb === "creates") continue;
+        for (const ent of eff.entities) if (ent.ref) targets.add(ent.ref);
+      }
+    }
+    if (targets.size === 0) return;
+    const seeded = new Set((test.given?.items ?? []).filter(isSeedItem).map((s) => s.entity?.ref));
+    if ([...targets].some((t) => seeded.has(t))) return;
+    const names = [...new Set([...targets].map((t) => t.name))].join("/");
+    accept(
+      "warning",
+      `'${shape.qualified}' ownership ${ownKw} ta\u015F\u0131yor ama bu negatif-dal testi hedef '${names}' kayd\u0131n\u0131 hi\xE7 seed'lemiyor \u2014 test guard'\u0131 de\u011Fil bo\u015Flu\u011Fu s\u0131n\u0131yor olabilir (ADR-0043). Hedef kayd\u0131 seed'leyin ya da 'kay\u0131t yok' niyetini waive/not ile belirtin.`,
       { node: test, property: "covers" }
     );
   }

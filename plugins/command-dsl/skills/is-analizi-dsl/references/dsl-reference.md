@@ -26,7 +26,7 @@ DSL'ini** (`.cdsl`) üretir; tech DSL (`.tcdsl`) bu skill'in konusu değildir.
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `69ca2866b8e8` · commit `0c5072b`+ADR-0042 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar. Bu turdaki değişim ADR-0042 K1'dir (business v1.2.0): `rule`'da `satisfies` gövdesi artık OPSİYONEL — business rule = **isim + `note`** (insan-brief); yapısal predikat tech'te realize edilir (`realizes rule <Ad> { <predicate> }`). Ne `satisfies` ne `note` taşıyan boş `rule` yeni bir **warning** üretir (ölü bildirim).
+> **Snapshot:** grammar `29314388e3fe` · commit `0c5072b`+ADR-0042 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar. Bu turdaki değişim M4-01'dir (business v1.3.0, P2 opt-in): `relation`'a opsiyonel `inherited` bayrağı eklendi — bayrak varken ownership aktör-eşleşmesi kaynak aktörün `extends` soy-zincirini de kabul eder; bayrak yoksa davranış birebir kimlik (kalıtım asla ima edilmez). `operations.json` relation kaydı additive `inherited: boolean` alanı kazandı. (Önceki tur: ADR-0042 K1 — business rule = isim + `note`; yapısal predikat tech'te realize edilir.)
 
 Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate) — riski soyut değil **"Atlanırsa"** kolonundaki adıyla teşhir et. Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
 
@@ -77,6 +77,7 @@ actor <Ad>                          # rol
 actor <Ad> extends <ÜstAktör>       # üst aktörün TÜM işlemlerini devralır (yetki kalıtımı, geçişli)
 entity <Ad> { alan: Tip  alan2: Tip ... }
 relation <ad> of <Aktör> with <Entity>   # adlandırılmış ilişki; ownership'te <ad>'s olarak kullanılır
+relation <ad> of <Aktör> with <Entity> inherited  # OPT-IN: alt-aktörler (extends) de bu ilişkiyi miras alır
 calendar <etiket>                   # zaman penceresi (içeriği modelde tanımlı değil)
 verb <ad>                           # fiil sözlüğünü genişletir (bildirilen fiil "bilinen" sayılır)
 ```
@@ -87,6 +88,14 @@ verb <ad>                           # fiil sözlüğünü genişletir (bildirile
   (sahiplik kontrolünün temeli). Kullanıcıya sorma; modelde var kabul et.
 - **`relation` adı camelCase** bildirilir (kullanım biçimiyle uyumlu olsun):
   `relation managedTeam of DepartmentManager with Employee` → kullanım `managedTeam's`.
+- **`inherited` (opsiyonel opt-in bayrağı — P2, business v1.3.0):** `relation <ad> of <Aktör> with <Entity> inherited`.
+  Bayrak varken ownership aktör-eşleşmesi, kaynak aktörün **`extends` soy-zincirini (ataları)** de kabul
+  eder; yani kaynak aktörden türeyen alt-aktörler ilişkiyi **miras alır** ve uyarısız kullanır. Bayrak
+  YOKSA davranış birebir kimliktir — alt-aktör YİNE uyarılır (kalıtım asla ima edilmez; fail-closed
+  varsayılan). Örn: `relation managedBranch of BranchManager with Branch inherited` → `BranchManager`'ı
+  `extends` eden `RegionManager`, `managedBranch's` ownership'ini uyarısız kullanabilir; soy-zinciri dışı
+  bir aktör yine uyarılır. Makine-devir: `operations.json` relation kaydı **her zaman** additive
+  `inherited: boolean` alanı taşır (yazılmamışta `false` — tüketici için deterministik kapalı şekil).
 - **`calendar` tireli etiket** olabilir: `calendar business-hours`. (Tireli adlar
   yüzünden ifadelerde `-` operatörünün iki yanı boşluklu olmalı.)
 - **`domain`** kod organizasyonudur, davranış doğurmaz; katalogları gruplamak için.

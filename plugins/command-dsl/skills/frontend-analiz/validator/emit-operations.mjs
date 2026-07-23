@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-69ca2866b8e8", grammarHash: "69ca2866b8e8", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "31e285180083", wrapperFiles: ["emit-operations.src.mts"], wrapperHash: "f705db09efc8", commit: "0c5072b", builtAt: "2026-07-19T09:19:37+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-29314388e3fe", grammarHash: "29314388e3fe", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "63bacb478283", wrapperFiles: ["emit-operations.src.mts"], wrapperHash: "f705db09efc8", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
   }
 });
 
@@ -32240,6 +32240,13 @@ var Model = {
 function isModel(item) {
   return reflection2.isInstance(item, Model.$type);
 }
+var NoteClause = {
+  $type: "NoteClause",
+  text: "text"
+};
+function isNoteClause(item) {
+  return reflection2.isInstance(item, NoteClause.$type);
+}
 var NumberExpr = {
   $type: "NumberExpr",
   value: "value"
@@ -32334,6 +32341,7 @@ var ReadEntry = {
 };
 var RelationDef = {
   $type: "RelationDef",
+  inherited: "inherited",
   name: "name",
   source: "source",
   target: "target"
@@ -32967,6 +32975,15 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: []
     },
+    NoteClause: {
+      name: NoteClause.$type,
+      properties: {
+        text: {
+          name: NoteClause.text
+        }
+      },
+      superTypes: [OperationClause.$type]
+    },
     NumberExpr: {
       name: NumberExpr.$type,
       properties: {
@@ -33130,6 +33147,10 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
     RelationDef: {
       name: RelationDef.$type,
       properties: {
+        inherited: {
+          name: RelationDef.inherited,
+          defaultValue: false
+        },
         name: {
           name: RelationDef.name
         },
@@ -33752,6 +33773,16 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "deprecatedSyntax": false,
               "isMulti": false
             }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "inherited",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "inherited"
+            },
+            "cardinality": "?"
           }
         ]
       },
@@ -34595,6 +34626,34 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "$ref": "#/rules@25"
             },
             "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "NoteClause"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "note"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@72"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
           },
           {
             "$type": "Group",
@@ -38396,6 +38455,612 @@ function deriveStateChain(p, input) {
   return { axis: axisList, stages };
 }
 
+// src/generator/operations.ts
+init_define_BUILD_INFO();
+
+// src/generator/ops-expr.ts
+init_define_BUILD_INFO();
+
+// src/generator/plantuml.ts
+init_define_BUILD_INFO();
+
+// src/generator/generator.ts
+init_define_BUILD_INFO();
+
+// src/generator/expressions.ts
+init_define_BUILD_INFO();
+
+// src/generator/naming.ts
+init_define_BUILD_INFO();
+function lowerFirst(s) {
+  return s.charAt(0).toLowerCase() + s.slice(1);
+}
+function kebab(s) {
+  return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+}
+
+// src/generator/cockburn.ts
+init_define_BUILD_INFO();
+
+// src/generator/coverage.ts
+init_define_BUILD_INFO();
+
+// src/generator/e2e.ts
+init_define_BUILD_INFO();
+
+// src/generator/routing.ts
+init_define_BUILD_INFO();
+
+// src/generator/process-doc.ts
+init_define_BUILD_INFO();
+
+// src/generator/process-e2e.ts
+init_define_BUILD_INFO();
+
+// src/generator/generator.ts
+function collectCommands(model2) {
+  const map2 = /* @__PURE__ */ new Map();
+  const domains = computeDomains(model2);
+  for (const el of elementsOf(model2)) {
+    if (!isOperationDecl(el) || !isStandardCommand(el.command)) continue;
+    const cmd = el.command;
+    const actor = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
+    const resource = cmd.resource?.ref;
+    if (!actor || !resource || !el.name) continue;
+    const sig = commandSignature(actor, cmd.verb, ownershipKey(cmd.ownership), resource.name);
+    if (map2.has(sig)) continue;
+    map2.set(sig, {
+      command: cmd,
+      op: el,
+      slug: kebab(el.name),
+      fnName: lowerFirst(el.name),
+      actor,
+      verb: cmd.verb,
+      resource,
+      isQuery: READ_VERBS.has(cmd.verb),
+      domain: domains.get(el)
+    });
+  }
+  return [...map2.values()];
+}
+
+// src/generator/plantuml.ts
+var SKIN_BASE = `skinparam backgroundColor #1e1e1e
+skinparam defaultFontColor #cccccc
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #252526
+  BorderColor #4fc1ff
+  FontColor #cccccc
+  StereotypeFontColor #8a8a8a
+}
+skinparam actor {
+  BackgroundColor #252526
+  BorderColor #4fc1ff
+  FontColor #cccccc
+}
+skinparam package {
+  BackgroundColor #252526
+  BorderColor #3c3c3c
+  FontColor #cccccc
+}
+skinparam arrow {
+  Color #8a8a8a
+  FontColor #8a8a8a
+}
+skinparam note {
+  BackgroundColor #2d2d30
+  BorderColor #3c3c3c
+  FontColor #cccccc
+}`;
+var DARK_STYLE = "left to right direction\n" + SKIN_BASE;
+function cstText2(node) {
+  return (node?.$cstNode?.text ?? "").replace(/\s+/g, " ").trim();
+}
+
+// src/generator/ops-expr.ts
+var ADD = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
+function normalizeDuration(d) {
+  const text = cstText2(d);
+  if (isUnitDuration(d)) {
+    const unit = d.unit.replace(/s$/, "");
+    return { value: d.value, unit, text };
+  }
+  if (isCompactDuration(d)) {
+    const m = /^(\d+)([hmd])$/.exec(d.literal);
+    const map2 = { h: "hour", m: "minute", d: "day" };
+    return { value: m ? Number(m[1]) : 0, unit: m ? map2[m[2]] : "?", text: d.literal };
+  }
+  return { value: 0, unit: "?", text };
+}
+function serializeExpr(e) {
+  if (isBinaryExpr(e)) return { node: ADD[e.op], op: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
+  if (isAggregateExpr(e)) return { node: "agg", fn: "sum", path: e.path.segments };
+  if (isFieldExpr(e)) return { path: e.path.segments };
+  if (isNumberExpr(e)) return { kind: "number", value: e.value };
+  if (isStringExpr(e)) return { kind: "string", value: e.value };
+  return { path: [] };
+}
+function serializeCondition(c) {
+  if (isBinaryCondition(c)) return { node: c.op, left: serializeCondition(c.left), right: serializeCondition(c.right) };
+  if (isComparison(c)) {
+    const right = c.right;
+    let r;
+    if (isStringValue(right)) r = { kind: "string", value: right.value };
+    else if (isNumberValue(right)) r = { kind: "number", value: right.value };
+    else if (isDurationValue(right)) r = { kind: "duration", ...normalizeDuration(right.value) };
+    else if (isFieldValue(right)) r = { path: right.path.segments };
+    else r = { path: [] };
+    return { node: "cmp", op: c.op, left: { path: c.left.segments }, right: r };
+  }
+  return { path: [] };
+}
+function serializeBoolExpr(b) {
+  if (isBinaryBool(b)) return { node: b.op, left: serializeBoolExpr(b.left), right: serializeBoolExpr(b.right) };
+  if (isExistsExpr(b)) return { node: "exists", negated: !!b.negated, collection: b.collection, where: serializeCondition(b.condition) };
+  return serializeCondition(b);
+}
+function box(node, ast) {
+  return { text: cstText2(node), ast };
+}
+
+// src/generator/operations.ts
+function pathEntity(path, entityNames) {
+  const head = path?.segments?.[0];
+  return head && entityNames.has(head) ? head : void 0;
+}
+function conditionPaths(c, out) {
+  if (!c || typeof c !== "object") return;
+  const n = c;
+  if (isBinaryCondition(c)) {
+    conditionPaths(n.left, out);
+    conditionPaths(n.right, out);
+    return;
+  }
+  if (isComparison(c)) {
+    if (c.left) out.push(c.left);
+    if (isFieldValue(c.right)) out.push(c.right.path);
+    return;
+  }
+}
+function exprPaths(e, out) {
+  if (!e || typeof e !== "object") return;
+  if (isBinaryExpr(e)) {
+    exprPaths(e.left, out);
+    exprPaths(e.right, out);
+    return;
+  }
+  if (isFieldExpr(e) || isAggregateExpr(e)) {
+    out.push(e.path);
+    return;
+  }
+}
+function buildSignature(cmd) {
+  return {
+    actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
+    verb: cmd.verb,
+    ownership: ownershipKey(cmd.ownership),
+    resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText
+  };
+}
+function buildTarget(cmd) {
+  if (!cmd.targetResource) return null;
+  return {
+    ownership: ownershipKey(cmd.targetOwnership),
+    resource: cmd.targetResource.ref?.name ?? cmd.targetResource.$refText
+  };
+}
+function buildSource(cmd) {
+  if (!cmd.sourceResource) return null;
+  return {
+    ownership: ownershipKey(cmd.sourceOwnership),
+    resource: cmd.sourceResource.ref?.name ?? cmd.sourceResource.$refText
+  };
+}
+function buildRecipient(cmd) {
+  return cmd.recipient?.ref?.name ?? null;
+}
+function buildSchedule(op) {
+  const s = op.clauses.find(isSchedule);
+  if (!s) return null;
+  return { unit: s.unit, time: s.time ?? null };
+}
+function buildOrderBy(op) {
+  const f = op.clauses.find(isOrderByFilter);
+  if (!f) return null;
+  return { path: f.field.segments, direction: f.direction ?? null };
+}
+function buildLimit(op) {
+  return op.clauses.find(isLimitFilter)?.count ?? null;
+}
+function buildGuards(op) {
+  const out = [];
+  const counters = { where: 0, during: 0, if: 0, when: 0, rule: 0 };
+  const nextId = (kind) => `${kind}:${counters[kind]++}`;
+  const cmd = op.command;
+  if (isStandardCommand(cmd) && cmd.where) {
+    out.push({ id: nextId("where"), kind: "where", ...box(cmd.where, serializeCondition(cmd.where)) });
+  }
+  for (const cl of op.clauses) {
+    if (isDuringConstraint(cl)) {
+      out.push({
+        id: nextId("during"),
+        kind: "during",
+        calendar: cl.calendar?.$refText ?? cl.calendar?.ref?.name ?? "?"
+      });
+    } else if (isIfConstraint(cl)) {
+      out.push({ id: nextId("if"), kind: "if", ...box(cl.condition, serializeCondition(cl.condition)) });
+    } else if (isWhenConstraint(cl)) {
+      out.push({
+        id: nextId("when"),
+        kind: "when",
+        role: operationKind(op) === "query" ? "result-filter" : "precondition",
+        ...box(cl.condition, serializeCondition(cl.condition))
+      });
+    } else if (isRequiresConstraint(cl)) {
+      for (const rr of cl.rules) {
+        out.push({
+          id: nextId("rule"),
+          kind: "rule",
+          ref: rr?.ref?.name ?? rr?.$refText ?? "?"
+        });
+      }
+    }
+  }
+  return out;
+}
+function calcNode(a2) {
+  return {
+    target: a2.target.segments,
+    text: cstText2(a2.expr),
+    expr: serializeExpr(a2.expr),
+    condition: a2.condition ? box(a2.condition, serializeCondition(a2.condition)) : null
+  };
+}
+function buildCalculate(op) {
+  return op.clauses.filter(isCalculateAction).map(calcNode);
+}
+function buildEffects(op) {
+  const out = [];
+  for (const a2 of op.success?.actions ?? []) {
+    if (isCalculateAction(a2)) out.push({ kind: "calculate", ...calcNode(a2) });
+    else if (isSendAction(a2)) out.push({ kind: "send", message: a2.message, recipient: a2.recipient.segments });
+    else if (isCreateAction(a2)) out.push({
+      kind: "create",
+      target: a2.target?.ref?.name ?? a2.target?.$refText ?? "?",
+      source: a2.source?.ref?.name ?? a2.source?.$refText ?? "?"
+    });
+    else if (isPerformAction(a2)) out.push({
+      kind: "perform",
+      target: a2.target?.ref?.name ?? a2.target?.$refText ?? "?"
+    });
+  }
+  return out;
+}
+function buildDelegation(cmd) {
+  if (isGrantCommand(cmd)) {
+    return {
+      operation: "grant",
+      actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
+      permission: cmd.permission,
+      ownership: ownershipKey(cmd.ownership),
+      resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText,
+      grantee: cmd.grantee?.ref?.name ?? cmd.grantee?.$refText,
+      duration: cmd.duration ? { ...normalizeDuration(cmd.duration) } : null
+    };
+  }
+  if (isRevokeCommand(cmd)) {
+    return {
+      operation: "revoke",
+      actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
+      permission: cmd.permission,
+      ownership: ownershipKey(cmd.ownership),
+      resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText,
+      grantee: cmd.grantee?.ref?.name ?? cmd.grantee?.$refText,
+      duration: null
+    };
+  }
+  return null;
+}
+function buildActors(model2) {
+  const out = [];
+  for (const el of elementsOf(model2)) {
+    if (!isActorDef(el) || !el.name) continue;
+    out.push({ id: el.name, extends: el.parent?.ref?.name ?? el.parent?.$refText ?? null });
+  }
+  return out.sort((a2, b) => a2.id.localeCompare(b.id));
+}
+function readEntryNode(r) {
+  if (isBareRead(r)) return { kind: "entity", entity: r.entity?.ref?.name ?? r.entity?.$refText ?? "?", alias: r.alias ?? null };
+  return {
+    kind: "path",
+    hops: (r.hops ?? []).map((h) => h?.ref?.name ?? h?.$refText ?? "?"),
+    leaf: r.leaf?.ref?.name ?? r.leaf?.$refText ?? null,
+    alias: r.alias ?? null
+  };
+}
+function buildRules2(model2) {
+  const out = [];
+  for (const el of elementsOf(model2)) {
+    if (!isRuleDef(el) || !el.name) continue;
+    out.push({
+      id: el.name,
+      reads: (el.reads ?? []).map(readEntryNode),
+      // ADR-0042 K1: satisfies opsiyonel — gövdesiz rule (isim + note) body:null yayınlar;
+      // yapısal predikat tech realize-gövdesinde (manifest realizesRules[].predicate).
+      body: el.body ? serializeBoolExpr(el.body) : null,
+      note: el.note || null
+    });
+  }
+  return out.sort((a2, b) => a2.id.localeCompare(b.id));
+}
+function buildSuccessCriteria(model2) {
+  const out = [];
+  for (const el of elementsOf(model2)) {
+    if (!isOutcomeDef(el) || !el.name) continue;
+    out.push({
+      id: el.name,
+      measures: el.measures.map((m) => ({
+        metric: m.metric,
+        comparator: m.op,
+        target: m.target,
+        unit: m.unit ?? null,
+        window: m.window ? { ...normalizeDuration(m.window) } : null
+      })),
+      covers: el.covers.map((c) => c.ref?.name ?? c.$refText).filter((n) => !!n),
+      note: el.note || null
+    });
+  }
+  return out.sort((a2, b) => a2.id.localeCompare(b.id));
+}
+function buildRelations(model2) {
+  const out = [];
+  for (const el of elementsOf(model2)) {
+    if (!isRelationDef(el) || !el.name) continue;
+    out.push({
+      id: el.name,
+      source: el.source?.ref?.name ?? el.source?.$refText,
+      target: el.target?.ref?.name ?? el.target?.$refText,
+      inherited: el.inherited === true
+    });
+  }
+  return out.sort((a2, b) => a2.id.localeCompare(b.id));
+}
+function buildCalendars(model2) {
+  const out = [];
+  for (const el of elementsOf(model2)) {
+    if (!isCalendarDef(el) || !el.name) continue;
+    out.push(el.name);
+  }
+  return out.sort((a2, b) => a2.localeCompare(b));
+}
+function buildVerbs(model2) {
+  const out = [];
+  for (const el of elementsOf(model2)) {
+    if (!isVerbDef(el) || !el.name) continue;
+    out.push(el.name);
+  }
+  return out.sort((a2, b) => a2.localeCompare(b));
+}
+function buildDomains(model2) {
+  const set = /* @__PURE__ */ new Set();
+  for (const el of elementsOf(model2)) {
+    if (!isDomainDef(el) || !el.name) continue;
+    set.add(el.name);
+  }
+  return [...set].sort((a2, b) => a2.localeCompare(b));
+}
+function buildFields(el) {
+  return el.fields.map((f) => ({ name: f.name, type: f.type, collection: f.collection }));
+}
+function flowItem(item) {
+  if (isFlowStep(item)) return {
+    type: "step",
+    name: item.name,
+    target: item.target?.ref?.name ?? item.target?.$refText ?? "?",
+    optional: item.optional,
+    repeat: item.repeat,
+    using: item.source?.ref?.name ?? item.source?.$refText ?? null
+  };
+  if (isIncludeStep(item)) return {
+    type: "include",
+    target: item.target?.ref?.name ?? item.target?.$refText ?? "?",
+    optional: item.optional,
+    repeat: item.repeat
+  };
+  if (isOutsideNote(item)) return { type: "outside", text: item.text };
+  if (isAbandonNote(item)) return { type: "abandon", text: item.text };
+  return { type: "either", branches: item.branches.map((b) => b.items.map(flowItem)) };
+}
+function buildFlows(model2) {
+  return elementsOf(model2).filter(isFlowDef).map((f) => ({
+    id: f.name,
+    actor: f.actor?.ref?.name ?? f.actor?.$refText ?? "?",
+    note: f.note || null,
+    items: (f.items ?? []).map(flowItem)
+  }));
+}
+function processItem(item) {
+  if (isStageDef(item)) {
+    if (item.flow?.ref || item.flow?.$refText) return {
+      type: "stage",
+      name: item.name,
+      stageKind: "flow",
+      flow: item.flow?.ref?.name ?? item.flow?.$refText ?? "?",
+      by: item.actor?.ref?.name ?? item.actor?.$refText ?? "?"
+    };
+    return {
+      type: "stage",
+      name: item.name,
+      stageKind: "operation",
+      target: item.target?.ref?.name ?? item.target?.$refText ?? "?"
+    };
+  }
+  return { type: "anyOrder", branches: item.branches.map((b) => b.items.map(processItem)) };
+}
+function buildProcesses(model2) {
+  return elementsOf(model2).filter(isProcessDef).map((p) => ({
+    id: p.name,
+    entity: p.entity?.ref?.name ?? p.entity?.$refText ?? null,
+    note: p.note || null,
+    items: (p.items ?? []).map(processItem)
+  }));
+}
+function effectiveNote(op) {
+  return op.note ?? (op.clauses ?? []).find(isNoteClause)?.text;
+}
+function deriveOpAccess(op) {
+  const writes = /* @__PURE__ */ new Set();
+  const reads = /* @__PURE__ */ new Set();
+  const model2 = ast_utils_exports.getContainerOfType(op, isModel);
+  const entityNames = /* @__PURE__ */ new Set();
+  if (model2) {
+    for (const el of model2.elements) if (isEntityDef(el) && el.name) entityNames.add(el.name);
+  }
+  const cmd = op.command;
+  if (cmd && isStandardCommand(cmd)) {
+    const isQuery = operationKind(op) === "query";
+    const primary = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
+    if (primary) (isQuery ? reads : writes).add(primary);
+    const target = cmd.targetResource?.ref?.name ?? cmd.targetResource?.$refText;
+    if (target) (isQuery ? reads : writes).add(target);
+    const source = cmd.sourceResource?.ref?.name ?? cmd.sourceResource?.$refText;
+    if (source) reads.add(source);
+    if (cmd.where) {
+      const ps = [];
+      conditionPaths(cmd.where, ps);
+      for (const p of ps) {
+        const e = pathEntity(p, entityNames);
+        if (e) reads.add(e);
+      }
+    }
+    const actions = [...op.clauses, ...op.success?.actions ?? []];
+    for (const a2 of actions) {
+      if (isCalculateAction(a2)) {
+        const te = pathEntity(a2.target, entityNames);
+        if (te) writes.add(te);
+        const ps = [];
+        exprPaths(a2.expr, ps);
+        if (a2.condition) conditionPaths(a2.condition, ps);
+        for (const p of ps) {
+          const e = pathEntity(p, entityNames);
+          if (e) reads.add(e);
+        }
+      } else if (isCreateAction(a2)) {
+        const t = a2.target?.ref?.name ?? a2.target?.$refText;
+        if (t) writes.add(t);
+        const s = a2.source?.ref?.name ?? a2.source?.$refText;
+        if (s) reads.add(s);
+      } else if (isSendAction(a2)) {
+        const e = pathEntity(a2.recipient, entityNames);
+        if (e) reads.add(e);
+      }
+    }
+  }
+  for (const w of writes) reads.delete(w);
+  return { writes, reads };
+}
+function genOperationsIndex(model2, units2) {
+  const cov = computeCoverage(model2);
+  const domains = computeDomains(model2);
+  const processesByOp = stagedProcessesByOperation(model2);
+  const entries = [];
+  for (const el of elementsOf(model2)) {
+    if (!isOperationDecl(el) || !el.name || !el.command) continue;
+    const sig = operationSignature(el);
+    const { writes, reads } = deriveOpAccess(el);
+    const access = { writes: [...writes].sort(), reads: [...reads].sort() };
+    const cmd2 = el.command;
+    entries.push({
+      id: el.name,
+      kind: operationKind(el),
+      signature: isStandardCommand(cmd2) ? buildSignature(cmd2) : null,
+      delegation: buildDelegation(cmd2),
+      target: isStandardCommand(cmd2) ? buildTarget(cmd2) : null,
+      source: isStandardCommand(cmd2) ? buildSource(cmd2) : null,
+      recipient: isStandardCommand(cmd2) ? buildRecipient(cmd2) : null,
+      description: effectiveNote(el) || null,
+      schedule: buildSchedule(el),
+      orderBy: buildOrderBy(el),
+      limit: buildLimit(el),
+      guards: buildGuards(el),
+      calculate: buildCalculate(el),
+      effects: buildEffects(el),
+      access,
+      flows: sig ? [...new Set((cov.covered.get(sig) ?? []).map((v) => v.flow.name))] : [],
+      processes: processesByOp.get(el) ?? [],
+      domain: domains.get(el) ?? null
+    });
+  }
+  entries.sort((a2, b) => a2.id.localeCompare(b.id));
+  const entities = [];
+  for (const el of elementsOf(model2)) {
+    if (!isEntityDef(el) || !el.name) continue;
+    entities.push({ id: el.name, name: el.name, domain: domains.get(el) ?? null, fields: buildFields(el) });
+  }
+  entities.sort((a2, b) => a2.id.localeCompare(b.id));
+  const emittedIds = new Set(entities.map((e) => e.id));
+  const referenced = /* @__PURE__ */ new Set();
+  for (const e of entries) {
+    for (const w of e.access.writes) referenced.add(w);
+    for (const r of e.access.reads) referenced.add(r);
+  }
+  const uncoveredEntities = [...referenced].filter((id) => !emittedIds.has(id)).sort();
+  let errorCount = 0;
+  for (const m of modelsOf(model2)) {
+    for (const d of m.$document?.diagnostics ?? []) if (d.severity === 1) errorCount++;
+  }
+  const meta = { schemaVersion: 3, hasErrors: errorCount > 0, errorCount };
+  return {
+    path: "operations.json",
+    content: JSON.stringify({
+      operations: entries,
+      entities,
+      flows: buildFlows(model2),
+      processes: buildProcesses(model2),
+      relations: buildRelations(model2),
+      actors: buildActors(model2),
+      rules: buildRules2(model2),
+      successCriteria: buildSuccessCriteria(model2),
+      calendars: buildCalendars(model2),
+      verbs: buildVerbs(model2),
+      domains: buildDomains(model2),
+      coverage: { uncoveredEntities },
+      meta
+    }, null, 4) + "\n"
+  };
+}
+function flowOperations(flow, path = /* @__PURE__ */ new Set()) {
+  if (path.has(flow)) return [];
+  path.add(flow);
+  const out = [];
+  for (const item of flowItemsDeep(flow)) {
+    if (isFlowStep(item) && item.target?.ref) out.push(item.target.ref);
+    else if (isIncludeStep(item) && item.target?.ref) out.push(...flowOperations(item.target.ref, path));
+  }
+  return out;
+}
+function stagedProcessesByOperation(model2) {
+  const out = /* @__PURE__ */ new Map();
+  const add = (op, processName) => {
+    const set = out.get(op) ?? /* @__PURE__ */ new Set();
+    set.add(processName);
+    out.set(op, set);
+  };
+  for (const el of elementsOf(model2)) {
+    if (!isProcessDef(el) || !el.name) continue;
+    for (const item of processItemsDeep(el)) {
+      if (!isStageDef(item)) continue;
+      if (item.target?.ref) add(item.target.ref, el.name);
+      if (item.flow?.ref) {
+        for (const op of flowOperations(item.flow.ref)) add(op, el.name);
+      }
+    }
+  }
+  return new Map([...out.entries()].map(([k, v]) => [k, [...v].sort()]));
+}
+
 // src/shared/note-lint.ts
 init_define_BUILD_INFO();
 var AMBIGUOUS_NOTE_CODE = "note.ambiguous";
@@ -38475,12 +39140,34 @@ var KNOWN_VERBS = [
   "rejects",
   "calculates"
 ];
+function stageHasUnresolvedRef(stage) {
+  if (stage.target && !stage.target.ref) return true;
+  if (stage.flow) {
+    if (!stage.flow.ref) return true;
+    const seen = /* @__PURE__ */ new Set();
+    const walk = (flow) => {
+      if (seen.has(flow)) return false;
+      seen.add(flow);
+      for (const item of flowItemsDeep(flow)) {
+        if (isFlowStep(item)) {
+          if (item.target && !item.target.ref) return true;
+        } else if (isIncludeStep(item)) {
+          if (item.target && !item.target.ref) return true;
+          if (item.target?.ref && walk(item.target.ref)) return true;
+        }
+      }
+      return false;
+    };
+    return walk(stage.flow.ref);
+  }
+  return false;
+}
 function registerValidationChecks(services) {
   const registry = services.validation.ValidationRegistry;
   const validator = services.validation.CommandDslValidator;
   const checks = {
-    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules],
-    OperationDecl: [validator.checkOperationClauses, validator.checkNote, validator.checkRequires],
+    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules, validator.checkBlindWrites],
+    OperationDecl: [validator.checkOperationClauses, validator.checkOperationNote, validator.checkRequires],
     ImportDecl: validator.checkImport,
     EntityDef: validator.checkEntityFields,
     StandardCommand: validator.checkStandardCommand,
@@ -38862,18 +39549,48 @@ var CommandDslValidator = class {
   }
   /** ADR-0005: not tanımlı ama boş → uyarı. İçerik aksi halde doğrulanmaz. */
   checkNote(node, accept) {
-    const note = node.note;
+    this.lintNoteText(node.note, node, "note", accept);
+  }
+  /**
+   * P1 (plan 2.5) — OperationDecl notu KONUM-BAĞIMSIZ: eski başlık-ardı slot VEYA
+   * NoteClause cümleciği. Adet tek: slot + clause'lar toplamı ≥2 → error (fail-closed;
+   * hangi note emit edilir belirsiz kalırdı, sessiz seçim = bilgi kaybı). Aksi halde
+   * etkin not (effectiveNote) sahibine (slot: op/'note', clause: NoteClause/'text')
+   * çıpalanarak lint'lenir — konumdan bağımsız aynı boş/belirsizlik/EARS/refinement denetimi.
+   */
+  checkOperationNote(op, accept) {
+    const noteClauses = (op.clauses ?? []).filter(isNoteClause);
+    const total = (op.note !== void 0 ? 1 : 0) + noteClauses.length;
+    if (total >= 2) {
+      accept(
+        "error",
+        "Bir i\u015Flemde en fazla bir 'note' olabilir (konumu serbest, adedi tek \u2014 P1).",
+        { node: op }
+      );
+      return;
+    }
+    if (op.note !== void 0) {
+      this.lintNoteText(op.note, op, "note", accept);
+    } else if (noteClauses.length === 1) {
+      this.lintNoteText(noteClauses[0].text, noteClauses[0], "text", accept);
+    }
+  }
+  /** ADR-0005 boş-not uyarısı + F2.3 belirsizlik/EARS/refinement lint (ADR-0036; dedektör
+   *  shared/note-lint.ts, tech ile TEK-KAYNAK). Her tespit AYRI code (talep-sayacı). Sessiz
+   *  sınıflandırma YOK — tanı SORAR. Not sahibi node/property çağıran tarafından verilir
+   *  (fixed slot: 'note'; NoteClause: 'text') — konum-bağımsız tek gövde. */
+  lintNoteText(note, node, property2, accept) {
     if (note === void 0) return;
     if (note.trim() === "") {
       accept(
         "warning",
         'Bo\u015F not: silin ya da i\xE7erik yaz\u0131n (note """...""").',
-        { node, property: "note" }
+        { node, property: property2 }
       );
       return;
     }
     for (const hit of detectNoteLint(note)) {
-      accept(hit.severity, hit.message, { node, property: "note", code: hit.code });
+      accept(hit.severity, hit.message, { node, property: property2, code: hit.code });
     }
   }
   /**
@@ -39036,10 +39753,11 @@ var CommandDslValidator = class {
     if (!source || !isActorDef(source)) return;
     const holder = ast_utils_exports.getContainerOfType(ownership, isStandardCommand) ?? ast_utils_exports.getContainerOfType(ownership, isGrantCommand) ?? ast_utils_exports.getContainerOfType(ownership, isRevokeCommand);
     const actor = holder?.actor?.ref;
-    if (actor && actor !== source) {
+    const compatible = !actor || actor === source || relation.inherited === true && actorAncestors(actor).includes(source);
+    if (actor && !compatible) {
       accept(
         "warning",
-        `'${relation.name}' ili\u015Fkisi '${source.name}' akt\xF6r\xFC i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}'`,
+        relation.inherited ? `'${relation.name}' ili\u015Fkisi ('inherited') '${source.name}' soy-zinciri i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}' bu zincirde de\u011Fil` : `'${relation.name}' ili\u015Fkisi '${source.name}' akt\xF6r\xFC i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}' (kal\u0131t\u0131m istiyorsan\u0131z ili\u015Fkiye 'inherited' yaz\u0131n \u2014 P2 opt-in)`,
         { node: ownership }
       );
     }
@@ -39401,6 +40119,26 @@ var CommandDslValidator = class {
         { node: p, property: "name" }
       );
     }
+    const ofEntity = p.entity?.ref;
+    if (ofEntity && !stages.some(stageHasUnresolvedRef)) {
+      const touched = /* @__PURE__ */ new Set();
+      let anyResolved = false;
+      for (const stage of stages) {
+        for (const stageOp of stageUnits(stage).map((u) => u.op)) {
+          const acc = deriveOpAccess(stageOp);
+          if (acc.writes.size + acc.reads.size > 0) anyResolved = true;
+          for (const e of acc.writes) touched.add(e);
+          for (const e of acc.reads) touched.add(e);
+        }
+      }
+      if (anyResolved && !touched.has(ofEntity.name)) {
+        accept(
+          "warning",
+          `S\xFCre\xE7 '${p.name}' hi\xE7bir etab\u0131 merkez kayd\u0131 '${ofEntity.name}'e dokunmuyor (dokunulan: ${[...touched].sort().join(", ") || "\u2014"}). S\xFCre\xE7 'of ${ofEntity.name}' diyorsa en az bir etap o kayd\u0131n ya\u015Fam d\xF6ng\xFCs\xFCn\xFC ilerletmeli (P6-merkez, per-process).`,
+          { node: p, property: "entity" }
+        );
+      }
+    }
     const model2 = ast_utils_exports.getContainerOfType(p, isModel);
     if (!model2) return;
     const chain = deriveStateChain(p, this.visible(model2));
@@ -39446,6 +40184,67 @@ var CommandDslValidator = class {
         `Zamanlanm\u0131\u015F komut s\xFCre\xE7 etab\u0131 olamaz: '${op.name}' schedule kural\u0131 ta\u015F\u0131yor \u2014 zamanlanm\u0131\u015F i\u015Fler hi\xE7bir etaba ait de\u011Fildir, s\xFCre\xE7 d\u0131\u015F\u0131d\u0131r (P7)`,
         { node: stage, property: "name" }
       );
+    }
+  }
+  /**
+   * F3 (plan 1.5): kör-oluşturma taraması. Bir entity ≥1 op tarafından yazılıyor ama
+   * hiçbir query onu DÖNDÜRMÜYOR → o veriyle ekran/panel kurulamaz (7-kayıt vakası).
+   * Ölçüt DÖNDÜRME'dir, okuma değil (kullanıcı kararı 2026-07-22): `reads ⊋ returns`;
+   * yalnız filtre/join için okunan (query'de `from`/`on` → `access.reads`) entity ekranda
+   * gösterilemez, o yüzden `reads` proxy'si yanlış-negatif üretir. Döndürülen entity =
+   * query'nin BİRİNCİL kaynağı (`cmd.resource` / emit `signature.resource`);
+   * `targetResource`/`sourceResource`/koşul-yolları query'de `reads`'e girer ama DÖNÜŞ değildir.
+   * Kapsam (reachability): "döndürülen" küme, görünürlük kümesi ∪ bu dokümanı import eden
+   * YÜKLÜ dokümanların görünürlük kümeleri üzerinden hesaplanır (checkCoverage/F6 emsali —
+   * `reverseImporterModels`). Aksi halde kardeş bir modülde E'yi döndüren query, E'yi yazan
+   * modül TEK BAŞINA doğrulanırken görünmez ve sahte-pozitif üretirdi (ölçülmüş: examples/real —
+   * procurement PurchaseOrder yazar, onu döndüren query fulfillment'tadır). Uyarı ise YALNIZ
+   * bu dokümanın yazan op'ları için üretilir (çapraz-doküman çift-uyarı olmaz).
+   * Sınır: `deriveOpAccess` çözemediği (kırık cross-import ref) erişimleri zaten taramaya
+   * katmaz → fail-open (bilinçli; çözüm hatası kendi diagnostic'ini üretir). Çözülen dünyada
+   * yazılan-ama-döndürülmeyen her entity KOŞULSUZ warning alır (fail-closed). Heuristik → warning.
+   */
+  checkBlindWrites(model2, accept) {
+    const union = /* @__PURE__ */ new Map();
+    const add = (m) => {
+      const key = m.$document?.uri.toString() ?? `anon:${union.size}`;
+      if (!union.has(key)) union.set(key, m);
+    };
+    for (const m of this.visible(model2)) add(m);
+    for (const importer of reverseImporterModels(model2, this.documents)) {
+      for (const m of visibleModels(importer, this.documents)) add(m);
+    }
+    const returnedEntities = /* @__PURE__ */ new Set();
+    for (const m of union.values()) {
+      for (const el of m.elements) {
+        if (!isOperationDecl(el) || operationKind(el) !== "query") continue;
+        const cmd = el.command;
+        if (isStandardCommand(cmd)) {
+          const r = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
+          if (r) returnedEntities.add(r);
+        }
+      }
+    }
+    const writers = /* @__PURE__ */ new Map();
+    for (const el of model2.elements) {
+      if (!isOperationDecl(el) || operationKind(el) === "query") continue;
+      for (const e of deriveOpAccess(el).writes) {
+        let arr = writers.get(e);
+        if (!arr) {
+          arr = [];
+          writers.set(e, arr);
+        }
+        arr.push(el);
+      }
+    }
+    for (const [entity, ws] of [...writers.entries()].sort()) {
+      if (!returnedEntities.has(entity)) {
+        accept(
+          "warning",
+          `'${entity}' ${ws.length} i\u015Flemce yaz\u0131l\u0131yor ama hi\xE7bir sorgu onu D\xD6ND\xDCRM\xDCYOR \u2014 bu kay\u0131tla ekran/panel kurulamaz (F3 k\xF6r-olu\u015Fturma). Yaln\u0131z filtre/join i\xE7in okunmas\u0131 yetmez. Onu d\xF6nd\xFCren bir query ekleyin ya da yaz\u0131m\u0131n amac\u0131n\u0131 'note' ile kayda ge\xE7irin.`,
+          { node: ws[0], property: "name" }
+        );
+      }
     }
   }
   /** P9: any order en az iki dal; iç içe any order yok (v1 düz) */
@@ -39874,597 +40673,6 @@ function createCommandDslServices(context) {
   shared2.ServiceRegistry.register(CommandDsl);
   registerValidationChecks(CommandDsl);
   return { shared: shared2, CommandDsl };
-}
-
-// src/generator/generator.ts
-init_define_BUILD_INFO();
-
-// src/generator/expressions.ts
-init_define_BUILD_INFO();
-
-// src/generator/naming.ts
-init_define_BUILD_INFO();
-function lowerFirst(s) {
-  return s.charAt(0).toLowerCase() + s.slice(1);
-}
-function kebab(s) {
-  return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-// src/generator/cockburn.ts
-init_define_BUILD_INFO();
-
-// src/generator/plantuml.ts
-init_define_BUILD_INFO();
-var SKIN_BASE = `skinparam backgroundColor #1e1e1e
-skinparam defaultFontColor #cccccc
-skinparam packageStyle rectangle
-skinparam shadowing false
-skinparam usecase {
-  BackgroundColor #252526
-  BorderColor #4fc1ff
-  FontColor #cccccc
-  StereotypeFontColor #8a8a8a
-}
-skinparam actor {
-  BackgroundColor #252526
-  BorderColor #4fc1ff
-  FontColor #cccccc
-}
-skinparam package {
-  BackgroundColor #252526
-  BorderColor #3c3c3c
-  FontColor #cccccc
-}
-skinparam arrow {
-  Color #8a8a8a
-  FontColor #8a8a8a
-}
-skinparam note {
-  BackgroundColor #2d2d30
-  BorderColor #3c3c3c
-  FontColor #cccccc
-}`;
-var DARK_STYLE = "left to right direction\n" + SKIN_BASE;
-function cstText(node) {
-  return (node?.$cstNode?.text ?? "").replace(/\s+/g, " ").trim();
-}
-
-// src/generator/coverage.ts
-init_define_BUILD_INFO();
-
-// src/generator/e2e.ts
-init_define_BUILD_INFO();
-
-// src/generator/routing.ts
-init_define_BUILD_INFO();
-
-// src/generator/process-doc.ts
-init_define_BUILD_INFO();
-
-// src/generator/process-e2e.ts
-init_define_BUILD_INFO();
-
-// src/generator/operations.ts
-init_define_BUILD_INFO();
-
-// src/generator/ops-expr.ts
-init_define_BUILD_INFO();
-var ADD = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
-function normalizeDuration(d) {
-  const text = cstText(d);
-  if (isUnitDuration(d)) {
-    const unit = d.unit.replace(/s$/, "");
-    return { value: d.value, unit, text };
-  }
-  if (isCompactDuration(d)) {
-    const m = /^(\d+)([hmd])$/.exec(d.literal);
-    const map2 = { h: "hour", m: "minute", d: "day" };
-    return { value: m ? Number(m[1]) : 0, unit: m ? map2[m[2]] : "?", text: d.literal };
-  }
-  return { value: 0, unit: "?", text };
-}
-function serializeExpr(e) {
-  if (isBinaryExpr(e)) return { node: ADD[e.op], op: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
-  if (isAggregateExpr(e)) return { node: "agg", fn: "sum", path: e.path.segments };
-  if (isFieldExpr(e)) return { path: e.path.segments };
-  if (isNumberExpr(e)) return { kind: "number", value: e.value };
-  if (isStringExpr(e)) return { kind: "string", value: e.value };
-  return { path: [] };
-}
-function serializeCondition(c) {
-  if (isBinaryCondition(c)) return { node: c.op, left: serializeCondition(c.left), right: serializeCondition(c.right) };
-  if (isComparison(c)) {
-    const right = c.right;
-    let r;
-    if (isStringValue(right)) r = { kind: "string", value: right.value };
-    else if (isNumberValue(right)) r = { kind: "number", value: right.value };
-    else if (isDurationValue(right)) r = { kind: "duration", ...normalizeDuration(right.value) };
-    else if (isFieldValue(right)) r = { path: right.path.segments };
-    else r = { path: [] };
-    return { node: "cmp", op: c.op, left: { path: c.left.segments }, right: r };
-  }
-  return { path: [] };
-}
-function serializeBoolExpr(b) {
-  if (isBinaryBool(b)) return { node: b.op, left: serializeBoolExpr(b.left), right: serializeBoolExpr(b.right) };
-  if (isExistsExpr(b)) return { node: "exists", negated: !!b.negated, collection: b.collection, where: serializeCondition(b.condition) };
-  return serializeCondition(b);
-}
-function box(node, ast) {
-  return { text: cstText(node), ast };
-}
-
-// src/generator/operations.ts
-function pathEntity(path, entityNames) {
-  const head = path?.segments?.[0];
-  return head && entityNames.has(head) ? head : void 0;
-}
-function conditionPaths(c, out) {
-  if (!c || typeof c !== "object") return;
-  const n = c;
-  if (isBinaryCondition(c)) {
-    conditionPaths(n.left, out);
-    conditionPaths(n.right, out);
-    return;
-  }
-  if (isComparison(c)) {
-    if (c.left) out.push(c.left);
-    if (isFieldValue(c.right)) out.push(c.right.path);
-    return;
-  }
-}
-function exprPaths(e, out) {
-  if (!e || typeof e !== "object") return;
-  if (isBinaryExpr(e)) {
-    exprPaths(e.left, out);
-    exprPaths(e.right, out);
-    return;
-  }
-  if (isFieldExpr(e) || isAggregateExpr(e)) {
-    out.push(e.path);
-    return;
-  }
-}
-function buildSignature(cmd) {
-  return {
-    actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
-    verb: cmd.verb,
-    ownership: ownershipKey(cmd.ownership),
-    resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText
-  };
-}
-function buildTarget(cmd) {
-  if (!cmd.targetResource) return null;
-  return {
-    ownership: ownershipKey(cmd.targetOwnership),
-    resource: cmd.targetResource.ref?.name ?? cmd.targetResource.$refText
-  };
-}
-function buildSource(cmd) {
-  if (!cmd.sourceResource) return null;
-  return {
-    ownership: ownershipKey(cmd.sourceOwnership),
-    resource: cmd.sourceResource.ref?.name ?? cmd.sourceResource.$refText
-  };
-}
-function buildRecipient(cmd) {
-  return cmd.recipient?.ref?.name ?? null;
-}
-function buildSchedule(op) {
-  const s = op.clauses.find(isSchedule);
-  if (!s) return null;
-  return { unit: s.unit, time: s.time ?? null };
-}
-function buildOrderBy(op) {
-  const f = op.clauses.find(isOrderByFilter);
-  if (!f) return null;
-  return { path: f.field.segments, direction: f.direction ?? null };
-}
-function buildLimit(op) {
-  return op.clauses.find(isLimitFilter)?.count ?? null;
-}
-function buildGuards(op) {
-  const out = [];
-  const counters = { where: 0, during: 0, if: 0, when: 0, rule: 0 };
-  const nextId = (kind) => `${kind}:${counters[kind]++}`;
-  const cmd = op.command;
-  if (isStandardCommand(cmd) && cmd.where) {
-    out.push({ id: nextId("where"), kind: "where", ...box(cmd.where, serializeCondition(cmd.where)) });
-  }
-  for (const cl of op.clauses) {
-    if (isDuringConstraint(cl)) {
-      out.push({
-        id: nextId("during"),
-        kind: "during",
-        calendar: cl.calendar?.$refText ?? cl.calendar?.ref?.name ?? "?"
-      });
-    } else if (isIfConstraint(cl)) {
-      out.push({ id: nextId("if"), kind: "if", ...box(cl.condition, serializeCondition(cl.condition)) });
-    } else if (isWhenConstraint(cl)) {
-      out.push({
-        id: nextId("when"),
-        kind: "when",
-        role: operationKind(op) === "query" ? "result-filter" : "precondition",
-        ...box(cl.condition, serializeCondition(cl.condition))
-      });
-    } else if (isRequiresConstraint(cl)) {
-      for (const rr of cl.rules) {
-        out.push({
-          id: nextId("rule"),
-          kind: "rule",
-          ref: rr?.ref?.name ?? rr?.$refText ?? "?"
-        });
-      }
-    }
-  }
-  return out;
-}
-function calcNode(a2) {
-  return {
-    target: a2.target.segments,
-    text: cstText(a2.expr),
-    expr: serializeExpr(a2.expr),
-    condition: a2.condition ? box(a2.condition, serializeCondition(a2.condition)) : null
-  };
-}
-function buildCalculate(op) {
-  return op.clauses.filter(isCalculateAction).map(calcNode);
-}
-function buildEffects(op) {
-  const out = [];
-  for (const a2 of op.success?.actions ?? []) {
-    if (isCalculateAction(a2)) out.push({ kind: "calculate", ...calcNode(a2) });
-    else if (isSendAction(a2)) out.push({ kind: "send", message: a2.message, recipient: a2.recipient.segments });
-    else if (isCreateAction(a2)) out.push({
-      kind: "create",
-      target: a2.target?.ref?.name ?? a2.target?.$refText ?? "?",
-      source: a2.source?.ref?.name ?? a2.source?.$refText ?? "?"
-    });
-    else if (isPerformAction(a2)) out.push({
-      kind: "perform",
-      target: a2.target?.ref?.name ?? a2.target?.$refText ?? "?"
-    });
-  }
-  return out;
-}
-function buildDelegation(cmd) {
-  if (isGrantCommand(cmd)) {
-    return {
-      operation: "grant",
-      actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
-      permission: cmd.permission,
-      ownership: ownershipKey(cmd.ownership),
-      resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText,
-      grantee: cmd.grantee?.ref?.name ?? cmd.grantee?.$refText,
-      duration: cmd.duration ? { ...normalizeDuration(cmd.duration) } : null
-    };
-  }
-  if (isRevokeCommand(cmd)) {
-    return {
-      operation: "revoke",
-      actor: cmd.actor?.ref?.name ?? cmd.actor?.$refText,
-      permission: cmd.permission,
-      ownership: ownershipKey(cmd.ownership),
-      resource: cmd.resource?.ref?.name ?? cmd.resource?.$refText,
-      grantee: cmd.grantee?.ref?.name ?? cmd.grantee?.$refText,
-      duration: null
-    };
-  }
-  return null;
-}
-function buildActors(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isActorDef(el) || !el.name) continue;
-    out.push({ id: el.name, extends: el.parent?.ref?.name ?? el.parent?.$refText ?? null });
-  }
-  return out.sort((a2, b) => a2.id.localeCompare(b.id));
-}
-function readEntryNode(r) {
-  if (isBareRead(r)) return { kind: "entity", entity: r.entity?.ref?.name ?? r.entity?.$refText ?? "?", alias: r.alias ?? null };
-  return {
-    kind: "path",
-    hops: (r.hops ?? []).map((h) => h?.ref?.name ?? h?.$refText ?? "?"),
-    leaf: r.leaf?.ref?.name ?? r.leaf?.$refText ?? null,
-    alias: r.alias ?? null
-  };
-}
-function buildRules2(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isRuleDef(el) || !el.name) continue;
-    out.push({
-      id: el.name,
-      reads: (el.reads ?? []).map(readEntryNode),
-      // ADR-0042 K1: satisfies opsiyonel — gövdesiz rule (isim + note) body:null yayınlar;
-      // yapısal predikat tech realize-gövdesinde (manifest realizesRules[].predicate).
-      body: el.body ? serializeBoolExpr(el.body) : null,
-      note: el.note || null
-    });
-  }
-  return out.sort((a2, b) => a2.id.localeCompare(b.id));
-}
-function buildSuccessCriteria(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isOutcomeDef(el) || !el.name) continue;
-    out.push({
-      id: el.name,
-      measures: el.measures.map((m) => ({
-        metric: m.metric,
-        comparator: m.op,
-        target: m.target,
-        unit: m.unit ?? null,
-        window: m.window ? { ...normalizeDuration(m.window) } : null
-      })),
-      covers: el.covers.map((c) => c.ref?.name ?? c.$refText).filter((n) => !!n),
-      note: el.note || null
-    });
-  }
-  return out.sort((a2, b) => a2.id.localeCompare(b.id));
-}
-function buildRelations(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isRelationDef(el) || !el.name) continue;
-    out.push({
-      id: el.name,
-      source: el.source?.ref?.name ?? el.source?.$refText,
-      target: el.target?.ref?.name ?? el.target?.$refText
-    });
-  }
-  return out.sort((a2, b) => a2.id.localeCompare(b.id));
-}
-function buildCalendars(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isCalendarDef(el) || !el.name) continue;
-    out.push(el.name);
-  }
-  return out.sort((a2, b) => a2.localeCompare(b));
-}
-function buildVerbs(model2) {
-  const out = [];
-  for (const el of elementsOf(model2)) {
-    if (!isVerbDef(el) || !el.name) continue;
-    out.push(el.name);
-  }
-  return out.sort((a2, b) => a2.localeCompare(b));
-}
-function buildDomains(model2) {
-  const set = /* @__PURE__ */ new Set();
-  for (const el of elementsOf(model2)) {
-    if (!isDomainDef(el) || !el.name) continue;
-    set.add(el.name);
-  }
-  return [...set].sort((a2, b) => a2.localeCompare(b));
-}
-function buildFields(el) {
-  return el.fields.map((f) => ({ name: f.name, type: f.type, collection: f.collection }));
-}
-function flowItem(item) {
-  if (isFlowStep(item)) return {
-    type: "step",
-    name: item.name,
-    target: item.target?.ref?.name ?? item.target?.$refText ?? "?",
-    optional: item.optional,
-    repeat: item.repeat,
-    using: item.source?.ref?.name ?? item.source?.$refText ?? null
-  };
-  if (isIncludeStep(item)) return {
-    type: "include",
-    target: item.target?.ref?.name ?? item.target?.$refText ?? "?",
-    optional: item.optional,
-    repeat: item.repeat
-  };
-  if (isOutsideNote(item)) return { type: "outside", text: item.text };
-  if (isAbandonNote(item)) return { type: "abandon", text: item.text };
-  return { type: "either", branches: item.branches.map((b) => b.items.map(flowItem)) };
-}
-function buildFlows(model2) {
-  return elementsOf(model2).filter(isFlowDef).map((f) => ({
-    id: f.name,
-    actor: f.actor?.ref?.name ?? f.actor?.$refText ?? "?",
-    note: f.note || null,
-    items: (f.items ?? []).map(flowItem)
-  }));
-}
-function processItem(item) {
-  if (isStageDef(item)) {
-    if (item.flow?.ref || item.flow?.$refText) return {
-      type: "stage",
-      name: item.name,
-      stageKind: "flow",
-      flow: item.flow?.ref?.name ?? item.flow?.$refText ?? "?",
-      by: item.actor?.ref?.name ?? item.actor?.$refText ?? "?"
-    };
-    return {
-      type: "stage",
-      name: item.name,
-      stageKind: "operation",
-      target: item.target?.ref?.name ?? item.target?.$refText ?? "?"
-    };
-  }
-  return { type: "anyOrder", branches: item.branches.map((b) => b.items.map(processItem)) };
-}
-function buildProcesses(model2) {
-  return elementsOf(model2).filter(isProcessDef).map((p) => ({
-    id: p.name,
-    entity: p.entity?.ref?.name ?? p.entity?.$refText ?? null,
-    note: p.note || null,
-    items: (p.items ?? []).map(processItem)
-  }));
-}
-function genOperationsIndex(model2, units2) {
-  const cov = computeCoverage(model2);
-  const domains = computeDomains(model2);
-  const entityNames = /* @__PURE__ */ new Set();
-  for (const el of elementsOf(model2)) if (isEntityDef(el) && el.name) entityNames.add(el.name);
-  const processesByOp = stagedProcessesByOperation(model2);
-  const entries = [];
-  for (const el of elementsOf(model2)) {
-    if (!isOperationDecl(el) || !el.name || !el.command) continue;
-    const sig = operationSignature(el);
-    const writes = /* @__PURE__ */ new Set();
-    const reads = /* @__PURE__ */ new Set();
-    const cmd = el.command;
-    if (isStandardCommand(cmd)) {
-      const isQuery = operationKind(el) === "query";
-      const primary = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
-      if (primary) (isQuery ? reads : writes).add(primary);
-      const target = cmd.targetResource?.ref?.name ?? cmd.targetResource?.$refText;
-      if (target) (isQuery ? reads : writes).add(target);
-      const source = cmd.sourceResource?.ref?.name ?? cmd.sourceResource?.$refText;
-      if (source) reads.add(source);
-      if (cmd.where) {
-        const ps = [];
-        conditionPaths(cmd.where, ps);
-        for (const p of ps) {
-          const e = pathEntity(p, entityNames);
-          if (e) reads.add(e);
-        }
-      }
-      const actions = [...el.clauses, ...el.success?.actions ?? []];
-      for (const a2 of actions) {
-        if (isCalculateAction(a2)) {
-          const te = pathEntity(a2.target, entityNames);
-          if (te) writes.add(te);
-          const ps = [];
-          exprPaths(a2.expr, ps);
-          if (a2.condition) conditionPaths(a2.condition, ps);
-          for (const p of ps) {
-            const e = pathEntity(p, entityNames);
-            if (e) reads.add(e);
-          }
-        } else if (isCreateAction(a2)) {
-          const t = a2.target?.ref?.name ?? a2.target?.$refText;
-          if (t) writes.add(t);
-          const s = a2.source?.ref?.name ?? a2.source?.$refText;
-          if (s) reads.add(s);
-        } else if (isSendAction(a2)) {
-          const e = pathEntity(a2.recipient, entityNames);
-          if (e) reads.add(e);
-        }
-      }
-    }
-    for (const w of writes) reads.delete(w);
-    const access = { writes: [...writes].sort(), reads: [...reads].sort() };
-    const cmd2 = el.command;
-    entries.push({
-      id: el.name,
-      kind: operationKind(el),
-      signature: isStandardCommand(cmd2) ? buildSignature(cmd2) : null,
-      delegation: buildDelegation(cmd2),
-      target: isStandardCommand(cmd2) ? buildTarget(cmd2) : null,
-      source: isStandardCommand(cmd2) ? buildSource(cmd2) : null,
-      recipient: isStandardCommand(cmd2) ? buildRecipient(cmd2) : null,
-      description: el.note || null,
-      schedule: buildSchedule(el),
-      orderBy: buildOrderBy(el),
-      limit: buildLimit(el),
-      guards: buildGuards(el),
-      calculate: buildCalculate(el),
-      effects: buildEffects(el),
-      access,
-      flows: sig ? [...new Set((cov.covered.get(sig) ?? []).map((v) => v.flow.name))] : [],
-      processes: processesByOp.get(el) ?? [],
-      domain: domains.get(el) ?? null
-    });
-  }
-  entries.sort((a2, b) => a2.id.localeCompare(b.id));
-  const entities = [];
-  for (const el of elementsOf(model2)) {
-    if (!isEntityDef(el) || !el.name) continue;
-    entities.push({ id: el.name, name: el.name, domain: domains.get(el) ?? null, fields: buildFields(el) });
-  }
-  entities.sort((a2, b) => a2.id.localeCompare(b.id));
-  const emittedIds = new Set(entities.map((e) => e.id));
-  const referenced = /* @__PURE__ */ new Set();
-  for (const e of entries) {
-    for (const w of e.access.writes) referenced.add(w);
-    for (const r of e.access.reads) referenced.add(r);
-  }
-  const uncoveredEntities = [...referenced].filter((id) => !emittedIds.has(id)).sort();
-  let errorCount = 0;
-  for (const m of modelsOf(model2)) {
-    for (const d of m.$document?.diagnostics ?? []) if (d.severity === 1) errorCount++;
-  }
-  const meta = { schemaVersion: 3, hasErrors: errorCount > 0, errorCount };
-  return {
-    path: "operations.json",
-    content: JSON.stringify({
-      operations: entries,
-      entities,
-      flows: buildFlows(model2),
-      processes: buildProcesses(model2),
-      relations: buildRelations(model2),
-      actors: buildActors(model2),
-      rules: buildRules2(model2),
-      successCriteria: buildSuccessCriteria(model2),
-      calendars: buildCalendars(model2),
-      verbs: buildVerbs(model2),
-      domains: buildDomains(model2),
-      coverage: { uncoveredEntities },
-      meta
-    }, null, 4) + "\n"
-  };
-}
-function flowOperations(flow, path = /* @__PURE__ */ new Set()) {
-  if (path.has(flow)) return [];
-  path.add(flow);
-  const out = [];
-  for (const item of flowItemsDeep(flow)) {
-    if (isFlowStep(item) && item.target?.ref) out.push(item.target.ref);
-    else if (isIncludeStep(item) && item.target?.ref) out.push(...flowOperations(item.target.ref, path));
-  }
-  return out;
-}
-function stagedProcessesByOperation(model2) {
-  const out = /* @__PURE__ */ new Map();
-  const add = (op, processName) => {
-    const set = out.get(op) ?? /* @__PURE__ */ new Set();
-    set.add(processName);
-    out.set(op, set);
-  };
-  for (const el of elementsOf(model2)) {
-    if (!isProcessDef(el) || !el.name) continue;
-    for (const item of processItemsDeep(el)) {
-      if (!isStageDef(item)) continue;
-      if (item.target?.ref) add(item.target.ref, el.name);
-      if (item.flow?.ref) {
-        for (const op of flowOperations(item.flow.ref)) add(op, el.name);
-      }
-    }
-  }
-  return new Map([...out.entries()].map(([k, v]) => [k, [...v].sort()]));
-}
-
-// src/generator/generator.ts
-function collectCommands(model2) {
-  const map2 = /* @__PURE__ */ new Map();
-  const domains = computeDomains(model2);
-  for (const el of elementsOf(model2)) {
-    if (!isOperationDecl(el) || !isStandardCommand(el.command)) continue;
-    const cmd = el.command;
-    const actor = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
-    const resource = cmd.resource?.ref;
-    if (!actor || !resource || !el.name) continue;
-    const sig = commandSignature(actor, cmd.verb, ownershipKey(cmd.ownership), resource.name);
-    if (map2.has(sig)) continue;
-    map2.set(sig, {
-      command: cmd,
-      op: el,
-      slug: kebab(el.name),
-      fnName: lowerFirst(el.name),
-      actor,
-      verb: cmd.verb,
-      resource,
-      isQuery: READ_VERBS.has(cmd.verb),
-      domain: domains.get(el)
-    });
-  }
-  return [...map2.values()];
 }
 
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/emit-operations.src.mts

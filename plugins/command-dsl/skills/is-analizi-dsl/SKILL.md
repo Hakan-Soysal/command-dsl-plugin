@@ -449,6 +449,10 @@ her flow step → var olan operation; her process stage → var olan flow/operat
 ownership ilişkileri ve takvimler bildirilmiş. Bir ihlal varsa **emit etme** —
 düzelt, tekrar denetle.
 
+> ⚠ **`.cdsl`'i revize/düzenlerken:** DSL dosyalarında toplu metin dönüşümü **CONVENTIONS §12**'ye
+> tabidir — blok-türüne duyarsız sed/regex süpürmesi YASAK; parse-farkındalıklı düzenle +
+> dönüşüm-öncesi/sonrası **sayım-doğrula** (`rg -c`; 0-error geçmesi kaybı aklamaz).
+
 **"Ne sormadım?" geçidi — ÇİFT-SIFIR (0-tutarsızlık VE 0-sessiz-eksik).** Tutarlılık tek başına
 YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyonel guard / `calculate` /
 `perform` / `schedule` hiç sorulmadıysa sessizce yok sayılır). Beş süpürme:

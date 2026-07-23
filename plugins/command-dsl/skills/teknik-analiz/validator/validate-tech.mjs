@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-b727382dcf1a", grammarHash: "b727382dcf1a", srcDirs: ["src/shared", "src/tech"], techSrcHash: "ef34d236b0cb", wrapperFiles: ["validate-tech.src.mts"], wrapperHash: "b193075762a9", commit: "0bf9c1d", builtAt: "2026-07-19T16:49:39+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-b727382dcf1a", grammarHash: "b727382dcf1a", srcDirs: ["src/shared", "src/tech"], techSrcHash: "395efefcfe70", wrapperFiles: ["validate-tech.src.mts"], wrapperHash: "b193075762a9", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
   }
 });
 
@@ -41286,35 +41286,24 @@ var TechDslValidator = class {
   }
   // ADR-0033 K9: requires edilen rule tech'te realize edilmemiş → coverage warning (gate DEĞİL).
   /**
-   * LINKED: realized business-op'ların `requires` ettiği rule'lardan (contract guards[].kind:'rule')
-   * teknik realize edilmeyenler → warning. Realize-işareti = op-clause `realizes rule <Ad>[, <Ad>]*`
-   * (Kalem 1a, 2026-07-18): işaretlenen rule'lar kapsam-warning'inden DÜŞER. Rule adı plain ID —
-   * contract `rules[]`'e karşı çözülür; sözleşmede yoksa ERROR. Standalone → N/A.
-   * NOT: rule GÖVDESİ divergence'a GİRMEZ (Karar 7) — bu check yalnız İSİM-kapsaması; AST-kıyas YOK.
+   * LINKED: bir op'un realize ettiği business-op'un `requires` ettiği rule'lardan (contract
+   * guards[].kind:'rule') O OP tarafından realize edilmeyenler → warning. Kapsam kıyası
+   * OP-BAZINDA eşleşir: başka bir op'un `realizes rule` işareti BU op'u KAPSAMAZ (plan 1.1, T9 —
+   * eski global-küme örtüşmesi sahte-yeşil üretiyordu). Realize-işareti = op-clause
+   * `realizes rule <Ad>[, <Ad>]*` (Kalem 1a, 2026-07-18): op'un kendi işaretlediği rule'lar o op'un
+   * kapsam-warning'inden DÜŞER. Rule adı plain ID — contract `rules[]`'e karşı çözülür; sözleşmede
+   * yoksa ERROR. Standalone → N/A. NOT: rule GÖVDESİ divergence'a GİRMEZ (ADR-0033 Karar 7/K9) —
+   * bu check yalnız İSİM-kapsaması; AST-kıyas YOK.
    */
   checkRequiredRuleCoverage(model, accept) {
     if (!model.contract?.path) return;
     const contract = loadContract(model.contract.path, ast_utils_exports.getDocument(model).uri);
     if (!contract) return;
     const ops = model.decls.filter(isModule).flatMap((m) => m.members.filter(isOperation));
-    const realizedOpIds = new Set(
-      ops.map((op) => op.realizes?.$refText).filter((id) => id != null)
-    );
-    const required = /* @__PURE__ */ new Set();
-    for (const id of realizedOpIds) {
-      const cop = contract.operations.get(id);
-      if (!cop) continue;
-      for (const g of cop.guards ?? []) {
-        if (g.kind === "rule" && g.ref) required.add(g.ref);
-      }
-    }
-    const realizedRules = /* @__PURE__ */ new Set();
     for (const op of ops) {
       for (const clause of op.clauses.filter(isRealizesRuleClause)) {
         clause.rules.forEach((name, i) => {
-          if (contract.rules.has(name)) {
-            realizedRules.add(name);
-          } else {
+          if (!contract.rules.has(name)) {
             accept(
               "error",
               `\`realizes rule ${name}\`: s\xF6zle\u015Fmede (operations.json rules[]) bu adla bir rule yok. Mevcut rule'lar: ${[...contract.rules.keys()].sort().join(", ") || "(hi\xE7 yok)"}.`,
@@ -41324,13 +41313,31 @@ var TechDslValidator = class {
         });
       }
     }
-    const unrealizedRules = [...required].filter((r) => contract.rules.has(r) && !realizedRules.has(r)).sort();
-    if (unrealizedRules.length > 0) {
-      accept(
-        "warning",
-        `requires edilen \u015Fu rule'lar teknik olarak hen\xFCz realize edilmemi\u015F (kapsam eksik; codegen downstream): ${unrealizedRules.join(", ")}.`,
-        { node: model.contract, property: "path" }
+    for (const op of ops) {
+      const bizId = op.realizes?.$refText;
+      if (!bizId) continue;
+      const cop = contract.operations.get(bizId);
+      if (!cop) continue;
+      const requiredHere = (cop.guards ?? []).filter((g) => g.kind === "rule" && g.ref).map((g) => g.ref);
+      const realizedHere = new Set(
+        op.clauses.filter(isRealizesRuleClause).flatMap((c) => c.rules)
       );
+      const missing = [...new Set(requiredHere)].filter((r) => contract.rules.has(r) && !realizedHere.has(r)).sort();
+      if (missing.length > 0) {
+        accept(
+          "warning",
+          `'${op.name}' requires etti\u011Fi \u015Fu rule'lar\u0131 KEND\u0130S\u0130 realize etmiyor (ba\u015Fka op'un realize etmesi bu op'u kapsamaz; kapsam eksik, codegen downstream): ${missing.join(", ")}.`,
+          { node: op, property: "realizes" }
+        );
+      }
+      const undefinedReq = [...new Set(requiredHere)].filter((r) => !contract.rules.has(r)).sort();
+      if (undefinedReq.length > 0) {
+        accept(
+          "warning",
+          `'${op.name}' realizes etti\u011Fi '${bizId}' \u015Fu rule'lar\u0131 requires ediyor ama s\xF6zle\u015Fme rules[]'te tan\u0131ms\u0131z: ${undefinedReq.join(", ")}. (S\xF6zle\u015Fme ile tech modeli uyumsuz \u2014 rule ya operations.json'a eklenmeli ya requires d\xFC\u015Fmeli.)`,
+          { node: op, property: "realizes" }
+        );
+      }
     }
   }
   // T-3.1: rolemap ters-indeks (repr) yardımcısı

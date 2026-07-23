@@ -214,6 +214,15 @@ ETME — yalnız testlerin gerçekten kullanacağı kimlikler; ama yetki-testler
 
 **Amaç:** Her op'un türetilmiş dal uzayını karara bağlamak — skill'in kalbi.
 **Elicit et:**
+- **Dal envanterini ELLE TÜRETME — VALIDATOR'DAN al (Q1-B):** op'un dal listesini kafadan /
+  §A tablosundan tek tek saymak sessizce eksik kalır (**ölçüldü:** `Filtered` dalları elle
+  **0**, gerçekte **12**). TAM envanter için **boş bir `.qa` yaz + `qcdsl --strict --json`
+  çalıştır** → qcdsl `uses tech` node'u başına **TEK bir (aggregated) `qa.uncovered-branches`
+  kaydı** üretir; TÜM op'lar ve dalları o kaydın `.message`'ında birleşiktir. **KAYIT SAYMA**
+  (eksik sayar — tekniğin önlediği hata); envanteri `.message`'ı AYRIŞTIRARAK çıkar
+  (sınırlayıcılar: `' · '` op-ayırıcı · `': '` op↔dal-listesi · `', '` dal-ayırıcı).
+  Kopyala-çalıştır dizisi: `references/tech-to-qa-translation.md` §A. Tablonun rolü envanteri
+  SAYMAK değil, validator'ın listelediği her dalı kullanıcıya **düz dille sunmaktır**.
 - Op-başına türetilmiş dal tablosunu **düz dille SUN** (türetim:
   `references/tech-to-qa-translation.md` §A): *"SubmitProposal'ın şu yolları var:
   (1) başarılı gönderim, (2) boş-başlık kuralı, (3) tutar-pozitif kuralı, (4) bütçe
@@ -419,6 +428,10 @@ persona / dataset / defaults / test / scenario / waive. Tavsiye edilen granülar
 tech-dosyası-başına bir `.qa` (küçük modelde tek dosya); coverage **workspace-union**
 olduğundan bölme serbesttir — TÜM dosyaları doğrulayıcıya **tek çağrıda** ver
 (union ancak böyle doğru). Dosya kuralları: `references/consistency-and-emit.md`.
+
+> ⚠ **`.qa`'yı revize/düzenlerken:** DSL dosyalarında toplu metin dönüşümü **CONVENTIONS §12**'ye
+> tabidir — blok-türüne duyarsız sed/regex süpürmesi YASAK; parse-farkındalıklı düzenle +
+> dönüşüm-öncesi/sonrası **sayım-doğrula** (`rg -c`; 0-error geçmesi kaybı aklamaz).
 
 **Emit-öncesi "Kapsandı ≠ doğrulandı" geçidi — ÇİFT-SIFIR (0-error VE 0-sessiz-eksik).**
 Branch-coverage tam olsa bile YETMEZ: bir dal SAYILDI diye gerçekten test edildiği anlamına gelmez.

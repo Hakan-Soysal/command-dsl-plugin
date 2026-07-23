@@ -155,6 +155,25 @@ action New -> screen NewOrder                 # client-only (ad hiçbir uses-com
 - **form** yalnız COMMAND'a bağlanır (submit); düzenleme deseni `loads query <TekilQuery>`.
   `field <ad> { required | min: N | max: N | pattern: "…" }`; çok-adım `step Ad { field… }`;
   çapraz-alan `rule <ifade>` (ifade yalnız form input-alanlarına + izinli köklere bakar).
+- **form-argümanı — bağlam kimliğini bağlama (F8-B; plan 4.4):** gramer form başlığında da argüman
+  KABUL EDER (`FormComponent: 'form' bind=QueryBind` — tıpkı list/detail gibi); **ekstra sözdizim
+  gerekmez, ZATEN destekleniyor.** Kanonik örnek:
+  `form CreatePoi(organizationId: session.organizationId) { field title { required }  <üyeler> }`.
+  Kural: bir **bağlam-kimliği param'ı form field'ı DEĞİLDİR** — kullanıcıya sorulmaz, oturumdan
+  bağlanır; bu yüzden `field` olarak değil **argüman** olarak yazılır. İzin verilen argüman kökleri
+  (form args'ta `checkPathRootsIn`, `rowAllowed:false`): `session` · `currentUser` · **ekran-param**
+  (`param`) · **state/derived** adları · ekran-kaydı (detail/value adı). ⚠ **`row` form-argümanında
+  GEÇERSİZ'dir** — form ekran-düzeyinde submit eder, satır-bağlamı yoktur (list/detail item-context'inden
+  ayrılan nokta budur; `row` yalnız o öğe-bağlamlarında geçer). **41-form vakası (gerekçe, plan satır 72):**
+  41 form bağlam kimliğini BOŞ gönderiyordu — 0 error/0 warning sahte-yeşil; düzeltme reçetesi tam da
+  `form X(organizationId: session.organizationId)`'dir.
+- **Validator (M1-03 merged; frontend minor):** command'ın her param'ı ya form field'ı ya bind argümanı
+  olmalı; karşılanmayan param istek gövdesinde BOŞ gider → **validator artık karşılanmayan param'a
+  warning verir.** Mesaj örneği:
+  > `Form 'CreatePoi' operasyonunun şu parametrelerini ne alan ne argüman olarak karşılıyor — bunlar BOŞ gönderilir: organizationId. (Bağlam kimliği için emsal: form X(organizationId: session.organizationId).)`
+
+  Fail-open: op çözülemezse (unlinked) veya form başlığında konumsal/adsız argüman varsa (hangi param'ı
+  karşıladığı yerel çözülemez) asimetri uyarısı SUSAR.
 - **action**: adı bir `uses command`'a çözülürse command-bağlı; çözülmezse **client-only**
   (nav/set için; mekanik anlamsız → warning; query'ye bağlanamaz → error). Üyeler:
   `visible-when: <ifade>` · `confirm ["<metin>"]` · `invalidates: [Q1, Q2]` ·

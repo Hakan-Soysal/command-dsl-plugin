@@ -354,6 +354,10 @@ büyük modelde experience-başına dosya + `contract` her kök dosyada tekrarla
 denetimleri doğru çalışsın diye TÜM dosyaları doğrulayıcıya **tek çağrıda** ver.
 Bütünlük self-check'i ve dosya kuralları: `references/consistency-and-emit.md`.
 
+> ⚠ **`.fcdsl`'i revize/düzenlerken:** DSL dosyalarında toplu metin dönüşümü **CONVENTIONS §12**'ye
+> tabidir — blok-türüne duyarsız sed/regex süpürmesi YASAK; parse-farkındalıklı düzenle +
+> dönüşüm-öncesi/sonrası **sayım-doğrula** (`rg -c`; 0-error geçmesi kaybı aklamaz).
+
 **Emit-öncesi "Ne sormadım?" geçidi — ÇİFT-SIFIR (0-error VE 0-sessiz-eksik).** 0-error tek başına
 YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Dört süpürme:
 1. **Sessiz-eksik (★ süpürmesi):** `references/frontend-dsl-reference.md` **Yetenek Envanteri**nin

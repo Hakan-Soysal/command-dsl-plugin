@@ -94,6 +94,11 @@
   yapısal kaynak TECH'tir.⟧ Aynı kural op'a göre **farklı** realize edilebilir (org-fazı vs app-fazı
   sayımı) — her realize-eden op'ta ayrı sor. Gövdesiz işaret (`realizes rule <Ad>` / çoklu-ad) =
   bilinçli devir → "hangi mekanizma kapsıyor?" diye sorup belgele.
+- **rule-realize — faz sorusu (ZORUNLU her `realizes rule` gövdesinde; `4.1/T10`):** "Bu predikatın
+  okuduğu kayıtların **hepsi** bu op çalışırken **var mı**? Sonraki fazda yaratılan kayıt varsa gövde
+  o fazda geçersizdir — o fazın op'unda farklı realize et." ⟦statik ürünlerde (manifest/operations.json)
+  faz/yaşam-döngüsü bilgisi YOK → hiçbir validator yakalayamaz, bu yüzden ZORUNLU SORU; org-fazında
+  `org.poiLimit` onboarding'de çözülemez, 0-error geçip runtime'da patlar.⟧
 
 ## F. Etkileşim & tutarlılık (Faz 6)
 
@@ -116,6 +121,11 @@
   dökümante edilmemiş** mi (mainframe)?" → module vs external vs uncharted.
 - "O sistemin **hangi uçlarını** çağırıyoruz, çağırırken **bildiğimiz input kuralları** neler?" →
   boundary op + serving + validation (caller-side fail-fast).
+- **Dönüş tipi — "reddetti" ↔ "çöktü" ayrımı (ZORUNLU her uçta; `4.6/Q2-B`):** "Bu servis
+  **'reddetti' ile 'çöktü'yü** ayırt edebiliyor mu?" ⟦opak `String`/tipsiz dönüş dal-ayrımını
+  imkânsızlaştırır — çağıran iş-reddi mi altyapı-hatası mı karar veremez (ÖLÇÜLDÜ: 10 dal deterministik
+  tetiklenemez kaldı). Ayırt ediyorsa **durum-alanlı bir `type`** öner (sonuç `rule`/`throws`/`compensate`
+  dalında gate-edilebilsin); edemiyorsa `note`'a yaz — sessiz düşme.⟧
 
 ## H. Guarantee — çapraz-kesen güvence (Faz 8, opsiyonel)
 
@@ -140,6 +150,11 @@ kapsamdaki HER satır sete girer — yaşam-döngüsü durumu varsa `when` eklet
 [principal'sız `actor.*` — principal bildirimini sor, §D]), bunu **kullanıcıya geri sor** —
 warning'ler senin discharge etmediğin belirsizlikleri işaret eder. 0 error'a indir; warning'leri
 ya gider ya da "bilinçli, kabul ediyorum" onayıyla belgele.
+
+**Toplu-uyarı süpürme (`4.2/T6`):** bir uyarı **sınıfını** ("bilinçli, kabul ediyorum" ile toplu)
+kapatmadan ÖNCE örnekleri grupla, **her grubun gerçek korumasını tek tek** göster/değerlendir —
+**"sınıf-toptan waive" YASAK.** ⟦48'lik bir `ownership` yığını toptan-waive edilseydi kaçacak olan
+`AcceptInvitation` `ownership any` gerçek güvenlik açığı ancak tek-tek bakışta çıktı.⟧
 
 **T4 realize-predikat ERROR'ları da ikinci tur sorgudur** (error olsa da düzeltmesi çoğu kez
 **authored bilgi** ister — uydurup kapatma, sor):

@@ -6,12 +6,12 @@
     "src/frontend",
     "src/playground"
   ],
-  "srcHash": "2b8a454c6c60",
+  "srcHash": "0186b753c637",
   "wrapperFiles": [
     "report-frontend.src.mts",
     "report-index.src.mts"
   ],
   "wrapperHash": "1d80610aab15",
-  "commit": "dcbfd21",
-  "builtAt": "2026-07-17T10:46:33+03:00"
+  "commit": "704eb7f",
+  "builtAt": "2026-07-20T18:02:32+03:00"
 }

@@ -181,3 +181,25 @@ prompt'u işler, `expected_output` görmeden; sonra karşılaştır) ayrı bir d
 6. Upstream/downstream zincirini description'da bildir (kimden devralır, kime devreder).
 7. `plugin.json` + `marketplace.json` sürüm bump (§8). Local doğrula (gerçek data, 0 error).
 8. Commit (junk yok) — push **yalnız kullanıcı onayıyla**.
+
+## 12. DSL dosyalarında toplu dönüşüm (parse-farkındalıklı + sayım-doğrulamalı)
+
+> Kaynak: B+D iyileştirme planı **4.9 (T1-ders)** + **satır 49** — blok-türüne duyarsız bir toplu
+> regex **32 operation `note`'unu sessizce öldürdü ve 0-error geçti**. Araç kusuru değil; **süreç
+> kuralı** (bu yüzden burada, CONVENTIONS'ta tek yerde yaşar; skill'ler yalnız referans verir).
+
+- **Blok-türüne duyarsız toplu metin dönüşümü (sed/regex süpürmesi) DSL dosyalarında YASAK.** Bir
+  `.cdsl`/`.tcdsl`/`.qa`/`.fcdsl` üzerinde toplu değişiklik (tırnak-temizliği, keyword rename, alan
+  taşıma) **parse-farkındalıklı** yapılır: hangi blok türüne dokunduğunu **bilerek** düzenle —
+  dosyayı düz metin gibi süpürme. Dönüşüm blok türü bilinmeden yapılamaz.
+- **Zorunlu eş-kural — dönüşüm sonrası SAYIM doğrulaması.** Dönüşümden ÖNCE ve SONRA, taşınması
+  gereken yapıları **say ve karşılaştır**. Örn.:
+  ```
+  rg -c "note" <dosya>    # önce  → n
+  # …dönüşüm…
+  rg -c "note" <dosya>    # sonra → n olmalı; düşmüşse kayıp var → DUR, geri al
+  ```
+  32→0 vakası bu tek sayımla **anında** yakalanırdı.
+- **0-error validate geçmesi kaybı AKLAMAZ.** Doğrulayıcı eksik bir `note`'u BİLEMEZ (yapısal
+  değil, serbest-proza taşınır) → "validate temiz olduğuna göre dönüşüm güvenli" ÇIKARIMI
+  geçersizdir. Kaybın kanıtı validator'da değil, **önce/sonra sayımındadır**.

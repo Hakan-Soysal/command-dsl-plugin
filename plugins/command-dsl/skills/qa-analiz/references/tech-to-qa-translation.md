@@ -7,7 +7,47 @@
 
 ## A. `.tcdsl` clause → dal eşleme tablosu (spec §4.1 birebir + §4.5 event-tetikli satırı)
 
-Op-başına dal envanterini bu tabloyla KENDİN çıkar, kullanıcıya düz dille sun:
+> **Envanteri VALIDATOR'DAN al — elle dal türetme YASAK (Q1-B).** Aşağıdaki tabloya bakıp
+> op'un dallarını kafadan saymak sessizce eksik kalır — **ölçüldü:** `Filtered` dalları elle
+> **0** sayıldı, gerçekte **12** vardı (`list of` dönen op'ların `ownership`/`permit` filtreleri
+> gözden kaçmıştı). TAM ve AUTHORITATIVE envanter tek yerden gelir: **boş bir `.qa` yaz +
+> `--strict --json` çalıştır → `qa.uncovered-branches` kaydının `.message`'ını AYRIŞTIR.**
+> Kopyala-çalıştır dizisi:
+>
+> ```bash
+> # 1) Boş sonda `.qa` — YALNIZ kökler; hiç test / senaryo / waive YOK.
+> #    (`uses flows` 0..1: operations.json yoksa o satırı at.)
+> cat > _envanter.qa <<'EOF'
+> qa "dal envanteri sondasi"
+> uses tech "./<AD>.tcdsl"
+> uses flows "./<AD>.operations.json"
+> EOF
+>
+> # 2) Strict + json ile koştur. Çıktı = saf diagnostics dizisi
+> #    [{severity,line,col,message,file,code?}].
+> node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs _envanter.qa --strict --json
+>
+> # 3) DİKKAT — KAYIT SAYMA: qcdsl `uses tech` node'u başına TEK bir (aggregated)
+> #    `qa.uncovered-branches` kaydı üretir; TÜM op'lar ve dalları o kaydın `.message`'ında
+> #    BİRLEŞİKTİR. Kayıtları saymak eksik SAYAR (tekniğin önlediği hatanın ta kendisi).
+> #    Envanteri `.message`'ı AYRIŞTIRARAK çıkar (sınırlayıcılar):
+> #      ' · ' → op'ları ayırır  ·  ': ' → op ile dal-listesini ayırır  ·  ', ' → dalları ayırır
+> #    Boş `.qa`'da HER dal kapsanmamıştır → ayrıştırılan liste = TAM envanter (elle türetim DEĞİL).
+>
+> # 4) (opsiyonel) aggregated `.message` metnini çek (kayıt DEĞİL — metni yukarıdaki gibi ayrıştır):
+> #    … --strict --json | jq -r '.[] | select(.code=="qa.uncovered-branches") | .message'
+>
+> # 4) Sonda dosyasını temizle (throwaway).
+> rm _envanter.qa
+> ```
+>
+> **Dipnot — `list of` manifest kaybı AYRI iştir (Q1-C / plan 1.6):** bu teknik ondan
+> BAĞIMSIZ çalışır — envanteri `.qa`+validator üretir, manifest'ten OKUMAZ. "returns-collection
+> bilgisi manifest'te henüz yok" bir **mevcut-durum tespitidir**, taahhüt değil; teknik onun
+> düzelmesini beklemez.
+
+Op-başına, **validator'ın listelediği her dalı** bu tabloyla kullanıcıya düz dille sun
+(tablonun rolü envanteri SAYMAK değil — validator sayar — çeviridir):
 
 | Tech clause | Doğurduğu dal | covers biçimi | Kullanıcıya düz-dil sunumu |
 |---|---|---|---|

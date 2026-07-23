@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "3454ca193e07", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "dcbfd21", builtAt: "2026-07-17T10:46:33+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "31aa9160a411", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
   }
 });
 
@@ -39435,6 +39435,7 @@ function loadTech(techPath, documentUri) {
     for (const o of json.operations ?? []) {
       const paramDeco = /* @__PURE__ */ new Map();
       for (const p of o.signature?.params ?? []) paramDeco.set(p.name, decorationOfExt(p.ext));
+      const refinedRuleIds = (o.violations ?? []).map((v) => v.ruleId);
       const op = {
         id: o.id,
         module: o.module ?? "",
@@ -39442,7 +39443,8 @@ function loadTech(techPath, documentUri) {
         realizes: o.realizes ?? null,
         throws: o.throws ?? [],
         validation: o.validation ?? [],
-        hasRefinedInput: (o.violations ?? []).length > 0,
+        hasRefinedInput: refinedRuleIds.length > 0,
+        refinedRuleIds,
         pagination: o.pagination ?? null,
         serving: o.serving ?? [],
         returns: o.signature?.returns ?? "",
@@ -39474,15 +39476,25 @@ function loadTech(techPath, documentUri) {
   }
 }
 function taggableResultsOf(ops, tech) {
-  const out = /* @__PURE__ */ new Set();
+  const out = /* @__PURE__ */ new Map();
+  const add = (id, source) => {
+    if (!out.has(id)) out.set(id, source);
+  };
   for (const op of ops) {
+    if (op.refinedRuleIds.length > 0) add("NotValid", `'${op.refinedRuleIds[0]}' refinement`);
+    else if (op.validation.length > 0) add("NotValid", "validation");
     for (const err of op.throws) {
       const rt = tech.resultTypeOf(op.module, err);
-      if (rt) out.add(rt);
+      if (rt) add(rt, err);
     }
-    if (op.validation.length > 0 || op.hasRefinedInput) out.add("NotValid");
   }
   return out;
+}
+function formatMissingResults(missing, taggable) {
+  return missing.map((r) => {
+    const src = taggable.get(r);
+    return src ? `${r} (kaynak: ${src})` : r;
+  }).join(", ");
 }
 
 // src/frontend/frontend-dsl-scope.ts
@@ -39599,7 +39611,7 @@ function registerFrontendValidationChecks(services) {
   const registry = services.validation.ValidationRegistry;
   const v = services.validation.FrontendDslValidator;
   const checks = {
-    Model: [v.checkContracts, v.checkUncoveredExposedOps],
+    Model: [v.checkContracts, v.checkUncoveredExposedOps, v.checkSingleReadParamSource],
     Experience: [v.checkExperienceNames, v.checkAudience, v.checkEntry, v.checkReachability],
     UsesDecl: [v.checkUsesShape, v.checkAnchor],
     Screen: [v.checkScreen],
@@ -39825,6 +39837,71 @@ var FrontendDslValidator = class {
       accept("warning", `Uncovered-op (union): \u015Fu exposed op'lar\u0131 hi\xE7bir experience sunmuyor: ${missing.join(", ")}.`, { node: model.contract, property: "path" });
     }
   };
+  /** F4 (reachability-lite — kullanıcı kararı #7, 2026-07-22): linked modda bir formun
+   *  `loads query` TEKİL okuması, argümanında bir EKRAN-PARAM'ına kök salıyorsa, o param'ı
+   *  besleyen HİÇBİR gelen-nav argümanı yoksa (ve değer bir oturum-kökü de değilse) → warning:
+   *  ekran çalışmada o kimliği elde edemez. KISMİ denetim: yalnız TEK-ADIM üreticiler taranır
+   *  (ekrana gelen nav kenarlarının argümanları); çok-hop navigasyon zinciri denetlenmez (karar
+   *  iii REDDEDİLDİ). Fail-open: contract yoksa (unlinked) KOŞMAZ — op ref'leri inline çözülse de
+   *  experience grafiği/manifest imzası yoktur (Why). F8'in (M1-03) form.bind kök denetimiyle aynı
+   *  köksüz-değer sınıfı; bu denetim onun bir-hop ileri adımıdır. */
+  checkSingleReadParamSource = (model, accept) => {
+    if (!model.contract) return;
+    const suppliedParams = /* @__PURE__ */ new Map();
+    const record = (target, args2) => {
+      if (!target) return;
+      const set = suppliedParams.get(target) ?? suppliedParams.set(target, /* @__PURE__ */ new Set()).get(target);
+      args2.forEach((arg, i) => {
+        const name = arg.name ?? target.params[i]?.name;
+        if (name) set.add(name);
+      });
+    };
+    const containers = [...model.experiences];
+    if (model.shared) containers.push(model.shared);
+    for (const c of containers) {
+      for (const screen of c.members.filter(isScreen)) {
+        for (const node of ast_utils_exports.streamAllContents(screen)) {
+          if (isActionComponent(node) && node.navTarget) record(node.navTarget.ref, node.navArgs ?? []);
+          else if (isResultHandler(node) && isNavHandler(node.handler)) record(node.handler.target.ref, node.handler.args);
+          else if (isEventNav(node)) record(node.target.ref, node.args);
+        }
+      }
+    }
+    for (const exp of model.experiences) {
+      for (const screen of exp.members.filter(isScreen)) {
+        const sessionRoots = /* @__PURE__ */ new Set(["session", "currentUser"]);
+        for (const s of screen.members.filter(isStateDecl)) {
+          const n = stateNameOf(s);
+          if (n) sessionRoots.add(n);
+        }
+        for (const s of exp.members.filter(isStateDecl)) {
+          const n = stateNameOf(s);
+          if (n) sessionRoots.add(n);
+        }
+        const paramNames = new Set((screen.params ?? []).map((p) => p.name));
+        const fed = suppliedParams.get(screen) ?? /* @__PURE__ */ new Set();
+        for (const form of componentsOfScreen(screen).filter(isFormComponent)) {
+          for (const loads of form.members.filter(isLoadsClause)) {
+            const lop = loads.bind.op.ref;
+            if (!lop || lop.outList) continue;
+            for (const arg of loads.bind.args) {
+              const paths = pathsOf(arg.value);
+              if (paths.length !== 1) continue;
+              const root2 = paths[0].segments[0];
+              if (sessionRoots.has(root2)) continue;
+              if (!paramNames.has(root2)) continue;
+              if (fed.has(root2)) continue;
+              accept(
+                "warning",
+                `'${screen.name}' ekran\u0131n\u0131n '${lop.name}' tekil okumas\u0131 '${root2}' de\u011Ferini bekliyor ama hi\xE7bir ekran/form bu de\u011Feri \xFCretmiyor (gelen nav arg\xFCman\u0131 yok, ekran girdisi yok, oturum k\xF6k\xFC yok) \u2014 0-error ge\xE7er, \xE7al\u0131\u015Fmada \xE7\xF6z\xFClemez (F4). (K\u0131smi denetim: yaln\u0131z TEK-ADIM \xFCreticiler tarand\u0131; \xE7ok-hop navigasyon zinciri denetlenmez.)`,
+                { node: loads.bind }
+              );
+            }
+          }
+        }
+      }
+    }
+  };
   checkExperienceNames = (exp, accept) => {
     for (const s of dupsBy(exp.members.filter(isScreen), (s2) => s2.name)) {
       accept("error", `Ekran ad\u0131 '${s.name}' bu experience'ta birden \xE7ok kez tan\u0131ml\u0131.`, { node: s, property: "name" });
@@ -39935,9 +40012,9 @@ var FrontendDslValidator = class {
     if (u.results.length > 0 && techOps.length > 0) {
       const taggable = taggableResultsOf(techOps, tech);
       const authored = new Set(u.results);
-      const missing = [...taggable].filter((r) => !authored.has(r)).sort();
+      const missing = [...taggable.keys()].filter((r) => !authored.has(r)).sort();
       if (missing.length > 0) {
-        accept("warning", `Results divergence: contract \u015Funlar\u0131 \xFCretebilir ama authored results'ta yok: ${missing.join(", ")}.`, { node: u, property: "results" });
+        accept("warning", `Results divergence: contract \u015Funlar\u0131 \xFCretebilir ama authored results'ta yok: ${formatMissingResults(missing, taggable)}.`, { node: u, property: "results" });
       }
     }
     if (techOps.length > 0) {
@@ -39960,6 +40037,9 @@ var FrontendDslValidator = class {
   };
   /** #39 B7 shared-persona yasağı + #35 persona cross-check + #38 component ad-çakışması. */
   checkScreen = (screen, accept) => {
+    if (!screen.title) {
+      accept("warning", `Ekran '${screen.name}' ba\u015Fl\u0131k ta\u015F\u0131m\u0131yor \u2014 \xFCrete\xE7 ba\u015Fl\u0131k icat etmez, experience.json'a title: null gider (F6). 'title' ekleyin.`, { node: screen, property: "name" });
+    }
     if (screen.persona && ast_utils_exports.getContainerOfType(screen, isSharedBlock)) {
       accept("error", `Shared ekranda 'for ${screen.persona}' yaz\u0131lamaz \u2014 shared ekran her audience'a a\xE7\u0131kt\u0131r (karar #39/B7).`, { node: screen, property: "persona" });
     }
@@ -40051,6 +40131,7 @@ var FrontendDslValidator = class {
   /** form: command'a bağlanır; loads tekil query; #25 queue×out; linked validation-divergence. */
   checkForm = (form, accept) => {
     const op = form.bind.op.ref;
+    for (const arg of form.bind.args) checkPathRootsIn(arg.value, arg, accept, { rowAllowed: false });
     if (op && op.kind !== "command") {
       accept("error", `form yaln\u0131z command'a ba\u011Flan\u0131r (submits); '${op.name}' bir ${op.kind}.`, { node: form.bind });
     }
@@ -40071,6 +40152,24 @@ var FrontendDslValidator = class {
     }
     for (const rule of form.members.filter(isFormRule)) {
       checkPathRootsIn(rule.expr, rule, accept, { rowAllowed: false, extraRoots: (op?.inputs ?? []).map((f) => f.name) });
+    }
+    if (op) {
+      const supplied = /* @__PURE__ */ new Set();
+      let hasPositionalArg = false;
+      for (const arg of form.bind.args) {
+        if (arg.name) supplied.add(arg.name);
+        else hasPositionalArg = true;
+      }
+      for (const f of form.members.filter(isFormField)) supplied.add(f.field.$refText);
+      for (const s of form.members.filter(isFormStep)) for (const f of s.fields) supplied.add(f.field.$refText);
+      const missing = (op.inputs ?? []).map((i) => i.name).filter((n) => !supplied.has(n)).sort();
+      if (!hasPositionalArg && missing.length > 0) {
+        accept(
+          "warning",
+          `Form '${op.name}' operasyonunun \u015Fu parametrelerini ne alan ne arg\xFCman olarak kar\u015F\u0131l\u0131yor \u2014 bunlar BO\u015E g\xF6nderilir: ${missing.join(", ")}. (Ba\u011Flam kimli\u011Fi i\xE7in emsal: form X(organizationId: session.organizationId).)`,
+          { node: form.bind }
+        );
+      }
     }
     const business = businessOf(form);
     const tech = techOf(form);

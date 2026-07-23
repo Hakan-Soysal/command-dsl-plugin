@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "v3.x-69ca2866b8e8", grammarHash: "69ca2866b8e8", srcDirs: ["src/generated", "src/language", "src/shared"], businessSrcHash: "13af4ff1a17b", wrapperFiles: ["validate.src.mts"], wrapperHash: "eec29976347a", commit: "0c5072b", builtAt: "2026-07-19T09:19:37+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "v3.x-29314388e3fe", grammarHash: "29314388e3fe", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], businessSrcHash: "63bacb478283", wrapperFiles: ["validate.src.mts"], wrapperHash: "eec29976347a", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
   }
 });
 
@@ -1778,14 +1778,14 @@ var require_messageBuffer = __commonJS({
           return result;
         }
         for (let i = 0; i < headers.length - 2; i++) {
-          const header = headers[i];
-          const index = header.indexOf(":");
+          const header2 = headers[i];
+          const index = header2.indexOf(":");
           if (index === -1) {
             throw new Error(`Message header must separate key and value using ':'
-${header}`);
+${header2}`);
           }
-          const key = header.substr(0, index);
-          const value = header.substr(index + 1).trim();
+          const key = header2.substr(0, index);
+          const value = header2.substr(index + 1).trim();
           result.set(lowerCaseKeys ? key.toLowerCase() : key, value);
         }
         return result;
@@ -31956,6 +31956,9 @@ var AggregateExpr = {
   $type: "AggregateExpr",
   path: "path"
 };
+function isAggregateExpr(item) {
+  return reflection2.isInstance(item, AggregateExpr.$type);
+}
 var AnyOrderBlock = {
   $type: "AnyOrderBlock",
   branches: "branches"
@@ -32054,6 +32057,9 @@ var CreateAction = {
   source: "source",
   target: "target"
 };
+function isCreateAction(item) {
+  return reflection2.isInstance(item, CreateAction.$type);
+}
 var DomainDef = {
   $type: "DomainDef",
   name: "name"
@@ -32122,6 +32128,9 @@ var FieldExpr = {
   $type: "FieldExpr",
   path: "path"
 };
+function isFieldExpr(item) {
+  return reflection2.isInstance(item, FieldExpr.$type);
+}
 var FieldPath = {
   $type: "FieldPath",
   segments: "segments"
@@ -32219,6 +32228,13 @@ var Model = {
 function isModel(item) {
   return reflection2.isInstance(item, Model.$type);
 }
+var NoteClause = {
+  $type: "NoteClause",
+  text: "text"
+};
+function isNoteClause(item) {
+  return reflection2.isInstance(item, NoteClause.$type);
+}
 var NumberExpr = {
   $type: "NumberExpr",
   value: "value"
@@ -32304,6 +32320,7 @@ var ReadEntry = {
 };
 var RelationDef = {
   $type: "RelationDef",
+  inherited: "inherited",
   name: "name",
   source: "source",
   target: "target"
@@ -32359,6 +32376,9 @@ var SendAction = {
   message: "message",
   recipient: "recipient"
 };
+function isSendAction(item) {
+  return reflection2.isInstance(item, SendAction.$type);
+}
 var StageDef = {
   $type: "StageDef",
   actor: "actor",
@@ -32928,6 +32948,15 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: []
     },
+    NoteClause: {
+      name: NoteClause.$type,
+      properties: {
+        text: {
+          name: NoteClause.text
+        }
+      },
+      superTypes: [OperationClause.$type]
+    },
     NumberExpr: {
       name: NumberExpr.$type,
       properties: {
@@ -33091,6 +33120,10 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
     RelationDef: {
       name: RelationDef.$type,
       properties: {
+        inherited: {
+          name: RelationDef.inherited,
+          defaultValue: false
+        },
         name: {
           name: RelationDef.name
         },
@@ -33713,6 +33746,16 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "deprecatedSyntax": false,
               "isMulti": false
             }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "inherited",
+            "operator": "?=",
+            "terminal": {
+              "$type": "Keyword",
+              "value": "inherited"
+            },
+            "cardinality": "?"
           }
         ]
       },
@@ -34556,6 +34599,34 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "$ref": "#/rules@25"
             },
             "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "NoteClause"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "note"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "text",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@72"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
           },
           {
             "$type": "Group",
@@ -38343,6 +38414,157 @@ function deriveStateChain(p, input) {
   return { axis: axisList, stages };
 }
 
+// src/generator/operations.ts
+init_define_BUILD_INFO();
+
+// src/generator/ops-expr.ts
+init_define_BUILD_INFO();
+
+// src/generator/plantuml.ts
+init_define_BUILD_INFO();
+
+// src/generator/generator.ts
+init_define_BUILD_INFO();
+
+// src/generator/expressions.ts
+init_define_BUILD_INFO();
+
+// src/generator/naming.ts
+init_define_BUILD_INFO();
+
+// src/generator/cockburn.ts
+init_define_BUILD_INFO();
+
+// src/generator/coverage.ts
+init_define_BUILD_INFO();
+
+// src/generator/e2e.ts
+init_define_BUILD_INFO();
+
+// src/generator/routing.ts
+init_define_BUILD_INFO();
+
+// src/generator/process-doc.ts
+init_define_BUILD_INFO();
+
+// src/generator/process-e2e.ts
+init_define_BUILD_INFO();
+
+// src/generator/plantuml.ts
+var SKIN_BASE = `skinparam backgroundColor #1e1e1e
+skinparam defaultFontColor #cccccc
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #252526
+  BorderColor #4fc1ff
+  FontColor #cccccc
+  StereotypeFontColor #8a8a8a
+}
+skinparam actor {
+  BackgroundColor #252526
+  BorderColor #4fc1ff
+  FontColor #cccccc
+}
+skinparam package {
+  BackgroundColor #252526
+  BorderColor #3c3c3c
+  FontColor #cccccc
+}
+skinparam arrow {
+  Color #8a8a8a
+  FontColor #8a8a8a
+}
+skinparam note {
+  BackgroundColor #2d2d30
+  BorderColor #3c3c3c
+  FontColor #cccccc
+}`;
+var DARK_STYLE = "left to right direction\n" + SKIN_BASE;
+
+// src/generator/operations.ts
+function pathEntity(path, entityNames) {
+  const head = path?.segments?.[0];
+  return head && entityNames.has(head) ? head : void 0;
+}
+function conditionPaths(c, out) {
+  if (!c || typeof c !== "object") return;
+  const n = c;
+  if (isBinaryCondition(c)) {
+    conditionPaths(n.left, out);
+    conditionPaths(n.right, out);
+    return;
+  }
+  if (isComparison(c)) {
+    if (c.left) out.push(c.left);
+    if (isFieldValue(c.right)) out.push(c.right.path);
+    return;
+  }
+}
+function exprPaths(e, out) {
+  if (!e || typeof e !== "object") return;
+  if (isBinaryExpr(e)) {
+    exprPaths(e.left, out);
+    exprPaths(e.right, out);
+    return;
+  }
+  if (isFieldExpr(e) || isAggregateExpr(e)) {
+    out.push(e.path);
+    return;
+  }
+}
+function deriveOpAccess(op) {
+  const writes = /* @__PURE__ */ new Set();
+  const reads = /* @__PURE__ */ new Set();
+  const model = ast_utils_exports.getContainerOfType(op, isModel);
+  const entityNames = /* @__PURE__ */ new Set();
+  if (model) {
+    for (const el of model.elements) if (isEntityDef(el) && el.name) entityNames.add(el.name);
+  }
+  const cmd = op.command;
+  if (cmd && isStandardCommand(cmd)) {
+    const isQuery = operationKind(op) === "query";
+    const primary = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
+    if (primary) (isQuery ? reads : writes).add(primary);
+    const target2 = cmd.targetResource?.ref?.name ?? cmd.targetResource?.$refText;
+    if (target2) (isQuery ? reads : writes).add(target2);
+    const source = cmd.sourceResource?.ref?.name ?? cmd.sourceResource?.$refText;
+    if (source) reads.add(source);
+    if (cmd.where) {
+      const ps = [];
+      conditionPaths(cmd.where, ps);
+      for (const p of ps) {
+        const e = pathEntity(p, entityNames);
+        if (e) reads.add(e);
+      }
+    }
+    const actions = [...op.clauses, ...op.success?.actions ?? []];
+    for (const a2 of actions) {
+      if (isCalculateAction(a2)) {
+        const te = pathEntity(a2.target, entityNames);
+        if (te) writes.add(te);
+        const ps = [];
+        exprPaths(a2.expr, ps);
+        if (a2.condition) conditionPaths(a2.condition, ps);
+        for (const p of ps) {
+          const e = pathEntity(p, entityNames);
+          if (e) reads.add(e);
+        }
+      } else if (isCreateAction(a2)) {
+        const t = a2.target?.ref?.name ?? a2.target?.$refText;
+        if (t) writes.add(t);
+        const s = a2.source?.ref?.name ?? a2.source?.$refText;
+        if (s) reads.add(s);
+      } else if (isSendAction(a2)) {
+        const e = pathEntity(a2.recipient, entityNames);
+        if (e) reads.add(e);
+      }
+    }
+  }
+  for (const w of writes) reads.delete(w);
+  return { writes, reads };
+}
+
 // src/shared/note-lint.ts
 init_define_BUILD_INFO();
 var AMBIGUOUS_NOTE_CODE = "note.ambiguous";
@@ -38422,12 +38644,34 @@ var KNOWN_VERBS = [
   "rejects",
   "calculates"
 ];
+function stageHasUnresolvedRef(stage) {
+  if (stage.target && !stage.target.ref) return true;
+  if (stage.flow) {
+    if (!stage.flow.ref) return true;
+    const seen = /* @__PURE__ */ new Set();
+    const walk = (flow) => {
+      if (seen.has(flow)) return false;
+      seen.add(flow);
+      for (const item of flowItemsDeep(flow)) {
+        if (isFlowStep(item)) {
+          if (item.target && !item.target.ref) return true;
+        } else if (isIncludeStep(item)) {
+          if (item.target && !item.target.ref) return true;
+          if (item.target?.ref && walk(item.target.ref)) return true;
+        }
+      }
+      return false;
+    };
+    return walk(stage.flow.ref);
+  }
+  return false;
+}
 function registerValidationChecks(services) {
   const registry = services.validation.ValidationRegistry;
   const validator = services.validation.CommandDslValidator;
   const checks = {
-    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules],
-    OperationDecl: [validator.checkOperationClauses, validator.checkNote, validator.checkRequires],
+    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules, validator.checkBlindWrites],
+    OperationDecl: [validator.checkOperationClauses, validator.checkOperationNote, validator.checkRequires],
     ImportDecl: validator.checkImport,
     EntityDef: validator.checkEntityFields,
     StandardCommand: validator.checkStandardCommand,
@@ -38809,18 +39053,48 @@ var CommandDslValidator = class {
   }
   /** ADR-0005: not tanımlı ama boş → uyarı. İçerik aksi halde doğrulanmaz. */
   checkNote(node, accept) {
-    const note = node.note;
+    this.lintNoteText(node.note, node, "note", accept);
+  }
+  /**
+   * P1 (plan 2.5) — OperationDecl notu KONUM-BAĞIMSIZ: eski başlık-ardı slot VEYA
+   * NoteClause cümleciği. Adet tek: slot + clause'lar toplamı ≥2 → error (fail-closed;
+   * hangi note emit edilir belirsiz kalırdı, sessiz seçim = bilgi kaybı). Aksi halde
+   * etkin not (effectiveNote) sahibine (slot: op/'note', clause: NoteClause/'text')
+   * çıpalanarak lint'lenir — konumdan bağımsız aynı boş/belirsizlik/EARS/refinement denetimi.
+   */
+  checkOperationNote(op, accept) {
+    const noteClauses = (op.clauses ?? []).filter(isNoteClause);
+    const total = (op.note !== void 0 ? 1 : 0) + noteClauses.length;
+    if (total >= 2) {
+      accept(
+        "error",
+        "Bir i\u015Flemde en fazla bir 'note' olabilir (konumu serbest, adedi tek \u2014 P1).",
+        { node: op }
+      );
+      return;
+    }
+    if (op.note !== void 0) {
+      this.lintNoteText(op.note, op, "note", accept);
+    } else if (noteClauses.length === 1) {
+      this.lintNoteText(noteClauses[0].text, noteClauses[0], "text", accept);
+    }
+  }
+  /** ADR-0005 boş-not uyarısı + F2.3 belirsizlik/EARS/refinement lint (ADR-0036; dedektör
+   *  shared/note-lint.ts, tech ile TEK-KAYNAK). Her tespit AYRI code (talep-sayacı). Sessiz
+   *  sınıflandırma YOK — tanı SORAR. Not sahibi node/property çağıran tarafından verilir
+   *  (fixed slot: 'note'; NoteClause: 'text') — konum-bağımsız tek gövde. */
+  lintNoteText(note, node, property2, accept) {
     if (note === void 0) return;
     if (note.trim() === "") {
       accept(
         "warning",
         'Bo\u015F not: silin ya da i\xE7erik yaz\u0131n (note """...""").',
-        { node, property: "note" }
+        { node, property: property2 }
       );
       return;
     }
     for (const hit of detectNoteLint(note)) {
-      accept(hit.severity, hit.message, { node, property: "note", code: hit.code });
+      accept(hit.severity, hit.message, { node, property: property2, code: hit.code });
     }
   }
   /**
@@ -38983,10 +39257,11 @@ var CommandDslValidator = class {
     if (!source || !isActorDef(source)) return;
     const holder = ast_utils_exports.getContainerOfType(ownership, isStandardCommand) ?? ast_utils_exports.getContainerOfType(ownership, isGrantCommand) ?? ast_utils_exports.getContainerOfType(ownership, isRevokeCommand);
     const actor = holder?.actor?.ref;
-    if (actor && actor !== source) {
+    const compatible = !actor || actor === source || relation.inherited === true && actorAncestors(actor).includes(source);
+    if (actor && !compatible) {
       accept(
         "warning",
-        `'${relation.name}' ili\u015Fkisi '${source.name}' akt\xF6r\xFC i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}'`,
+        relation.inherited ? `'${relation.name}' ili\u015Fkisi ('inherited') '${source.name}' soy-zinciri i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}' bu zincirde de\u011Fil` : `'${relation.name}' ili\u015Fkisi '${source.name}' akt\xF6r\xFC i\xE7in tan\u0131ml\u0131; komutun akt\xF6r\xFC '${actor.name}' (kal\u0131t\u0131m istiyorsan\u0131z ili\u015Fkiye 'inherited' yaz\u0131n \u2014 P2 opt-in)`,
         { node: ownership }
       );
     }
@@ -39348,6 +39623,26 @@ var CommandDslValidator = class {
         { node: p, property: "name" }
       );
     }
+    const ofEntity = p.entity?.ref;
+    if (ofEntity && !stages.some(stageHasUnresolvedRef)) {
+      const touched = /* @__PURE__ */ new Set();
+      let anyResolved = false;
+      for (const stage of stages) {
+        for (const stageOp of stageUnits(stage).map((u) => u.op)) {
+          const acc = deriveOpAccess(stageOp);
+          if (acc.writes.size + acc.reads.size > 0) anyResolved = true;
+          for (const e of acc.writes) touched.add(e);
+          for (const e of acc.reads) touched.add(e);
+        }
+      }
+      if (anyResolved && !touched.has(ofEntity.name)) {
+        accept(
+          "warning",
+          `S\xFCre\xE7 '${p.name}' hi\xE7bir etab\u0131 merkez kayd\u0131 '${ofEntity.name}'e dokunmuyor (dokunulan: ${[...touched].sort().join(", ") || "\u2014"}). S\xFCre\xE7 'of ${ofEntity.name}' diyorsa en az bir etap o kayd\u0131n ya\u015Fam d\xF6ng\xFCs\xFCn\xFC ilerletmeli (P6-merkez, per-process).`,
+          { node: p, property: "entity" }
+        );
+      }
+    }
     const model = ast_utils_exports.getContainerOfType(p, isModel);
     if (!model) return;
     const chain = deriveStateChain(p, this.visible(model));
@@ -39393,6 +39688,67 @@ var CommandDslValidator = class {
         `Zamanlanm\u0131\u015F komut s\xFCre\xE7 etab\u0131 olamaz: '${op.name}' schedule kural\u0131 ta\u015F\u0131yor \u2014 zamanlanm\u0131\u015F i\u015Fler hi\xE7bir etaba ait de\u011Fildir, s\xFCre\xE7 d\u0131\u015F\u0131d\u0131r (P7)`,
         { node: stage, property: "name" }
       );
+    }
+  }
+  /**
+   * F3 (plan 1.5): kör-oluşturma taraması. Bir entity ≥1 op tarafından yazılıyor ama
+   * hiçbir query onu DÖNDÜRMÜYOR → o veriyle ekran/panel kurulamaz (7-kayıt vakası).
+   * Ölçüt DÖNDÜRME'dir, okuma değil (kullanıcı kararı 2026-07-22): `reads ⊋ returns`;
+   * yalnız filtre/join için okunan (query'de `from`/`on` → `access.reads`) entity ekranda
+   * gösterilemez, o yüzden `reads` proxy'si yanlış-negatif üretir. Döndürülen entity =
+   * query'nin BİRİNCİL kaynağı (`cmd.resource` / emit `signature.resource`);
+   * `targetResource`/`sourceResource`/koşul-yolları query'de `reads`'e girer ama DÖNÜŞ değildir.
+   * Kapsam (reachability): "döndürülen" küme, görünürlük kümesi ∪ bu dokümanı import eden
+   * YÜKLÜ dokümanların görünürlük kümeleri üzerinden hesaplanır (checkCoverage/F6 emsali —
+   * `reverseImporterModels`). Aksi halde kardeş bir modülde E'yi döndüren query, E'yi yazan
+   * modül TEK BAŞINA doğrulanırken görünmez ve sahte-pozitif üretirdi (ölçülmüş: examples/real —
+   * procurement PurchaseOrder yazar, onu döndüren query fulfillment'tadır). Uyarı ise YALNIZ
+   * bu dokümanın yazan op'ları için üretilir (çapraz-doküman çift-uyarı olmaz).
+   * Sınır: `deriveOpAccess` çözemediği (kırık cross-import ref) erişimleri zaten taramaya
+   * katmaz → fail-open (bilinçli; çözüm hatası kendi diagnostic'ini üretir). Çözülen dünyada
+   * yazılan-ama-döndürülmeyen her entity KOŞULSUZ warning alır (fail-closed). Heuristik → warning.
+   */
+  checkBlindWrites(model, accept) {
+    const union = /* @__PURE__ */ new Map();
+    const add = (m) => {
+      const key = m.$document?.uri.toString() ?? `anon:${union.size}`;
+      if (!union.has(key)) union.set(key, m);
+    };
+    for (const m of this.visible(model)) add(m);
+    for (const importer of reverseImporterModels(model, this.documents)) {
+      for (const m of visibleModels(importer, this.documents)) add(m);
+    }
+    const returnedEntities = /* @__PURE__ */ new Set();
+    for (const m of union.values()) {
+      for (const el of m.elements) {
+        if (!isOperationDecl(el) || operationKind(el) !== "query") continue;
+        const cmd = el.command;
+        if (isStandardCommand(cmd)) {
+          const r = cmd.resource?.ref?.name ?? cmd.resource?.$refText;
+          if (r) returnedEntities.add(r);
+        }
+      }
+    }
+    const writers = /* @__PURE__ */ new Map();
+    for (const el of model.elements) {
+      if (!isOperationDecl(el) || operationKind(el) === "query") continue;
+      for (const e of deriveOpAccess(el).writes) {
+        let arr = writers.get(e);
+        if (!arr) {
+          arr = [];
+          writers.set(e, arr);
+        }
+        arr.push(el);
+      }
+    }
+    for (const [entity, ws] of [...writers.entries()].sort()) {
+      if (!returnedEntities.has(entity)) {
+        accept(
+          "warning",
+          `'${entity}' ${ws.length} i\u015Flemce yaz\u0131l\u0131yor ama hi\xE7bir sorgu onu D\xD6ND\xDCRM\xDCYOR \u2014 bu kay\u0131tla ekran/panel kurulamaz (F3 k\xF6r-olu\u015Fturma). Yaln\u0131z filtre/join i\xE7in okunmas\u0131 yetmez. Onu d\xF6nd\xFCren bir query ekleyin ya da yaz\u0131m\u0131n amac\u0131n\u0131 'note' ile kayda ge\xE7irin.`,
+          { node: ws[0], property: "name" }
+        );
+      }
     }
   }
   /** P9: any order en az iki dal; iç içe any order yok (v1 düz) */

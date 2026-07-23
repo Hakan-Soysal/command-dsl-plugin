@@ -338,6 +338,12 @@ yetkili aktör kümesini aşma. Bunlar **güvenlik-zayıflatma warning**'i — h
   5. **Op-başına farklı realize normaldir:** aynı kural farklı op'larda farklı gövde alabilir
      (PoiLimitExceeded emsali: org-fazında org'un tüm POI'leri sayılır, app-fazında yalnız
      app'e bağlı olanlar) — her realize-eden op'ta ayrı sor, kopyalama.
+  6. **Faz sorusu — gövde-geçerliliği (ZORUNLU her `realizes rule` gövdesinde; `4.1/T10`):** sor:
+     *"Bu predikatın okuduğu kayıtların HEPSİ, bu op çalışırken VAR mı? Sonraki fazda yaratılan
+     kayıt varsa gövde o fazda geçersizdir — o fazın op'unda farklı realize edin."* Statik ürünler
+     (manifest / `operations.json`) **faz / yaşam-döngüsü bilgisi TAŞIMAZ** → bunu hiçbir validator
+     yakalayamaz; bu yüzden validator değil ZORUNLU SORU. (Emsal: onboarding anında `org` henüz
+     yaratılmamışken `org.poiLimit`'i okuyan bir gövde çözülemez — 0-error geçer, çalışma anında patlar.)
   - **Gövdesiz işaret meşru ama BİLİNÇLİ olmalı:** `realizes rule <Ad>` (gövdesiz / çoklu-ad
     `A, B, C`) = "bu op'un authored gövdesi kuralı başka mekanizmayla kapsıyor" devri —
     kullanıcıya hangi mekanizmayla kapsandığını sorup belgele. Gövdeli form TEK-AD
@@ -404,6 +410,12 @@ idempotent/emits/on linker'ları.
   bir sistem mi (mainframe)?" → `external N{…}` vs `uncharted N{…}`.
 - Her çağrılan uç: imza + (varsa) `serving` (nasıl çağrılır) + bilinen `validation` (caller-side
   fail-fast, **input-only**). Üreteç bu sistemin KENDİSİNİ üretmez ama **çağrı adapter'ını** üretir.
+- **Dönüş tipi — "reddetti" ↔ "çöktü" ayrımı (ZORUNLU her `external`/`uncharted` uçta; `4.6/Q2-B`):**
+  sor: *"Bu servis 'reddetti' ile 'çöktü'yü ayırt edebiliyor mu?"* Opak `String` (ya da tipsiz) dönüş
+  dal-ayrımını **imkânsızlaştırır** — çağıran "iş-reddi mi altyapı-hatası mı" kararını veremez (ÖLÇÜLDÜ:
+  **10 dal** deterministik tetiklenemez kaldı). Ayırt ediyorsa **durum-alanlı bir `type`** öner
+  (dönüşte bir `status`/sonuç alanı taşısın) → sonuç `rule`/`throws`/`compensate` dallarında
+  gate-edilebilir olur; edemiyorsa bunu `note`'a yaz (dal-ayrımı runtime'da elle yapılacak, sessiz düşme).
 - "Bu dış uç **yan-etkisiz bir sorgu** mu (fraud-skoru, fiyat) ve sonucuna göre **rule** mı
   vereceksin?" → `readonly operation …` (ADR-0030 K4). Yalnız `readonly` işaretli boundary-op
   sonucu `rule`'da gate-edilebilir; işaretsiz = yan-etkili varsayılır (compensate-eligible).
@@ -445,6 +457,10 @@ modülleri tip-bazlı dosyalara **bölme**, dosya içinde dependency sırasında
 (Varsa) `guarantee`'ler **en sonda** — module/op/invariant'lara referans verdikleri için.
 Tam tutarlılık self-check'i ve dosya kuralı: `references/consistency-and-emit.md`.
 
+> ⚠ **`.tcdsl`'i revize/düzenlerken:** DSL dosyalarında toplu metin dönüşümü **CONVENTIONS §12**'ye
+> tabidir — blok-türüne duyarsız sed/regex süpürmesi YASAK; parse-farkındalıklı düzenle +
+> dönüşüm-öncesi/sonrası **sayım-doğrula** (`rg -c`; 0-error geçmesi kaybı aklamaz).
+
 **Emit-öncesi "Ne sormadım?" geçidi — ÇİFT-SIFIR (0-error VE 0-sessiz-eksik).** 0-error tek başına
 YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Emit'ten önce üç süpürme:
 1. **Sessiz-eksik (★ süpürmesi):** `references/tech-dsl-reference.md` **Yetenek Envanteri**nin **★**
@@ -470,6 +486,13 @@ YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Emit'ten önce üç 
 KENDİ uydurduğu düzeltmeyle kapatamaz — çözüm **authored**'dır (büyü yok). Meşru kapanış üç: (a) sor →
 cevaba göre düzelt, (b) gerekçeli kabul, (c) yanlış-pozitif olduğunu göster. Sessiz auto-fix / sessiz
 geçiştirme YASAK. Kabul gerekçesi düşülebilir bilgidir → op-`note` ile makinece taşı.
+
+**Toplu-uyarı süpürme kuralı — (b) yolunun kısıtı (`4.2/T6`):** bir uyarı **sınıfını** (aynı kod, çok
+sayıda örnek) gerekçeli-kabul etmeden ÖNCE, örnekleri grupla ve **her grubun gerçek korumasını TEK
+TEK** göster/değerlendir. **"Sınıf-toptan waive" YASAK** — bir sınıfta çoğu örnek gerçekten zararsız
+olsa bile aralarında gizli bir gerçek açık olabilir. (ÖLÇÜLDÜ: 48'lik bir `ownership`-uyarı yığını
+toptan-waive edilseydi kaçacak olan `AcceptInvitation` `ownership any` **gerçek güvenlik açığı** ancak
+tek-tek bakışta çıktı.)
 
 **Doğrula (zorunlu):** Gömülü Tech doğrulayıcısını çalıştır:
 ```
