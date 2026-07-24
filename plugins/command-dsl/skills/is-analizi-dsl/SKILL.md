@@ -65,9 +65,20 @@ hata-düzeltme döngüsünden sonra **harfiyen** yeniden okunur (parafraz = anch
    construct için** geçerlidir. Emit'ten SONRA bir construct eklenir/değişirse
    (validator warning'i giderme, dış denetim bulgusu, kullanıcı revizyonu, çözüm
    olarak türetilen yeni işlem) o construct Faz 3 çeviri prosedüründen + Faz 3.5
-   kapanışından + emit-öncesi süpürmelerin TAMAMINDAN yeniden geçer ve deftere yeni
-   sıra-no'lu girdi açar. **"Zaten geçmiştik" geçerli bir gerekçe değildir** — kapı
-   modele değil, construct'a bakar. Oturum döngüseldir; fazlar bir kez akmaz.
+   kapanışından + Faz 3.6 deneyim-borcu kapanışından + emit-öncesi süpürmelerin
+   TAMAMINDAN yeniden geçer ve deftere yeni sıra-no'lu girdi açar. **"Zaten geçmiştik"
+   geçerli bir gerekçe değildir** — kapı modele değil, construct'a bakar. Oturum
+   döngüseldir; fazlar bir kez akmaz.
+7. **Journey aktifse ÇİFT-SIFIR'ın deneyim-yarısı da kapanır.** Modelde ≥1 `journey`
+   bloğu varsa (kapı AÇIK) emit iki AYRI garanti ister: (a) **Kapsama** — her tetik
+   `moment | waive`, HARD validator kapısı (J2/J3/J13 = 0, emit-kilidi K6); (b)
+   **Bilinçlilik** — deneyimleyensiz düşen her tetik (`journey-scan.mjs` `droppedJ22`)
+   durable `beklemede-★` kaydına dönüşmüş ve **confirm** ("insan-tüketicisi yok, doğru")
+   ya **fix** (tüketici ekle / Faz 3.5 modelleme boşluğu) ile kapanmış olmalı; içi-boş
+   moment (J17) yüzeye çıkarılmış olmalı. Bu, Değişmez-2 ÇİFT-SIFIR'ın journey uzantısıdır:
+   **kapsama ≠ bilinçlilik** — biri validator'ın, öteki ★-süpürmenin işi; hiçbir cümle
+   J22/J17'yi validator'a atfetmez. Journey PASİFSE (0 blok) bu değişmez sessizdir ve
+   emit bit-özdeş kalır.
 
 ## In-flight öz-denetim (bahane → çürütme · red-flags)
 
@@ -167,8 +178,9 @@ Ton: sıcak, sade, yönlendirici. Örnek açılış:
 > sadece işini anlatır gibi konuş. Başlayalım: bu uygulama temelde ne işe
 > yarayacak, bir cümleyle?"
 
-Sonra dört fazı sırayla yürüt; Faz 3'ten sonra emit'ten önce ön-gereksinim
-kapanışını (Faz 3.5) çalıştır.
+Sonra dört fazı sırayla yürüt; Faz 3'ten sonra ön-gereksinim kapanışını (Faz 3.5),
+ondan ve Tutarlılık self-check'inden sonra emit-öncesi süpürmelerden önce deneyim-borcu
+kapanışını (Faz 3.6) çalıştır.
 
 **Sessiz-eksik disiplini → ElicitationState (her faz + emit).** Faz'lar zorunlu ekseni
 (aktör/işlem/akış) kapatır; ama **opsiyonel** iş-kuralları (guard'lar, `calculate` durum-geçişi,
@@ -188,24 +200,37 @@ yaşar:
      söylediğine bakar; **skill'in kendi ürettiği yapı hiçbir sinyal doğurmaz** — `System` işlemleri,
      `perform` zincirindeki ara işlemler, Faz 3.5'te eklenen üreticiler, düzeltme turunda türetilen
      işlemler. Kayıt yok → beklemede-★ yok → süpürme temiz görünür = **sahte-sıfır**. Bu yüzden
-     modeldeki **her operation için**, kim yazdıysa yazsın, şu **beş eksende** birer kayıt otomatik
+     modeldeki **her operation için**, kim yazdıysa yazsın, şu **eksenlerde** birer kayıt otomatik
      açılır (risk ★):
 
      | Eksen | Kapanış sorusu (düz dille) | Yapısal ev |
      |---|---|---|
      | guard / ön-koşul | "Bu işlemin bir ön-koşulu var mı — hangi durumda reddedilir?" | `where` · `only if` · `only when` · `requires` |
      | ownership genişliği | "Bu işlemi kim yapabiliyor — herkes mi, kendi kaydı mı, ilişkiye bağlı mı?" | ownership anahtarı (`own`/`any`/`all`/`public`/`<ilişki>'s`) |
-     | hata dalı | "Bu iş yapılamazsa/başarısız olursa kullanıcı ne görsün, kayıt ne olsun?" | **önlenebilir** ise guard (`where`/`only if`/`requires`); **çalışma-anı başarısızlığı** için `on failure` YOKTUR → kanonik ev `note` (+ istenirse başarısız-durumu üreten ayrı authored işlem) |
+     | hata dalı (**kayıt-yarısı**) | "Bu iş yapılamazsa/başarısız olursa **kayıt ne olsun**?" | **önlenebilir** ise guard (`where`/`only if`/`requires`); **çalışma-anı başarısızlığı** için `on failure` YOKTUR → kanonik ev `note` (+ istenirse başarısız-durumu üreten ayrı authored işlem). ⚠ **"kullanıcı ne görsün" YARISI BU EKSENDE DEĞİL** — o deneyim-yarısıdır, Faz 3.6 `failure` moment/waive'ine gider (6. eksen). Burada yalnız kayıt-durumu sorulur. |
      | durum etkisi | "Bu olunca kaydın durumu değişiyor mu?" | `on success do: calculate <E>.status = '…'` |
      | bağımlı-kayıt etkisi | "Bu kayıt gidince/kapanınca ona bağlı kayıtlara ne olacak?" | `perform <SilmeOp>` (niyet; kapsam tech'te) · engelleme guard'ı · `note` — yıkım kapanışı D4, `references/dependency-closure.md` |
+     | **deneyim-borcu (6. eksen — ASİMETRİK)** | *soru DEĞİL* — COMPUTED tracking-satırı (`journey-scan.mjs` `hesaplaTetikler`'i çağırır) | `journey` moment/waive — Faz 3.6 (`references/journey-closure.md`) |
+
+     **6. eksen ASİMETRİKtir.** İlk beş, kullanıcı-sinyalinden AÇIK-SORU tutar; altıncı, içeriği
+     **hesaplanan** (`hesaplaTetikler`) bir **tracking-satırı** — soru değil, defter-bayrağı. Bu yüzden
+     6. eksen kanal-1 (keyword→sinyal) değil **kanal-2**'dir (`kaynak: model`, computed) — tetikler
+     *volunteer edilmez, hesaplanır* (journey'nin kapalı/confirmatory register'ı). **Yaşam döngüsü:** op
+     var olunca (Faz 3) `beklemede` açılır (skill-authored op da satır alır); o op'un TÜM tetikleri Faz 3.6'da
+     kapanınca `cevaplandı`'ya döner; sıfır-tetikli op zaten-`cevaplandı` açılır. Deneyim-borcunu ★ süpürmenin
+     "N op × eksen, hepsi kapalı mı?" sorgusuna sokar → sahte-sıfır olmaz.
 
 - **Model-türevli kayıtlar İKİNCİ BİR SORGULAMA DEĞİLDİR.** Faz 3 çeviri prosedürünü izleyen her
   operation bu eksenleri **yan ürün olarak** kapatır (Adım 3 ownership · Adım 6 guard · Adım 7 durum ·
   EARS kalıp-2 hata dalı) — o op'un satırları anında `cevaplandı` işaretlenir. Süpürme bir
   **defter-sorgusudur**, tekrar soru sormak değil: amaç, Faz 3'ten HİÇ geçmemiş op'ları (arka plan,
   `perform` hedefi, düzeltme-turu ürünü) görünür kılmaktır. Kapanmamış eksen ya cevaplanır ya
-  `/atla` ile authored-atlanır; üçüncü hâl yok. Ölçüt: **N operation × 5 eksen** satırın tamamı
-  `cevaplandı` ∨ `atlandı`.
+  `/atla` ile authored-atlanır; üçüncü hâl yok. Ölçüt: **N operation × 6 eksen** satırın tamamı
+  `cevaplandı` ∨ `atlandı`. **6. eksenin kapanışı (İ7 — journey opsiyonel):** sıfır-tetikli op
+  zaten-`cevaplandı`; tetikli op journey ÇÖZÜLÜNCE (Faz 3.6) `cevaplandı`; kullanıcı journey'i
+  DECLINE ederse tetikli op'ların satırı **`atlandı`**'ya döner (Adım A'daki authored defter
+  girdisi = declared-skip — otomatik `cevaplandı` DEĞİL; journey her tetikli app'te zorunlu
+  değildir). Her üç yol da `cevaplandı ∨ atlandı` ölçütünü karşılar → emit yanlış bloklamaz.
 - **İki-modlu soru (tek-soru-tek-cevap):** cevabı **önerebiliyorsan** → toplu öner + tek onay (hibrit
   onay). Öneremiyorsan (gerçek bilinmeyen) → **tek soru sor, cevabı bekle** — birden çok bilinmeyeni tek
   mesaja yığma.
@@ -439,6 +464,54 @@ muafiyetler ve çalışılmış örnekler: **`references/dependency-closure.md`*
 
 ---
 
+## Faz 3.6 — Deneyim-Borcu Kapanışı
+
+**Amaç:** Modelin **deneyim olarak tam** olduğunu güvence altına almak: sistemin ürettiği
+her **tetik-noktasında** (boş liste, engellenen eylem, arka-plan bekleyişi, başarısızlık,
+geri-alınamaz silme, akıştan ayrılma, başkasının ürettiği kayıt) kullanıcıya ne borçlu
+olduğumuza ya authored bir `moment` ile karşılık verilir ya gerekçeli bir `waive` ile
+kapatılır — üçüncü hâl yok. Bu, Faz 3.5'ten (nedensel bütünlük) **farklıdır**; burası
+**deneyim bütünlüğü**dür. Ayrım sert: **Kapsama** (her tetik moment|waive — HARD validator
+kapısı) ≠ **Bilinçlilik** (moment içi-boş değil / düşen tetik modelleme boşluğu değil — ★
+bloklamayan INFO); ve **Borç** (owed mi) ≠ **Muamele** (nasıl sunulur — frontend `.fcdsl`).
+
+**Konum:** Faz 3.5 sabit-noktaya erip Tutarlılık self-check'i geçtikten SONRA, emit-öncesi
+5 süpürmeden ÖNCE. Sıra zorunludur: Faz 3.5 / D4 yeni `perform` kaskad-op'ları ekler, her
+biri yeni `irreversible`(+`failure`) tetiği doğurur — daha erken koşmak bayat `T` hesaplar.
+
+**Aktivasyon = surface-always + resolve-opt-in.** Envanteri HER ZAMAN hesapla+göster (tarama
+≈ 1 validator koşusu); çözmek opt-in. `total = 0` (saf CRUD) → bildir, **hiçbir şey yazma**,
+kapı kapalı, emit bit-özdeş. `total ≠ 0` → şekli göster + **TEK, atlanabilir, suçlamasız
+satırla** onay iste (düz iş analizini isteyene "deneyim tasarımı" itelemesi gibi
+HİSSETTİRME). Decline → authored defter girdisi (declared-skip, sessiz-drop değil) + tetik
+SAYISI doküman §7 "bilinçli istisnalar"a. Yüzeye-çıkarma zorunlu (anti-silent-skip); çözüm
+opsiyonel (İ7).
+
+**Tarama aracı — `journey-scan.mjs` (GEREKLİ):**
+```
+node ${CLAUDE_SKILL_DIR}/validator/journey-scan.mjs <model.cdsl> [--today YYYY-MM-DD]
+```
+`hesaplaTetikler`'i sarmalar; tam envanteri JSON basar — **deneyimleyen dahil** (validator'ın
+J2 diagnostiği deneyimleyen taşımaz; `mutation`/`failure` durum şablonları "kim" ile kurulur,
+J22 boş-deneyimleyen düşmesi durable ★-kaydına döner). Scratch `journey __scan__ {}` KULLANMA
+(J14/emit-kirliliği + deneyimleyen kaybı).
+
+**Etkileşim = taslak-sonra-düzenle** (grup-turu-diff DEĞİL): skill TÜM kapanışı taslaklar (her
+tetik önceden-kararlı: moment+çekirdek ya waive+gerekçe, görünür gerekçe + satır-içi J17
+dürtmesiyle; by-kind gruplu); kullanıcı YALNIZ istisnaları düzenler (~≤6 etkileşim). **ZORUNLU
+açık-dokunuş yalnız `irreversible` + `failure`** (içi-boş momenti gizleyemesin); gerisi
+(`provenance` dahil) batch. Sahte-waive tuzağına karşı **dürüst toplu-`deferred` çıkışı** öner
+(sayı + ortak `until`).
+
+**Tam prosedür** — çekirdek/J17 tablosu, waive karar-ağacı, `offers path` = var-olan-üretici,
+★-süpürme J22-binding, sabit-nokta: **`references/journey-closure.md`**. (Phrasing ilk-taslak;
+gerçek-oturum eval'iyle kalibre edilecek — kilitleme.)
+
+**Sabit-nokta:** Her batch'ten sonra yeniden tara/validate; `uncovered = 0 ∧ step-partial = 0`
+olana dek döngüle. Op EKLEYEN karar Faz 3/3.5/3.6'yı yeniden koşar (Değişmez-6/7).
+
+---
+
 ## Emit öncesi — Tutarlılık self-check (= "hatasız")
 
 Onaylar bittikten sonra, üretmeden ÖNCE katmanlar-arası bütünlüğü denetle. Tam
@@ -460,9 +533,18 @@ YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyo
    sorgu** çalıştır — "durum=beklemede ∧ risk=★ kaydı var mı?" (Yetenek Envanteri'ni ezberden gezme;
    kayıt-tablosunu sorgula). Sorgu **`kaynak: elicitation` VE `kaynak: model` kayıtlarının ikisini de**
    kapsar; yalnız elicitation-türevlileri sorgulamak sahte-sıfırdır (skill'in kendi ürettiği yapı hiç
-   sinyal doğurmaz). Ek mekanik ölçüt: **modeldeki her operation için beş eksenin (guard · ownership
-   genişliği · hata dalı · durum etkisi · bağımlı-kayıt etkisi) satırı `cevaplandı` ∨ `atlandı` mı?**
-   Kalan her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu sor. Hiçbir ★'ı sessizce atlama.
+   sinyal doğurmaz). Ek mekanik ölçüt: **modeldeki her operation için altı eksenin (guard · ownership
+   genişliği · hata dalı-kayıt-yarısı · durum etkisi · bağımlı-kayıt etkisi · deneyim-borcu) satırı
+   `cevaplandı` ∨ `atlandı` mı?** Kalan her ★ için ya örtük kapandığını göster, ya tek doğrulama sorusu
+   sor. Hiçbir ★'ı sessizce atlama.
+   **Journey J22-binding (per-diagnostic hibrit — silent-hole).** Journey AKTİFSE, `journey-scan.mjs`'in
+   `droppedJ22`'sindeki **her** deneyimleyensiz-düşen tetik durable bir `beklemede-★` kaydıdır ve bu MEKANİK
+   sorgu onu yeniden-enumere eder. Neden zorunlu: bu adaylar `T`'ye GİRMEDEN düşer → kapsama kapısı (J2)
+   onları HİÇ görmez → saf-kapsama-güdümlü elicitation `any`/`all`/`public` admin/dashboard okumalarını
+   SESSİZCE atlar (sistematik sınıf, köşe-vaka değil). Kapanış: **confirm** ("insan-tüketicisi yok, doğru")
+   ya **fix** (tüketici ekle / Faz 3.5 modelleme boşluğu). Validator'ın *info*'su tek başına yetmez
+   (Değişmez-7). (J17 içi-boş = Faz 3.6 çekirdek-auto-fill anında satır-içi kapanır; J21 `like updates`
+   yığılması = elicitation probe'u — zorunlu kayıt değil. Ayrıntı: `references/journey-closure.md` §★-süpürme.)
 2. **Sessiz-yanlış (teşhir):** zorunlu **ownership** yanlış-değerle de tutarlı görünür — `any` /
    `public` genişliği güvenlik-kritiktir. Seçtiğin ownership'i sessiz emit etme: "Bu işlemi herkes
    (any) yapabiliyor — kendi kaydıyla (own) sınırlı olmalı mı?" diye açıkça onaylat.
@@ -478,9 +560,11 @@ YETMEZ: denetim YANLIŞ bağı yakalar, EKSİK iş-kuralını değil (bir opsiyo
    der = sahte-sıfır; bu yüzden defter-kadansı (bkz. "Oturum karar-defteri") bu süpürmenin ön-koşuludur.
 5. **İddia-sınaması (note ↔ model) — karşı-olgusal gerekçeler:** `note`/`rule`-brief makinece aşağı
    katmanlara taşınır (tech + QA onu okur), ama içeriğini hiçbir validator sınamaz — business `rule`
-   ADR-0042'den beri **isim + insan-brief**tir, denetlenemeyen prozadır. Bu yüzden emit'ten önce
-   **KAPALI kip-listesiyle** tara (skorlama/benzerlik yok): *"… olmadan · aksi halde · yoksa …
-   olurdu · bu sayede … engellenir · bu olmasa … yapabilirdi"*. Eşleşen her **karşı-olgusal iddia**
+   ADR-0042'den beri **isim + insan-brief**tir, denetlenemeyen prozadır. **Journey de aynı sınıf:**
+   `moment … note """…"""` ve `waive … because """…"""` de denetimsiz-proza yüzeyleridir → bu süpürme
+   `moment.note` + `waive.because` üzerine de genişler (aynı kapalı kip-listesi; ADR-0042 sınıfı).
+   Bu yüzden emit'ten önce **KAPALI kip-listesiyle** tara (skorlama/benzerlik yok): *"… olmadan ·
+   aksi halde · yoksa … olurdu · bu sayede … engellenir · bu olmasa … yapabilirdi"*. Eşleşen her **karşı-olgusal iddia**
    için tek soru: *"Bu iddia, modeldeki diğer işlemler ve `perform` zincirleri göz önüne alındığında
    hâlâ doğru mu?"* Üç meşru kapanış: (a) iddia modelde ayakta → bırak, (b) yanlış → **davranış-diline
    indir** ("ne engeller" yerine "ne yapar"), (c) iddia doğru olmalıydı ama model onu tutmuyor →
@@ -585,6 +669,9 @@ cümleyle not düş). Sözleşme detayı: `references/validator.md` (§7).
 - `references/dependency-closure.md` — ön-gereksinim kapanışı: üretici-tüketici
   tespiti, D1/D2/D3 kapsam seçimi + **D4 yıkım kapanışı (zorunlu)**, seed/embedded
   muafiyetleri, sabit-nokta kapanış. **Faz 3.5'te oku.**
+- `references/journey-closure.md` — deneyim-borcu kapanışı: `journey-scan.mjs` tarama,
+  aktivasyon (surface-always+opt-in), taslak-sonra-düzenle, çekirdek/J17 tablosu, waive
+  karar-ağacı, ★-süpürme J22-binding, toplu-`deferred` çıkış, sabit-nokta. **Faz 3.6'da oku.**
 - `references/consistency-and-emit.md` — emit öncesi tutarlılık self-check'i +
   dependency-order emit + dosya bölme. **Emit'ten önce oku.**
 - `references/validator.md` — doğrulayıcı konum zinciri + diagnostics + düzeltme

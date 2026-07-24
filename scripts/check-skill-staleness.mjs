@@ -104,6 +104,7 @@ const SKILLS = {
         grammar: CDSL_GRAMMAR, langium: 'command-dsl.langium', ref: 'references/dsl-reference.md',
         bundles: [
             { bundleRel: 'validator/validate.mjs',        srcField: 'businessSrcHash', mustInclude: 'src/language' },
+            { bundleRel: 'validator/journey-scan.mjs',    srcField: 'businessSrcHash', mustInclude: 'src/language' },  // Faz 3.6 tetik-envanteri (hesaplaTetikler; validate.mjs ile aynı reçete — journey-triggers src/language'te)
             { bundleRel: 'validator/emit-operations.mjs', srcField: 'srcHash',         mustInclude: 'src/generator' },
             { bundleRel: 'validator/report-business.mjs', srcField: 'srcHash',         mustInclude: 'src/generator' },
         ],
