@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "v3.x-8ad0263172c7", grammarHash: "8ad0263172c7", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], businessSrcHash: "6cd3016fc9dc", wrapperFiles: ["journey-scan.src.mts"], wrapperHash: "617f65ef59a3", commit: "72b4298", builtAt: "2026-07-24T08:59:30+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "v3.x-8ad0263172c7", grammarHash: "8ad0263172c7", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], businessSrcHash: "03358ee281e9", wrapperFiles: ["journey-scan.src.mts"], wrapperHash: "617f65ef59a3", commit: "9a3b9ce", builtAt: "2026-07-25T00:46:08+03:00", langium: "4.2.4" };
   }
 });
 
@@ -9244,7 +9244,7 @@ ${stack}`);
   }
 });
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/journey-scan.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/journey-scan.src.mts
 init_define_BUILD_INFO();
 import { statSync as statSync2 } from "node:fs";
 import { resolve, isAbsolute } from "node:path";
@@ -40154,6 +40154,24 @@ init_define_BUILD_INFO();
 // src/generator/process-e2e.ts
 init_define_BUILD_INFO();
 
+// src/generator/auth-matrix.ts
+init_define_BUILD_INFO();
+
+// src/generator/journey-register.ts
+init_define_BUILD_INFO();
+
+// src/generator/rules-register.ts
+init_define_BUILD_INFO();
+
+// src/generator/data-dictionary.ts
+init_define_BUILD_INFO();
+
+// src/generator/outcome-scorecard.ts
+init_define_BUILD_INFO();
+
+// src/generator/schedule-register.ts
+init_define_BUILD_INFO();
+
 // src/generator/plantuml.ts
 var SKIN_BASE = `skinparam backgroundColor #1e1e1e
 skinparam defaultFontColor #cccccc
@@ -42521,7 +42539,7 @@ function createCommandDslServices(context) {
   return { shared: shared2, CommandDsl };
 }
 
-// ../../../.claude/plugins/marketplaces/command-dsl-tools/plugins/command-dsl/skills/is-analizi-dsl/validator/journey-scan.src.mts
+// ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/is-analizi-dsl/validator/journey-scan.src.mts
 var argv = process.argv.slice(2);
 if (argv.includes("--version")) {
   console.log(JSON.stringify(define_BUILD_INFO_default, null, 2));
