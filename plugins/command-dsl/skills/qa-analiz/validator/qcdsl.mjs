@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "116004e099ab", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "9228ab332626", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "72b4298", builtAt: "2026-07-24T08:59:30+03:00", langium: "4.2.4" };
   }
 });
 
@@ -56816,6 +56816,28 @@ function push(map2, key, ref) {
   map2.set(key, list);
 }
 
+// src/shared/waive-excuse.ts
+init_define_BUILD_INFO();
+var WB = String.raw`(?<![\p{L}\p{N}])`;
+var WE = String.raw`(?![\p{L}\p{N}])`;
+var WAIVE_EXCUSE_RES = [
+  /vakt[iı]m[iı]z yok|vakit yok|zaman yok/iu,
+  // no-time
+  /daha sonra|sonra (bak|halled|ekle|yapar|d[üu]zelt|ilgilen)/iu,
+  // ertele + defer-fiil (bare 'sonra' temporal → hariç)
+  new RegExp(`${WB}(?:\u015Fimdilik|ileride|ilerde|ge\xE7ici)${WE}`, "iu"),
+  /\bTODO\b|\bFIXME\b|\bHACK\b/i,
+  /no time|for now|(fix|do|revisit|handle) (it )?later|come back later|quick ?fix|will fix/iu
+];
+function detectWaiveExcuse(reason) {
+  if (!reason) return null;
+  for (const re of WAIVE_EXCUSE_RES) {
+    const m = reason.match(re);
+    if (m) return m[0];
+  }
+  return null;
+}
+
 // src/qa/validation-eval.ts
 init_define_BUILD_INFO();
 var un = (reason) => ({ ok: false, reason });
@@ -56923,17 +56945,6 @@ function evalValidationAst(ast, inputs) {
 var UNCOVERED_BRANCHES_CODE = "qa.uncovered-branches";
 var UNCOVERED_GUARANTEE_CODE = "qa.uncovered-guarantee";
 var WAIVE_EXCUSE_CODE = "qa.waive-excuse";
-var WB = String.raw`(?<![\p{L}\p{N}])`;
-var WE = String.raw`(?![\p{L}\p{N}])`;
-var WAIVE_EXCUSE_RES = [
-  /vakt[iı]m[iı]z yok|vakit yok|zaman yok/iu,
-  // no-time
-  /daha sonra|sonra (bak|halled|ekle|yapar|d[üu]zelt|ilgilen)/iu,
-  // ertele + defer-fiil (bare 'sonra' temporal → hariç)
-  new RegExp(`${WB}(?:\u015Fimdilik|ileride|ilerde|ge\xE7ici)${WE}`, "iu"),
-  /\bTODO\b|\bFIXME\b|\bHACK\b/i,
-  /no time|for now|(fix|do|revisit|handle) (it )?later|come back later|quick ?fix|will fix/iu
-];
 function condLiteral(expr) {
   let n = expr;
   while (isCmp(n) && n.op === void 0) n = n.left;
@@ -56943,14 +56954,6 @@ function condPath(expr) {
   let n = expr;
   while (isCmp(n) && n.op === void 0) n = n.left;
   return isPath(n) ? n : null;
-}
-function detectWaiveExcuse(reason) {
-  if (!reason) return null;
-  for (const re of WAIVE_EXCUSE_RES) {
-    const m = reason.match(re);
-    if (m) return m[0];
-  }
-  return null;
 }
 function parseStatusGuard(text) {
   const t = text.trim();

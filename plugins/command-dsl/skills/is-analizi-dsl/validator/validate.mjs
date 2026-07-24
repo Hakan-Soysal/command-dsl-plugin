@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "v3.x-29314388e3fe", grammarHash: "29314388e3fe", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], businessSrcHash: "63bacb478283", wrapperFiles: ["validate.src.mts"], wrapperHash: "eec29976347a", commit: "704eb7f", builtAt: "2026-07-20T18:02:32+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "v3.x-8ad0263172c7", grammarHash: "8ad0263172c7", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], businessSrcHash: "6cd3016fc9dc", wrapperFiles: ["validate.src.mts"], wrapperHash: "eec29976347a", commit: "72b4298", builtAt: "2026-07-24T08:59:30+03:00", langium: "4.2.4" };
   }
 });
 
@@ -31941,6 +31941,9 @@ var AbandonNote = {
   $type: "AbandonNote",
   text: "text"
 };
+function isAbandonNote(item) {
+  return reflection2.isInstance(item, AbandonNote.$type);
+}
 var Action2 = {
   $type: "Action"
 };
@@ -31959,6 +31962,15 @@ var AggregateExpr = {
 function isAggregateExpr(item) {
   return reflection2.isInstance(item, AggregateExpr.$type);
 }
+var AllowsRetry = {
+  $type: "AllowsRetry"
+};
+function isAllowsRetry(item) {
+  return reflection2.isInstance(item, AllowsRetry.$type);
+}
+var AnchorRef = {
+  $type: "AnchorRef"
+};
 var AnyOrderBlock = {
   $type: "AnyOrderBlock",
   branches: "branches"
@@ -32060,6 +32072,9 @@ var CreateAction = {
 function isCreateAction(item) {
   return reflection2.isInstance(item, CreateAction.$type);
 }
+var DisclosesOrigin = {
+  $type: "DisclosesOrigin"
+};
 var DomainDef = {
   $type: "DomainDef",
   name: "name"
@@ -32115,6 +32130,9 @@ var ExistsExpr = {
 function isExistsExpr(item) {
   return reflection2.isInstance(item, ExistsExpr.$type);
 }
+var ExplainsCause = {
+  $type: "ExplainsCause"
+};
 var Expression = {
   $type: "Expression"
 };
@@ -32141,6 +32159,13 @@ var FieldValue = {
 };
 function isFieldValue(item) {
   return reflection2.isInstance(item, FieldValue.$type);
+}
+var FlowAnchor = {
+  $type: "FlowAnchor",
+  flow: "flow"
+};
+function isFlowAnchor(item) {
+  return reflection2.isInstance(item, FlowAnchor.$type);
 }
 var FlowDef = {
   $type: "FlowDef",
@@ -32182,6 +32207,9 @@ var IfConstraint = {
   $type: "IfConstraint",
   condition: "condition"
 };
+function isIfConstraint(item) {
+  return reflection2.isInstance(item, IfConstraint.$type);
+}
 var ImportDecl = {
   $type: "ImportDecl",
   path: "path"
@@ -32194,6 +32222,16 @@ var IncludeStep = {
 };
 function isIncludeStep(item) {
   return reflection2.isInstance(item, IncludeStep.$type);
+}
+var JourneyDef = {
+  $type: "JourneyDef",
+  moments: "moments",
+  name: "name",
+  note: "note",
+  waives: "waives"
+};
+function isJourneyDef(item) {
+  return reflection2.isInstance(item, JourneyDef.$type);
 }
 var KeywordOwnership = {
   $type: "KeywordOwnership",
@@ -32228,6 +32266,14 @@ var Model = {
 function isModel(item) {
   return reflection2.isInstance(item, Model.$type);
 }
+var MomentDecl = {
+  $type: "MomentDecl",
+  anchor: "anchor",
+  kind: "kind",
+  name: "name",
+  note: "note",
+  obligations: "obligations"
+};
 var NoteClause = {
   $type: "NoteClause",
   text: "text"
@@ -32243,10 +32289,27 @@ var NumberValue = {
   $type: "NumberValue",
   value: "value"
 };
+var ObligationDecl = {
+  $type: "ObligationDecl"
+};
+var OffersPath = {
+  $type: "OffersPath",
+  target: "target"
+};
+function isOffersPath(item) {
+  return reflection2.isInstance(item, OffersPath.$type);
+}
 var OnSuccessBlock = {
   $type: "OnSuccessBlock",
   actions: "actions"
 };
+var OperationAnchor = {
+  $type: "OperationAnchor",
+  op: "op"
+};
+function isOperationAnchor(item) {
+  return reflection2.isInstance(item, OperationAnchor.$type);
+}
 var OperationClause = {
   $type: "OperationClause"
 };
@@ -32295,6 +32358,9 @@ var PathRead = {
 function isPathRead(item) {
   return reflection2.isInstance(item, PathRead.$type);
 }
+var PathTarget = {
+  $type: "PathTarget"
+};
 var PerformAction = {
   $type: "PerformAction",
   target: "target"
@@ -32302,6 +32368,12 @@ var PerformAction = {
 function isPerformAction(item) {
   return reflection2.isInstance(item, PerformAction.$type);
 }
+var PreservesInput = {
+  $type: "PreservesInput"
+};
+var PreservesProgress = {
+  $type: "PreservesProgress"
+};
 var ProcessDef = {
   $type: "ProcessDef",
   entity: "entity",
@@ -32379,6 +32451,12 @@ var SendAction = {
 function isSendAction(item) {
   return reflection2.isInstance(item, SendAction.$type);
 }
+var ShowsProgress = {
+  $type: "ShowsProgress"
+};
+var SignalsCompletion = {
+  $type: "SignalsCompletion"
+};
 var StageDef = {
   $type: "StageDef",
   actor: "actor",
@@ -32405,6 +32483,14 @@ var StandardCommand = {
 function isStandardCommand(item) {
   return reflection2.isInstance(item, StandardCommand.$type);
 }
+var StepAnchor = {
+  $type: "StepAnchor",
+  flow: "flow",
+  step: "step"
+};
+function isStepAnchor(item) {
+  return reflection2.isInstance(item, StepAnchor.$type);
+}
 var StringExpr = {
   $type: "StringExpr",
   value: "value"
@@ -32429,15 +32515,30 @@ var UnitDuration = {
 };
 var VerbDef = {
   $type: "VerbDef",
+  klass: "klass",
   name: "name"
 };
 function isVerbDef(item) {
   return reflection2.isInstance(item, VerbDef.$type);
 }
+var WaiveDecl = {
+  $type: "WaiveDecl",
+  anchor: "anchor",
+  because: "because",
+  kind: "kind",
+  reason: "reason",
+  until: "until"
+};
+var WarnsLoss = {
+  $type: "WarnsLoss"
+};
 var WhenConstraint = {
   $type: "WhenConstraint",
   condition: "condition"
 };
+function isWhenConstraint(item) {
+  return reflection2.isInstance(item, WhenConstraint.$type);
+}
 var CommandDslAstReflection = class extends AbstractAstReflection {
   types = {
     AbandonNote: {
@@ -32475,6 +32576,16 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
         }
       },
       superTypes: [Expression.$type]
+    },
+    AllowsRetry: {
+      name: AllowsRetry.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
+    },
+    AnchorRef: {
+      name: AnchorRef.$type,
+      properties: {},
+      superTypes: []
     },
     AnyOrderBlock: {
       name: AnyOrderBlock.$type,
@@ -32641,6 +32752,11 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [Action2.$type]
     },
+    DisclosesOrigin: {
+      name: DisclosesOrigin.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
+    },
     DomainDef: {
       name: DomainDef.$type,
       properties: {
@@ -32728,6 +32844,11 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [BoolExpr.$type]
     },
+    ExplainsCause: {
+      name: ExplainsCause.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
+    },
     Expression: {
       name: Expression.$type,
       properties: {},
@@ -32777,6 +32898,16 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [ComparisonValue.$type]
     },
+    FlowAnchor: {
+      name: FlowAnchor.$type,
+      properties: {
+        flow: {
+          name: FlowAnchor.flow,
+          referenceType: FlowDef.$type
+        }
+      },
+      superTypes: [AnchorRef.$type]
+    },
     FlowDef: {
       name: FlowDef.$type,
       properties: {
@@ -32795,7 +32926,7 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
           name: FlowDef.note
         }
       },
-      superTypes: [Element.$type, Measurable.$type]
+      superTypes: [Element.$type, Measurable.$type, PathTarget.$type]
     },
     FlowItem: {
       name: FlowItem.$type,
@@ -32890,6 +33021,26 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [FlowItem.$type]
     },
+    JourneyDef: {
+      name: JourneyDef.$type,
+      properties: {
+        moments: {
+          name: JourneyDef.moments,
+          defaultValue: []
+        },
+        name: {
+          name: JourneyDef.name
+        },
+        note: {
+          name: JourneyDef.note
+        },
+        waives: {
+          name: JourneyDef.waives,
+          defaultValue: []
+        }
+      },
+      superTypes: [Element.$type]
+    },
     KeywordOwnership: {
       name: KeywordOwnership.$type,
       properties: {
@@ -32948,6 +33099,28 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: []
     },
+    MomentDecl: {
+      name: MomentDecl.$type,
+      properties: {
+        anchor: {
+          name: MomentDecl.anchor
+        },
+        kind: {
+          name: MomentDecl.kind
+        },
+        name: {
+          name: MomentDecl.name
+        },
+        note: {
+          name: MomentDecl.note
+        },
+        obligations: {
+          name: MomentDecl.obligations,
+          defaultValue: []
+        }
+      },
+      superTypes: []
+    },
     NoteClause: {
       name: NoteClause.$type,
       properties: {
@@ -32975,6 +33148,21 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [ComparisonValue.$type]
     },
+    ObligationDecl: {
+      name: ObligationDecl.$type,
+      properties: {},
+      superTypes: []
+    },
+    OffersPath: {
+      name: OffersPath.$type,
+      properties: {
+        target: {
+          name: OffersPath.target,
+          referenceType: PathTarget.$type
+        }
+      },
+      superTypes: [ObligationDecl.$type]
+    },
     OnSuccessBlock: {
       name: OnSuccessBlock.$type,
       properties: {
@@ -32984,6 +33172,16 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
         }
       },
       superTypes: []
+    },
+    OperationAnchor: {
+      name: OperationAnchor.$type,
+      properties: {
+        op: {
+          name: OperationAnchor.op,
+          referenceType: OperationDecl.$type
+        }
+      },
+      superTypes: [AnchorRef.$type]
     },
     OperationClause: {
       name: OperationClause.$type,
@@ -33010,7 +33208,7 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
           name: OperationDecl.success
         }
       },
-      superTypes: [Element.$type, Measurable.$type]
+      superTypes: [Element.$type, Measurable.$type, PathTarget.$type]
     },
     OrderByFilter: {
       name: OrderByFilter.$type,
@@ -33077,6 +33275,11 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [ReadEntry.$type]
     },
+    PathTarget: {
+      name: PathTarget.$type,
+      properties: {},
+      superTypes: []
+    },
     PerformAction: {
       name: PerformAction.$type,
       properties: {
@@ -33086,6 +33289,16 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
         }
       },
       superTypes: [Action2.$type]
+    },
+    PreservesInput: {
+      name: PreservesInput.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
+    },
+    PreservesProgress: {
+      name: PreservesProgress.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
     },
     ProcessDef: {
       name: ProcessDef.$type,
@@ -33226,6 +33439,16 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [Action2.$type]
     },
+    ShowsProgress: {
+      name: ShowsProgress.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
+    },
+    SignalsCompletion: {
+      name: SignalsCompletion.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
+    },
     StageDef: {
       name: StageDef.$type,
       properties: {
@@ -33288,6 +33511,19 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
       },
       superTypes: [CommandDecl.$type]
     },
+    StepAnchor: {
+      name: StepAnchor.$type,
+      properties: {
+        flow: {
+          name: StepAnchor.flow,
+          referenceType: FlowDef.$type
+        },
+        step: {
+          name: StepAnchor.step
+        }
+      },
+      superTypes: [AnchorRef.$type]
+    },
     StringExpr: {
       name: StringExpr.$type,
       properties: {
@@ -33326,11 +33562,40 @@ var CommandDslAstReflection = class extends AbstractAstReflection {
     VerbDef: {
       name: VerbDef.$type,
       properties: {
+        klass: {
+          name: VerbDef.klass
+        },
         name: {
           name: VerbDef.name
         }
       },
       superTypes: [Element.$type]
+    },
+    WaiveDecl: {
+      name: WaiveDecl.$type,
+      properties: {
+        anchor: {
+          name: WaiveDecl.anchor
+        },
+        because: {
+          name: WaiveDecl.because
+        },
+        kind: {
+          name: WaiveDecl.kind
+        },
+        reason: {
+          name: WaiveDecl.reason
+        },
+        until: {
+          name: WaiveDecl.until
+        }
+      },
+      superTypes: []
+    },
+    WarnsLoss: {
+      name: WarnsLoss.$type,
+      properties: {},
+      superTypes: [ObligationDecl.$type]
     },
     WhenConstraint: {
       name: WhenConstraint.$type,
@@ -33408,7 +33673,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@80"
               },
               "arguments": []
             }
@@ -33428,13 +33693,6 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@4"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@5"
             },
             "arguments": []
@@ -33449,7 +33707,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@8"
+              "$ref": "#/rules@7"
             },
             "arguments": []
           },
@@ -33463,14 +33721,21 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@18"
+              "$ref": "#/rules@10"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@28"
+              "$ref": "#/rules@20"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@30"
             },
             "arguments": []
           },
@@ -33484,21 +33749,28 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@36"
+              "$ref": "#/rules@38"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@48"
+              "$ref": "#/rules@57"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@41"
+              "$ref": "#/rules@43"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@45"
             },
             "arguments": []
           }
@@ -33525,10 +33797,57 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "like"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "klass",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@4"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "VerbClass",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "creates"
+          },
+          {
+            "$type": "Keyword",
+            "value": "updates"
+          },
+          {
+            "$type": "Keyword",
+            "value": "deletes"
           }
         ]
       },
@@ -33553,7 +33872,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -33581,7 +33900,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -33600,12 +33919,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@5"
+                    "$ref": "#/rules@6"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -33639,7 +33958,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@7"
+                "$ref": "#/rules@8"
               },
               "arguments": []
             }
@@ -33660,14 +33979,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@70"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@69"
+              "$ref": "#/rules@78"
             },
             "arguments": []
           }
@@ -33694,7 +34013,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -33715,7 +34034,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -33739,7 +34058,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -33780,7 +34099,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -33796,7 +34115,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@10"
+                "$ref": "#/rules@11"
               },
               "arguments": []
             },
@@ -33825,7 +34144,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@12"
               },
               "arguments": []
             }
@@ -33860,10 +34179,34 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "IdentName",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@79"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Keyword",
+            "value": "path"
           }
         ]
       },
@@ -33880,7 +34223,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@13"
+              "$ref": "#/rules@15"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@16"
             },
             "arguments": []
           },
@@ -33888,13 +34238,6 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "$type": "RuleCall",
             "rule": {
               "$ref": "#/rules@14"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@12"
             },
             "arguments": []
           }
@@ -33917,12 +34260,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@5"
+                "$ref": "#/rules@6"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -33937,7 +34280,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@16"
+                "$ref": "#/rules@18"
               },
               "arguments": []
             }
@@ -33949,7 +34292,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@19"
               },
               "arguments": []
             }
@@ -33961,12 +34304,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@9"
+                "$ref": "#/rules@10"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -33988,7 +34331,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@17"
+                    "$ref": "#/rules@19"
                   },
                   "arguments": []
                 }
@@ -34000,12 +34343,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@9"
+                    "$ref": "#/rules@10"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -34030,7 +34373,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@17"
+                    "$ref": "#/rules@19"
                   },
                   "arguments": []
                 }
@@ -34042,12 +34385,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@9"
+                    "$ref": "#/rules@10"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -34072,12 +34415,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@5"
+                    "$ref": "#/rules@6"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -34102,7 +34445,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@44"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -34129,12 +34472,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@5"
+                "$ref": "#/rules@6"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -34153,7 +34496,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@15"
+                "$ref": "#/rules@17"
               },
               "arguments": []
             }
@@ -34165,7 +34508,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@19"
               },
               "arguments": []
             }
@@ -34177,12 +34520,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@9"
+                "$ref": "#/rules@10"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -34201,12 +34544,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@5"
+                "$ref": "#/rules@6"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -34228,7 +34571,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@62"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -34255,12 +34598,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@5"
+                "$ref": "#/rules@6"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -34279,7 +34622,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@15"
+                "$ref": "#/rules@17"
               },
               "arguments": []
             }
@@ -34291,7 +34634,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@19"
               },
               "arguments": []
             }
@@ -34303,12 +34646,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@9"
+                "$ref": "#/rules@10"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -34327,12 +34670,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@5"
+                "$ref": "#/rules@6"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -34385,7 +34728,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@70"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           },
@@ -34396,6 +34739,18 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "Keyword",
             "value": "lists"
+          },
+          {
+            "$type": "Keyword",
+            "value": "creates"
+          },
+          {
+            "$type": "Keyword",
+            "value": "updates"
+          },
+          {
+            "$type": "Keyword",
+            "value": "deletes"
           }
         ]
       },
@@ -34464,12 +34819,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@8"
+                    "$ref": "#/rules@9"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@65"
+                      "$ref": "#/rules@74"
                     },
                     "arguments": []
                   },
@@ -34498,7 +34853,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -34514,7 +34869,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@11"
+                "$ref": "#/rules@13"
               },
               "arguments": []
             }
@@ -34533,7 +34888,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@81"
                   },
                   "arguments": []
                 }
@@ -34548,7 +34903,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@19"
+                "$ref": "#/rules@21"
               },
               "arguments": []
             },
@@ -34561,7 +34916,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@22"
+                "$ref": "#/rules@24"
               },
               "arguments": []
             },
@@ -34582,21 +34937,21 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@20"
+              "$ref": "#/rules@22"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@21"
+              "$ref": "#/rules@23"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@25"
+              "$ref": "#/rules@27"
             },
             "arguments": []
           },
@@ -34621,7 +34976,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@81"
                   },
                   "arguments": []
                 }
@@ -34653,7 +35008,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@61"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -34704,7 +35059,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@77"
                   },
                   "arguments": []
                 }
@@ -34748,12 +35103,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@6"
+                    "$ref": "#/rules@7"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@7"
+                      "$ref": "#/rules@8"
                     },
                     "arguments": []
                   },
@@ -34788,7 +35143,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@55"
+                    "$ref": "#/rules@64"
                   },
                   "arguments": []
                 }
@@ -34820,7 +35175,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@44"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -34848,12 +35203,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@48"
+                    "$ref": "#/rules@57"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -34875,12 +35230,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@48"
+                        "$ref": "#/rules@57"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@70"
+                          "$ref": "#/rules@79"
                         },
                         "arguments": []
                       },
@@ -34953,7 +35308,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@66"
+                    "$ref": "#/rules@75"
                   },
                   "arguments": []
                 }
@@ -34980,7 +35335,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@63"
+              "$ref": "#/rules@72"
             },
             "arguments": []
           },
@@ -34991,7 +35346,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@23"
+                "$ref": "#/rules@25"
               },
               "arguments": []
             },
@@ -35000,7 +35355,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@64"
+              "$ref": "#/rules@73"
             },
             "arguments": []
           }
@@ -35019,20 +35374,6 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@25"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@26"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@27"
             },
             "arguments": []
@@ -35040,7 +35381,21 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@24"
+              "$ref": "#/rules@28"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@29"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@26"
             },
             "arguments": []
           }
@@ -35067,12 +35422,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@18"
+                "$ref": "#/rules@20"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -35103,7 +35458,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@61"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35119,7 +35474,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@57"
+                "$ref": "#/rules@66"
               },
               "arguments": []
             }
@@ -35147,7 +35502,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@44"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -35178,7 +35533,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -35194,7 +35549,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@61"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -35222,12 +35577,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@9"
+                "$ref": "#/rules@10"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -35246,12 +35601,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@9"
+                "$ref": "#/rules@10"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -35282,7 +35637,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -35298,12 +35653,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@5"
+                "$ref": "#/rules@6"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -35317,7 +35672,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@63"
+                  "$ref": "#/rules@72"
                 },
                 "arguments": []
               },
@@ -35335,7 +35690,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@72"
+                        "$ref": "#/rules@81"
                       },
                       "arguments": []
                     }
@@ -35350,7 +35705,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@29"
+                    "$ref": "#/rules@31"
                   },
                   "arguments": []
                 },
@@ -35359,7 +35714,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@64"
+                  "$ref": "#/rules@73"
                 },
                 "arguments": []
               }
@@ -35381,21 +35736,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@30"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@31"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@32"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@33"
             },
             "arguments": []
           },
@@ -35409,7 +35757,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@33"
+              "$ref": "#/rules@36"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@35"
             },
             "arguments": []
           }
@@ -35436,7 +35791,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -35452,12 +35807,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@18"
+                "$ref": "#/rules@20"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -35499,12 +35854,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@30"
+                    "$ref": "#/rules@32"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -35538,12 +35893,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@28"
+                "$ref": "#/rules@30"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@79"
                 },
                 "arguments": []
               },
@@ -35594,7 +35949,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@73"
+                "$ref": "#/rules@82"
               },
               "arguments": []
             }
@@ -35626,7 +35981,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@73"
+                "$ref": "#/rules@82"
               },
               "arguments": []
             }
@@ -35654,7 +36009,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@35"
+                "$ref": "#/rules@37"
               },
               "arguments": []
             }
@@ -35673,7 +36028,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@35"
+                    "$ref": "#/rules@37"
                   },
                   "arguments": []
                 }
@@ -35696,7 +36051,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@63"
+              "$ref": "#/rules@72"
             },
             "arguments": []
           },
@@ -35707,7 +36062,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@29"
+                "$ref": "#/rules@31"
               },
               "arguments": []
             },
@@ -35716,7 +36071,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@64"
+              "$ref": "#/rules@73"
             },
             "arguments": []
           }
@@ -35743,7 +36098,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -35762,12 +36117,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@9"
+                    "$ref": "#/rules@10"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -35784,7 +36139,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@63"
+                  "$ref": "#/rules@72"
                 },
                 "arguments": []
               },
@@ -35802,7 +36157,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@72"
+                        "$ref": "#/rules@81"
                       },
                       "arguments": []
                     }
@@ -35817,7 +36172,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@37"
+                    "$ref": "#/rules@39"
                   },
                   "arguments": []
                 },
@@ -35826,7 +36181,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@64"
+                  "$ref": "#/rules@73"
                 },
                 "arguments": []
               }
@@ -35848,14 +36203,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@38"
+              "$ref": "#/rules@40"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@39"
+              "$ref": "#/rules@41"
             },
             "arguments": []
           }
@@ -35882,7 +36237,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -35908,12 +36263,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@28"
+                        "$ref": "#/rules@30"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@70"
+                          "$ref": "#/rules@79"
                         },
                         "arguments": []
                       },
@@ -35932,12 +36287,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@5"
+                        "$ref": "#/rules@6"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@70"
+                          "$ref": "#/rules@79"
                         },
                         "arguments": []
                       },
@@ -35954,12 +36309,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@18"
+                    "$ref": "#/rules@20"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -35996,7 +36351,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@40"
+                "$ref": "#/rules@42"
               },
               "arguments": []
             }
@@ -36015,7 +36370,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@40"
+                    "$ref": "#/rules@42"
                   },
                   "arguments": []
                 }
@@ -36038,7 +36393,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@63"
+              "$ref": "#/rules@72"
             },
             "arguments": []
           },
@@ -36049,7 +36404,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@37"
+                "$ref": "#/rules@39"
               },
               "arguments": []
             },
@@ -36058,7 +36413,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@64"
+              "$ref": "#/rules@73"
             },
             "arguments": []
           }
@@ -36085,7 +36440,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -36101,7 +36456,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@42"
+                "$ref": "#/rules@44"
               },
               "arguments": []
             },
@@ -36126,7 +36481,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -36153,7 +36508,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@70"
+                          "$ref": "#/rules@79"
                         },
                         "arguments": []
                       },
@@ -36181,7 +36536,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@81"
                   },
                   "arguments": []
                 }
@@ -36216,7 +36571,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@80"
               },
               "arguments": []
             }
@@ -36228,7 +36583,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@43"
+                "$ref": "#/rules@52"
               },
               "arguments": []
             }
@@ -36240,7 +36595,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@77"
               },
               "arguments": []
             }
@@ -36259,7 +36614,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@80"
                   },
                   "arguments": []
                 }
@@ -36281,13 +36636,728 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@62"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
               }
             ],
             "cardinality": "?"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "JourneyDef",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "journey"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@79"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "note"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "note",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@81"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "moments",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@46"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "waives",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@50"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "MomentDecl",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "moment"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "name",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@79"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "for"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "kind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@47"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "at"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "anchor",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@48"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "{"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "obligations",
+            "operator": "+=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@49"
+              },
+              "arguments": []
+            },
+            "cardinality": "*"
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "note"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "note",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@81"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "}"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "MomentKind",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "empty"
+          },
+          {
+            "$type": "Keyword",
+            "value": "blocked"
+          },
+          {
+            "$type": "Keyword",
+            "value": "waiting"
+          },
+          {
+            "$type": "Keyword",
+            "value": "failure"
+          },
+          {
+            "$type": "Keyword",
+            "value": "mutation"
+          },
+          {
+            "$type": "Keyword",
+            "value": "irreversible"
+          },
+          {
+            "$type": "Keyword",
+            "value": "departure"
+          },
+          {
+            "$type": "Keyword",
+            "value": "provenance"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "AnchorRef",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "OperationAnchor"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "operation"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "op",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@20"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@79"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "StepAnchor"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "step"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "flow",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@30"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@79"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "."
+              },
+              {
+                "$type": "Assignment",
+                "feature": "step",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@79"
+                  },
+                  "arguments": []
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "FlowAnchor"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "flow"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "flow",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@30"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@79"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ObligationDecl",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "ExplainsCause"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "explains"
+              },
+              {
+                "$type": "Keyword",
+                "value": "cause"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "OffersPath"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "offers"
+              },
+              {
+                "$type": "Keyword",
+                "value": "path"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "target",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/types@2"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@79"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PreservesInput"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "preserves"
+              },
+              {
+                "$type": "Keyword",
+                "value": "input"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PreservesProgress"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "preserves"
+              },
+              {
+                "$type": "Keyword",
+                "value": "progress"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "ShowsProgress"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "shows"
+              },
+              {
+                "$type": "Keyword",
+                "value": "progress"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "SignalsCompletion"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "signals"
+              },
+              {
+                "$type": "Keyword",
+                "value": "completion"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "AllowsRetry"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "allows"
+              },
+              {
+                "$type": "Keyword",
+                "value": "retry"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "WarnsLoss"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "warns"
+              },
+              {
+                "$type": "Keyword",
+                "value": "loss"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "DisclosesOrigin"
+                }
+              },
+              {
+                "$type": "Keyword",
+                "value": "discloses"
+              },
+              {
+                "$type": "Keyword",
+                "value": "origin"
+              }
+            ]
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "WaiveDecl",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "waive"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "kind",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@47"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "at"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "anchor",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@48"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Keyword",
+            "value": "reason"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "reason",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@51"
+              },
+              "arguments": []
+            }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "until"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "until",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@80"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          },
+          {
+            "$type": "Keyword",
+            "value": "because"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "because",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@81"
+              },
+              "arguments": []
+            }
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "ReasonCode",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "Keyword",
+            "value": "unreachable"
+          },
+          {
+            "$type": "Keyword",
+            "value": "inherent"
+          },
+          {
+            "$type": "Keyword",
+            "value": "generic-policy"
+          },
+          {
+            "$type": "Keyword",
+            "value": "accepted"
+          },
+          {
+            "$type": "Keyword",
+            "value": "deferred"
           }
         ]
       },
@@ -36338,7 +37408,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@45"
+          "$ref": "#/rules@54"
         },
         "arguments": []
       },
@@ -36359,7 +37429,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@46"
+              "$ref": "#/rules@55"
             },
             "arguments": []
           },
@@ -36391,7 +37461,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@55"
                   },
                   "arguments": []
                 }
@@ -36418,7 +37488,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@47"
+              "$ref": "#/rules@56"
             },
             "arguments": []
           },
@@ -36450,7 +37520,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@47"
+                    "$ref": "#/rules@56"
                   },
                   "arguments": []
                 }
@@ -36484,7 +37554,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@44"
+                  "$ref": "#/rules@53"
                 },
                 "arguments": []
               },
@@ -36497,7 +37567,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@55"
+              "$ref": "#/rules@64"
             },
             "arguments": []
           }
@@ -36524,7 +37594,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -36547,7 +37617,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@49"
+                    "$ref": "#/rules@58"
                   },
                   "arguments": []
                 }
@@ -36566,7 +37636,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@49"
+                        "$ref": "#/rules@58"
                       },
                       "arguments": []
                     }
@@ -36591,7 +37661,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@50"
+                    "$ref": "#/rules@59"
                   },
                   "arguments": []
                 }
@@ -36613,7 +37683,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@81"
                   },
                   "arguments": []
                 }
@@ -36654,12 +37724,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@9"
+                    "$ref": "#/rules@10"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -36681,7 +37751,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@70"
+                        "$ref": "#/rules@79"
                       },
                       "arguments": []
                     }
@@ -36708,12 +37778,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@8"
+                    "$ref": "#/rules@9"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@65"
+                      "$ref": "#/rules@74"
                     },
                     "arguments": []
                   },
@@ -36729,12 +37799,12 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@9"
+                    "$ref": "#/rules@10"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@79"
                     },
                     "arguments": []
                   },
@@ -36757,7 +37827,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@70"
+                        "$ref": "#/rules@79"
                       },
                       "arguments": []
                     }
@@ -36779,7 +37849,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@51"
+          "$ref": "#/rules@60"
         },
         "arguments": []
       },
@@ -36800,7 +37870,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@52"
+              "$ref": "#/rules@61"
             },
             "arguments": []
           },
@@ -36832,7 +37902,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@52"
+                    "$ref": "#/rules@61"
                   },
                   "arguments": []
                 }
@@ -36859,7 +37929,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@53"
+              "$ref": "#/rules@62"
             },
             "arguments": []
           },
@@ -36891,7 +37961,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@53"
+                    "$ref": "#/rules@62"
                   },
                   "arguments": []
                 }
@@ -36925,7 +37995,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@50"
+                  "$ref": "#/rules@59"
                 },
                 "arguments": []
               },
@@ -36938,14 +38008,14 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@54"
+              "$ref": "#/rules@63"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@55"
+              "$ref": "#/rules@64"
             },
             "arguments": []
           }
@@ -36982,7 +38052,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -36998,7 +38068,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@44"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -37022,7 +38092,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@61"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -37034,7 +38104,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@43"
+                "$ref": "#/rules@52"
               },
               "arguments": []
             }
@@ -37046,7 +38116,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@56"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -37080,7 +38150,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@80"
                   },
                   "arguments": []
                 }
@@ -37104,7 +38174,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@62"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -37128,7 +38198,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@77"
                   },
                   "arguments": []
                 }
@@ -37152,7 +38222,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@61"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -37171,7 +38241,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@58"
+          "$ref": "#/rules@67"
         },
         "arguments": []
       },
@@ -37192,7 +38262,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@59"
+              "$ref": "#/rules@68"
             },
             "arguments": []
           },
@@ -37233,7 +38303,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@59"
+                    "$ref": "#/rules@68"
                   },
                   "arguments": []
                 }
@@ -37260,7 +38330,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@60"
+              "$ref": "#/rules@69"
             },
             "arguments": []
           },
@@ -37301,7 +38371,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@60"
+                    "$ref": "#/rules@69"
                   },
                   "arguments": []
                 }
@@ -37335,7 +38405,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@57"
+                  "$ref": "#/rules@66"
                 },
                 "arguments": []
               },
@@ -37362,7 +38432,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@77"
                   },
                   "arguments": []
                 }
@@ -37386,7 +38456,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@80"
                   },
                   "arguments": []
                 }
@@ -37418,7 +38488,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@61"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -37442,7 +38512,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@61"
+                    "$ref": "#/rules@70"
                   },
                   "arguments": []
                 }
@@ -37468,7 +38538,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@79"
               },
               "arguments": []
             }
@@ -37487,7 +38557,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@79"
                   },
                   "arguments": []
                 }
@@ -37524,7 +38594,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@68"
+                    "$ref": "#/rules@77"
                   },
                   "arguments": []
                 }
@@ -37582,7 +38652,7 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@67"
+                    "$ref": "#/rules@76"
                   },
                   "arguments": []
                 }
@@ -37770,13 +38840,13 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@5"
+              "$ref": "#/rules@6"
             }
           },
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@9"
+              "$ref": "#/rules@10"
             }
           }
         ]
@@ -37791,19 +38861,40 @@ var CommandDslGrammar = () => loadedCommandDslGrammar ?? (loadedCommandDslGramma
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@28"
+              "$ref": "#/rules@30"
             }
           },
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@18"
+              "$ref": "#/rules@20"
             }
           },
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@36"
+              "$ref": "#/rules@38"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "$type": "Type",
+      "name": "PathTarget",
+      "type": {
+        "$type": "UnionType",
+        "types": [
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@20"
+            }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@30"
             }
           }
         ]
@@ -37837,6 +38928,28 @@ var CommandDslGeneratedModule = {
 
 // src/language/validation.ts
 init_define_BUILD_INFO();
+
+// src/shared/waive-excuse.ts
+init_define_BUILD_INFO();
+var WB = String.raw`(?<![\p{L}\p{N}])`;
+var WE = String.raw`(?![\p{L}\p{N}])`;
+var WAIVE_EXCUSE_RES = [
+  /vakt[iı]m[iı]z yok|vakit yok|zaman yok/iu,
+  // no-time
+  /daha sonra|sonra (bak|halled|ekle|yapar|d[üu]zelt|ilgilen)/iu,
+  // ertele + defer-fiil (bare 'sonra' temporal → hariç)
+  new RegExp(`${WB}(?:\u015Fimdilik|ileride|ilerde|ge\xE7ici)${WE}`, "iu"),
+  /\bTODO\b|\bFIXME\b|\bHACK\b/i,
+  /no time|for now|(fix|do|revisit|handle) (it )?later|come back later|quick ?fix|will fix/iu
+];
+function detectWaiveExcuse(reason) {
+  if (!reason) return null;
+  for (const re of WAIVE_EXCUSE_RES) {
+    const m = reason.match(re);
+    if (m) return m[0];
+  }
+  return null;
+}
 
 // src/language/imports.ts
 init_define_BUILD_INFO();
@@ -37965,6 +39078,19 @@ function actorAncestors(actor) {
     current = current.parent?.ref;
   }
   return chain;
+}
+function actorDescendants(input) {
+  const result = /* @__PURE__ */ new Map();
+  for (const el of elementsOf(input)) {
+    if (!isActorDef(el) || !el.name) continue;
+    for (const ancestor of actorAncestors(el)) {
+      if (!ancestor.name) continue;
+      const list = result.get(ancestor.name) ?? [];
+      list.push(el.name);
+      result.set(ancestor.name, list);
+    }
+  }
+  return result;
 }
 function ownershipKey(o) {
   if (!o) return "any";
@@ -38417,6 +39543,584 @@ function deriveStateChain(p, input) {
 // src/generator/operations.ts
 init_define_BUILD_INFO();
 
+// src/language/journey-triggers.ts
+init_define_BUILD_INFO();
+var CORE_CLASSES = /* @__PURE__ */ new Set(["creates", "updates", "deletes"]);
+function verbClassMap(input) {
+  const map2 = /* @__PURE__ */ new Map();
+  for (const el of elementsOf(input)) {
+    if (isVerbDef(el) && el.klass) map2.set(el.name, el.klass);
+  }
+  return map2;
+}
+function verbClass(op, input) {
+  if (!isStandardCommand(op.command)) return null;
+  const verb = op.command.verb;
+  if (CORE_CLASSES.has(verb)) return verb;
+  if (READ_VERBS.has(verb)) return null;
+  return verbClassMap(input).get(verb) ?? null;
+}
+function effectCreateTargets(op) {
+  const out = [];
+  for (const a2 of (op.success?.actions ?? []).filter(isCreateAction)) {
+    const name = a2.target?.ref?.name ?? a2.target?.$refText;
+    if (name) out.push(name);
+  }
+  return out;
+}
+function uretimYuzeyi(op, input) {
+  if (isStandardCommand(op.command) && READ_VERBS.has(op.command.verb)) return false;
+  return verbClass(op, input) === "creates" || effectCreateTargets(op).length > 0;
+}
+function uretilenKume(op, input) {
+  const out = /* @__PURE__ */ new Set();
+  if (verbClass(op, input) === "creates" && isStandardCommand(op.command)) {
+    const resource = op.command.resource?.ref?.name ?? op.command.resource?.$refText;
+    if (resource) out.add(resource);
+  }
+  for (const t of effectCreateTargets(op)) out.add(t);
+  return out;
+}
+function opCalculates(op) {
+  return [
+    ...(op.clauses ?? []).filter(isCalculateAction),
+    ...(op.success?.actions ?? []).filter(isCalculateAction)
+  ];
+}
+function calcTargetEntity(c, op, input) {
+  const head = c.target?.segments?.[0];
+  if (head && indexModel(input).entities.has(head)) return head;
+  if (isStandardCommand(op.command)) {
+    return op.command.resource?.ref?.name ?? op.command.resource?.$refText;
+  }
+  return void 0;
+}
+function disMutasyon(op, input) {
+  const kume = uretilenKume(op, input);
+  for (const c of opCalculates(op)) {
+    const entity = calcTargetEntity(c, op, input);
+    if (entity === void 0) continue;
+    if (!kume.has(entity)) return true;
+    if (c.condition !== void 0) return true;
+  }
+  return false;
+}
+function reversePerformIndex(input) {
+  const index = /* @__PURE__ */ new Map();
+  for (const el of elementsOf(input)) {
+    if (!isOperationDecl(el)) continue;
+    for (const action of el.success?.actions ?? []) {
+      if (!isPerformAction(action)) continue;
+      const target2 = action.target?.ref;
+      if (!target2) continue;
+      const performers = index.get(target2);
+      if (performers === void 0) {
+        index.set(target2, [el]);
+      } else if (!performers.includes(el)) {
+        performers.push(el);
+      }
+    }
+  }
+  return index;
+}
+function performHedefSet(input) {
+  return new Set(reversePerformIndex(input).keys());
+}
+function arkaPlan(op, performHedef) {
+  const actorName = op.command?.actor?.ref?.name ?? op.command?.actor?.$refText;
+  return actorName === "System" || performHedef.has(op);
+}
+function performRootsOf(op, input, index) {
+  const idx = index ?? reversePerformIndex(input);
+  const performHedef = new Set(idx.keys());
+  const reachable = /* @__PURE__ */ new Set([op]);
+  const stack = [op];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const performer of idx.get(current) ?? []) {
+      if (!reachable.has(performer)) {
+        reachable.add(performer);
+        stack.push(performer);
+      }
+    }
+  }
+  const roots = [];
+  for (const el of elementsOf(input)) {
+    if (isOperationDecl(el) && reachable.has(el) && !arkaPlan(el, performHedef)) {
+      roots.push(el);
+    }
+  }
+  return roots;
+}
+function stateAssignmentsOf(op, input) {
+  const out = [];
+  for (const c of opCalculates(op)) {
+    const entity = calcTargetEntity(c, op, input);
+    if (entity === void 0) continue;
+    const segs = c.target?.segments ?? [];
+    if (segs.length === 0) continue;
+    const field = indexModel(input).entities.has(segs[0]) ? segs.slice(1).join(".") : segs.join(".");
+    if (field === "") continue;
+    const value = isStringExpr(c.expr) ? c.expr.value : null;
+    out.push({ entity, field, value, op });
+  }
+  return out;
+}
+function andVerdict(vs) {
+  if (vs.includes("forbids")) return "forbids";
+  if (vs.includes("unknown")) return "unknown";
+  return "allows";
+}
+function orVerdict(vs) {
+  if (vs.includes("allows")) return "allows";
+  if (vs.includes("unknown")) return "unknown";
+  return "forbids";
+}
+function comparisonVerdict(c, ctxEntity, entity, field, value, input) {
+  const segs = c.left?.segments ?? [];
+  let e;
+  let f;
+  if (segs.length === 1) {
+    e = ctxEntity;
+    f = segs[0];
+  } else if (segs.length >= 2 && indexModel(input).entities.has(segs[0])) {
+    e = segs[0];
+    f = segs.slice(1).join(".");
+  }
+  if (e !== entity || f !== field) return "allows";
+  if (!isStringValue(c.right)) return "allows";
+  const lit = c.right.value;
+  if (c.op === "=") return lit === value ? "allows" : "forbids";
+  if (c.op === "!=") return lit !== value ? "allows" : "forbids";
+  return "allows";
+}
+function conditionVerdict(cond, ctxEntity, entity, field, value, input) {
+  if (isBinaryCondition(cond)) {
+    const l = conditionVerdict(cond.left, ctxEntity, entity, field, value, input);
+    const r = conditionVerdict(cond.right, ctxEntity, entity, field, value, input);
+    return cond.op === "and" ? andVerdict([l, r]) : orVerdict([l, r]);
+  }
+  if (isComparison(cond)) return comparisonVerdict(cond, ctxEntity, entity, field, value, input);
+  return "unknown";
+}
+function boolExprVerdict(b, ctxEntity, entity, field, value, input) {
+  if (isBinaryBool(b)) {
+    const l = boolExprVerdict(b.left, ctxEntity, entity, field, value, input);
+    const r = boolExprVerdict(b.right, ctxEntity, entity, field, value, input);
+    return b.op === "and" ? andVerdict([l, r]) : orVerdict([l, r]);
+  }
+  if (isExistsExpr(b)) return "unknown";
+  if (isComparison(b)) return comparisonVerdict(b, ctxEntity, entity, field, value, input);
+  return "unknown";
+}
+function guardAllows(op, entity, field, value, input) {
+  const contributions = [];
+  const cmd = isStandardCommand(op.command) ? op.command : void 0;
+  const ctxEntity = cmd?.resource?.ref?.name ?? cmd?.resource?.$refText;
+  if (cmd?.where) {
+    contributions.push(conditionVerdict(cmd.where, ctxEntity, entity, field, value, input));
+  }
+  for (const clause of op.clauses ?? []) {
+    if (isIfConstraint(clause)) {
+      contributions.push(comparisonVerdict(clause.condition, ctxEntity, entity, field, value, input));
+    } else if (isWhenConstraint(clause)) {
+      contributions.push(conditionVerdict(clause.condition, ctxEntity, entity, field, value, input));
+    } else if (isDuringConstraint(clause)) {
+      contributions.push("unknown");
+    } else if (isRequiresConstraint(clause)) {
+      for (const ruleRef2 of clause.rules) {
+        const rule = ruleRef2.ref;
+        if (rule?.body === void 0) {
+          contributions.push("unknown");
+        } else {
+          contributions.push(boolExprVerdict(rule.body, ctxEntity, entity, field, value, input));
+        }
+      }
+    }
+  }
+  if (contributions.length === 0) return "allows";
+  return andVerdict(contributions);
+}
+function terminalDurum(entity, field, value, input) {
+  for (const el of elementsOf(input)) {
+    if (!isOperationDecl(el)) continue;
+    for (const a2 of stateAssignmentsOf(el, input)) {
+      if (a2.entity !== entity || a2.field !== field) continue;
+      if (a2.value !== null && a2.value === value) continue;
+      if (guardAllows(el, entity, field, value, input) === "allows") return false;
+    }
+  }
+  return true;
+}
+function merkezVarliklar(input) {
+  const out = /* @__PURE__ */ new Set();
+  for (const el of elementsOf(input)) {
+    if (isProcessDef(el)) {
+      const name = el.entity?.ref?.name;
+      if (name) out.add(name);
+    }
+  }
+  return out;
+}
+function merkezTerminalAtama(op, input) {
+  const merkezler = merkezVarliklar(input);
+  for (const a2 of stateAssignmentsOf(op, input)) {
+    if (!merkezler.has(a2.entity)) continue;
+    if (a2.value === null) continue;
+    if (terminalDurum(a2.entity, a2.field, a2.value, input)) return true;
+  }
+  return false;
+}
+function consumersOf(entityName, input) {
+  const out = /* @__PURE__ */ new Set();
+  const descendants = actorDescendants(input);
+  for (const el of elementsOf(input)) {
+    if (!isOperationDecl(el) || !isStandardCommand(el.command)) continue;
+    const cmd = el.command;
+    const positions = [
+      [cmd.resource?.ref?.name ?? cmd.resource?.$refText, cmd.ownership],
+      [cmd.targetResource?.ref?.name ?? cmd.targetResource?.$refText, cmd.targetOwnership],
+      [cmd.sourceResource?.ref?.name ?? cmd.sourceResource?.$refText, cmd.sourceOwnership]
+    ];
+    for (const [posEntity, ownership] of positions) {
+      if (posEntity !== entityName || ownership === void 0) continue;
+      if (isKeywordOwnership(ownership)) {
+        if (ownership.keyword !== "own") continue;
+        const actorName = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
+        if (actorName) out.add(actorName);
+      } else if (isRelationOwnership(ownership)) {
+        const rel = ownership.relation?.ref;
+        const source = rel?.source?.ref;
+        if (!rel || !source || !isActorDef(source) || !source.name) continue;
+        out.add(source.name);
+        if (rel.inherited) {
+          for (const d of descendants.get(source.name) ?? []) out.add(d);
+        }
+      }
+    }
+  }
+  out.delete("System");
+  return out;
+}
+function opActorName(op) {
+  return op.command?.actor?.ref?.name ?? op.command?.actor?.$refText;
+}
+function opResourceName(op) {
+  return isStandardCommand(op.command) ? op.command.resource?.ref?.name ?? op.command.resource?.$refText : void 0;
+}
+function experiencerOf(t, input) {
+  const out = /* @__PURE__ */ new Set();
+  const addRootActors = (op) => {
+    const roots = performRootsOf(op, input);
+    for (const root2 of roots) {
+      const n = opActorName(root2);
+      if (n) out.add(n);
+    }
+    return roots.length > 0;
+  };
+  const addConsumers = (entity) => {
+    if (!entity) return;
+    for (const a2 of consumersOf(entity, input)) out.add(a2);
+  };
+  if (t.kind === "departure") {
+    if (isFlowDef(t.anchor)) {
+      const n = t.anchor.actor?.ref?.name ?? t.anchor.actor?.$refText;
+      if (n) out.add(n);
+    }
+  } else if (isOperationDecl(t.anchor)) {
+    const op = t.anchor;
+    switch (t.kind) {
+      case "empty":
+      case "blocked": {
+        const n = opActorName(op);
+        if (n) out.add(n);
+        break;
+      }
+      case "failure": {
+        if (!arkaPlan(op, performHedefSet(input))) {
+          const n = opActorName(op);
+          if (n) out.add(n);
+        } else if (!addRootActors(op)) {
+          for (const e of deriveOpAccess(op).writes) addConsumers(e);
+        }
+        break;
+      }
+      case "waiting":
+      case "mutation": {
+        if (!addRootActors(op)) {
+          for (const e of deriveOpAccess(op).writes) addConsumers(e);
+        }
+        break;
+      }
+      case "irreversible": {
+        if (op.clauses.some(isSchedule)) {
+          addConsumers(opResourceName(op));
+        } else if (!arkaPlan(op, performHedefSet(input))) {
+          const n = opActorName(op);
+          if (n) out.add(n);
+        } else if (!addRootActors(op)) {
+          addConsumers(opResourceName(op));
+        }
+        break;
+      }
+      case "provenance": {
+        if (isStandardCommand(op.command)) {
+          const r = op.command.recipient?.ref?.name ?? op.command.recipient?.$refText;
+          if (r) out.add(r);
+        }
+        break;
+      }
+    }
+  }
+  out.delete("System");
+  return out;
+}
+function akistaReferansli(op, input) {
+  for (const el of elementsOf(input)) {
+    if (!isFlowDef(el)) continue;
+    for (const item of flowItemsDeep(el)) {
+      if (isFlowStep(item) && item.target?.ref === op) return true;
+    }
+  }
+  return false;
+}
+function redGuard(op) {
+  if (isStandardCommand(op.command) && op.command.where) return true;
+  return (op.clauses ?? []).some((c) => isIfConstraint(c) || isWhenConstraint(c) || isDuringConstraint(c) || isRequiresConstraint(c));
+}
+function hesaplaTetikler(input) {
+  const candidates = [];
+  const unclassified = [];
+  const performHedef = performHedefSet(input);
+  for (const el of elementsOf(input)) {
+    if (!isOperationDecl(el)) continue;
+    const op = el;
+    if (!isStandardCommand(op.command)) continue;
+    const cmd = op.command;
+    const kind = operationKind(op);
+    const sinif = verbClass(op, input);
+    if (kind === "command" && sinif === null) {
+      unclassified.push(op);
+      continue;
+    }
+    const bg = arkaPlan(op, performHedef);
+    const uretim = uretimYuzeyi(op, input);
+    const recipientName = cmd.recipient?.ref?.name ?? cmd.recipient?.$refText;
+    const actorName = cmd.actor?.ref?.name ?? cmd.actor?.$refText;
+    const provenanceP = uretim && recipientName !== void 0 && actorName !== recipientName;
+    if ((op.clauses ?? []).some(isSchedule)) {
+      if (sinif === "deletes" || merkezTerminalAtama(op, input)) {
+        candidates.push({ kind: "irreversible", anchor: op });
+      }
+      if (disMutasyon(op, input)) candidates.push({ kind: "mutation", anchor: op });
+      if (provenanceP) candidates.push({ kind: "provenance", anchor: op });
+      continue;
+    }
+    if (kind === "query" && cmd.verb === "lists" && akistaReferansli(op, input)) {
+      candidates.push({ kind: "empty", anchor: op });
+    }
+    if (kind === "command" && redGuard(op)) candidates.push({ kind: "blocked", anchor: op });
+    if (bg && uretim) candidates.push({ kind: "waiting", anchor: op });
+    if (bg) candidates.push({ kind: "failure", anchor: op });
+    if (kind === "command" && !bg && (op.success?.actions ?? []).length === 0 && !(op.clauses ?? []).some(isCalculateAction) && sinif !== "deletes") {
+      candidates.push({ kind: "failure", anchor: op });
+    }
+    if (bg && disMutasyon(op, input)) candidates.push({ kind: "mutation", anchor: op });
+    if (sinif === "deletes" || merkezTerminalAtama(op, input)) {
+      candidates.push({ kind: "irreversible", anchor: op });
+    }
+    if (provenanceP) candidates.push({ kind: "provenance", anchor: op });
+  }
+  for (const el of elementsOf(input)) {
+    if (!isFlowDef(el)) continue;
+    if (flowItemsDeep(el).some(isAbandonNote)) candidates.push({ kind: "departure", anchor: el });
+  }
+  const triggers = [];
+  const droppedJ22 = [];
+  for (const t of candidates) {
+    const exp = experiencerOf(t, input);
+    if (exp.size === 0) {
+      droppedJ22.push(t);
+      continue;
+    }
+    triggers.push({ ...t, anchorName: t.anchor.name, experiencers: [...exp].sort() });
+  }
+  return { triggers, droppedJ22, unclassified };
+}
+var OBLIGATION_KEY_BY_TYPE = {
+  ExplainsCause: "explains-cause",
+  OffersPath: "offers-path",
+  PreservesInput: "preserves-input",
+  PreservesProgress: "preserves-progress",
+  ShowsProgress: "shows-progress",
+  SignalsCompletion: "signals-completion",
+  AllowsRetry: "allows-retry",
+  WarnsLoss: "warns-loss",
+  DisclosesOrigin: "discloses-origin"
+};
+function obligationKeysOf(m) {
+  const out = /* @__PURE__ */ new Set();
+  for (const o of m.obligations ?? []) {
+    const key = OBLIGATION_KEY_BY_TYPE[o.$type];
+    if (key) out.add(key);
+  }
+  return [...out];
+}
+var JOURNEY_KIND_OBLIGATIONS = {
+  empty: { core: ["offers-path"], coreMode: "all", allowed: ["explains-cause"] },
+  blocked: { core: ["explains-cause"], coreMode: "all", allowed: ["offers-path"] },
+  waiting: {
+    core: ["shows-progress", "signals-completion"],
+    coreMode: "any",
+    allowed: ["shows-progress", "signals-completion"]
+  },
+  failure: {
+    core: ["explains-cause"],
+    coreMode: "all",
+    allowed: ["preserves-input", "allows-retry", "offers-path"]
+  },
+  mutation: { core: ["signals-completion"], coreMode: "all", allowed: ["explains-cause"] },
+  irreversible: { core: ["warns-loss"], coreMode: "all", allowed: ["explains-cause", "offers-path"] },
+  departure: { core: ["preserves-progress"], coreMode: "all", allowed: ["offers-path"] },
+  provenance: { core: ["discloses-origin"], coreMode: "all", allowed: [] }
+};
+function cekirdekTam(m) {
+  const spec = JOURNEY_KIND_OBLIGATIONS[m.kind];
+  const have = new Set(obligationKeysOf(m));
+  if (spec.coreMode === "any") {
+    return spec.core.some((k) => have.has(k)) ? { ok: true, eksik: [] } : { ok: false, eksik: [...spec.core] };
+  }
+  const eksik = spec.core.filter((k) => !have.has(k));
+  return { ok: eksik.length === 0, eksik };
+}
+function obligationKeyOf(o) {
+  return OBLIGATION_KEY_BY_TYPE[o.$type];
+}
+function derivedDischarge(m) {
+  const spec = JOURNEY_KIND_OBLIGATIONS[m.kind];
+  if (spec.coreMode === "any") return false;
+  if (m.kind === "empty") return false;
+  const have = new Set(obligationKeysOf(m));
+  if (have.size !== spec.core.length) return false;
+  return spec.core.every((k) => have.has(k));
+}
+function anchorSinifiUyumlu(kind, cipa, input, T) {
+  if (kind === "departure") {
+    return cipa.type === "flow" && T.some((t) => t.kind === "departure" && t.anchor === cipa.flow);
+  }
+  if (cipa.type === "flow") return false;
+  const op = cipa.op;
+  if (!isStandardCommand(op.command)) return false;
+  if (kind === "blocked") {
+    return T.some((t) => t.kind === "blocked" && t.anchor === op);
+  }
+  const opKind = operationKind(op);
+  if (kind === "empty") return opKind === "query" && op.command.verb === "lists";
+  if (kind === "provenance") {
+    const recipient = op.command.recipient?.ref?.name ?? op.command.recipient?.$refText;
+    return opKind === "command" && uretimYuzeyi(op, input) && recipient !== void 0;
+  }
+  return opKind === "command";
+}
+function isWaiveExpired(until, today) {
+  return until !== void 0 && until < today;
+}
+function buildFlowStepIndex(input) {
+  const index = /* @__PURE__ */ new Map();
+  for (const el of elementsOf(input)) {
+    if (!isFlowDef(el)) continue;
+    for (const item of flowItemsDeep(el)) {
+      if (!isFlowStep(item)) continue;
+      const target2 = item.target?.ref;
+      if (!target2) continue;
+      const list = index.get(target2);
+      if (list === void 0) index.set(target2, [{ flow: el, step: item }]);
+      else list.push({ flow: el, step: item });
+    }
+  }
+  return index;
+}
+function anchorTarget(anchor) {
+  if (!anchor) return void 0;
+  if (isOperationAnchor(anchor)) return anchor.op?.ref;
+  if (isFlowAnchor(anchor)) return anchor.flow?.ref;
+  return void 0;
+}
+function resolveStepAnchor(anchor) {
+  if (!anchor || !isStepAnchor(anchor)) return void 0;
+  const flow = anchor.flow?.ref;
+  if (!flow) return void 0;
+  for (const item of flowItemsDeep(flow)) {
+    if (isFlowStep(item) && item.name === anchor.step) return { flow, step: item };
+  }
+  return void 0;
+}
+function kapsamaDegerlendir(journeys, T, flowStepIndex, today) {
+  const moments = journeys.flatMap((j) => j.moments ?? []);
+  const waives = journeys.flatMap((j) => j.waives ?? []);
+  const entries = [];
+  for (const t of T) {
+    const globalMoment = moments.find((m) => m.kind === t.kind && anchorTarget(m.anchor) === t.anchor && cekirdekTam(m).ok);
+    if (globalMoment) {
+      entries.push({ trigger: t, status: "covered", by: globalMoment.name });
+      continue;
+    }
+    if (isOperationDecl(t.anchor)) {
+      const op = t.anchor;
+      const stepMoments = [];
+      for (const m of moments) {
+        if (m.kind !== t.kind) continue;
+        const ref = resolveStepAnchor(m.anchor);
+        if (ref && ref.step.target?.ref === op) stepMoments.push({ m, ref });
+      }
+      const stepWaives = [];
+      for (const w of waives) {
+        if (w.kind !== t.kind) continue;
+        const ref = resolveStepAnchor(w.anchor);
+        if (ref && ref.step.target?.ref === op) stepWaives.push({ w, ref });
+      }
+      if (stepMoments.length > 0 || stepWaives.length > 0) {
+        const adimlar = flowStepIndex.get(op) ?? [];
+        const kapali = /* @__PURE__ */ new Set();
+        const coveringNames = [];
+        for (const { m, ref } of stepMoments) {
+          if (cekirdekTam(m).ok) {
+            kapali.add(ref.step);
+            coveringNames.push(m.name);
+          }
+        }
+        for (const { w, ref } of stepWaives) {
+          if (!isWaiveExpired(w.until, today)) kapali.add(ref.step);
+        }
+        const acik = adimlar.filter((s) => !kapali.has(s.step));
+        if (acik.length === 0) {
+          const entry2 = { trigger: t, status: "covered" };
+          if (coveringNames.length > 0) entry2.by = coveringNames.join(", ");
+          entries.push(entry2);
+        } else {
+          entries.push({
+            trigger: t,
+            status: "step-partial",
+            openSteps: acik.map((s) => `${s.flow.name}.${s.step.name}`)
+          });
+        }
+        continue;
+      }
+    }
+    const matchingWaives = waives.filter((w) => w.kind === t.kind && anchorTarget(w.anchor) === t.anchor);
+    const valid = matchingWaives.find((w) => !isWaiveExpired(w.until, today));
+    if (valid) {
+      entries.push({ trigger: t, status: "waived", waive: valid });
+      continue;
+    }
+    const expired = matchingWaives.find((w) => isWaiveExpired(w.until, today));
+    const entry = { trigger: t, status: "uncovered" };
+    if (expired) entry.expiredWaive = expired;
+    entries.push(entry);
+  }
+  return entries;
+}
+
 // src/generator/ops-expr.ts
 init_define_BUILD_INFO();
 
@@ -38644,6 +40348,11 @@ var KNOWN_VERBS = [
   "rejects",
   "calculates"
 ];
+var MIN_BECAUSE_LEN = 20;
+var JOURNEY_DATE_RX = /^\d{4}-\d{2}-\d{2}$/;
+function journeyValidDate(v) {
+  return JOURNEY_DATE_RX.test(v) && !Number.isNaN(Date.parse(`${v}T00:00:00Z`));
+}
 function stageHasUnresolvedRef(stage) {
   if (stage.target && !stage.target.ref) return true;
   if (stage.flow) {
@@ -38670,11 +40379,11 @@ function registerValidationChecks(services) {
   const registry = services.validation.ValidationRegistry;
   const validator = services.validation.CommandDslValidator;
   const checks = {
-    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules, validator.checkBlindWrites],
+    Model: [validator.checkUniqueNames, validator.checkDuplicateDeclarations, validator.checkCoverage, validator.checkUnusedRules, validator.checkBlindWrites, validator.checkJourneyCoverage, validator.checkJourneyMomentSpace, validator.checkJourneyWaiveConflicts, validator.checkJourneyReport],
     OperationDecl: [validator.checkOperationClauses, validator.checkOperationNote, validator.checkRequires],
     ImportDecl: validator.checkImport,
     EntityDef: validator.checkEntityFields,
-    StandardCommand: validator.checkStandardCommand,
+    StandardCommand: [validator.checkStandardCommand, validator.checkJourneyVerbClass],
     Schedule: validator.checkScheduleOnlySystem,
     RelationOwnership: validator.checkRelationActorMatch,
     FieldPath: validator.checkFieldPathResolves,
@@ -38694,7 +40403,10 @@ function registerValidationChecks(services) {
     OutcomeDef: [validator.checkOutcome, validator.checkNote],
     StageDef: validator.checkStage,
     AnyOrderBlock: validator.checkAnyOrder,
-    StringExpr: validator.checkStringExpr
+    StringExpr: validator.checkStringExpr,
+    MomentDecl: [validator.checkMomentCore, validator.checkJourneyMoment, validator.checkJourneyDerivedDischarge, validator.checkJourneyEmptyPath, validator.checkJourneyRetryRoot, validator.checkJourneyVoluntary],
+    JourneyDef: validator.checkJourneyDecl,
+    WaiveDecl: validator.checkJourneyWaive
   };
   registry.register(checks, validator);
 }
@@ -39196,6 +40908,636 @@ var CommandDslValidator = class {
           `Hi\xE7bir s\xFCrecin etab\u0131 de\u011Fil: '${el.name}' ak\u0131\u015F\u0131 s\xFCre\xE7 kapsamas\u0131nda a\xE7\u0131kta (P8) \u2014 s\xFCre\xE7ler ak\u0131\u015Flar\u0131 zorlamaz, bu bilgi ama\xE7l\u0131d\u0131r`,
           { node: el, property: "name" }
         );
+      }
+    }
+  }
+  /** Journey doğrulama birimi (D10 görünürlük kümesi — checkCoverage emsali):
+   *  visible(model) ∪ bu dokümanı DOĞRUDAN import eden YÜKLÜ dokümanların
+   *  görünürlük kümeleri. Aktivasyon ve tetik hesabı bu birim üzerinden. */
+  journeyUnit(model) {
+    const union = /* @__PURE__ */ new Map();
+    const add = (m) => {
+      const key = m.$document?.uri.toString() ?? `anon:${union.size}`;
+      if (!union.has(key)) union.set(key, m);
+    };
+    for (const m of this.visible(model)) add(m);
+    for (const importer of reverseImporterModels(model, this.documents)) {
+      for (const m of visibleModels(importer, this.documents)) add(m);
+    }
+    return [...union.values()];
+  }
+  /** §4.1 aktivasyon: doğrulama biriminde (D10 görünürlük kümesi — checkCoverage
+   *  emsali) ≥1 JourneyDef → kapı AÇIK. Kapalıyken HİÇBİR journey diagnostiği
+   *  üretilmez (kısıt 2). T-3.5 (J16) bu yardımcıyı tüketir. */
+  journeyAktif(model) {
+    return this.journeyUnit(model).some((m) => m.elements.some(isJourneyDef));
+  }
+  /**
+   * T-3.1 — kapsama kapısı (J1 info / J2 error / J13 error).
+   * Tetik hesabı ve kapsama durumu TEK kaynaktan (journey-triggers:
+   * hesaplaTetikler + kapsamaDegerlendir — M4 emit de aynısını okuyacak).
+   * Diagnostik yalnız BU dokümandaki çıpa node'larına yazılır (workspace-pass'te
+   * çıpanın dokümanı kendi J2'sini üretir — çift-rapor yok).
+   */
+  checkJourneyCoverage(model, accept) {
+    if (!this.journeyAktif(model)) return;
+    const unit = this.journeyUnit(model);
+    const comp = hesaplaTetikler(unit);
+    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+    const journeys = [];
+    for (const m of unit) {
+      for (const el of m.elements) if (isJourneyDef(el)) journeys.push(el);
+    }
+    const entries = kapsamaDegerlendir(journeys, comp.triggers, buildFlowStepIndex(unit), today);
+    let covered = 0, waived = 0, uncovered = 0;
+    for (const e of entries) {
+      if (e.status === "covered") covered++;
+      else if (e.status === "waived") waived++;
+      else if (e.status === "uncovered") uncovered++;
+    }
+    const firstJourney = model.elements.find(isJourneyDef);
+    if (firstJourney) {
+      accept(
+        "info",
+        `Journey kap\u0131s\u0131 a\xE7\u0131k \u2014 ${comp.triggers.length} tetik-noktas\u0131 (${covered} covered \xB7 ${waived} waived \xB7 ${uncovered} uncovered).`,
+        { node: firstJourney, property: "name", code: "journey.J1" }
+      );
+    }
+    for (const e of entries) {
+      const anchorDoc = ast_utils_exports.getContainerOfType(e.trigger.anchor, isModel);
+      if (anchorDoc !== model) continue;
+      if (e.status === "uncovered") {
+        let msg = `Kapsanmam\u0131\u015F tetik-noktas\u0131: (${e.trigger.kind}, ${e.trigger.anchorName}) \u2014 moment yaz ya da 'waive ${e.trigger.kind} at \u2026' ile gerek\xE7elendir (\xFC\xE7\xFCnc\xFC h\xE2l yok).`;
+        if (e.expiredWaive?.until) {
+          msg += ` (J9: waive s\xFCresi dolmu\u015F \u2014 until ${e.expiredWaive.until} < ${today}; tetik yeniden a\xE7\u0131ld\u0131)`;
+        }
+        accept("error", msg, { node: e.trigger.anchor, property: "name", code: "journey.J2" });
+      } else if (e.status === "step-partial") {
+        accept(
+          "error",
+          `K\u0131smi step-kapsamas\u0131: (${e.trigger.kind}, ${e.trigger.anchorName}) \u015Fu ad\u0131mlarda a\xE7\u0131kta: ${(e.openSteps ?? []).join(", ")} \u2014 her ad\u0131m i\xE7in step-moment/step-waive gerekli ya da global moment yaz\u0131n.`,
+          { node: e.trigger.anchor, property: "name", code: "journey.J13" }
+        );
+      }
+    }
+  }
+  /** T-3.1 — J3 (error): çekirdeği eksik moment. Çekirdeği eksik moment kapsamada
+   *  sayılMAZ (kapsamaDegerlendir cekirdekTam filtreler) → aynı tetik için J2 de
+   *  düşer; bu ÇİFT error tasarım gereğidir (J3 "tetiği KAPATMAZ" + İ4). */
+  checkMomentCore(m, accept) {
+    const res = cekirdekTam(m);
+    if (!res.ok) {
+      accept(
+        "error",
+        `Moment '${m.name}' (${m.kind}) \xE7ekirde\u011Fi eksik: ${res.eksik.join(", ")} zorunlu \u2014 bu moment teti\u011Fi KAPATMAZ.`,
+        { node: m, property: "name", code: "journey.J3" }
+      );
+    }
+  }
+  /** T-3.2 çıpa çözümü — çift-hata yasağı (checkRequires:436 emsali): çözülmeyen
+   *  CROSS-REF (operation/flow) linker error'unu ZATEN aldı → 'linker-silent'
+   *  (moment-yerel TÜM denetimler susar). StepAnchor'ın step ADI düz ID'dir
+   *  (cross-ref DEĞİL, gramer notu) → burada çözülür; bulunamazsa J4 BİZDEN
+   *  (accept çağıran tarafta). step'in op-ref'i çözülmemişse yine linker-susma. */
+  resolveMomentAnchor(m) {
+    const anchor = m.anchor;
+    if (isOperationAnchor(anchor)) {
+      const op = anchor.op?.ref;
+      return op ? { type: "operation", op } : "linker-silent";
+    }
+    if (isFlowAnchor(anchor)) {
+      const flow = anchor.flow?.ref;
+      return flow ? { type: "flow", flow } : "linker-silent";
+    }
+    if (isStepAnchor(anchor)) {
+      const flow = anchor.flow?.ref;
+      if (!flow) return "linker-silent";
+      const step = flowItemsDeep(flow).find((it) => isFlowStep(it) && it.name === anchor.step);
+      if (!step) return "step-unresolved";
+      const op = step.target?.ref;
+      return op ? { type: "step", flow, step, op } : "linker-silent";
+    }
+    return "linker-silent";
+  }
+  /** J5 mesajının kısa-nedeni (§3.2 4. kolon dilinde) */
+  j5Reason(m, cipa) {
+    if (m.kind !== "departure" && cipa.type === "flow") {
+      return "'flow' \xE7\u0131pas\u0131 yaln\u0131z 'departure' i\xE7in";
+    }
+    switch (m.kind) {
+      case "departure":
+        return "'departure' yaln\u0131z 'abandon' ta\u015F\u0131yan flow \xE7\u0131pas\u0131nda";
+      case "empty":
+        return "'empty' yaln\u0131z 'lists' sorgusu \xE7\u0131pas\u0131nda";
+      case "blocked":
+        return "'blocked' dar s\u0131n\u0131ft\u0131r \u2014 yaln\u0131z tetik k\xFCmesindeki (red-guard'l\u0131 komut) \xE7\u0131pada";
+      case "provenance":
+        return "'provenance' yaln\u0131z \xFCretim-y\xFCzeyli, recipient'l\u0131 komutta";
+      default:
+        return `'${m.kind}' yaln\u0131z komut \xE7\u0131pas\u0131nda (sorgu/grant/revoke de\u011Fil)`;
+    }
+  }
+  /** T-3.2 — moment-YEREL denetimler: J4 (çözümsüz step-çıpası) + J5 (kind↔anchor-sınıfı)
+   *  + J6 (izin dışı yükümlülük) + J14-moment (yükümlülüksüz moment).
+   *  `offers path` hedefi gramerde CROSS-REF'tir ([PathTarget:ID] — operation∪flow
+   *  TEK ref-tipinde birleşik) → çözümsüzlüğü Langium linker error olarak düşer,
+   *  burada ek J4 kodu YOK (çift-hata yasağı; test 6.2 bu davranışı belgeler).
+   *  J5 düşen moment'e J6 YİNE uygulanır (tasarım: J12 uygulanmaz — o T-3.5). */
+  checkJourneyMoment(m, accept) {
+    const model = ast_utils_exports.getContainerOfType(m, isModel);
+    if (!model) return;
+    const resolved = this.resolveMomentAnchor(m);
+    if (resolved === "linker-silent") return;
+    if (resolved === "step-unresolved") {
+      const anchor = m.anchor;
+      const flowName = isStepAnchor(anchor) ? anchor.flow?.ref?.name ?? anchor.flow?.$refText ?? "?" : "?";
+      const stepName = isStepAnchor(anchor) ? anchor.step : "?";
+      accept(
+        "error",
+        `\xC7\xF6z\xFCms\xFCz \xE7\u0131pa: '${flowName}.${stepName}' \u2014 katalogda b\xF6yle bir operation/flow/step yok.`,
+        { node: anchor, property: "step", code: "journey.J4" }
+      );
+      return;
+    }
+    const unit = this.journeyUnit(model);
+    const comp = hesaplaTetikler(unit);
+    if (!anchorSinifiUyumlu(m.kind, resolved, unit, comp.triggers)) {
+      accept(
+        "error",
+        `'${m.kind}' bu \xE7\u0131pada ifade edilemez: ${this.j5Reason(m, resolved)} (\xF6r. empty yaln\u0131z 'lists' sorgusunda, departure yaln\u0131z 'abandon' ta\u015F\u0131yan flow'da).`,
+        { node: m, property: "kind", code: "journey.J5" }
+      );
+    }
+    const spec = JOURNEY_KIND_OBLIGATIONS[m.kind];
+    const izinli = [.../* @__PURE__ */ new Set([...spec.core, ...spec.allowed])];
+    for (const o of m.obligations ?? []) {
+      const key = obligationKeyOf(o);
+      if (key !== void 0 && !izinli.includes(key)) {
+        accept(
+          "error",
+          `'${key}' y\xFCk\xFCml\xFCl\xFC\u011F\xFC '${m.kind}' t\xFCr\xFCnde kullan\u0131lamaz \u2014 izinli k\xFCme: ${izinli.join(", ")} (\xA73.3).`,
+          { node: o, code: "journey.J6" }
+        );
+      }
+    }
+    if ((m.obligations ?? []).length === 0) {
+      accept(
+        "warning",
+        `Moment '${m.name}': hi\xE7 y\xFCk\xFCml\xFCl\xFCk yok \u2014 \xF6l\xFC bildirim (bo\u015F-rule emsali). T\xFCr\xFCn \xE7ekirde\u011Fini yaz ya da moment'i sil.`,
+        { node: m, property: "name", code: "journey.J14" }
+      );
+    }
+  }
+  /** T-3.4 — J17 (info): türetilebilir-discharge. Biçimsel predikat SAF olarak
+   *  journey-triggers'ta (derivedDischarge) — M4 aynı fonksiyonu emit'te tüketir.
+   *  empty/waiting tanım gereği hariç, note körü, tam-eşitlik (bkz. derivedDischarge).
+   *  Rapor katmanıdır: discharge'ı DÜŞÜRMEZ (C3: görünürlük, ceza değil), moment
+   *  yine COVERED sayılır. */
+  checkJourneyDerivedDischarge(m, accept) {
+    if (!derivedDischarge(m)) return;
+    accept(
+      "info",
+      `Moment '${m.name}': t\xFCretilebilir discharge \u2014 yaln\u0131z '${m.kind}' \xE7ekirde\u011Fini ta\u015F\u0131yor; mekanik doldurma olabilir, borcun i\xE7eri\u011Fi g\xF6zden ge\xE7irilmeli (raporda ayr\u0131ca listelenir).`,
+      { node: m, property: "name", code: "journey.J17" }
+    );
+  }
+  /** T-3.5 — J16 (error, fail-closed): journey AKTİFKEN komuttaki sınıfsız özel fiil.
+   *  Sınıfı bilinmeyen fiilin tetik kümesi hesaplanamaz — "hesaplanamayan kapı kapı
+   *  değildir" → error (§2.1 fail-closed). checkStandardCommand'ın D13 "bilinmeyen fiil"
+   *  uyarısından AYRIDIR (reconciliation B1): KNOWN_VERBS üyesi approves/rejects de
+   *  SINIFSIZDIR (KNOWN = HTTP-eşleme listesi, sınıf haritası DEĞİL). `like`'sız
+   *  `verb <ad>` beyanı da sınıf içermez → yine J16. Kapı KAPALIYKEN (journey yok)
+   *  HİÇ çalışmaz — journey'siz zemin bit-özdeş kalır (kısıt 2). Sorgu fiilleri
+   *  (reads/lists) girmez: sorgu türü fiilden kapalı türetilir (§3.2). */
+  checkJourneyVerbClass(cmd, accept) {
+    const model = ast_utils_exports.getContainerOfType(cmd, isModel);
+    if (!model || !this.journeyAktif(model)) return;
+    const op = ast_utils_exports.getContainerOfType(cmd, isOperationDecl);
+    if (!op) return;
+    if (operationKind(op) !== "command") return;
+    if (verbClass(op, this.journeyUnit(model)) !== null) return;
+    accept(
+      "error",
+      `Journey aktifken s\u0131n\u0131fs\u0131z \xF6zel fiil: '${cmd.verb}' \u2014 tetik k\xFCmesi hesaplanamaz (fail-closed). Bildir: 'verb ${cmd.verb} like creates|updates|deletes'.`,
+      { node: cmd, property: "verb", code: "journey.J16" }
+    );
+  }
+  /** T-3.5 — J12 (info): gönüllü moment. Sıralı karar (çift-diagnostik yok):
+   *  (1) çıpa çözümsüz → sus; (kind, çıpa) ∈ T → sus (zorunlu tetik — kapsama T-3.1'in işi).
+   *  (2) !anchorSinifiUyumlu → sus (J5 error'u T-3.2 basar; J12 üretme).
+   *  (3) tetiklenmemiş + sınıf-uyumlu → J12 (başka ayrım YOK).
+   *
+   *  KARAR-3 — J19 ERTELENDİ (computability; dev-docs/conceptual-decisions.md,
+   *  ADR-0044 kaydı T-6.2): J12 (gönüllü) ile J19 (tetik-düşmüş) tek model
+   *  fotoğrafında İLKESEL olarak ayırt edilemez — "eskiden tetikliyordu" TARİH
+   *  bilgisidir, validator'da tarih yoktur; herhangi bir statik vekil BAŞKA bir şeyi
+   *  J19 diye etiketler = yanlış sinyal. Bu yüzden J19 dalı YAZILMAZ ve `journey.J19`
+   *  kodu HİÇBİR YERDE üretilmez; tetiklenmemiş + sınıf-uyumlu HER moment J12'dir.
+   *  J19, versiyon-diff/fcdsl-bağı geldiğinde (T-6.2) yeniden değerlendirilir. */
+  checkJourneyVoluntary(m, accept) {
+    const model = ast_utils_exports.getContainerOfType(m, isModel);
+    if (!model || !this.journeyAktif(model)) return;
+    const resolved = this.resolveMomentAnchor(m);
+    if (resolved === "linker-silent" || resolved === "step-unresolved") return;
+    const unit = this.journeyUnit(model);
+    const comp = hesaplaTetikler(unit);
+    const anchorNode = resolved.type === "flow" ? resolved.flow : resolved.op;
+    if (comp.triggers.some((t) => t.kind === m.kind && t.anchor === anchorNode)) return;
+    if (!anchorSinifiUyumlu(m.kind, resolved, unit, comp.triggers)) return;
+    accept(
+      "info",
+      `G\xF6n\xFCll\xFC moment '${m.name}': (${m.kind}, ${anchorNode.name}) zorunlu tabanda de\u011Fil ama anchor-s\u0131n\u0131f\u0131 uyumlu \u2014 ge\xE7erli (taban zorunlu, tavan analist karar\u0131).`,
+      { node: m, property: "name", code: "journey.J12" }
+    );
+  }
+  /** T-3.5 — J21 (info: fiil-sınıfı beyan tablosu, Y3 teşhir) + J22 (info:
+   *  deneyimleyensiz düşen tetik, Y4 totallik). journey AKTİF değilse ∨ dokümanda
+   *  JourneyDef yoksa sus (rapor journey'yi barındıran dokümanda TEK kez basılır —
+   *  çift-rapor yok). */
+  checkJourneyReport(model, accept) {
+    if (!this.journeyAktif(model)) return;
+    const firstJourney = model.elements.find(isJourneyDef);
+    if (!firstJourney) return;
+    const unit = this.journeyUnit(model);
+    const verbDefs = [];
+    for (const vm of unit) for (const el of vm.elements) if (isVerbDef(el)) verbDefs.push(el);
+    let nC = 0, nU = 0, nD = 0, nX = 0;
+    const updatesList = [];
+    for (const v of verbDefs) {
+      if (v.klass === "creates") nC++;
+      else if (v.klass === "updates") {
+        nU++;
+        updatesList.push(v.name);
+      } else if (v.klass === "deletes") nD++;
+      else nX++;
+    }
+    accept(
+      "info",
+      `Fiil-s\u0131n\u0131f\u0131 beyan tablosu: ${verbDefs.length} \xF6zel fiil \u2014 creates: ${nC}, updates: ${nU}, deletes: ${nD}, beyans\u0131z: ${nX}. 'like updates' beyanl\u0131lar: ${updatesList.join(", ")} (\u2605 teyidi: bu eylemler i\xE7erik \xFCretiyor ya da yok ediyor mu?).`,
+      { node: firstJourney, property: "name", code: "journey.J21" }
+    );
+    for (const t of hesaplaTetikler(unit).droppedJ22) {
+      if (ast_utils_exports.getContainerOfType(t.anchor, isModel) !== model) continue;
+      accept(
+        "info",
+        `Deneyimleyensiz tetik d\xFC\u015F\xFCr\xFCld\xFC: (${t.kind}, ${t.anchor.name}) \u2014 hedef entity'yi hi\xE7bir insan-akt\xF6r y\xFCzeyi t\xFCketmiyor (g\xF6r\xFCn\xFCr d\xFC\u015Fme; olas\u0131 modelleme sorusu: t\xFCketicisiz-\xFCretilen kay\u0131t).`,
+        { node: t.anchor, property: "name", code: "journey.J22" }
+      );
+    }
+  }
+  /** Yapısal tek-eşitlik `<E.alan> = '<değer>'` çıkarımı (D2 filtresi ∧ kendini-mühürleme
+   *  where'i için ORTAK). Comparison değilse (and/or/complex), '=' değilse, RHS literal
+   *  değilse ya da sol yol (entity, alan)'a çözülmüyorsa → undefined (İDDİA YOK — sus).
+   *  Sol yol çözümü comparisonVerdict (journey-triggers) kalıbıyla AYNI: yalın alan →
+   *  bağlam entity'si, qualified → pathEntity. */
+  extractEqualityFilter(cond, ctxEntity, input) {
+    if (!isComparison(cond)) return void 0;
+    if (cond.op !== "=") return void 0;
+    if (!isStringValue(cond.right)) return void 0;
+    const segs = cond.left?.segments ?? [];
+    let e;
+    let f;
+    if (segs.length === 1) {
+      e = ctxEntity;
+      f = segs[0];
+    } else if (segs.length >= 2 && indexModel(input).entities.has(segs[0])) {
+      e = segs[0];
+      f = segs.slice(1).join(".");
+    }
+    if (!e || !f) return void 0;
+    return { entity: e, field: f, value: cond.right.value };
+  }
+  /** Bir flow'un TÜM adım op'ları — either dalları (flowItemsDeep) + include-kapanışı
+   *  (döngü korumalı, stageHasUnresolvedRef walk kalıbı). Çözülmeyen ref atlanır. */
+  flowStepOpsDeep(flow) {
+    const ops = [];
+    const seen = /* @__PURE__ */ new Set();
+    const walk = (f) => {
+      if (seen.has(f)) return;
+      seen.add(f);
+      for (const item of flowItemsDeep(f)) {
+        if (isFlowStep(item)) {
+          const op = item.target?.ref;
+          if (op) ops.push(op);
+        } else if (isIncludeStep(item)) {
+          const inc = item.target?.ref;
+          if (inc) walk(inc);
+        }
+      }
+    };
+    walk(flow);
+    return ops;
+  }
+  /** T-3.4 — J11 (warning): `empty` moment'inin `offers path` hedefi, listelenen
+   *  entity'nin üreticisi değil. D1 = üretim-yüzeyi tanımı; D2 = `only when
+   *  <alan>='X'` filtreli listede X'i atayan işlem. Çözümsüz ref / J5-uyumsuz çıpa /
+   *  çözülemeyen filtre → sus (çift-hata yasağı + fail-open warning katmanı, §3.3). */
+  checkJourneyEmptyPath(m, accept) {
+    if (m.kind !== "empty") return;
+    const model = ast_utils_exports.getContainerOfType(m, isModel);
+    if (!model) return;
+    const resolved = this.resolveMomentAnchor(m);
+    if (resolved === "linker-silent" || resolved === "step-unresolved") return;
+    if (resolved.type === "flow") return;
+    const anchorOp = resolved.op;
+    if (!isStandardCommand(anchorOp.command)) return;
+    if (anchorOp.command.verb !== "lists") return;
+    const E2 = anchorOp.command.resource?.ref?.name ?? anchorOp.command.resource?.$refText;
+    if (!E2) return;
+    const offers = (m.obligations ?? []).find(isOffersPath);
+    if (!offers) return;
+    const target2 = offers.target?.ref;
+    if (!target2) return;
+    const unit = this.journeyUnit(model);
+    const filters = [];
+    let complexFilter = false;
+    if (anchorOp.command.where) filters.push(anchorOp.command.where);
+    for (const clause of anchorOp.clauses ?? []) {
+      if (isWhenConstraint(clause)) filters.push(clause.condition);
+      else if (isIfConstraint(clause)) filters.push(clause.condition);
+      else if (isDuringConstraint(clause)) complexFilter = true;
+    }
+    let d2;
+    if (complexFilter) return;
+    if (filters.length === 1) {
+      d2 = this.extractEqualityFilter(filters[0], E2, unit);
+      if (!d2) return;
+    } else if (filters.length > 1) {
+      return;
+    }
+    const isProducer = (cand) => {
+      if (d2) {
+        return stateAssignmentsOf(cand, unit).some(
+          (a2) => a2.entity === d2.entity && a2.field === d2.field && a2.value === d2.value
+        );
+      }
+      return uretimYuzeyi(cand, unit) && uretilenKume(cand, unit).has(E2);
+    };
+    const producerFound = isFlowDef(target2) ? this.flowStepOpsDeep(target2).some(isProducer) : isProducer(target2);
+    if (!producerFound) {
+      accept(
+        "warning",
+        `'offers path ${target2.name}': '${E2}' listesini dolduran bir \xFCretici de\u011Fil \u2014 bo\u015F-durumda sunulan yol listeyi doldurabilmeli (D1/D2).`,
+        { node: m, property: "name", code: "journey.J11" }
+      );
+    }
+  }
+  /** Kök kendini mühürlüyor mu? AÇIK `where`-guard yapısal `<alan>='X'` ∧ kökün
+   *  `on success` (+clause) durum-ataması AYNI alana `'Y'` (Y≠X literal). requires-only
+   *  ∨ where'siz ∨ çözülemeyen where → undefined (mühür DEĞİL; iddia yok — §3.3-iii). */
+  rootSelfSeals(r, input) {
+    if (!isStandardCommand(r.command) || !r.command.where) return void 0;
+    const ctxEntity = r.command.resource?.ref?.name ?? r.command.resource?.$refText;
+    const eq2 = this.extractEqualityFilter(r.command.where, ctxEntity, input);
+    if (!eq2) return void 0;
+    for (const a2 of stateAssignmentsOf(r, input)) {
+      if (a2.entity === eq2.entity && a2.field === eq2.field && a2.value !== null && a2.value !== eq2.value) {
+        return { root: r.name, field: eq2.field, x: eq2.value, y: a2.value };
+      }
+    }
+    return void 0;
+  }
+  /** T-3.4 — J18 (warning): `allows retry` kök denetimi (Rev. 2 / C9, §3.3 üç şık).
+   *  Ön-kapı: kullanıcı-op çıpasında (¬arkaPlan) retry = aynı işlemin tekrarı → değerlendirilmez.
+   *  (i) arka-plan çıpa ∧ kullanıcı-kök YOK → warning; (ii) TÜM kökler kendini-mühürlüyor
+   *  → warning; ≥1 sağlam/requires-only kök → sus (iii, bilinçli fail-open). */
+  checkJourneyRetryRoot(m, accept) {
+    if (!(m.obligations ?? []).some(isAllowsRetry)) return;
+    const model = ast_utils_exports.getContainerOfType(m, isModel);
+    if (!model) return;
+    const resolved = this.resolveMomentAnchor(m);
+    if (resolved === "linker-silent" || resolved === "step-unresolved") return;
+    if (resolved.type === "flow") return;
+    const op = resolved.op;
+    const unit = this.journeyUnit(model);
+    const idx = reversePerformIndex(unit);
+    const performHedef = new Set(idx.keys());
+    if (!arkaPlan(op, performHedef)) return;
+    const roots = performRootsOf(op, unit, idx);
+    if (roots.length === 0) {
+      accept(
+        "warning",
+        `'allows retry' @ '${op.name}': perform-zincirinde yeniden \xE7a\u011Fr\u0131labilir kullan\u0131c\u0131-k\xF6k\xFC yok \u2014 retry borcu \xF6denemez.`,
+        { node: m, property: "name", code: "journey.J18" }
+      );
+      return;
+    }
+    const seals = roots.map((r) => this.rootSelfSeals(r, unit));
+    if (seals.every((s) => s !== void 0)) {
+      const first2 = seals.find((s) => s !== void 0);
+      accept(
+        "warning",
+        `'allows retry' @ '${op.name}': k\xF6k '${first2.root}' kendini m\xFCh\xFCrl\xFCyor (where ${first2.field}='${first2.x}' + ba\u015Far\u0131da ${first2.field}='${first2.y}') \u2014 ba\u015Far\u0131dan sonra ayn\u0131 kay\u0131tta yeniden \xE7a\u011Fr\u0131lamaz.`,
+        { node: m, property: "name", code: "journey.J18" }
+      );
+    }
+  }
+  /** T-3.2 — J14(journey, warning): ne moment ne waive içeren journey = ölü bildirim.
+   *  Yalnız-waive'li journey MEŞRU (kademeli benimseme, İ7) — J14 verilmez. */
+  checkJourneyDecl(j, accept) {
+    if ((j.moments ?? []).length === 0 && (j.waives ?? []).length === 0) {
+      accept(
+        "warning",
+        `Journey '${j.name}': ne moment ne waive i\xE7eriyor \u2014 \xF6l\xFC bildirim (yine de kap\u0131y\u0131 AKT\u0130VE eder ve t\xFCm tetikler J2 olur, \u01305).`,
+        { node: j, property: "name", code: "journey.J14" }
+      );
+    }
+  }
+  /** T-3.2 — moment-uzayı denetimleri (Model): J7 (error) + J15 (info).
+   *  Görünür kümedeki (journeyUnit) TÜM journey'lerin moment'leri
+   *  (kind, çözülmüş-çıpa-hedefi, kapsam) anahtarıyla gruplanır — kapsam:
+   *  operation-çıpa = global, step F.S = akış-yerel (FlowStep AST-kimliği),
+   *  flow = flow kimliği. Journey-GRUPLARI ARASI da sayılır (gruplama semantiksiz,
+   *  §3.1). Hedef karşılaştırması AD değil AST-kimliği (alias/dupe güvenli).
+   *  Çözülmeyen çıpa uzaya HİÇ girmez (linker/J4 zaten raporlar — çift-hata yok).
+   *  Diagnostik yalnız BU dokümandaki moment'lere yazılır.
+   *  journeyAktif kapısı YOK — moment zaten yalnız journey içinde yaşar. */
+  checkJourneyMomentSpace(model, accept) {
+    const entries = [];
+    for (const um of this.journeyUnit(model)) {
+      for (const el of um.elements) {
+        if (!isJourneyDef(el)) continue;
+        for (const m of el.moments ?? []) {
+          const a2 = m.anchor;
+          if (isOperationAnchor(a2)) {
+            const op = a2.op?.ref;
+            if (op) entries.push({ m, target: op, scope: "global", display: op.name, scopeEki: "" });
+          } else if (isFlowAnchor(a2)) {
+            const flow = a2.flow?.ref;
+            if (flow) entries.push({ m, target: flow, scope: "flow", display: flow.name, scopeEki: "" });
+          } else if (isStepAnchor(a2)) {
+            const flow = a2.flow?.ref;
+            if (!flow) continue;
+            const step = flowItemsDeep(flow).find((it) => isFlowStep(it) && it.name === a2.step);
+            if (!step) continue;
+            entries.push({
+              m,
+              target: step,
+              scope: "step",
+              display: `${flow.name}.${a2.step}`,
+              scopeEki: ` \u2014 ${flow.name} ak\u0131\u015F\u0131-yerel`,
+              stepFlowName: flow.name,
+              stepOp: step.target?.ref
+            });
+          }
+        }
+      }
+    }
+    const groups = /* @__PURE__ */ new Map();
+    for (const e of entries) {
+      const key = `${e.m.kind}|${e.scope}`;
+      let byTarget = groups.get(key);
+      if (!byTarget) {
+        byTarget = /* @__PURE__ */ new Map();
+        groups.set(key, byTarget);
+      }
+      const list = byTarget.get(e.target);
+      if (list) list.push(e);
+      else byTarget.set(e.target, [e]);
+    }
+    for (const byTarget of groups.values()) {
+      for (const list of byTarget.values()) {
+        for (let i = 1; i < list.length; i++) {
+          const e = list[i];
+          if (ast_utils_exports.getContainerOfType(e.m, isModel) !== model) continue;
+          accept(
+            "error",
+            `Ayn\u0131 (${e.m.kind}, ${e.display}${e.scopeEki}) i\xE7in ikinci moment: '${e.m.name}' \u2014 ilki: '${list[0].m.name}'. Tek tetik-noktas\u0131 tek moment'le cevaplan\u0131r.`,
+            { node: e.m, property: "name", code: "journey.J7" }
+          );
+        }
+      }
+    }
+    for (const e of entries) {
+      if (e.scope !== "step" || !e.stepOp) continue;
+      if (ast_utils_exports.getContainerOfType(e.m, isModel) !== model) continue;
+      const g = entries.find((x) => x.scope === "global" && x.m.kind === e.m.kind && x.target === e.stepOp);
+      if (g) {
+        accept(
+          "info",
+          `Step-moment '${e.m.name}', global '${g.m.name}' moment'ini '${e.stepFlowName}' ak\u0131\u015F\u0131 i\xE7inde \xF6zelle\u015Ftiriyor (\xA73.1).`,
+          { node: e.m, property: "name", code: "journey.J15" }
+        );
+      }
+    }
+  }
+  /** T-3.3 — waive-YEREL denetimler (§5 karar ağacı + kod-eksen kuralları):
+   *  until-biçim (error; CANLI süre değerlendirmesinin ön-koşulu — qa F2.2/İQ6 emsali)
+   *  · J10 (deferred ∧ until yok → error) · accepted-until (info — §5 tablo accepted satırı)
+   *  · J20 (bahane-kalıbı ∨ asgari-içerik → warning; qa F2.3/QA-19 emsali, TEK kaynak
+   *  src/shared/waive-excuse.ts). J9'un AYRI kodu YOK (tasarım §4.3: "error (J2 üzerinden)")
+   *  — süresi dolan waive'in tetiği yeniden açması checkJourneyCoverage +
+   *  kapsamaDegerlendir/isWaiveExpired'da yaşar (T-3.1); burada yalnız biçim denetlenir. */
+  checkJourneyWaive(w, accept) {
+    if (w.until !== void 0 && !journeyValidDate(w.until)) {
+      accept(
+        "error",
+        `'until' "YYYY-AA-GG" bi\xE7iminde olmal\u0131: '${w.until}'.`,
+        { node: w, property: "until", code: "journey.until-format" }
+      );
+    }
+    if (w.reason === "deferred" && !w.until) {
+      accept(
+        "error",
+        `'deferred' s\xFCreli erteleme demektir \u2014 'until "YYYY-AA-GG"' zorunlu (kal\u0131c\u0131ysa 'accepted' kullan\u0131n; \xA75 karar a\u011Fac\u0131).`,
+        { node: w, property: "reason", code: "journey.J10" }
+      );
+    }
+    if (w.reason === "accepted" && w.until !== void 0) {
+      accept(
+        "info",
+        `'accepted' kal\u0131c\u0131 karard\u0131r \u2014 'until' anlams\u0131z (s\xFCreliyse 'deferred').`,
+        { node: w, property: "until", code: "journey.accepted-until" }
+      );
+    }
+    const excuse = detectWaiveExcuse(w.because);
+    if (excuse) {
+      accept(
+        "warning",
+        `Waive gerek\xE7esi bahane-kal\u0131b\u0131 ta\u015F\u0131yor ('${excuse}') \u2014 'because' bir karar gerek\xE7esidir, erteleme niyeti de\u011Fil; s\xFCreliyse 'reason deferred until \u2026' kullan\u0131n (kapal\u0131 bahane-listesi; tam de\u011Fil).`,
+        { node: w, property: "because", code: "journey.J20" }
+      );
+    } else {
+      const n = (w.because ?? "").trim().length;
+      if (n < MIN_BECAUSE_LEN) {
+        accept(
+          "warning",
+          `Waive gerek\xE7esi asgari i\xE7eri\u011Fin alt\u0131nda (${n} karakter) \u2014 an\u0131n neden momentsiz kald\u0131\u011F\u0131n\u0131 bir denet\xE7inin anlayaca\u011F\u0131 somutlukta yaz.`,
+          { node: w, property: "because", code: "journey.J20" }
+        );
+      }
+    }
+  }
+  /** T-3.3 — J8 (warning, Model): görünür kümede aynı (kind, çözülmüş-çıpa, kapsam) için
+   *  HEM (çekirdek-durumu-ne-olursa-olsun) bir moment HEM waive → çelişki. Diagnostik yalnız
+   *  BU dokümandaki WAIVE node'una (kapsamada moment öncelikli — kapsamaDegerlendir sırası;
+   *  waive ölü, qa emsali). Çözümsüz çıpa ref'i uzaya HİÇ girmez (linker/J4 zaten raporlar —
+   *  çift-hata yasağı). Hedef karşılaştırması AD değil AST-kimliği (checkJourneyMomentSpace
+   *  emsali); kapsam: operation=global, step=akış-yerel, flow=flow. */
+  checkJourneyWaiveConflicts(model, accept) {
+    const resolve2 = (anchor) => {
+      if (!anchor) return void 0;
+      if (isOperationAnchor(anchor)) {
+        const op = anchor.op?.ref;
+        return op ? { target: op, scope: "global", display: op.name, scopeEki: "" } : void 0;
+      }
+      if (isFlowAnchor(anchor)) {
+        const flow = anchor.flow?.ref;
+        return flow ? { target: flow, scope: "flow", display: flow.name, scopeEki: "" } : void 0;
+      }
+      if (isStepAnchor(anchor)) {
+        const flow = anchor.flow?.ref;
+        if (!flow) return void 0;
+        const step = flowItemsDeep(flow).find((it) => isFlowStep(it) && it.name === anchor.step);
+        return step ? {
+          target: step,
+          scope: "step",
+          display: `${flow.name}.${anchor.step}`,
+          scopeEki: ` \u2014 ${flow.name} ak\u0131\u015F\u0131-yerel`
+        } : void 0;
+      }
+      return void 0;
+    };
+    const groups = /* @__PURE__ */ new Map();
+    const slotFor = (kind, r) => {
+      const key = `${kind}|${r.scope}`;
+      let byTarget = groups.get(key);
+      if (!byTarget) {
+        byTarget = /* @__PURE__ */ new Map();
+        groups.set(key, byTarget);
+      }
+      let slot = byTarget.get(r.target);
+      if (!slot) {
+        slot = { moments: [], waives: [], display: r.display, scopeEki: r.scopeEki };
+        byTarget.set(r.target, slot);
+      }
+      return slot;
+    };
+    for (const um of this.journeyUnit(model)) {
+      for (const el of um.elements) {
+        if (!isJourneyDef(el)) continue;
+        for (const m of el.moments ?? []) {
+          const r = resolve2(m.anchor);
+          if (r) slotFor(m.kind, r).moments.push(m);
+        }
+        for (const w of el.waives ?? []) {
+          const r = resolve2(w.anchor);
+          if (r) slotFor(w.kind, r).waives.push(w);
+        }
+      }
+    }
+    for (const [key, byTarget] of groups) {
+      const kind = key.slice(0, key.indexOf("|"));
+      for (const slot of byTarget.values()) {
+        if (slot.moments.length === 0) continue;
+        for (const w of slot.waives) {
+          if (ast_utils_exports.getContainerOfType(w, isModel) !== model) continue;
+          accept(
+            "warning",
+            `(${kind}, ${slot.display}${slot.scopeEki}) hem moment ('${slot.moments[0].name}') hem waive ta\u015F\u0131yor \u2014 \xE7eli\u015Fki: kapsamada moment \xF6ncelikli, waive \xF6l\xFC (qa emsali). Birini kald\u0131r\u0131n.`,
+            { node: w, property: "kind", code: "journey.J8" }
+          );
+        }
       }
     }
   }

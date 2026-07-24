@@ -26,7 +26,7 @@ DSL'ini** (`.cdsl`) üretir; tech DSL (`.tcdsl`) bu skill'in konusu değildir.
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `29314388e3fe` · commit `0c5072b`+ADR-0042 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar. Bu turdaki değişim M4-01'dir (business v1.3.0, P2 opt-in): `relation`'a opsiyonel `inherited` bayrağı eklendi — bayrak varken ownership aktör-eşleşmesi kaynak aktörün `extends` soy-zincirini de kabul eder; bayrak yoksa davranış birebir kimlik (kalıtım asla ima edilmez). `operations.json` relation kaydı additive `inherited: boolean` alanı kazandı. (Önceki tur: ADR-0042 K1 — business rule = isim + `note`; yapısal predikat tech'te realize edilir.)
+> **Snapshot:** grammar `8ad0263172c7` · commit `72b4298`+ADR-0044 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar. Bu turdaki değişim journey katmanıdır (business v1.4.0, ADR-0044): `command-dsl.langium`'a üst-düzey `journey` construct'ı + `moment`/`waive` bildirimleri + kapalı yükümlülük/kind/reason dağarcıkları + özel-fiil `like` sınıf-eki eklendi; `operations.json` additive `journeys[]` + `coverage.journey` kazandı (mevcut alanların şekli/union'ı DEĞİŞMEDİ, meta.schemaVersion 3 korunur). (Önceki tur: M4-01 business v1.3.0, P2 opt-in — `relation`'a opsiyonel `inherited` bayrağı.)
 
 Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate) — riski soyut değil **"Atlanırsa"** kolonundaki adıyla teşhir et. Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
 
@@ -425,3 +425,62 @@ Emit: `outcome` → `operations.json` `successCriteria[]` (measures + covers + n
 `body: null` + `reads: []` + `note` dolu yayınlar, legacy `satisfies`'lı rule
 ExprNode gövdesini taşımaya devam eder (business v1.2.0); op'taki `requires` →
 op'un `guards[]`'ında `{kind:'rule', ref}`.
+
+## Journey katmanı — deneyim borcu (business v1.4.0, ADR-0044)
+
+`journey`, business modeline eklenen üst-düzey bir **deneyim-borcu** katmanıdır: "sistem ne yapar"ın (operation/flow/process) yanına, "bu anda kullanıcıya ne borçluyuz"u authored + kapı-denetimli biçimde koyar. Referans-only'dir — hiçbir şey TANIMLAMAZ; var olan operation/flow/step'lere ID ile tutunur. Serbest metin YALNIZ `note """…"""` ve waive `because """…"""` içindedir.
+
+### `journey` bloğu
+```
+journey <Ad> {
+    moment ...
+    waive ...
+}
+```
+Bir `journey`, `moment` ve `waive` bildirimlerini toplar. `journey` yalın ID olamaz (rezerve).
+
+### Özel fiil sınıfı — `verb <ad> like <sınıf>`
+`like`, bir özel fiilin tetik-cebiri **sınıfını** beyan eden bağlamsal keyword'dür: `creates` (üretim), `updates` (nötr), `deletes` (yıkım). Sınıfsız fiil geçerlidir; ama journey AKTİFKEN sınıfsız özel fiil J16 error verir. `like` yalın ID olarak yaşamaya devam eder (yalnız fiil ADI olarak `like` önerilmez).
+
+### `moment` — borcu ödeyen authored karar
+```
+moment <Ad> for <kind> at <anchor> { <yükümlülük>* }
+```
+Bir tetik-noktasındaki deneyim borcunu bir **yükümlülük kümesiyle** karşılayan authored karar. `<anchor>` = var olan operation/flow/step ID'si.
+
+**8 tür (`kind`, kapalı dağarcık):**
+- `empty` — bir lists/sorgu sonucu boş olabilir (kullanıcı çıkışsız kalır).
+- `blocked` — eylem guard/önkoşulla engellenir.
+- `waiting` — kullanıcının sessizce beklediği arka-plan/asenkron iş.
+- `failure` — çalışma-anı başarısızlığı.
+- `mutation` — durum-değiştiren yazma (nötr).
+- `irreversible` — geri-alınamaz/yıkıcı değişiklik (uyarısız veri kaybı).
+- `departure` — bir akıştan ayrılma/terk.
+- `provenance` — kaynağı/menşei açıklanması gereken veri.
+
+**9 yükümlülük (kapalı; argüman YALNIZ `offers path`'te):**
+- `explains cause` — nedeni açıklar (ör. neden engellendi).
+- `offers path <ID>` — var olan bir operation/flow'a giden yol sunar.
+- `preserves input` — kullanıcının girdiğini korur.
+- `preserves progress` — kısmi ilerlemeyi korur.
+- `shows progress` — ilerleme gösterir (waiting için).
+- `signals completion` — tamamlanmayı bildirir.
+- `allows retry` — başarısız eylemi yeniden denemeye izin verir.
+- `warns loss` — geri-alınamaz eylem öncesi veri kaybını uyarır.
+- `discloses origin` — verinin menşeini açıklar.
+
+### `waive` — gerekçeli kapatma
+```
+waive <kind> at <anchor> reason <kod> [until "YYYY-AA-GG"] because """…"""
+```
+Bir tetik-noktasını moment yerine **gerekçeyle** kapatır. `reason` kapalı koddur (makine-görünür); `until` opsiyonel son-tarihtir; `because` ZORUNLU serbest-metin gerekçedir.
+
+**5 gerekçe kodu (`reason`, kapalı):**
+- `unreachable` — tetik-noktası statik olarak ulaşılamaz.
+- `inherent` — borç kullanıcının kendi eyleminden türer (ayrıca ödenmez).
+- `generic-policy` — genel bir sistem politikasıyla kapsanır.
+- `accepted` — bilinçle kabul edilmiş boşluk/risk.
+- `deferred` — sonraki iterasyona ertelendi (kademeli-benimseme yolu).
+
+### Kapı ilkesi (strict)
+Her tetik-noktası ya bir `moment` ya gerekçeli bir `waive` ile kapanır — kapsanmamış tetik = error (üçüncü hâl yok). Kapı, borcun ÖDENDİĞİNİ değil, her tetikte **authored bir kararın alındığını** garanti eder.
