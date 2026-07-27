@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "a92992c2d968", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "3a48fde", builtAt: "2026-07-25T01:11:14+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "b7ece23c2f90", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "3a48fde", builtAt: "2026-07-25T01:11:14+03:00", langium: "4.2.4" };
   }
 });
 
@@ -20377,8 +20377,8 @@ var Set_default = Set2;
 
 // node_modules/lodash-es/_WeakMap.js
 init_define_BUILD_INFO();
-var WeakMap = getNative_default(root_default, "WeakMap");
-var WeakMap_default = WeakMap;
+var WeakMap2 = getNative_default(root_default, "WeakMap");
+var WeakMap_default = WeakMap2;
 
 // node_modules/lodash-es/_getTag.js
 var mapTag3 = "[object Map]";
@@ -31939,6 +31939,7 @@ init_define_BUILD_INFO();
 init_define_BUILD_INFO();
 var ActionComponent = {
   $type: "ActionComponent",
+  decorations: "decorations",
   mech: "mech",
   members: "members",
   name: "name",
@@ -32083,6 +32084,7 @@ var DetailComponent = {
   $type: "DetailComponent",
   alias: "alias",
   bind: "bind",
+  decorations: "decorations",
   mech: "mech",
   members: "members",
   refreshable: "refreshable"
@@ -32183,6 +32185,7 @@ var FormComponent = {
   $type: "FormComponent",
   alias: "alias",
   bind: "bind",
+  decorations: "decorations",
   mech: "mech",
   members: "members"
 };
@@ -32263,6 +32266,7 @@ var ListComponent = {
   $type: "ListComponent",
   alias: "alias",
   bind: "bind",
+  decorations: "decorations",
   mech: "mech",
   members: "members",
   pagination: "pagination",
@@ -32371,6 +32375,7 @@ function isRefreshAction(item) {
 var Region = {
   $type: "Region",
   attrs: "attrs",
+  decorations: "decorations",
   items: "items",
   name: "name"
 };
@@ -32551,6 +32556,7 @@ var ValueComponent = {
   $type: "ValueComponent",
   alias: "alias",
   bind: "bind",
+  decorations: "decorations",
   mech: "mech"
 };
 function isValueComponent(item) {
@@ -32576,6 +32582,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
     ActionComponent: {
       name: ActionComponent.$type,
       properties: {
+        decorations: {
+          name: ActionComponent.decorations,
+          defaultValue: []
+        },
         mech: {
           name: ActionComponent.mech
         },
@@ -32836,6 +32846,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
         bind: {
           name: DetailComponent.bind
         },
+        decorations: {
+          name: DetailComponent.decorations,
+          defaultValue: []
+        },
         mech: {
           name: DetailComponent.mech
         },
@@ -33030,6 +33044,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
         bind: {
           name: FormComponent.bind
         },
+        decorations: {
+          name: FormComponent.decorations,
+          defaultValue: []
+        },
         mech: {
           name: FormComponent.mech
         },
@@ -33157,6 +33175,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
         },
         bind: {
           name: ListComponent.bind
+        },
+        decorations: {
+          name: ListComponent.decorations,
+          defaultValue: []
         },
         mech: {
           name: ListComponent.mech
@@ -33351,6 +33373,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
       properties: {
         attrs: {
           name: Region.attrs,
+          defaultValue: []
+        },
+        decorations: {
+          name: Region.decorations,
           defaultValue: []
         },
         items: {
@@ -33671,6 +33697,10 @@ var FrontendDslAstReflection = class extends AbstractAstReflection {
         bind: {
           name: ValueComponent.bind
         },
+        decorations: {
+          name: ValueComponent.decorations,
+          defaultValue: []
+        },
         mech: {
           name: ValueComponent.mech
         }
@@ -33779,7 +33809,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@11"
+                "$ref": "#/rules@12"
               },
               "arguments": []
             },
@@ -33792,7 +33822,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@17"
+                "$ref": "#/rules@18"
               },
               "arguments": []
             },
@@ -33820,7 +33850,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -33839,7 +33869,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -33870,7 +33900,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -33898,7 +33928,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -33914,7 +33944,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34038,7 +34068,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34054,7 +34084,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34100,7 +34130,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -34112,7 +34142,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@72"
+                "$ref": "#/rules@73"
               },
               "arguments": []
             }
@@ -34143,6 +34173,26 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
     },
     {
       "$type": "ParserRule",
+      "fragment": true,
+      "name": "Decorated",
+      "definition": {
+        "$type": "Assignment",
+        "feature": "decorations",
+        "operator": "+=",
+        "terminal": {
+          "$type": "RuleCall",
+          "rule": {
+            "$ref": "#/rules@8"
+          },
+          "arguments": []
+        },
+        "cardinality": "*"
+      },
+      "entry": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
       "name": "Annotation",
       "definition": {
         "$type": "Group",
@@ -34158,7 +34208,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34174,7 +34224,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34196,7 +34246,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@8"
+                        "$ref": "#/rules@9"
                       },
                       "arguments": []
                     }
@@ -34215,7 +34265,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@8"
+                            "$ref": "#/rules@9"
                           },
                           "arguments": []
                         }
@@ -34252,7 +34302,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34303,7 +34353,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@10"
+                    "$ref": "#/rules@11"
                   },
                   "arguments": []
                 }
@@ -34322,7 +34372,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@10"
+                        "$ref": "#/rules@11"
                       },
                       "arguments": []
                     }
@@ -34359,7 +34409,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -34381,7 +34431,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -34393,7 +34443,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@73"
                   },
                   "arguments": []
                 }
@@ -34405,7 +34455,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -34439,7 +34489,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@12"
+                "$ref": "#/rules@13"
               },
               "arguments": []
             },
@@ -34464,6 +34514,13 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
+              "$ref": "#/rules@15"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
               "$ref": "#/rules@14"
             },
             "arguments": []
@@ -34471,14 +34528,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@13"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@24"
+              "$ref": "#/rules@25"
             },
             "arguments": []
           }
@@ -34505,7 +34555,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34524,7 +34574,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@15"
+                    "$ref": "#/rules@16"
                   },
                   "arguments": []
                 }
@@ -34543,7 +34593,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@15"
+                        "$ref": "#/rules@16"
                       },
                       "arguments": []
                     }
@@ -34599,7 +34649,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34623,7 +34673,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -34659,7 +34709,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@15"
+                        "$ref": "#/rules@16"
                       },
                       "arguments": []
                     }
@@ -34678,7 +34728,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@15"
+                            "$ref": "#/rules@16"
                           },
                           "arguments": []
                         }
@@ -34736,7 +34786,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@15"
+                        "$ref": "#/rules@16"
                       },
                       "arguments": []
                     }
@@ -34755,7 +34805,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@15"
+                            "$ref": "#/rules@16"
                           },
                           "arguments": []
                         }
@@ -34791,7 +34841,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@16"
+                    "$ref": "#/rules@17"
                   },
                   "arguments": []
                 }
@@ -34810,7 +34860,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@16"
+                        "$ref": "#/rules@17"
                       },
                       "arguments": []
                     }
@@ -34844,7 +34894,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34863,7 +34913,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -34931,7 +34981,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -34958,7 +35008,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -34977,7 +35027,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@70"
+                        "$ref": "#/rules@71"
                       },
                       "arguments": []
                     }
@@ -35034,12 +35084,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@24"
+                    "$ref": "#/rules@25"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -35057,7 +35107,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@18"
+                "$ref": "#/rules@19"
               },
               "arguments": []
             },
@@ -35082,6 +35132,13 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
+              "$ref": "#/rules@15"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
               "$ref": "#/rules@14"
             },
             "arguments": []
@@ -35089,28 +35146,28 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@13"
+              "$ref": "#/rules@20"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@19"
+              "$ref": "#/rules@22"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@21"
+              "$ref": "#/rules@25"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@24"
+              "$ref": "#/rules@55"
             },
             "arguments": []
           },
@@ -35124,14 +35181,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@53"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@51"
+              "$ref": "#/rules@52"
             },
             "arguments": []
           }
@@ -35158,7 +35208,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@16"
+                "$ref": "#/rules@17"
               },
               "arguments": []
             }
@@ -35170,7 +35220,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@20"
+                "$ref": "#/rules@21"
               },
               "arguments": []
             }
@@ -35212,12 +35262,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@24"
+                    "$ref": "#/rules@25"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -35242,7 +35292,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@32"
+                            "$ref": "#/rules@33"
                           },
                           "arguments": []
                         }
@@ -35261,7 +35311,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                             "terminal": {
                               "$type": "RuleCall",
                               "rule": {
-                                "$ref": "#/rules@32"
+                                "$ref": "#/rules@33"
                               },
                               "arguments": []
                             }
@@ -35302,7 +35352,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -35340,7 +35390,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -35404,14 +35454,14 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@22"
+              "$ref": "#/rules@23"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@23"
+              "$ref": "#/rules@24"
             },
             "arguments": []
           }
@@ -35448,7 +35498,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -35467,7 +35517,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -35489,7 +35539,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@58"
                   },
                   "arguments": []
                 }
@@ -35520,7 +35570,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -35536,7 +35586,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@57"
+                "$ref": "#/rules@58"
               },
               "arguments": []
             }
@@ -35554,17 +35604,11 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
         "$type": "Group",
         "elements": [
           {
-            "$type": "Assignment",
-            "feature": "decorations",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@7"
-              },
-              "arguments": []
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
             },
-            "cardinality": "*"
+            "arguments": []
           },
           {
             "$type": "Keyword",
@@ -35577,7 +35621,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -35596,7 +35640,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@25"
+                    "$ref": "#/rules@26"
                   },
                   "arguments": []
                 }
@@ -35615,7 +35659,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@25"
+                        "$ref": "#/rules@26"
                       },
                       "arguments": []
                     }
@@ -35637,7 +35681,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             },
@@ -35657,7 +35701,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -35676,7 +35720,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@26"
+                "$ref": "#/rules@27"
               },
               "arguments": []
             },
@@ -35702,7 +35746,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
         "terminal": {
           "$type": "RuleCall",
           "rule": {
-            "$ref": "#/rules@70"
+            "$ref": "#/rules@71"
           },
           "arguments": []
         }
@@ -35720,28 +35764,28 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@27"
+              "$ref": "#/rules@28"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@51"
+              "$ref": "#/rules@52"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@48"
+              "$ref": "#/rules@49"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@21"
+              "$ref": "#/rules@22"
             },
             "arguments": []
           }
@@ -35762,13 +35806,20 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "value": "region"
           },
           {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
+            },
+            "arguments": []
+          },
+          {
             "$type": "Assignment",
             "feature": "name",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -35790,7 +35841,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@28"
+                        "$ref": "#/rules@29"
                       },
                       "arguments": []
                     }
@@ -35809,7 +35860,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@28"
+                            "$ref": "#/rules@29"
                           },
                           "arguments": []
                         }
@@ -35838,7 +35889,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@29"
+                "$ref": "#/rules@30"
               },
               "arguments": []
             },
@@ -35954,14 +36005,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@27"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@33"
+              "$ref": "#/rules@28"
             },
             "arguments": []
           },
@@ -35982,28 +36026,35 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@38"
+              "$ref": "#/rules@36"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@45"
+              "$ref": "#/rules@39"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@47"
+              "$ref": "#/rules@46"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@9"
+              "$ref": "#/rules@48"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@10"
             },
             "arguments": []
           }
@@ -36051,12 +36102,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@14"
+                "$ref": "#/rules@15"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@71"
                 },
                 "arguments": []
               },
@@ -36081,7 +36132,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@32"
+                        "$ref": "#/rules@33"
                       },
                       "arguments": []
                     }
@@ -36100,7 +36151,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@32"
+                            "$ref": "#/rules@33"
                           },
                           "arguments": []
                         }
@@ -36140,7 +36191,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -36159,7 +36210,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@57"
+                "$ref": "#/rules@58"
               },
               "arguments": []
             }
@@ -36181,13 +36232,20 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "value": "list"
           },
           {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
+            },
+            "arguments": []
+          },
+          {
             "$type": "Assignment",
             "feature": "bind",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@31"
+                "$ref": "#/rules@32"
               },
               "arguments": []
             }
@@ -36206,7 +36264,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -36221,7 +36279,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@30"
+                "$ref": "#/rules@31"
               },
               "arguments": []
             },
@@ -36279,7 +36337,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@36"
+                    "$ref": "#/rules@37"
                   },
                   "arguments": []
                 },
@@ -36309,13 +36367,20 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "value": "detail"
           },
           {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
+            },
+            "arguments": []
+          },
+          {
             "$type": "Assignment",
             "feature": "bind",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@31"
+                "$ref": "#/rules@32"
               },
               "arguments": []
             }
@@ -36334,7 +36399,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -36349,7 +36414,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@30"
+                "$ref": "#/rules@31"
               },
               "arguments": []
             },
@@ -36379,7 +36444,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@36"
+                    "$ref": "#/rules@37"
                   },
                   "arguments": []
                 },
@@ -36409,13 +36474,20 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "value": "value"
           },
           {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
+            },
+            "arguments": []
+          },
+          {
             "$type": "Assignment",
             "feature": "bind",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@31"
+                "$ref": "#/rules@32"
               },
               "arguments": []
             }
@@ -36434,7 +36506,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -36449,7 +36521,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@30"
+                "$ref": "#/rules@31"
               },
               "arguments": []
             },
@@ -36470,28 +36542,28 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@37"
+              "$ref": "#/rules@38"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@51"
+              "$ref": "#/rules@52"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@48"
+              "$ref": "#/rules@49"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@45"
+              "$ref": "#/rules@46"
             },
             "arguments": []
           }
@@ -36518,12 +36590,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@15"
+                "$ref": "#/rules@16"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@71"
                 },
                 "arguments": []
               },
@@ -36545,12 +36617,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@15"
+                    "$ref": "#/rules@16"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -36578,13 +36650,20 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "value": "form"
           },
           {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
+            },
+            "arguments": []
+          },
+          {
             "$type": "Assignment",
             "feature": "bind",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@31"
+                "$ref": "#/rules@32"
               },
               "arguments": []
             }
@@ -36603,7 +36682,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -36618,7 +36697,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@30"
+                "$ref": "#/rules@31"
               },
               "arguments": []
             },
@@ -36635,7 +36714,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@39"
+                "$ref": "#/rules@40"
               },
               "arguments": []
             },
@@ -36660,13 +36739,6 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@40"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@41"
             },
             "arguments": []
@@ -36674,7 +36746,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@43"
+              "$ref": "#/rules@42"
             },
             "arguments": []
           },
@@ -36688,7 +36760,14 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@19"
+              "$ref": "#/rules@45"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@20"
             },
             "arguments": []
           }
@@ -36719,7 +36798,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@31"
+                "$ref": "#/rules@32"
               },
               "arguments": []
             }
@@ -36737,17 +36816,11 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
         "$type": "Group",
         "elements": [
           {
-            "$type": "Assignment",
-            "feature": "decorations",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@7"
-              },
-              "arguments": []
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
             },
-            "cardinality": "*"
+            "arguments": []
           },
           {
             "$type": "Keyword",
@@ -36760,12 +36833,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@15"
+                "$ref": "#/rules@16"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@71"
                 },
                 "arguments": []
               },
@@ -36790,7 +36863,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@42"
+                        "$ref": "#/rules@43"
                       },
                       "arguments": []
                     }
@@ -36809,7 +36882,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@42"
+                            "$ref": "#/rules@43"
                           },
                           "arguments": []
                         }
@@ -36885,7 +36958,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@73"
                   },
                   "arguments": []
                 }
@@ -36917,7 +36990,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@73"
                   },
                   "arguments": []
                 }
@@ -36949,7 +37022,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -36979,7 +37052,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -36995,7 +37068,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@41"
+                "$ref": "#/rules@42"
               },
               "arguments": []
             },
@@ -37028,7 +37101,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@57"
+                "$ref": "#/rules@58"
               },
               "arguments": []
             }
@@ -37050,13 +37123,20 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "value": "action"
           },
           {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
+            },
+            "arguments": []
+          },
+          {
             "$type": "Assignment",
             "feature": "name",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -37068,7 +37148,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@30"
+                "$ref": "#/rules@31"
               },
               "arguments": []
             },
@@ -37092,12 +37172,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@24"
+                    "$ref": "#/rules@25"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -37122,7 +37202,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@32"
+                            "$ref": "#/rules@33"
                           },
                           "arguments": []
                         }
@@ -37141,7 +37221,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                             "terminal": {
                               "$type": "RuleCall",
                               "rule": {
-                                "$ref": "#/rules@32"
+                                "$ref": "#/rules@33"
                               },
                               "arguments": []
                             }
@@ -37176,7 +37256,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 },
@@ -37226,7 +37306,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@58"
                   },
                   "arguments": []
                 }
@@ -37259,7 +37339,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 },
@@ -37296,12 +37376,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@14"
+                    "$ref": "#/rules@15"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -37323,12 +37403,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@14"
+                        "$ref": "#/rules@15"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@70"
+                          "$ref": "#/rules@71"
                         },
                         "arguments": []
                       },
@@ -37366,12 +37446,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@21"
+                    "$ref": "#/rules@22"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -37390,7 +37470,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@58"
                   },
                   "arguments": []
                 }
@@ -37400,7 +37480,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@19"
+              "$ref": "#/rules@20"
             },
             "arguments": []
           }
@@ -37423,7 +37503,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@7"
+                "$ref": "#/rules@8"
               },
               "arguments": []
             }
@@ -37435,7 +37515,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@31"
+                "$ref": "#/rules@32"
               },
               "arguments": []
             },
@@ -37464,7 +37544,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@49"
+                "$ref": "#/rules@50"
               },
               "arguments": []
             }
@@ -37486,7 +37566,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@50"
+                        "$ref": "#/rules@51"
                       },
                       "arguments": []
                     },
@@ -37512,7 +37592,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@50"
+                        "$ref": "#/rules@51"
                       },
                       "arguments": []
                     }
@@ -37605,7 +37685,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@70"
+                        "$ref": "#/rules@71"
                       },
                       "arguments": []
                     }
@@ -37658,7 +37738,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@72"
+                    "$ref": "#/rules@73"
                   },
                   "arguments": []
                 }
@@ -37728,12 +37808,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@14"
+                    "$ref": "#/rules@15"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -37755,12 +37835,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@14"
+                        "$ref": "#/rules@15"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@70"
+                          "$ref": "#/rules@71"
                         },
                         "arguments": []
                       },
@@ -37794,12 +37874,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@24"
+                    "$ref": "#/rules@25"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -37824,7 +37904,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@32"
+                            "$ref": "#/rules@33"
                           },
                           "arguments": []
                         }
@@ -37843,7 +37923,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                             "terminal": {
                               "$type": "RuleCall",
                               "rule": {
-                                "$ref": "#/rules@32"
+                                "$ref": "#/rules@33"
                               },
                               "arguments": []
                             }
@@ -37884,12 +37964,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@21"
+                    "$ref": "#/rules@22"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -37908,7 +37988,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@58"
                   },
                   "arguments": []
                 }
@@ -37944,12 +38024,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@14"
+                    "$ref": "#/rules@15"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -37971,12 +38051,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@14"
+                        "$ref": "#/rules@15"
                       },
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@70"
+                          "$ref": "#/rules@71"
                         },
                         "arguments": []
                       },
@@ -38014,7 +38094,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -38082,7 +38162,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@52"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             },
@@ -38125,7 +38205,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -38153,7 +38233,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@71"
+                    "$ref": "#/rules@72"
                   },
                   "arguments": []
                 }
@@ -38181,7 +38261,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -38209,7 +38289,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -38239,12 +38319,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@24"
+                "$ref": "#/rules@25"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@71"
                 },
                 "arguments": []
               },
@@ -38263,12 +38343,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@24"
+                "$ref": "#/rules@25"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@71"
                 },
                 "arguments": []
               },
@@ -38299,7 +38379,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -38327,7 +38407,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -38353,12 +38433,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@24"
+                "$ref": "#/rules@25"
               },
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@70"
+                  "$ref": "#/rules@71"
                 },
                 "arguments": []
               },
@@ -38380,12 +38460,12 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@24"
+                    "$ref": "#/rules@25"
                   },
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@70"
+                      "$ref": "#/rules@71"
                     },
                     "arguments": []
                   },
@@ -38434,7 +38514,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@58"
+          "$ref": "#/rules@59"
         },
         "arguments": []
       },
@@ -38451,7 +38531,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@59"
+              "$ref": "#/rules@60"
             },
             "arguments": []
           },
@@ -38483,7 +38563,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@59"
+                    "$ref": "#/rules@60"
                   },
                   "arguments": []
                 }
@@ -38506,7 +38586,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@60"
+              "$ref": "#/rules@61"
             },
             "arguments": []
           },
@@ -38538,7 +38618,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@60"
+                    "$ref": "#/rules@61"
                   },
                   "arguments": []
                 }
@@ -38565,7 +38645,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@64"
               },
               "arguments": []
             }
@@ -38617,7 +38697,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@63"
+                        "$ref": "#/rules@64"
                       },
                       "arguments": []
                     }
@@ -38646,14 +38726,14 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                         {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@61"
+                            "$ref": "#/rules@62"
                           },
                           "arguments": []
                         },
                         {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@68"
+                            "$ref": "#/rules@69"
                           },
                           "arguments": []
                         }
@@ -38688,7 +38768,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@62"
+                "$ref": "#/rules@63"
               },
               "arguments": []
             }
@@ -38707,7 +38787,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@62"
+                    "$ref": "#/rules@63"
                   },
                   "arguments": []
                 }
@@ -38738,7 +38818,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -38750,7 +38830,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -38762,7 +38842,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@72"
+                "$ref": "#/rules@73"
               },
               "arguments": []
             }
@@ -38782,7 +38862,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@64"
+              "$ref": "#/rules@65"
             },
             "arguments": []
           },
@@ -38823,7 +38903,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@64"
+                    "$ref": "#/rules@65"
                   },
                   "arguments": []
                 }
@@ -38846,7 +38926,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@65"
+              "$ref": "#/rules@66"
             },
             "arguments": []
           },
@@ -38887,7 +38967,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@65"
+                    "$ref": "#/rules@66"
                   },
                   "arguments": []
                 }
@@ -38917,7 +38997,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@57"
+                  "$ref": "#/rules@58"
                 },
                 "arguments": []
               },
@@ -38930,13 +39010,6 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@66"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@67"
             },
             "arguments": []
@@ -38944,14 +39017,21 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@69"
+              "$ref": "#/rules@68"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@68"
+              "$ref": "#/rules@70"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@69"
             },
             "arguments": []
           }
@@ -38987,7 +39067,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@69"
               },
               "arguments": []
             }
@@ -39011,7 +39091,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -39030,7 +39110,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@57"
+                    "$ref": "#/rules@58"
                   },
                   "arguments": []
                 }
@@ -39049,7 +39129,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@57"
+                        "$ref": "#/rules@58"
                       },
                       "arguments": []
                     }
@@ -39083,7 +39163,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -39102,7 +39182,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@70"
+                    "$ref": "#/rules@71"
                   },
                   "arguments": []
                 }
@@ -39129,7 +39209,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@72"
+                "$ref": "#/rules@73"
               },
               "arguments": []
             }
@@ -39141,7 +39221,7 @@ var FrontendDslGrammar = () => loadedFrontendDslGrammar ?? (loadedFrontendDslGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -39275,7 +39355,7 @@ function isAbsoluteImportPath(path) {
   return path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path);
 }
 function resolveImportUri(docUri, path) {
-  if (!path.trim()) return void 0;
+  if (!path?.trim()) return void 0;
   if (isAbsoluteImportPath(path)) return URI2.file(path);
   return UriUtils.resolvePath(UriUtils.dirname(docUri), path);
 }
@@ -39348,11 +39428,13 @@ init_define_BUILD_INFO();
 init_define_BUILD_INFO();
 import { readFileSync as readFileSync2 } from "node:fs";
 function resolveContractUri(contractPath, documentUri) {
+  if (!contractPath?.trim()) return void 0;
   return UriUtils.resolvePath(UriUtils.dirname(documentUri), contractPath);
 }
 var businessTextProvider;
 function loadBusiness(contractPath, documentUri) {
   const uri = resolveContractUri(contractPath, documentUri);
+  if (!uri) return null;
   try {
     const override = businessTextProvider?.(uri);
     const raw = override !== void 0 ? override : readFileSync2(uri.fsPath, "utf-8");
@@ -39426,6 +39508,7 @@ function resolveInFieldDecoration(techOps, fieldName) {
 var techTextProvider;
 function loadTech(techPath, documentUri) {
   const uri = resolveContractUri(techPath, documentUri);
+  if (!uri) return null;
   try {
     const override = techTextProvider?.(uri);
     const raw = override !== void 0 ? override : readFileSync2(uri.fsPath, "utf-8");
@@ -39560,7 +39643,7 @@ var FrontendDslScopeProvider = class extends DefaultScopeProvider {
     }
     if (isFormField(context.container)) {
       const form = ast_utils_exports.getContainerOfType(context.container, isFormComponent);
-      const op = form?.bind.op.ref;
+      const op = form?.bind?.op?.ref;
       if (!op) return EMPTY_SCOPE;
       return this.createScopeForNodes(op.inputs);
     }
@@ -39607,6 +39690,248 @@ var FrontendDslTokenBuilder = class extends DefaultTokenBuilder {
 
 // src/frontend/frontend-dsl-validation.ts
 init_define_BUILD_INFO();
+
+// src/frontend/ui-vocabulary.ts
+init_define_BUILD_INFO();
+
+// src/frontend/ui-vocabulary.json
+var ui_vocabulary_default = {
+  version: "3.0.0",
+  namespaces: {
+    ui: {
+      layer: "affordance",
+      degrade: "semantic",
+      archetypes: [
+        {
+          name: "text",
+          sites: ["field"],
+          args: {
+            multiline: { type: "boolean" },
+            format: { type: "string", domain: ["email", "url", "phone"] }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "secret",
+          sites: ["field"],
+          args: {},
+          since: "3.0.0"
+        },
+        {
+          name: "choice",
+          sites: ["field"],
+          args: {
+            cardinality: { type: "string", domain: ["one", "many"], default: "one" }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "boolean",
+          sites: ["field"],
+          args: {},
+          since: "3.0.0"
+        },
+        {
+          name: "quantity",
+          sites: ["field"],
+          args: {
+            bounded: { type: "boolean" },
+            min: { type: "number" },
+            max: { type: "number" },
+            step: { type: "number" }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "temporal",
+          sites: ["field"],
+          args: {
+            precision: { type: "string", domain: ["date", "time", "datetime"] }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "file",
+          sites: ["field"],
+          args: {
+            accept: { type: "string", domain: ["image", "document", "any"] }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "search",
+          sites: ["field"],
+          args: {},
+          since: "3.0.0"
+        },
+        {
+          name: "readonly",
+          sites: ["field"],
+          args: {},
+          since: "3.0.0"
+        },
+        {
+          name: "hidden",
+          sites: ["field"],
+          args: {},
+          since: "3.0.0"
+        }
+      ]
+    },
+    layout: {
+      layer: "composition",
+      degrade: "default-layout",
+      archetypes: [
+        {
+          name: "stack",
+          sites: ["screen", "region"],
+          args: {
+            flow: { type: "string", domain: ["sequential", "parallel"] }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "split",
+          sites: ["screen", "region"],
+          args: {
+            ratio: { type: "string" }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "grid",
+          sites: ["screen", "region"],
+          args: {
+            columns: { type: "number" }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "group",
+          sites: ["screen", "region"],
+          args: {
+            name: { type: "string" }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "order",
+          sites: ["screen", "region"],
+          args: {
+            n: { type: "number" }
+          },
+          since: "3.0.0"
+        }
+      ]
+    },
+    style: {
+      layer: "style",
+      degrade: "droppable",
+      archetypes: [
+        {
+          name: "emphasis",
+          sites: ["field", "screen", "action", "list", "detail", "value", "form"],
+          args: {
+            level: { type: "number", min: 0, max: 3 }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "icon",
+          sites: ["action", "field"],
+          args: {
+            name: { type: "string" }
+          },
+          since: "3.0.0"
+        },
+        {
+          name: "sample",
+          sites: ["field", "list", "detail", "value"],
+          args: {
+            value: { type: "scalar" },
+            options: { type: "string" },
+            rows: { type: "number" }
+          },
+          since: "3.0.0"
+        }
+      ]
+    }
+  }
+};
+
+// src/frontend/ui-vocabulary.ts
+var SITE_OF_NODE = {
+  Screen: "screen",
+  Region: "region",
+  FormField: "field",
+  ListComponent: "list",
+  DetailComponent: "detail",
+  ValueComponent: "value",
+  FormComponent: "form",
+  ActionComponent: "action"
+};
+var VOCABULARY = ui_vocabulary_default;
+function namespaceOf(ns) {
+  return Object.hasOwn(VOCABULARY.namespaces, ns) ? VOCABULARY.namespaces[ns] : void 0;
+}
+function lookup(ns, name) {
+  return namespaceOf(ns)?.archetypes.find((a2) => a2.name === name);
+}
+function isBlessedNs(ns) {
+  return namespaceOf(ns) !== void 0;
+}
+function blessedNamespaces() {
+  return Object.keys(VOCABULARY.namespaces);
+}
+function archetypeNames(ns) {
+  return namespaceOf(ns)?.archetypes.map((a2) => a2.name) ?? [];
+}
+function validArgs(a2, given) {
+  const issues = [];
+  for (const [arg, value] of Object.entries(given)) {
+    const spec = Object.hasOwn(a2.args, arg) ? a2.args[arg] : void 0;
+    if (!spec) {
+      issues.push({ arg, kind: "unknown", expected: Object.keys(a2.args).join("|") });
+      continue;
+    }
+    if (spec.type !== "scalar" && typeof value !== spec.type) {
+      issues.push({ arg, kind: "type", expected: spec.type });
+      continue;
+    }
+    if (spec.domain && !spec.domain.includes(String(value))) {
+      issues.push({ arg, kind: "domain", expected: spec.domain.join("|") });
+      continue;
+    }
+    if (typeof value === "number" && (spec.min !== void 0 || spec.max !== void 0)) {
+      const low = spec.min ?? Number.NEGATIVE_INFINITY;
+      const high = spec.max ?? Number.POSITIVE_INFINITY;
+      if (value < low || value > high) {
+        issues.push({ arg, kind: "range", expected: `${spec.min ?? ""}..${spec.max ?? ""}` });
+        continue;
+      }
+    }
+  }
+  for (const [arg, spec] of Object.entries(a2.args)) {
+    if (spec.required && !Object.hasOwn(given, arg)) {
+      issues.push({ arg, kind: "missing", expected: spec.type });
+    }
+  }
+  return issues;
+}
+
+// src/frontend/frontend-dsl-validation.ts
+function bindOp(b) {
+  return b?.op?.ref;
+}
+function bindOpText(b) {
+  return b?.op?.$refText;
+}
+function bindArgs(b) {
+  return b?.args ?? [];
+}
+function refTextOf(r) {
+  return r?.$refText;
+}
 function registerFrontendValidationChecks(services) {
   const registry = services.validation.ValidationRegistry;
   const v = services.validation.FrontendDslValidator;
@@ -39615,6 +39940,11 @@ function registerFrontendValidationChecks(services) {
     Experience: [v.checkExperienceNames, v.checkAudience, v.checkEntry, v.checkReachability],
     UsesDecl: [v.checkUsesShape, v.checkAnchor],
     Screen: [v.checkScreen],
+    // T-3.3: `Region` bugüne dek HİÇ kayıtlı değildi → region'a yazılan her dekorasyon sessizce
+    // yok sayılıyordu. Diğer beş yeni site'ın (list/detail/value/form/action) check fonksiyonu
+    // ZATEN var; onlara İKİNCİ bir kayıt açılmaz (diagnostic iki kez üretilirdi) — çağrı mevcut
+    // fonksiyonların içine eklendi.
+    Region: [v.checkRegion],
     ListComponent: [v.checkDataComponent, v.checkPagination],
     DetailComponent: [v.checkDataComponent],
     ValueComponent: [v.checkDataComponent],
@@ -39681,8 +40011,8 @@ function componentsOfScreen(screen) {
   return out;
 }
 function effectiveName(c) {
-  if (isActionComponent(c)) return c.name;
-  return c.alias ?? c.bind.op.$refText;
+  if (isActionComponent(c)) return c.name ?? "";
+  return c.alias ?? bindOpText(c.bind) ?? "";
 }
 function visibleUses(node, documents2) {
   const out = [];
@@ -39704,11 +40034,11 @@ function offeredUsesOf(comp, documents2) {
     return u ? [u] : [];
   }
   const out = [];
-  const primary = comp.bind.op.ref;
+  const primary = bindOp(comp.bind);
   if (primary) out.push(primary);
   if (isFormComponent(comp)) {
     for (const loads of comp.members.filter(isLoadsClause)) {
-      const lu = loads.bind.op.ref;
+      const lu = bindOp(loads.bind);
       if (lu) out.push(lu);
     }
   }
@@ -39721,8 +40051,9 @@ function pathsOf(e, acc = []) {
   } else if (isCmp(e)) {
     pathsOf(e.left, acc);
     if (e.right) pathsOf(e.right, acc);
-  } else if (isAggregate(e)) acc.push(e.path);
-  else if (isCall(e)) e.args.forEach((a2) => pathsOf(a2, acc));
+  } else if (isAggregate(e)) {
+    if (e.path) acc.push(e.path);
+  } else if (isCall(e)) e.args.forEach((a2) => pathsOf(a2, acc));
   else if (isPath(e)) acc.push(e);
   return acc;
 }
@@ -39760,31 +40091,143 @@ function dupsBy(items, key) {
   }
   return [...seen.values()].filter((g) => g.length > 1).flat();
 }
-var UI_DECORATIONS = {
-  readonly: ["field"],
-  hidden: ["field"],
-  emphasis: ["field", "screen"]
+var EXT_SITE_TO_SITES = {
+  experience: [],
+  screen: ["screen"],
+  region: ["region"],
+  component: ["list", "detail", "value", "form"],
+  action: ["action"],
+  field: ["field"]
 };
-function checkDecorations(decorations, site, accept) {
+function declaredSitesOf(decl) {
+  const out = /* @__PURE__ */ new Set();
+  for (const s of decl.sites) for (const fine of EXT_SITE_TO_SITES[s] ?? []) out.add(fine);
+  return out;
+}
+var EXTENSION_INDEX = /* @__PURE__ */ new WeakMap();
+function extensionsOf(model) {
+  let idx = EXTENSION_INDEX.get(model);
+  if (!idx) {
+    idx = new Map((model.extensions ?? []).map((e) => [`${e.ns}.${e.name}`, e]));
+    EXTENSION_INDEX.set(model, idx);
+  }
+  return idx;
+}
+function extLitValue(lit) {
+  if (lit == null) return void 0;
+  if (lit.str != null) return lit.str;
+  if (lit.bool != null) return lit.bool === "true";
+  return lit.num ?? void 0;
+}
+function editDistance(a2, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_2, j) => j);
+  for (let i = 1; i <= a2.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a2[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function didYouMean(name, candidates, ns) {
+  const near = candidates.map((c) => ({ c, d: editDistance(name, c) })).filter((x) => x.d <= 2).sort((x, y) => x.d - y.d || x.c.localeCompare(y.c)).slice(0, 2).map((x) => `@${ns}.${x.c}`);
+  return near.length > 0 ? ` \u2014 bunu mu demek istediniz: ${near.join(" / ")}?` : "";
+}
+function argTypeLabel(t) {
+  switch (t) {
+    case "string":
+      return "metin";
+    case "number":
+      return "say\u0131";
+    case "boolean":
+      return "true/false";
+    case "scalar":
+      return "skalar";
+  }
+}
+function argIssueMessage(key, issue) {
+  const exp = issue.expected ?? "";
+  switch (issue.kind) {
+    case "unknown":
+      return `'@${key}': '${issue.arg}' arg\xFCman\u0131 yok; izinli: ${exp.length > 0 ? exp.split("|").join(", ") : "(yok \u2014 bu arketip arg\xFCman almaz)"}.`;
+    case "type":
+      return `'@${key}': '${issue.arg}' ${argTypeLabel(exp)} bekler.`;
+    case "domain":
+      return `'@${key}': '${issue.arg}' \u015Funlardan biri olmal\u0131: ${exp.split("|").join(", ")} (kapal\u0131 k\xFCme, TIRNAKLI yaz\u0131l\u0131r).`;
+    case "range":
+      return `'@${key}': '${issue.arg}' ${exp} aral\u0131\u011F\u0131nda olmal\u0131 (s\u0131n\u0131rlar dahil).`;
+    case "missing":
+      return `'@${key}': '${issue.arg}' zorunlu (${argTypeLabel(exp)}).`;
+  }
+}
+function argValueUnreadableMessage(key, argName, spec) {
+  const head = `'@${key}': '${argName}' arg\xFCman\u0131n\u0131n DE\u011EER\u0130 okunamad\u0131 \u2014 arg\xFCman de\u011Ferleri yaln\u0131z metin ("\u2026"), say\u0131 ya da true/false olabilir.`;
+  if (spec?.domain != null) {
+    return `${head} '${argName}' KAPALI K\xDCME bir arg\xFCmand\u0131r ve de\u011Feri TIRNAK i\xE7inde yaz\u0131l\u0131r: ${argName}: "${spec.domain[0]}" (izinli: ${spec.domain.join(", ")}).`;
+  }
+  if (spec?.type === "string") {
+    return `${head} '${argName}' metin bekler \u2014 de\u011Feri TIRNAK i\xE7inde yaz\u0131n: ${argName}: "\u2026".`;
+  }
+  if (spec != null) {
+    return `${head} '${argName}' ${argTypeLabel(spec.type)} bekler.`;
+  }
+  return head;
+}
+function checkDecorations(model, decorations, site, accept) {
   const seen = /* @__PURE__ */ new Set();
   for (const d of decorations) {
-    if (d.ns !== "ui") {
-      accept("error", `Bilinmeyen dekorasyon namespace'i '@${d.ns}.*' \u2014 yaln\u0131z \xE7ekirdek-yorumlu '@ui.*' desteklenir (\u01305-lift kapal\u0131 k\xFCme; frontend-authored dekorasyon).`, { node: d, property: "ns" });
-      continue;
+    const key = `${d.ns}.${d.name}`;
+    if (!isBlessedNs(d.ns)) {
+      const decl = extensionsOf(model).get(key);
+      if (!decl) {
+        const siblings = (model.extensions ?? []).filter((e) => e.ns === d.ns).map((e) => `@${e.ns}.${e.name}`);
+        accept(
+          "error",
+          siblings.length > 0 ? `Bildirilmemi\u015F dekorasyon '@${key}' \u2014 '@${d.ns}' alt\u0131nda bildirilenler: ${siblings.join(", ")}; ya birini kullan\u0131n ya dosyaya 'extension ${key} { on ${site} }' ekleyin.` : `Bilinmeyen dekorasyon namespace'i '@${d.ns}.*' \u2014 \xE7ekirdek: ${blessedNamespaces().map((n) => `@${n}`).join("/")}; kendi ns'iniz i\xE7in dosyada 'extension ${key} { on ${site} }' bildirin.`,
+          { node: d, property: "ns" }
+        );
+        continue;
+      }
+      const allowed = declaredSitesOf(decl);
+      if (!allowed.has(site)) {
+        accept("error", `'@${key}' yaln\u0131z \u015Fu site(ler)de bildirildi: ${decl.sites.join(", ")} \u2014 buras\u0131 '${site}'. Bildirime site ekleyin ya da dekorasyonu ta\u015F\u0131y\u0131n.`, { node: d, property: "name" });
+        continue;
+      }
+      const declaredArgs = decl.params.map((p) => p.name);
+      for (const a2 of d.args) {
+        if (!declaredArgs.includes(a2.name)) {
+          accept("error", `'@${key}' bilinmeyen arg\xFCman '${a2.name}' \u2014 bildirilen arg(lar): ${declaredArgs.length > 0 ? declaredArgs.join(", ") : "(yok)"}.`, { node: a2, property: "name" });
+        }
+        if (a2.value == null) accept("error", argValueUnreadableMessage(key, a2.name, void 0), { node: a2, property: "name" });
+      }
+    } else {
+      const archetype = lookup(d.ns, d.name);
+      if (!archetype) {
+        const names = archetypeNames(d.ns);
+        accept("error", `Bilinmeyen '@${key}' dekorasyonu${didYouMean(d.name, names, d.ns)} \u2014 '@${d.ns}' arketipleri: ${names.join(", ")}.`, { node: d, property: "name" });
+        continue;
+      }
+      if (!archetype.sites.includes(site)) {
+        accept("error", `'@${key}' bu site'da ge\xE7ersiz (${site}) \u2014 izinli site(ler): ${archetype.sites.join(", ")}.`, { node: d, property: "name" });
+      }
+      const given = /* @__PURE__ */ Object.create(null);
+      for (const a2 of d.args) {
+        const v = extLitValue(a2.value);
+        if (v === void 0) {
+          accept("error", argValueUnreadableMessage(key, a2.name, archetype.args[a2.name]), { node: a2, property: "name" });
+          continue;
+        }
+        given[a2.name] = v;
+      }
+      for (const issue of validArgs(archetype, given)) {
+        const argNode = d.args.find((a2) => a2.name === issue.arg);
+        if (argNode) accept("error", argIssueMessage(key, issue), { node: argNode, property: "name" });
+        else accept("error", argIssueMessage(key, issue), { node: d, property: "name" });
+      }
     }
-    const sites = UI_DECORATIONS[d.name];
-    if (!sites) {
-      accept("error", `Bilinmeyen '@ui.${d.name}' dekorasyonu \u2014 izinli: ${Object.keys(UI_DECORATIONS).map((n) => `@ui.${n}`).join(", ")}.`, { node: d, property: "name" });
-      continue;
-    }
-    if (!sites.includes(site)) {
-      accept("error", `'@ui.${d.name}' bu site'da ge\xE7ersiz (${site}) \u2014 izinli site(ler): ${sites.join(", ")}.`, { node: d, property: "name" });
-    }
-    if (d.args.length > 0) {
-      accept("warning", `'@ui.${d.name}' arg\xFCman almaz; verilenler yok say\u0131l\u0131r.`, { node: d, property: "name" });
-    }
-    if (seen.has(d.name)) accept("warning", `'@ui.${d.name}' bu \xF6\u011Fede yinelenmi\u015F.`, { node: d, property: "name" });
-    seen.add(d.name);
+    if (seen.has(key)) accept("warning", `'@${key}' bu \xF6\u011Fede yinelenmi\u015F.`, { node: d, property: "name" });
+    seen.add(key);
   }
 }
 var FrontendDslValidator = class {
@@ -39795,6 +40238,10 @@ var FrontendDslValidator = class {
   /** contract dosyaları okunabilir + schemaVersion uyumlu mu. */
   checkContracts = (model, accept) => {
     if (!model.contract) return;
+    if (!model.contract.path) {
+      accept("error", `'contract' bir s\xF6zle\u015Fme dosyas\u0131 yolu bekler ve yol TIRNAK i\xE7inde yaz\u0131l\u0131r: contract "../is-analizi/operations.json" (opsiyonel: tech "../teknik/manifest.json"). Yol okunamad\u0131\u011F\u0131 i\xE7in s\xF6zle\u015Fme y\xFCklenmedi.`, { node: model.contract });
+      return;
+    }
     const docUri = ast_utils_exports.getDocument(model).uri;
     const business = loadBusiness(model.contract.path, docUri);
     if (!business) {
@@ -39808,7 +40255,7 @@ var FrontendDslValidator = class {
   };
   /** Union-coverage (workspace): exposed+realizes'li tech-op'u hiçbir experience sunmuyor → warning. */
   checkUncoveredExposedOps = (model, accept) => {
-    if (!model.contract?.techPath) return;
+    if (!model.contract?.path || !model.contract.techPath) return;
     const docUri = ast_utils_exports.getDocument(model).uri;
     const tech = loadTech(model.contract.techPath, docUri);
     const business = loadBusiness(model.contract.path, docUri);
@@ -39862,8 +40309,8 @@ var FrontendDslValidator = class {
       for (const screen of c.members.filter(isScreen)) {
         for (const node of ast_utils_exports.streamAllContents(screen)) {
           if (isActionComponent(node) && node.navTarget) record(node.navTarget.ref, node.navArgs ?? []);
-          else if (isResultHandler(node) && isNavHandler(node.handler)) record(node.handler.target.ref, node.handler.args);
-          else if (isEventNav(node)) record(node.target.ref, node.args);
+          else if (isResultHandler(node) && isNavHandler(node.handler)) record(node.handler.target?.ref, node.handler.args);
+          else if (isEventNav(node)) record(node.target?.ref, node.args);
         }
       }
     }
@@ -39882,9 +40329,9 @@ var FrontendDslValidator = class {
         const fed = suppliedParams.get(screen) ?? /* @__PURE__ */ new Set();
         for (const form of componentsOfScreen(screen).filter(isFormComponent)) {
           for (const loads of form.members.filter(isLoadsClause)) {
-            const lop = loads.bind.op.ref;
+            const lop = bindOp(loads.bind);
             if (!lop || lop.outList) continue;
-            for (const arg of loads.bind.args) {
+            for (const arg of bindArgs(loads.bind)) {
               const paths = pathsOf(arg.value);
               if (paths.length !== 1) continue;
               const root2 = paths[0].segments[0];
@@ -39939,17 +40386,26 @@ var FrontendDslValidator = class {
     for (const screen of screens) {
       for (const node of ast_utils_exports.streamAllContents(screen)) {
         if (isActionComponent(node) && node.navTarget) addEdge(screen.name, node.navTarget.$refText);
-        else if (isResultHandler(node) && isNavHandler(node.handler)) addEdge(screen.name, node.handler.target.$refText);
-        else if (isEventNav(node)) addEdge(screen.name, node.target.$refText);
+        else if (isResultHandler(node) && isNavHandler(node.handler)) addEdge(screen.name, refTextOf(node.handler.target));
+        else if (isEventNav(node)) addEdge(screen.name, refTextOf(node.target));
       }
     }
-    for (const nav of exp.members.filter(isNavDecl)) addEdge(nav.from.$refText, nav.to.$refText);
+    for (const nav of exp.members.filter(isNavDecl)) {
+      const from = refTextOf(nav.from);
+      if (from !== void 0) addEdge(from, refTextOf(nav.to));
+    }
     for (const flow of exp.members.filter(isFlowDecl)) {
-      for (let i = 0; i + 1 < flow.steps.length; i++) addEdge(flow.steps[i].$refText, flow.steps[i + 1].$refText);
+      for (let i = 0; i + 1 < flow.steps.length; i++) {
+        const from = refTextOf(flow.steps[i]);
+        if (from !== void 0) addEdge(from, refTextOf(flow.steps[i + 1]));
+      }
     }
     const reachable = /* @__PURE__ */ new Set([entry.name]);
     for (const h of exp.members.filter(isResultHandler)) {
-      if (isNavHandler(h.handler)) reachable.add(h.handler.target.$refText);
+      if (isNavHandler(h.handler)) {
+        const t = refTextOf(h.handler.target);
+        if (t !== void 0) reachable.add(t);
+      }
     }
     const queue = [...reachable];
     while (queue.length > 0) {
@@ -40066,11 +40522,17 @@ var FrontendDslValidator = class {
         accept("error", `Ekran-kayd\u0131 ad\u0131 '${effectiveName(c)}' rezerve bir path-k\xF6k\xFCn\xFC (session/currentUser/row/ekran-param/state) g\xF6lgeliyor \u2014 'as <farkl\u0131-ad>' verin (F3.7 k\xF6k-belirsizli\u011Fi).`, { node: c });
       }
     }
-    checkDecorations(screen.decorations, "screen", accept);
+    checkDecorations(modelOf(screen), screen.decorations, SITE_OF_NODE[screen.$type], accept);
   };
-  /** İ5-lift: form-field @ui.* dekorasyonu (readonly/hidden/emphasis). */
+  /** Dekorasyon ns kapısı (blessed `@ui`/`@layout`/`@style` + bildirilmiş extension) — field site'ı. */
   checkFormField = (f, accept) => {
-    checkDecorations(f.decorations, "field", accept);
+    checkDecorations(modelOf(f), f.decorations, SITE_OF_NODE[f.$type], accept);
+  };
+  /** T-3.3 — `region` site'ı. Region'ın BAŞKA bir check'i yok; bu kayıt yalnız dekorasyon içindir.
+   *  İç-içe region'lar da ayrı `Region` düğümü olarak dispatch edilir (Langium tüm ağacı gezer) →
+   *  `checkScreen` içinde ayrıca region ağacı yürünmez (çift-diagnostic tuzağı). */
+  checkRegion = (r, accept) => {
+    checkDecorations(modelOf(r), r.decorations, SITE_OF_NODE[r.$type], accept);
   };
   /** Call yasağı (kullanıcı kararı, 2026-07-17): authored frontend Expr'inde fonksiyon çağrısı
    *  DESTEKLENMEZ — çağrılabilir fonksiyon kümesi hiçbir yerde tanımlı değil ve üretecin
@@ -40089,7 +40551,8 @@ var FrontendDslValidator = class {
   };
   /** #24 cardinality + kind (list/detail/value). */
   checkDataComponent = (c, accept) => {
-    const op = c.bind.op.ref;
+    checkDecorations(modelOf(c), c.decorations, SITE_OF_NODE[c.$type], accept);
+    const op = bindOp(c.bind);
     if (op) {
       if (op.kind !== "query") {
         accept("error", `${c.$type === "ListComponent" ? "list" : c.$type === "DetailComponent" ? "detail" : "value"} yaln\u0131z query'ye ba\u011Flan\u0131r; '${op.name}' bir ${op.kind}.`, { node: c.bind });
@@ -40101,14 +40564,14 @@ var FrontendDslValidator = class {
         accept("error", `${isDetailComponent(c) ? "detail" : "value"} tekil-out ister: '${op.name}' liste out bildiriyor (karar #24).`, { node: c.bind });
       }
     }
-    for (const arg of c.bind.args) {
+    for (const arg of bindArgs(c.bind)) {
       checkPathRootsIn(arg.value, arg, accept, { rowAllowed: this.inRowContext(c) });
     }
-    this.checkHandlerCompleteness(c, op, [], accept, c.bind);
+    this.checkHandlerCompleteness(c, op, [], accept, c.bind ?? c);
   };
   /** #43 — pagination cross-check (linked+tech; 3 kural). `size`/`keys` = üreteç-join, girmez. */
   checkPagination = (c, accept) => {
-    const op = c.bind.op.ref;
+    const op = bindOp(c.bind);
     if (!op) return;
     const business = businessOf(c);
     const tech = techOf(c);
@@ -40130,25 +40593,26 @@ var FrontendDslValidator = class {
   };
   /** form: command'a bağlanır; loads tekil query; #25 queue×out; linked validation-divergence. */
   checkForm = (form, accept) => {
-    const op = form.bind.op.ref;
-    for (const arg of form.bind.args) checkPathRootsIn(arg.value, arg, accept, { rowAllowed: false });
+    checkDecorations(modelOf(form), form.decorations, SITE_OF_NODE[form.$type], accept);
+    const op = bindOp(form.bind);
+    for (const arg of bindArgs(form.bind)) checkPathRootsIn(arg.value, arg, accept, { rowAllowed: false });
     if (op && op.kind !== "command") {
       accept("error", `form yaln\u0131z command'a ba\u011Flan\u0131r (submits); '${op.name}' bir ${op.kind}.`, { node: form.bind });
     }
     for (const loads of form.members.filter(isLoadsClause)) {
-      const lop = loads.bind.op.ref;
+      const lop = bindOp(loads.bind);
       if (lop && lop.kind !== "query") {
         accept("error", `loads yaln\u0131z query al\u0131r; '${lop.name}' bir ${lop.kind}.`, { node: loads.bind });
       }
       if (lop && lop.outList) {
         accept("error", `loads tekil-out query ister (form tek kay\u0131t y\xFCkler); '${lop.name}' liste d\xF6n\xFCyor.`, { node: loads.bind });
       }
-      for (const arg of loads.bind.args) checkPathRootsIn(arg.value, arg, accept, { rowAllowed: false });
+      for (const arg of bindArgs(loads.bind)) checkPathRootsIn(arg.value, arg, accept, { rowAllowed: false });
     }
     this.checkQueueOut(form.mech, op, form.members.filter(isResultHandler), accept);
     this.checkHandlerCompleteness(form, op, form.members.filter(isResultHandler), accept, form.bind);
     for (const loads of form.members.filter(isLoadsClause)) {
-      this.checkHandlerCompleteness(form, loads.bind.op.ref, [], accept, loads.bind);
+      this.checkHandlerCompleteness(form, bindOp(loads.bind), [], accept, loads.bind ?? form);
     }
     for (const rule of form.members.filter(isFormRule)) {
       checkPathRootsIn(rule.expr, rule, accept, { rowAllowed: false, extraRoots: (op?.inputs ?? []).map((f) => f.name) });
@@ -40156,12 +40620,18 @@ var FrontendDslValidator = class {
     if (op) {
       const supplied = /* @__PURE__ */ new Set();
       let hasPositionalArg = false;
-      for (const arg of form.bind.args) {
+      for (const arg of bindArgs(form.bind)) {
         if (arg.name) supplied.add(arg.name);
         else hasPositionalArg = true;
       }
-      for (const f of form.members.filter(isFormField)) supplied.add(f.field.$refText);
-      for (const s of form.members.filter(isFormStep)) for (const f of s.fields) supplied.add(f.field.$refText);
+      for (const f of form.members.filter(isFormField)) {
+        const n = refTextOf(f.field);
+        if (n !== void 0) supplied.add(n);
+      }
+      for (const s of form.members.filter(isFormStep)) for (const f of s.fields) {
+        const n = refTextOf(f.field);
+        if (n !== void 0) supplied.add(n);
+      }
       const missing = (op.inputs ?? []).map((i) => i.name).filter((n) => !supplied.has(n)).sort();
       if (!hasPositionalArg && missing.length > 0) {
         accept(
@@ -40185,6 +40655,7 @@ var FrontendDslValidator = class {
   };
   /** #39 B3 action bağlama + #25 queue×out + path kökleri. */
   checkAction = (action, accept) => {
+    checkDecorations(modelOf(action), action.decorations, SITE_OF_NODE[action.$type], accept);
     const uses = resolveActionUses(action, this.documents);
     if (uses && uses.kind === "query") {
       accept("error", `action query'ye ba\u011Flanamaz: '${action.name}' bir query aray\xFCz\xFC.`, { node: action, property: "name" });
@@ -40247,7 +40718,7 @@ var FrontendDslValidator = class {
       accept("error", `inline-errors yaln\u0131z form ba\u011Flam\u0131nda anlaml\u0131d\u0131r (karar #36) \u2014 action'da kullan\u0131lamaz.`, { node: h });
     }
     if (isNavHandler(h.handler)) {
-      const target = h.handler.target.ref;
+      const target = h.handler.target?.ref;
       if (target && h.handler.args.length !== target.params.length) {
         accept("error", `'${target.name}' ${target.params.length} parametre bekler, ${h.handler.args.length} verildi.`, { node: h.handler });
       }
@@ -40279,7 +40750,7 @@ var FrontendDslValidator = class {
       }
       if (a2.$type === "EventNav") {
         const nav = a2;
-        const target = nav.target.ref;
+        const target = nav.target?.ref;
         if (target && nav.args.length !== target.params.length) {
           accept("error", `'${target.name}' ${target.params.length} parametre bekler, ${nav.args.length} verildi.`, { node: a2 });
         }
@@ -40432,9 +40903,26 @@ function createFrontendDslServices(context) {
 
 // src/frontend/experience.ts
 init_define_BUILD_INFO();
-function uiDecorations(decorations, site) {
-  return decorations.filter((d) => d.ns === "ui" && UI_DECORATIONS[d.name]?.includes(site)).map((d) => d.name);
+function decorationsJson(decorations, site) {
+  const out = [];
+  for (const d of decorations) {
+    if (!lookup(d.ns, d.name)?.sites.includes(site)) continue;
+    const args2 = /* @__PURE__ */ Object.create(null);
+    for (const a2 of d.args) {
+      const v = extLitValue(a2.value);
+      if (v !== void 0 && a2.name != null) args2[a2.name] = v;
+    }
+    out.push({ ns: d.ns, name: d.name, args: args2 });
+  }
+  return out;
 }
+function namedNode(n) {
+  return n.name != null;
+}
+function usableUses(u) {
+  return u.name != null && u.kind != null;
+}
+var FRONTEND_DSL_VERSION = "3.0.2";
 var ARITH = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
 function serializeExpr(e) {
   if (isBinary(e)) return { node: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
@@ -40443,7 +40931,7 @@ function serializeExpr(e) {
     if (e.op) return { node: "cmp", op: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
     return serializeExpr(e.left);
   }
-  if (isAggregate(e)) return { node: "agg", fn: e.fn, path: [...e.path.segments] };
+  if (isAggregate(e)) return { node: "agg", fn: e.fn, path: e.path ? [...e.path.segments] : [] };
   if (isCall(e)) return { node: "call", name: e.name, args: e.args.map(serializeExpr) };
   if (isSetLit(e)) return {
     node: "set",
@@ -40462,22 +40950,23 @@ function serializeExpr(e) {
 function emitExperience(document, documents2) {
   const model = document.parseResult.value;
   const docUri = document.uri;
-  const business = model.contract ? loadBusiness(model.contract.path, docUri) : null;
-  const tech = model.contract?.techPath ? loadTech(model.contract.techPath, docUri) : null;
+  const contract = model.contract?.path ? model.contract : void 0;
+  const business = contract ? loadBusiness(contract.path, docUri) : null;
+  const tech = contract?.techPath ? loadTech(contract.techPath, docUri) : null;
   const errorCount = (document.diagnostics ?? []).filter((d) => (d.severity ?? 1) === 1).length;
   return {
-    mode: model.contract ? "linked" : "standalone",
-    contract: model.contract ? { business: model.contract.path, tech: model.contract.techPath ?? null } : null,
+    mode: contract ? "linked" : "standalone",
+    contract: contract ? { business: contract.path, tech: contract.techPath ?? null } : null,
     shared: model.shared ? sharedJson(model.shared, business, tech, documents2) : null,
-    experiences: model.experiences.map((e) => experienceJson(e, business, tech, documents2)),
-    meta: { hasErrors: errorCount > 0, errorCount }
+    experiences: model.experiences.filter((e) => e.name != null).map((e) => experienceJson(e, business, tech, documents2)),
+    meta: { hasErrors: errorCount > 0, errorCount, dslVersion: FRONTEND_DSL_VERSION }
   };
 }
 function sharedJson(shared2, business, tech, documents2) {
   return {
-    usesInterfaces: shared2.members.filter(isUsesDecl).map((u) => usesJson(u, business, tech)),
-    types: shared2.members.filter(isTypeDecl).map((t) => ({ name: t.name, fields: t.fields.map(fieldJson) })),
-    screens: shared2.members.filter(isScreen).map((s) => screenJson(s, documents2))
+    usesInterfaces: shared2.members.filter(isUsesDecl).filter(usableUses).map((u) => usesJson(u, business, tech)),
+    types: shared2.members.filter(isTypeDecl).filter(namedNode).map((t) => ({ name: t.name, fields: t.fields.filter(namedNode).map(fieldJson) })),
+    screens: shared2.members.filter(isScreen).filter(namedNode).map((s) => screenJson(s, documents2))
   };
 }
 function experienceJson(exp, business, tech, documents2) {
@@ -40485,18 +40974,27 @@ function experienceJson(exp, business, tech, documents2) {
     name: exp.name,
     audience: [...exp.audience],
     deliveryDefault: exp.delivery ?? null,
-    entryScreen: exp.entry?.$refText ?? null,
-    resultDefaults: exp.members.filter(isResultHandler).map(handlerJson),
-    usesInterfaces: exp.members.filter(isUsesDecl).map((u) => usesJson(u, business, tech)),
-    screens: exp.members.filter(isScreen).map((s) => screenJson(s, documents2)),
-    flows: exp.members.filter(isFlowDecl).map((f) => ({
+    entryScreen: refTextOf(exp.entry) ?? null,
+    resultDefaults: exp.members.filter(isResultHandler).flatMap(handlerJson),
+    usesInterfaces: exp.members.filter(isUsesDecl).filter(usableUses).map((u) => usesJson(u, business, tech)),
+    screens: exp.members.filter(isScreen).filter(namedNode).map((s) => screenJson(s, documents2)),
+    flows: exp.members.filter(isFlowDecl).filter(namedNode).map((f) => ({
       name: f.name,
-      realizes: f.realizes?.$refText ?? null,
-      steps: f.steps.map((s) => s.$refText)
+      realizes: refTextOf(f.realizes) ?? null,
+      // Adım referansı hiç kurulmamışsa (`= []` / yarım liste) o adım YOK sayılır — `steps: string[]`
+      // zorunlu anahtar, `undefined` eleman sözleşmeyi kırardı.
+      steps: f.steps.flatMap((s) => {
+        const t = refTextOf(s);
+        return t === void 0 ? [] : [t];
+      })
     })),
-    navigation: exp.members.filter(isNavDecl).map((n) => ({ from: n.from.$refText, to: n.to.$refText })),
-    clientState: exp.members.filter(isStateDecl).map((s) => stateJson(s, "experience")),
-    whenDeltas: exp.members.filter(isWhenBlock).map(whenJson)
+    // `nav -> S` / `nav S ->` — iki ucu da olmayan kenar bir kenar değildir (ölçüldü: c76).
+    navigation: exp.members.filter(isNavDecl).flatMap((n) => {
+      const from = refTextOf(n.from), to = refTextOf(n.to);
+      return from === void 0 || to === void 0 ? [] : [{ from, to }];
+    }),
+    clientState: exp.members.filter(isStateDecl).flatMap((s) => stateJson(s, "experience")),
+    whenDeltas: exp.members.filter(isWhenBlock).flatMap(whenJson)
   };
 }
 function usesJson(u, business, tech) {
@@ -40510,12 +41008,15 @@ function usesJson(u, business, tech) {
   const hasOut = u.outputs.length > 0 || u.outList;
   return {
     name: u.name,
+    // `uses Q3 { … }` — kind hiç kurulmamış olabilir; `opKind` ZORUNLU ve KAPALI bir union'dır →
+    // uydurulmuş bir üye basmak tip-uzayını kirletirdi. Çağrı yeri (`usableUses`) kind'ı da eler,
+    // buraya yalnız adı VE kind'ı KURULMUŞ uses gelir.
     opKind: u.kind,
     // in-field'lara tech PARAM dekorasyonu join'lenir (form-capture PII/şifreli girdi → güvenli-input);
-    in: u.inputs.map((f) => inFieldJson(f, techOps, tech)),
+    in: u.inputs.filter(namedNode).map((f) => inFieldJson(f, techOps, tech)),
     // out-field'lara tech dönüş-tipi dekorasyonu (sensitivity/crypto) join'lenir — TECH-sahipli, frontend
     // yeniden-beyan etmez; hedef-adaptör maskeleme/güvenli-render için okur (render KAPSAM-DIŞI=üretici).
-    out: hasOut ? { cardinality: u.outList ? "list" : "single", fields: u.outputs.map((f) => outFieldJson(f, techOps, tech)) } : null,
+    out: hasOut ? { cardinality: u.outList ? "list" : "single", fields: u.outputs.filter(namedNode).map((f) => outFieldJson(f, techOps, tech)) } : null,
     results: u.results.length > 0 ? [...u.results] : null,
     realizes: realized ? { op: realized.id, source: realized.source } : null,
     remoteSource
@@ -40543,16 +41044,16 @@ function withDecoration(base, decoration) {
   };
 }
 function screenJson(s, documents2) {
-  const decorations = uiDecorations(s.decorations, "screen");
+  const decorations = decorationsJson(s.decorations, "screen");
   return {
     name: s.name,
     title: s.title ?? null,
     persona: s.persona ?? null,
-    params: s.params.map((p) => ({ name: p.name })),
-    regions: s.members.filter(isRegion).map((r) => regionJson(r, documents2)),
-    whenDeltas: s.members.filter(isWhenBlock).map(whenJson),
-    uiEvents: s.members.filter(isUiEvent).map(uiEventJson),
-    clientState: s.members.filter(isStateDecl).map((st) => stateJson(st, "screen")),
+    params: s.params.filter(namedNode).map((p) => ({ name: p.name })),
+    regions: s.members.filter(isRegion).filter(namedNode).map((r) => regionJson(r, documents2)),
+    whenDeltas: s.members.filter(isWhenBlock).flatMap(whenJson),
+    uiEvents: s.members.filter(isUiEvent).flatMap(uiEventJson),
+    clientState: s.members.filter(isStateDecl).flatMap((st) => stateJson(st, "screen")),
     ...decorations.length ? { decorations } : {}
   };
 }
@@ -40561,29 +41062,40 @@ function regionJson(r, documents2) {
   const collapse = r.attrs.find((a2) => a2.$type === "CollapseAttr");
   const components = [];
   for (const item of r.items) {
-    if (isListComponent(item) || isDetailComponent(item) || isValueComponent(item)) components.push(dataComponentJson(item, documents2));
-    else if (isFormComponent(item)) components.push(formJson(item));
-    else if (isActionComponent(item)) components.push(actionJson(item, documents2));
-    else if (isExtComponent(item)) components.push(extComponentJson(item));
+    if (isListComponent(item) || isDetailComponent(item) || isValueComponent(item)) {
+      if (bindOpText(item.bind) !== void 0) components.push(dataComponentJson(item, documents2));
+    } else if (isFormComponent(item)) {
+      if (bindOpText(item.bind) !== void 0) components.push(formJson(item));
+    } else if (isActionComponent(item)) {
+      if (item.name != null) components.push(actionJson(item, documents2));
+    } else if (isExtComponent(item)) {
+      if (item.ext?.ns != null && item.ext.name != null) components.push(extComponentJson(item));
+    }
   }
+  const decorations = decorationsJson(r.decorations, SITE_OF_NODE[r.$type]);
   return {
     name: r.name,
     role: role?.value ?? null,
     collapseWhen: collapse?.value ?? null,
-    children: r.items.filter(isRegion).map((cr) => regionJson(cr, documents2)),
+    children: r.items.filter(isRegion).filter(namedNode).map((cr) => regionJson(cr, documents2)),
     components,
-    targetEscapes: r.items.filter(isTargetEscape).map(targetEscapeJson)
+    targetEscapes: r.items.filter(isTargetEscape).map(targetEscapeJson),
+    ...decorations.length ? { decorations } : {}
   };
 }
 function dataComponentJson(c, documents2) {
   const kind = isListComponent(c) ? "list" : isDetailComponent(c) ? "detail" : "value";
-  const op = c.bind.op.ref;
+  const op = bindOp(c.bind);
   const members = isValueComponent(c) ? [] : c.members;
   const showClause = members.find(isShowClause);
   let show = null;
   if (kind !== "value") {
-    show = showClause ? { fields: showClause.fields.map((f) => f.$refText), source: "authored" } : op ? { fields: op.outputs.map((f) => f.name), source: "default-all-out-fields" } : null;
+    show = showClause ? { fields: showClause.fields.flatMap((f) => {
+      const n = refTextOf(f);
+      return n === void 0 ? [] : [n];
+    }), source: "authored" } : op ? { fields: op.outputs.filter(namedNode).map((f) => f.name), source: "default-all-out-fields" } : null;
   }
+  const decorations = decorationsJson(c.decorations, SITE_OF_NODE[c.$type]);
   return {
     kind,
     query: bindJson(c.bind),
@@ -40592,15 +41104,17 @@ function dataComponentJson(c, documents2) {
     pagination: isListComponent(c) && c.pagination ? { intent: c.pagination } : null,
     alias: c.alias ?? null,
     show,
-    whenDeltas: members.filter(isWhenBlock).map(whenJson),
-    uiEvents: members.filter(isUiEvent).map(uiEventJson),
-    actions: members.filter(isActionComponent).map((a2) => actionJson(a2, documents2))
+    whenDeltas: members.filter(isWhenBlock).flatMap(whenJson),
+    uiEvents: members.filter(isUiEvent).flatMap(uiEventJson),
+    actions: members.filter(isActionComponent).filter(namedNode).map((a2) => actionJson(a2, documents2)),
+    ...decorations.length ? { decorations } : {}
   };
 }
 function formJson(f) {
-  const loads = f.members.find(isLoadsClause);
-  const fields = f.members.filter(isFormField).map(formFieldJson);
-  const steps = f.members.filter(isFormStep).map((s) => ({ name: s.name, fields: s.fields.map(formFieldJson) }));
+  const loads = f.members.filter(isLoadsClause).find((l) => bindOpText(l.bind) !== void 0);
+  const fields = f.members.filter(isFormField).flatMap(formFieldJson);
+  const steps = f.members.filter(isFormStep).filter(namedNode).map((s) => ({ name: s.name, fields: s.fields.flatMap(formFieldJson) }));
+  const decorations = decorationsJson(f.decorations, SITE_OF_NODE[f.$type]);
   return {
     kind: "form",
     submits: { ...bindJson(f.bind), mechanic: f.mech ?? null },
@@ -40608,27 +41122,37 @@ function formJson(f) {
     alias: f.alias ?? null,
     fields,
     steps,
-    rules: f.members.filter(isFormRule).map((r) => ({
+    // `rule` yazılıp ifade düşerse `r.expr` undefined kalır (ölçüldü: c50 → :487 emit ölümü);
+    // ifadesiz kural bir kural değildir → eleman düşer (`text`/`ast` ikisi de ZORUNLU).
+    rules: f.members.filter(isFormRule).flatMap((r) => r.expr ? [{
       text: (r.expr.$cstNode?.text ?? "").trim(),
       ast: serializeExpr(r.expr)
-    })),
-    resultHandlers: f.members.filter(isResultHandler).map(handlerJson)
+    }] : []),
+    resultHandlers: f.members.filter(isResultHandler).flatMap(handlerJson),
+    ...decorations.length ? { decorations } : {}
   };
 }
 function formFieldJson(ff) {
+  const name = refTextOf(ff.field);
+  if (name === void 0) return [];
   const validation = {};
   for (const r of ff.rules) {
     if (isRequiredRule(r)) validation.required = true;
-    else if (isMaxRule(r)) validation.max = r.value;
-    else if (isMinRule(r)) validation.min = r.value;
-    else if (isPatternRule(r)) validation.pattern = r.value;
+    else if (isMaxRule(r)) {
+      if (r.value != null) validation.max = r.value;
+    } else if (isMinRule(r)) {
+      if (r.value != null) validation.min = r.value;
+    } else if (isPatternRule(r)) {
+      if (r.value != null) validation.pattern = r.value;
+    }
   }
-  const decorations = uiDecorations(ff.decorations, "field");
-  return { name: ff.field.$refText, validation, ...decorations.length ? { decorations } : {} };
+  const decorations = decorationsJson(ff.decorations, "field");
+  return [{ name, validation, ...decorations.length ? { decorations } : {} }];
 }
 function actionJson(a2, documents2) {
   const uses = resolveActionUses(a2, documents2);
   const confirmClause = a2.members.find(isConfirmClause);
+  const decorations = decorationsJson(a2.decorations, SITE_OF_NODE[a2.$type]);
   return {
     kind: "action",
     name: a2.name,
@@ -40640,27 +41164,39 @@ function actionJson(a2, documents2) {
       const vw = a2.members.find(isVisibleWhen);
       return vw ? { expr: serializeExpr(vw.expr), uxOnly: true } : null;
     })(),
-    invalidates: a2.members.filter(isInvalidatesClause).flatMap((i) => i.targets.map((t) => t.$refText)),
-    set: a2.members.filter(isSetClause).map((s) => ({ state: s.state.$refText, expr: serializeExpr(s.expr) })),
-    navigation: a2.navTarget ? { screen: a2.navTarget.$refText, args: (a2.navArgs ?? []).map(argJson) } : null,
-    resultHandlers: a2.members.filter(isResultHandler).map(handlerJson)
+    invalidates: a2.members.filter(isInvalidatesClause).flatMap((i) => i.targets.flatMap((t) => {
+      const n = refTextOf(t);
+      return n === void 0 ? [] : [n];
+    })),
+    // `set = 1` — durum referansı hiç kurulmaz (ölçüldü: c56 → :528 emit ölümü). `state` ZORUNLU
+    // anahtar → hedefsiz atama emit EDİLMEZ.
+    set: a2.members.filter(isSetClause).flatMap((s) => {
+      const st = refTextOf(s.state);
+      return st === void 0 ? [] : [{ state: st, expr: serializeExpr(s.expr) }];
+    }),
+    // `action X -> screen` — hedef düşmüşse navigasyon YOK (yarım kenar emit edilmez).
+    navigation: refTextOf(a2.navTarget) !== void 0 ? { screen: refTextOf(a2.navTarget), args: (a2.navArgs ?? []).map(argJson) } : null,
+    resultHandlers: a2.members.filter(isResultHandler).flatMap(handlerJson),
+    ...decorations.length ? { decorations } : {}
   };
 }
 function extComponentJson(e) {
   return {
     kind: "ext",
     ext: {
+      // `ns`/`name` ZORUNLU anahtar; ikisi de kurulmamışsa bileşen `regionJson`'da zaten elenir.
       ns: e.ext.ns,
       name: e.ext.name,
-      args: Object.fromEntries(e.ext.args.map((a2) => [a2.name, litValue(a2.value)]))
+      // T-6.2: değeri parse edilememiş argüman (ör. `@ns.ad(mode: canli)` — tırnaksız) anahtar
+      // olarak basılmaz; eskiden korumasızdı ve `fcdsl --out` bu modelde SÜRECİ ÖLDÜRÜYORDU
+      // (ölçüldü: extComponentJson → extLitValue TypeError). Gerekçe `decorationsJson` ile aynı.
+      args: Object.fromEntries(e.ext.args.flatMap((a2) => {
+        const v = extLitValue(a2.value);
+        return v === void 0 || a2.name == null ? [] : [[a2.name, v]];
+      }))
     },
     query: e.bind ? bindJson(e.bind) : null
   };
-}
-function litValue(lit) {
-  if (lit.str != null) return lit.str;
-  if (lit.bool != null) return lit.bool === "true";
-  return lit.num;
 }
 function targetEscapeJson(t) {
   return {
@@ -40671,54 +41207,72 @@ function targetEscapeJson(t) {
   };
 }
 function bindJson(b) {
-  return { op: b.op.$refText, args: b.args.map(argJson) };
+  return { op: bindOpText(b) ?? "", args: bindArgs(b).map(argJson) };
 }
 function argJson(a2) {
   return { name: a2.name ?? null, expr: serializeExpr(a2.value) };
 }
 function handlerJson(h) {
   const hd = h.handler;
-  if (isNavHandler(hd)) return { result: h.result, handler: { verb: "navigate", screen: hd.target.$refText, args: hd.args.map(argJson) } };
-  if (isToastHandler(hd)) return { result: h.result, handler: { verb: "toast", text: hd.text, retry: hd.retry === true } };
-  if (isBannerHandler(hd)) return { result: h.result, handler: { verb: "banner", text: hd.text } };
-  if (isInlineErrorsHandler(hd)) return { result: h.result, handler: { verb: "inline-errors" } };
-  if (isRetryHandler(hd)) return { result: h.result, handler: { verb: "retry" } };
-  return { result: h.result, handler: { verb: "retry" } };
+  if (h.result == null || hd == null) return [];
+  if (isNavHandler(hd)) {
+    const screen = refTextOf(hd.target);
+    return screen === void 0 ? [] : [{ result: h.result, handler: { verb: "navigate", screen, args: hd.args.map(argJson) } }];
+  }
+  if (isToastHandler(hd)) return hd.text == null ? [] : [{ result: h.result, handler: { verb: "toast", text: hd.text, retry: hd.retry === true } }];
+  if (isBannerHandler(hd)) return hd.text == null ? [] : [{ result: h.result, handler: { verb: "banner", text: hd.text } }];
+  if (isInlineErrorsHandler(hd)) return [{ result: h.result, handler: { verb: "inline-errors" } }];
+  if (isRetryHandler(hd)) return [{ result: h.result, handler: { verb: "retry" } }];
+  return [];
 }
 function uiEventJson(ev) {
   const t = ev.trigger;
   let trigger;
   if (isLifecycleTrigger(t)) trigger = { kind: t.kind };
   else if (isInteractionTrigger(t)) trigger = { kind: t.kind, target: t.target ?? null };
-  else if (isTimerTrigger(t)) trigger = { kind: t.kind, value: t.value, unit: t.unit };
-  else trigger = { kind: "enter" };
-  return {
+  else if (isTimerTrigger(t) && t.value != null && t.unit != null) trigger = { kind: t.kind, value: t.value, unit: t.unit };
+  else return [];
+  return [{
     trigger,
-    actions: ev.actions.map((a2) => {
-      if (isRefreshAction(a2)) return { do: "refresh", targets: a2.targets.map((t2) => t2.$refText) };
-      if (isEventNav(a2)) return { do: "navigate", screen: a2.target.$refText, args: a2.args.map(argJson) };
-      if (isEventSet(a2)) return { do: "set", state: a2.state.$refText, expr: serializeExpr(a2.expr) };
-      if (isEventInvalidate(a2)) return { do: "invalidates", targets: a2.targets.map((t2) => t2.$refText) };
-      if (isEventPerform(a2)) return { do: "action", target: a2.target };
-      return { do: "refresh", targets: [] };
+    actions: ev.actions.flatMap((a2) => {
+      if (isRefreshAction(a2)) return [{ do: "refresh", targets: a2.targets.flatMap((t2) => {
+        const n = refTextOf(t2);
+        return n === void 0 ? [] : [n];
+      }) }];
+      if (isEventNav(a2)) {
+        const screen = refTextOf(a2.target);
+        return screen === void 0 ? [] : [{ do: "navigate", screen, args: a2.args.map(argJson) }];
+      }
+      if (isEventSet(a2)) {
+        const st = refTextOf(a2.state);
+        return st === void 0 ? [] : [{ do: "set", state: st, expr: serializeExpr(a2.expr) }];
+      }
+      if (isEventInvalidate(a2)) return [{ do: "invalidates", targets: a2.targets.flatMap((t2) => {
+        const n = refTextOf(t2);
+        return n === void 0 ? [] : [n];
+      }) }];
+      if (isEventPerform(a2)) return a2.target == null ? [] : [{ do: "action", target: a2.target }];
+      return [];
     })
-  };
+  }];
 }
 function whenJson(w) {
-  return {
+  if (w.state == null) return [];
+  return [{
     state: w.state,
-    delta: w.deltas.map((d) => {
-      if (isBannerDelta(d)) return { verb: "banner", text: d.text };
-      if (isBadgeDelta(d)) return { verb: "badge", text: d.text };
-      if (isHideDelta(d)) return { verb: "hide", target: d.target };
-      if (isRevealDelta(d)) return { verb: "reveal", target: d.target };
-      return { verb: "banner", text: "" };
+    delta: w.deltas.flatMap((d) => {
+      if (isBannerDelta(d)) return d.text == null ? [] : [{ verb: "banner", text: d.text }];
+      if (isBadgeDelta(d)) return d.text == null ? [] : [{ verb: "badge", text: d.text }];
+      if (isHideDelta(d)) return d.target == null ? [] : [{ verb: "hide", target: d.target }];
+      if (isRevealDelta(d)) return d.target == null ? [] : [{ verb: "reveal", target: d.target }];
+      return [];
     })
-  };
+  }];
 }
 function stateJson(s, scope) {
   if (isMutableState(s)) {
-    return {
+    if (s.name == null) return [];
+    return [{
       name: s.name,
       scope,
       kind: "state",
@@ -40726,17 +41280,19 @@ function stateJson(s, scope) {
       type: s.type ?? null,
       init: s.init ? serializeExpr(s.init) : null,
       derivedExpr: null
-    };
+    }];
   }
-  return {
-    name: stateNameOf(s),
+  const name = stateNameOf(s);
+  if (!name) return [];
+  return [{
+    name,
     scope,
     kind: "derived",
     persisted: false,
     type: null,
     init: null,
-    derivedExpr: isDerivedState(s) ? serializeExpr(s.expr) : null
-  };
+    derivedExpr: isDerivedState(s) && s.expr ? serializeExpr(s.expr) : null
+  }];
 }
 
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/fcdsl.src.mts

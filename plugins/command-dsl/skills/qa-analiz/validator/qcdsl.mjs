@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "b45fa935f96d", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "3a48fde", builtAt: "2026-07-25T01:11:14+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "3d1950958528", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "3a48fde", builtAt: "2026-07-25T01:11:14+03:00", langium: "4.2.4" };
   }
 });
 
@@ -56943,7 +56943,49 @@ function evalValidationAst(ast, inputs) {
 
 // src/qa/qa-dsl-validation.ts
 var UNCOVERED_BRANCHES_CODE = "qa.uncovered-branches";
+function pascalKey(name) {
+  return name.length === 0 ? name : name[0].toUpperCase() + name.slice(1);
+}
+function isIdTyped(typeName) {
+  return typeName === "Id" || typeName.length > 2 && typeName.endsWith("Id");
+}
+function isUnpinnableIdField(typeName, fieldName, op) {
+  return isIdTyped(typeName) && !(op.params ?? []).some((p) => pascalKey(p.name) === pascalKey(fieldName));
+}
+function mutatedEntities(op) {
+  const surviving = [];
+  const deleted = [];
+  for (const clause of op.clauses ?? []) {
+    if (!isAccessClause(clause)) continue;
+    for (const effect of clause.effects ?? []) {
+      const bucket = effect.verb === "creates" || effect.verb === "updates" ? surviving : effect.verb === "deletes" ? deleted : null;
+      if (!bucket) continue;
+      for (const ref of effect.entities ?? []) {
+        const entity = ref.ref;
+        if (entity && !bucket.includes(entity)) bucket.push(entity);
+      }
+    }
+  }
+  return { surviving, deleted: deleted.filter((e) => !surviving.includes(e)) };
+}
+function provesNonExistence(a2) {
+  if (!isStateAssert(a2)) return false;
+  return a2.absent === true || a2.count !== void 0 && Number(a2.count) === 0;
+}
+function condedFieldKeys(asserts, entity) {
+  const keys2 = /* @__PURE__ */ new Set();
+  for (const a2 of asserts) {
+    if (!isStateAssert(a2) || a2.entity?.ref !== entity) continue;
+    if (provesNonExistence(a2)) continue;
+    for (const cond of a2.cond?.conds ?? []) {
+      if (cond.op === "!=") continue;
+      keys2.add(pascalKey(cond.field));
+    }
+  }
+  return keys2;
+}
 var UNCOVERED_GUARANTEE_CODE = "qa.uncovered-guarantee";
+var MUTATION_INCOMPLETE_CODE = "qa.mutation-incomplete";
 var WAIVE_EXCUSE_CODE = "qa.waive-excuse";
 function condLiteral(expr) {
   let n = expr;
@@ -57305,6 +57347,58 @@ var QaDslValidator = class {
     const assertCtx = { ...ctx, allowResult: true, inputParams: test.when.call ? this.paramSpecs(op) : null };
     for (const a2 of asserts) this.checkAssert(a2, shape, assertCtx, model, accept);
     this.checkFilteredMembership(test.covers, res.branch, asserts, shape, test, accept);
+    this.checkMutationCompleteness(test, op, shape, res.branch, asserts, model, accept);
+  }
+  /**
+   * G10 — MUTASYON DEĞER-TAMLIĞI: yazılan entity'nin her value-alanı, o testin **varlık-kanıtlayan**
+   * state assert'lerinin cond'larıyla pinlenmiş olmalı; silinen entity için de bir non-existence
+   * assert'i bulunmalı.
+   *
+   * NEDEN error: yarı-cond'lu bir state assert **sessiz yeşil**dir — pinlenmeyen alanlar yanlış
+   * doldurulsa da test geçer, dal "kapsandı" görünür. Bu, [Q6 sahte-kapsam] sınıfının ta kendisidir:
+   * strict "kapsandı" der ama kalıcı etkinin doğrulandığını İDDİA ETMEZ. S9 bunun yalnız TERSİNİ
+   * (access-dışı assert) kokutur; bu kural eksik-assert'i ZORLAR.
+   *
+   * İKİZ KURAL (2026-07-25): bu kapı üreteçte de var (`Hfx.Codegen/Emission/Qa/
+   * QaMutationCompleteness.cs`). Evren/kapsama kuralları BİREBİR aynı tutulmalı — ayrışırlarsa
+   * doğrulayıcı "temiz" der, üreteç reddeder; bu tek kapı olmasından DAHA KÖTÜdür. Kuralı burada
+   * değiştiren, oradakini de değiştirir.
+   *
+   * Evren (entity BAŞINA, `creates ∪ updates` için):
+   *   − PK (`id`) · − koleksiyon alan (cond emitter koleksiyon cond'unu reddediyor) ·
+   *   − entity-referanslı nav alan (aynı sınıf: nav cond'u render edilemez) ·
+   *   − **pinlenemez Id-tipli alan**: tipi `…Id` VE op'ta aynı adlı param YOK → değeri çalışma
+   *     anında türer (persona SHA-256), cond'un sağ tarafı ise yalnız literal veya `input.<param>`
+   *     olabilir. Param'ı OLAN FK (`applicationId = input.applicationId`) evrende KALIR — yanlış-üst
+   *     kayıt / yanlış-kiracı yazımını yakalayan tam da odur.
+   * Kapsama: yalnız varlık-kanıtlayan assert sayılır (`absent` ve `count 0` SAYILMAZ — ikisi
+   * semantik olarak aynı); `!=` cond'u SAYILMAZ (domain'den tek nokta çıkarır, kanıtlamaz);
+   * aralık op'ları (`>`,`<`,`>=`,`<=`) sayılır — kapı "tam literal" değil "gerçekten denetlenmiş" ister.
+   */
+  checkMutationCompleteness(test, op, shape, branch, asserts, model, accept) {
+    if (!branch || expectedOutcome(branch, shape).class !== "Success") return;
+    const { surviving, deleted } = mutatedEntities(op);
+    if (surviving.length === 0 && deleted.length === 0) return;
+    const entityTypeNames = new Set(this.universeOf(model).entities.map((e) => e.node.name));
+    for (const entity of surviving) {
+      const conded = condedFieldKeys(asserts, entity);
+      const uncovered = (entity.fields ?? []).filter((f) => pascalKey(f.name) !== "Id" && !f.type?.collection && !entityTypeNames.has(f.type?.name ?? "") && !isUnpinnableIdField(f.type?.name ?? "", f.name, op) && !conded.has(pascalKey(f.name))).map((f) => f.name);
+      if (uncovered.length === 0) continue;
+      accept(
+        "warning",
+        `'${shape.qualified}' ba\u015Far\u0131 dal\u0131 '${entity.name}' kayd\u0131n\u0131 yaz\u0131yor ama testin state assert'leri \u015Fu alanlar\u0131 P\u0130NLEM\u0130YOR: ${uncovered.join(", ")}. Pinlenmeyen alan yanl\u0131\u015F yaz\u0131lsa da test GE\xC7ER (sahte-kapsam). D\xFCzeltme: 'state ${entity.name} exists { ${uncovered.map((f) => `${f} = <beklenen>`).join(", ")} }' \u2014 de\u011Fer bir op param'\u0131ndan geliyorsa 'input.<param>' yazabilirsin.`,
+        { node: test, property: "title", code: MUTATION_INCOMPLETE_CODE }
+      );
+    }
+    for (const entity of deleted) {
+      const proven = asserts.some((a2) => isStateAssert(a2) && a2.entity?.ref === entity && provesNonExistence(a2));
+      if (proven) continue;
+      accept(
+        "warning",
+        `'${shape.qualified}' ba\u015Far\u0131 dal\u0131 '${entity.name}' kayd\u0131n\u0131 S\u0130L\u0130YOR ama test kayd\u0131n gitti\u011Fini kan\u0131tlam\u0131yor. D\xFCzeltme: 'state ${entity.name} absent { <hedefi se\xE7en cond> }' (ya da 'count 0') ekle. Silinen kay\u0131tta de\u011Fer-pinleme \u0130STENMEZ \u2014 geriye sat\u0131r kalmad\u0131\u011F\u0131 i\xE7in tek do\u011Fru assert budur.`,
+        { node: test, property: "title", code: MUTATION_INCOMPLETE_CODE }
+      );
+    }
   }
   /**
    * ADR-0040 — `filtered` dalının ARKETİPİ: **sonuç-kümesi ÜYELİK ikilisi ZORUNLU.**

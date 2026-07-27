@@ -81,6 +81,8 @@ gerekçeye karşı — Gate ÇIKIŞTA kilitler, bu blok SÜREÇ-İÇİNDE, Gate'
 | "Kullanıcı acele ediyor" | ÇİFT-SIFIR hiçbir tempoda kısalmaz; hız = daha az laf, daha az soru DEĞİL. |
 | "Cevabı tahmin edebiliyorum" | Tahmin = çıkarım; çıkarım cevap değil SORU üretir (Değişmez-1). |
 | "Bunu sonra hallederiz" | Ertelenen ★ authored-kayıt olur (durum=beklemede), sessizce düşmez. |
+| "'Select mi radio mu' diye sormak daha somut" | Widget markası **üreteç kararıdır**, cevabını DSL'e yazamazsın → sahte-danışma. Bir seviye yukarıdan sor: alanın **arketibi** (`@ui.*`), bölgenin **kompozisyon niyeti** (`@layout.*`). |
+| "Alanın ne olduğu adından belli (`dueDate` → tarih)" | Ad çıkarımdır; çıkarım cevap değil SORU üretir (Değişmez-1). Arketip yazılmazsa üreteç **düz metin kutusu** üretir — tarih-seçici çıkmaz. |
 
 **Red flags (kendini yakala):** ★-soru atlandı · faz-sırası bozuldu · kullanıcıya
 sorulmadan clause dolduruldu · warning sessiz kapatıldı · gate-geçti diye AskUser
@@ -93,6 +95,17 @@ atlandı. Biri olduysa DUR, adını koy, düzelt.
   "saha ekibi tablette, internet yokken de çalışmalı" → `delivery: offline-first` +
   kritik listelere `cache`, yazmalara `queue`. "listede sadece başlık ve durum görünsün"
   → `show title, status`. "iptal butonu onay sorsun" → `confirm "İptal edilsin mi?"`.
+- **WIDGET MARKASI SORULMAZ — arketip sorulur.** "Açılır liste mi radio buton mu?", "checkbox mı
+  switch mi?", "date-picker mı takvim mi?", "tab mı accordion mu?", "tablo mu kart mı?" — bunların
+  HİÇBİRİ sorulmaz. Bunlar **üreteç/hedef kararıdır** (aynı niyet web'de select, mobilde tekerlek
+  olur). Sen bir seviye YUKARIDAN sorarsın — alanın **anlamı** ne, bölgenin **kompozisyon niyeti** ne:
+  "sınırlı bir listeden **tek mi çok mu** seçilecek?" → `@ui.choice(cardinality: "one"|"many")` ·
+  "evet/hayır mı?" → `@ui.boolean` · "tarih mi, saat mi, ikisi mi?" → `@ui.temporal(precision: …)` ·
+  "yan yana mı, alt alta mı?" → `@layout.split` / `@layout.stack`. Kullanıcı KENDİLİĞİNDEN widget adı
+  söylerse (bu normaldir) düzeltme — **niyete çevir** ve çevirdiğini söyle: *"'radio buton' dediniz —
+  bunu 'sınırlı listeden tek seçim' olarak yazıyorum; radio mu açılır liste mi olacağı hedefe göre
+  üretimde belirlenir."* Widget'ı DSL'e yazmanın yolu zaten yok; sorarsan cevabı **atmak** zorunda
+  kalırsın (sahte-danışma).
 - **Hibrit onay.** Her fazda önce **toplu öneri** (kısa liste), sonra tek soruyla onay.
   Takılınan öğede derinleş. Onay almadan alt faza inme.
 - **Kullanıcıya-görünen davranış eksenlerinde MUTLAKA sor** (güvenlik-ekseninin frontend
@@ -247,6 +260,25 @@ persona cross-check), `checkFlowCoverage`.
 - "Listede/detayda **hangi alanlar** görünsün?" → `show a, b` — yazılmazsa default TÜM
   out-alanları (beyan sırasıyla); bunu bilinçli seçtirt ("hepsi mi, özet mi?").
 - Aynı op'u bir ekranda ≥2 bileşen kullanıyorsa `as <ad>` zorunlu.
+- **★ KOMPOZİSYON — "bunlar ekranda nasıl dizilsin?" (SOR, `@layout.*`).** Bir ekranda/bölgede
+  birden çok içerik varsa yerleşim niyeti **sessiz-eksiktir**: yazılmazsa üreteç kendi
+  varsayılanını uygular ve "yan yana dursun" beyanı kaybolur. Sor:
+  - "Bu ekrandaki şeyler **yan yana mı, alt alta mı** dursun?" → `@layout.stack(flow: "sequential")`
+    (alt alta / sıralı) · `@layout.split(ratio: "2:1")` (yan yana, oranlı).
+  - "**Menü / yan panel** var mı; ana içerikle nasıl bölünsün?" → `region (role: navigation)` +
+    ekran düzeyinde `@layout.split(ratio: "1:3")`.
+  - "Kartlar/alanlar **kaç sütuna** yerleşsin?" → `@layout.grid(columns: 3)`.
+  - "Şu alanlar bir **başlık altında gruplansın** mı / şu blok **hangi sırada** gelsin?" →
+    `@layout.group(name: "İletişim")` · `@layout.order(n: 1)`.
+  ⚠ Piksel/flex/breakpoint SORULMAZ (P-sınırı; tek responsive-niyet `collapse-when: compact`).
+  Widget markası da SORULMAZ (Altın kural) — "sekme mi akordiyon mu" üreteç kararıdır.
+- **○ ÖRNEK VERİ — "taslakta gerçekçi görünsün mü?" (SOR, `@style.sample`).** Wireframe/taslak
+  paydaşa gösterilecekse boş kutular kararı zorlaştırır. Toplu sor (tek soru yeter):
+  *"Ekran taslaklarında **gerçekçi örnek değerler** görünsün mü — listede kaç örnek satır olsun?"*
+  → `list @style.sample(rows: 3) …` · `value @style.sample(value: 42) …` ·
+  `detail @style.sample(value: "Örnek")`. **Söylemesi gereken sınır:** örnek veri
+  **illüstrasyondur, otoriter değildir** — gerçek üretim üreteci onu yok sayar (droppable katman);
+  `@style.sample(options: "A | B | C")` de **gerçek seçenek listesi DEĞİLDİR**.
 
 **⚠ Anti-pattern — `show`'suz veri dökümü:** liste ekranında tüm alanların dökülmesi
 çoğu zaman istenmez; default'u sessizce bırakma, sor.
@@ -288,6 +320,30 @@ firing-point zemini (Faz 6'daki queue×out'un hazırlığı).
   `field x { required, min/max: N, pattern: "…" }`. Çok-adımlı mı → `step`. Çapraz-alan
   kuralı → `rule <ifade>`. Düzenleme formu mu → `loads query <TekilQuery>` (+ submit
   command'ı form bind'ı).
+- **★ ARKETİP — "bu alan NE?" HER alan için sor (`@ui.*`).** Zorunluluk/sınır sorulup arketip
+  atlanırsa alan üreteçte **düz metin kutusuna** düşer (tarih-seçici · seçim listesi · parola
+  maskesi · dosya seçici · sayısal klavye ÇIKMAZ) — bu **sessiz** bir kayıptır, doğrulayıcı
+  yakalamaz. Alanları toplu geç, tek soruyla onaylat:
+  *"Şu alanların her biri ne tür: **serbest metin mi**, **sınırlı bir listeden seçim mi**,
+  **evet/hayır mı**, **sayı/miktar mı**, **tarih mi**, **dosya mı**, **parola mı**, **arama kutusu mu**;
+  yoksa kullanıcı hiç dokunmayacak mı (**salt-okunur**) ya da formda **hiç görünmeyecek mi** (**gizli**)?"*
+  Cevabı arketibe çevir (tam sözlük + argümanlar: `references/frontend-dsl-reference.md` §13):
+  | Kullanıcının dediği | Yazdığın |
+  |---|---|
+  | "uzun açıklama / serbest yazı" · "e-posta / web adresi / telefon" | `@ui.text(multiline: true)` · `@ui.text(format: "email")` |
+  | "sınırlı listeden seçim" (tek/çok) | `@ui.choice(cardinality: "one")` / `("many")` |
+  | "evet-hayır / açık-kapalı" | `@ui.boolean` |
+  | "adet / tutar / puan; alt-üst sınırı var" | `@ui.quantity(bounded: true, min: 0, max: 100, step: 5)` |
+  | "tarih" · "saat" · "tarih+saat" | `@ui.temporal(precision: "date" \| "time" \| "datetime")` |
+  | "dosya/görsel yükleyecek" | `@ui.file(accept: "image" \| "document" \| "any")` |
+  | "parola / gizli anahtar (ekranda görünmesin)" | `@ui.secret` |
+  | "içinde arama yapılan kutu" | `@ui.search` |
+  | "görsün ama değiştiremesin" · "arka planda gitsin, görünmesin" | `@ui.readonly` · `@ui.hidden` |
+  ⚠ **Widget markası SORMA** ("açılır liste mi radio mu", "checkbox mı switch mi") — Altın kural;
+  arketip sorulur, widget'ı üreteç seçer. ⚠ `@ui.secret` ≠ **PII maskesi**: backend-hassaslık
+  `@sensitivity`→tech-driven kalır (aşağıdaki Pre-Emit süpürme-3).
+- **○ Form alanında örnek veri:** taslak paydaşa gösterilecekse `@style.sample(value: "Örnek başlık")` /
+  `@style.sample(options: "A | B | C")` — illüstrasyondur, gerçek seçenek listesi DEĞİLDİR (Faz 4).
 - "İşlem **başarısız olursa** kullanıcı ne yaşar?" — önce uygulama-geneli varsayılanlar
   (bir kez): `on NotAuthenticated -> screen Login` · `on ServerError toast "…" retry` ·
   `on NotValid inline-errors`; sonra yalnız İSTİSNALARI form/aksiyonda override et.
@@ -370,10 +426,17 @@ YETMEZ: doğrulayıcı YANLIŞ'ı yakalar, EKSİK'i değil. Dört süpürme:
 3. **Sınır-devri (köprü süpürmesi):** backend'in modellediği her fact UI'da bir karşılık aldı mı?
    - **Köprüsü olan** (tech `validation`→form-alanı · result-type→handler · pagination→sunum-niyeti):
      linked cross-check divergence'ını uyumla ya da gerekçeyle onaylat.
-   - **Frontend-yazarı sunum-ipucu KÖPRÜLÜ** (`@ui.*` — bu bundle'da VAR): "bu alan
-     salt-okunur / gizli / vurgulu görünsün" niyeti artık makinece-taşınır — kaynak-içi
-     `#` yorumla BIRAKMA, **author et**: `@ui.readonly`/`@ui.hidden` (field), `@ui.emphasis`
-     (field+screen). Manifest `decorations: [...]` emit eder (envanterin `@ui.*` satırı).
+   - **Frontend-yazarı sunum-ipucu KÖPRÜLÜ** (`@ui.*` / `@layout.*` / `@style.*` — bu bundle'da VAR):
+     "bu alan tarih seçer / listeden seçim / salt-okunur / gizli", "bunlar yan yana dursun",
+     "taslakta örnek değer görünsün" niyetleri artık makinece-taşınır — kaynak-içi `#` yorumla
+     BIRAKMA, **author et**. Üç eksen: **arketip** `@ui.*` (Faz 6 tablosu) · **kompozisyon**
+     `@layout.*` (Faz 4) · **sunum/örnek** `@style.emphasis`/`@style.icon`/`@style.sample`.
+     Manifest `decorations: [{ns, name, args}]` emit eder (envanterin `@ui.*`/`@layout.*`/`@style.*`
+     satırları). ⚠ **`@ui.emphasis` ARTIK ERROR** — arketip `@style.emphasis`'e taşındı (frontend
+     v3.0.0). ⚠ Kapalı-küme argümanlar **TIRNAKLI** yazılır (`cardinality: "one"`), sayı/boolean
+     tırnaksız; yerleşim asimetriktir (`region @layout.grid(columns: 3) main` ← keyword'den SONRA;
+     `@ui.readonly field note` ← ÖNDE). İkisi de bilinmezse **parse hatası** — kural:
+     `references/frontend-dsl-reference.md` §13.
    - **Köprüsü OLMAYAN — backend-hassas (tech `@sensitivity`/`@crypto`→maske):** bu %100
      **tech-driven** kalır; frontend re-declare ETMEZ (`@ui.hidden` ≠ PII-maske —
      [[manifest-mapping-not-superset]]). Gerçek taşıyıcı **ÜSTAKIŞTIR** (tech manifest),

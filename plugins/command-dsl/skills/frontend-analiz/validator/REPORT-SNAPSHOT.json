@@ -1,12 +1,12 @@
 {
   "source": "CommandDSL",
-  "grammarVersion": "frontend-v1.x-a428b3d71944",
-  "grammarHash": "a428b3d71944",
+  "grammarVersion": "frontend-v1.x-7401ab4e6bbc",
+  "grammarHash": "7401ab4e6bbc",
   "srcDirs": [
     "src/frontend",
     "src/playground"
   ],
-  "srcHash": "de5ce5a1f085",
+  "srcHash": "9eb6f2991693",
   "wrapperFiles": [
     "report-frontend.src.mts",
     "report-index.src.mts"

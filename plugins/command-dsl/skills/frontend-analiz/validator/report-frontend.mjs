@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-a428b3d71944", grammarHash: "a428b3d71944", srcDirs: ["src/frontend", "src/playground"], srcHash: "de5ce5a1f085", wrapperFiles: ["report-frontend.src.mts", "report-index.src.mts"], wrapperHash: "1d80610aab15", commit: "3a48fde", builtAt: "2026-07-25T01:11:14+03:00" };
+var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/playground"], srcHash: "9eb6f2991693", wrapperFiles: ["report-frontend.src.mts", "report-index.src.mts"], wrapperHash: "1d80610aab15", commit: "3a48fde", builtAt: "2026-07-25T01:11:14+03:00" };
 
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/report-frontend.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync, readdirSync as readdirSync2, statSync as statSync2, rmSync } from "node:fs";
@@ -42,7 +42,7 @@ function screenSaltLines(owner, screen, exp) {
   const persona = screen.persona ? `  <i>for ${esc(screen.persona)}</i>` : "";
   const lines = [];
   const legend = { conditional: false, masked: false, sensitiveByOp: sensitiveFieldMap(exp) };
-  const emph = (screen.decorations ?? []).includes("emphasis") ? "\xABvurgu\xBB " : "";
+  const emph = (screen.decorations ?? []).some((d) => d.ns === "style" && d.name === "emphasis") ? "\xABvurgu\xBB " : "";
   lines.push("{+");
   lines.push(`{* <b>${emph}${esc(stripLabel(owner, screen))}</b>${persona} }`);
   for (const r of screen.regions) regionLines(r, lines, legend);
@@ -142,12 +142,12 @@ function formLines(c, out, legend) {
   out.push(`[G\xF6nder \u2014 ${esc(c.submits.op)}${mech}]`);
 }
 function fieldLine(f, sensitive) {
-  const deco = new Set(f.decorations ?? []);
+  const deco = new Set((f.decorations ?? []).map((d) => `${d.ns}.${d.name}`));
   const req = f.validation.required ? "*" : "";
   const name = `${esc(f.name)}${req}`;
-  const label = deco.has("emphasis") ? `<b>${name}</b>` : name;
-  if (deco.has("hidden")) return `<i>${name} \xABgizli\xBB</i>`;
-  if (deco.has("readonly")) return `${label} | <i>\xABokunur\xBB</i>`;
+  const label = deco.has("style.emphasis") ? `<b>${name}</b>` : name;
+  if (deco.has("ui.hidden")) return `<i>${name} \xABgizli\xBB</i>`;
+  if (deco.has("ui.readonly")) return `${label} | <i>\xABokunur\xBB</i>`;
   if (sensitive) return `${label} \u2022 | "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"`;
   return `${label} | "                "`;
 }

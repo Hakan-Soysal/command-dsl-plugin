@@ -8,7 +8,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `a428b3d71944` · src `3454ca193e07` · commit `dcbfd21`+**frontend v2.0.0 (`Call` yasağı — validator error; KIRICI girdi)** + ADR-0038 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `7401ab4e6bbc` · src `b7ece23c2f90` (report-frontend src `9eb6f2991693`) · commit `3a48fde`+**frontend v3.0.2 (PATCH: YARIM YAZILMIŞ hiçbir model artık doğrulayıcıyı/süreci ÇÖKERTMEZ — 189 vakalık gramerden-türetilmiş korpüsle ölçüldü; bundle'ın 0-error emit kapısı DEĞİŞMEDİ — §0.1)** + **v3.0.1 (PATCH: tırnaksız kapalı-küme argüman değeri artık ÇÖKME değil, TIRNAK kuralını söyleyen tanı üretiyor — §13.2)** + **v3.0.0 (üç blessed namespace `@ui`/`@layout`/`@style` · 18 arketip · 6 yeni site · dekorasyon argümanları artık DENETLENİYOR · `@ui.emphasis` → `@style.emphasis` KIRICI göç)** + v2.0.0 (`Call` yasağı — validator error) + ADR-0038 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı; sözlük tablosu (§13) `src/frontend/ui-vocabulary.json`'dan TÜRETİLİR.
 
 Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listeler (zorunlular — experience/screen/uses/region — faz+validator'ca zorlanır). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → eşleşme aday-soru kuyruğuna girer (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate). Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok). `entry` ve result-handler-tamlığı zaten validator-warning'idir (sessiz değil) → burada yok; warning geldiğinde ikinci-tur soru olarak ele al.
 
@@ -29,9 +29,33 @@ Yalnız **opsiyonel/authored, sessizce atlanabilir** sunum yeteneklerini listele
 | `show a, b` (görüntü-şekli) | "listede/detayda yalnız şu alanlar görünsün" | 4 | ○ | **belirsiz-alan-izdüşümü** — hangi alanların görüneceği tanımsız; varsayılana/tümüne düşer |
 | `alan: Tip` (uses in/out alan tipi) | "bu alan **sayı mı, tarih mi, para mı, metin mi**?" | 2/6 | ○ | **yanlış-girdi-türü** — tipsiz alan üreteçte **string input** default'una düşer; sayı/tarih/para alanı düz metin kutusu olarak gelir (tarih-seçici/numerik klavye/para-maskesi yok) |
 | `step` (form wizard) | "adım adım form / sihirbaz" | 6 | ○ | **çökmüş-sihirbaz** — adımlı form tek sayfaya iner; uzun form bir arada gelir |
-| `@ui.readonly` / `@ui.hidden` (field) · `@ui.emphasis` (field+screen) | "bu alan **salt-okunur** görünsün / formda **gizli** olsun / **vurgulu** çıksın" (frontend-yazarı sunum-ipucu; UX — backend-gerçeği DEĞİL) | 4/6 | ○ | **kayıp-sunum-ipucu** — alan/ekran salt-okunur/gizli/vurgu niyeti manifest'e taşınmaz; üreteç düz-alan üretir (kullanıcı düzenlenmemesi gereken alanı düzenler / gizli alan görünür) |
+| **`@ui.*` alan arketibi** (`text`·`secret`·`choice`·`boolean`·`quantity`·`temporal`·`file`·`search`·`readonly`·`hidden` — §13) | "bu alan **serbest metin mi**, **sınırlı bir listeden seçim mi**, **evet/hayır mı**, **sayı/miktar mı**, **tarih mi**, **dosya mı**, **parola mı**, **arama kutusu mu**; **salt-okunur** mu, formda **gizli** mi?" (frontend-yazarı sunum-ipucu; UX — backend-gerçeği DEĞİL) | 4/6 | ★ | **arketipsiz-alan** — alanın etkileşim semantiği manifest'e taşınmaz; üreteç HER alanı düz metin kutusu üretir (tarih-seçici yok · seçim listesi yok · parola maskesi yok · dosya seçici yok · salt-okunur alan düzenlenir · gizli alan görünür) |
+| **`@layout.*` kompozisyon** (`stack`·`split`·`grid`·`group`·`order` — screen/region; §13) | "bunlar **yan yana mı alt alta mı** dursun / **kaç sütun** / **menü-yan panel** ile ana içerik nasıl bölünsün / şu blok **hangi sırada** gelsin" (kompozisyon NİYETİ — piksel/flex DEĞİL) | 3/4 | ★ | **rastgele-yerleşim** — ekran/bölge kompozisyon niyeti taşınmaz; üreteç kendi varsayılan yerleşimini uygular (yan-yana istenen alanlar alt alta iner, sıralama beyanı kaybolur) |
+| **`@style.sample` örnek veri** (field/list/detail/value — `value` · `options` · `rows`) | "taslak/wireframe **gerçekçi görünsün** diye örnek değer/satır koyalım mı; şu seçim kutusunda örnek seçenekler ne olsun?" (illüstrasyon — **otoriter değil**, gerçek üretim üreteci yok sayar) | 4/6 | ○ | **boş-taslak** — wireframe/taslak boş kutularla çıkar; paydaş ekranı değerlendiremez |
+| `@style.emphasis` / `@style.icon` (vurgu & ikon) | "bu **vurgulu** çıksın / bu düğmede **ikon** olsun" | 4/6 | ○ | **kayıp-sunum-ipucu** — vurgu/ikon niyeti manifest'e taşınmaz; üreteç düz öğe üretir |
 
-**Not:** frontend-yazarı `@ui.*` dekorasyonu bu bundle'da **VAR** (grammar `a428b3d71944`; `decorations+=Annotation` — Screen:131 + FormField:190; probe'la doğrulandı → manifest `decorations: [...]` emit eder). Kapalı çekirdek-yorumlu küme: `@ui.readonly`·`@ui.hidden` (yalnız field-site), `@ui.emphasis` (field+screen). `@bogus.*` = bilinmeyen namespace **error**; yanlış-site (ör. `@ui.readonly` screen'de) **error**; argüman verilirse **warning** (yok sayılır). Render: hidden→«gizli» · readonly→«okunur» · emphasis→«vurgu». **AYRI concern:** backend-hassas `@sensitivity`/`@crypto`→maske %100 **tech-driven** kalır (frontend re-declare ETMEZ; [[manifest-mapping-not-superset]] tek-kaynak) — o köprü hâlâ üstakışta, `@ui.*` onun yerine geçmez.
+**Not (v3.0.0 — ESKİ BİLGİYİ EZER):** frontend-yazarı dekorasyonu bu bundle'da **VAR** ve artık **üç blessed namespace**tir (grammar `7401ab4e6bbc`; `fragment Decorated` — `frontend-dsl.langium:66`): `@ui.*` (affordance/etkileşim semantiği, degrade=**semantic**) · `@layout.*` (kompozisyon, degrade=**default-layout**) · `@style.*` (saf sunum, degrade=**droppable**). Toplam **18 arketip** ve **8 site** — tam liste + argüman şeması **§13**'te, tek kaynağı `CommandDSL/src/frontend/ui-vocabulary.json`. Manifest `decorations: [{ns, name, args}]` emit eder (**v2'deki `["readonly"]` string dizisi DEĞİL**).
+**⚠ v2'den gelen üç bilgi artık YANLIŞ — ezildi:** (1) `@ui.emphasis` **ERROR**'dur, arketip `@style.emphasis`'e taşındı (site kümesi 7'ye çıktı); (2) "argüman verilirse warning, yok sayılır" **EMEKLİ** — argümanlar artık gerçekten okunur, denetlenir (bilinmeyen ad / tip / kapalı-küme / 0..3 aralığı → **ERROR**) ve emit edilir; (3) dekore edilebilen site 2 değil **8**'dir. `@bogus.*` = bilinmeyen namespace **error** (mesaj did-you-mean taşır); yanlış-site **error**. Kendi ns'inizi `extension acme.kanban { on region }` ile bildirirseniz `@acme.kanban` yazılabilir — ama **bugün çıktıya taşınmaz** (v3.0.0 bilinen sınırlaması: validator onaylar, `experience.json`'da görünmez). **AYRI concern:** backend-hassas `@sensitivity`/`@crypto`→maske %100 **tech-driven** kalır (frontend re-declare ETMEZ; [[manifest-mapping-not-superset]] tek-kaynak) — o köprü hâlâ üstakışta, `@ui.hidden` onun yerine geçmez.
+
+## 0.1 Yarım yazım ne yapar (frontend v3.0.2'den beri)
+
+Yazarken model her an **yarım** kalır (kapanmamış blok, eksik ad, sondaki virgül, tırnaksız değer).
+Bundle'ın buna karşı sözleşmesi artık **tek ve nettir** — 97 bozuk yazım × 2 yerleşim = **189 vaka**
+gramerden türetilip ölçülmüştür:
+
+- `node validator/fcdsl.mjs <f>` → **çökmez.** Yarım yazım her zaman **reddedilir** (`exit 1`) ve
+  Langium'un parse hatası (`Expecting token of type '…'`) seni tam o satıra götürür.
+  **ESKİ BUNDLE BELİRTİSİ:** çıktıda `An error occurred during validation` ya da ham bir `TypeError`
+  stack trace görüyorsan bu **senin yazımının değil, bundle'ın eskiliğinin** işaretidir → tazele.
+  (v3.0.2 öncesi bazı yarım yazımlar doğrulayıcıyı — hatta bütün node sürecini — öldürüyordu:
+  `import` yolsuzsa özet satırı bile basılamıyordu.)
+- `node validator/fcdsl.mjs <f> --out <dizin>` → **kapı DEĞİŞMEDİ:** bu bundle `.experience.json`'ı
+  **yalnız 0 error'da** yazar (`✗ emit atlandı: N error var`). Yani burada dosyanın varlığı hâlâ
+  0-error kanıtıdır. Değişen tek şey: hatalı girdide artık **temiz `exit 1`** alırsın, süreç ölmez.
+  (CommandDSL reposunun geliştirici CLI'ı `scripts/fcdsl.ts` bunun AKSİdir — hatalı modelde de JSON
+  yazıp hatayı `meta.hasErrors`'ta taşır. Skill akışında o yolu kullanmıyoruz.)
+- Kural değişmedi: **`.experience.json` ancak 0 error'da devredilir.** Yarım/hatalı modelin
+  manifest'i eksik olur (kimliği okunamayan düğüm taşınmaz) — o yüzden gate var.
 
 ## 1. Model kökü
 
@@ -143,12 +167,10 @@ action New -> screen NewOrder                 # client-only (ad hiçbir uses-com
   op-adı) rezerve bir path-kökünü (`session`·`currentUser`·`row`·ekran-param·state/derived)
   GÖLGELEYEMEZ — `detail X as session` gibi bir ad `session.y`'yi ekran-kaydı mı store mu
   belirsiz kılar (checkScreen). Farklı ad ver.
-- **`@ui.*` dekorasyonu** (frontend-yazarı sunum-ipucu; İ5-lift kapalı küme): field-önüne
-  `@ui.readonly` / `@ui.hidden`, field VEYA screen-önüne `@ui.emphasis` yazılır
-  (`@ui.readonly field email` · `@ui.emphasis screen X`). Manifest `decorations: [...]`
-  emit eder (hidden→«gizli»·readonly→«okunur»·emphasis→«vurgu»). Bilinmeyen namespace
-  (`@bogus.*`) veya yanlış-site (screen'de `@ui.readonly`) = error; argüman = warning
-  (yok sayılır). Backend-hassas maske DEĞİL (o `@sensitivity`→tech-driven; bkz. Envanter Not'u).
+- **Sunum-niyeti dekorasyonu** (`@ui.*` / `@layout.*` / `@style.*`): bileşenlere ve
+  bölgelere yazılır — **yerleşim ve yazım kuralları §13'te** (asimetriktir; bilmeyen yazar
+  parse hatası alır). Manifest `decorations: [{ns, name, args}]` emit eder. Backend-hassas
+  maske DEĞİL (o `@sensitivity`→tech-driven; bkz. Envanter Not'u).
 - **`show a, b`** (list/detail): görüntü-şekli; yazılmazsa default = TÜM out-alanları
   beyan sırasıyla (üreteç tahmin etmez — belgeli default).
 - **`paginated infinite|pager`** yalnız list; niyet ZORUNLU (çıplak `paginated` yok).
@@ -285,3 +307,120 @@ flow SiparisVer = [MyOrders -> NewOrder -> MyOrders] # realizes'siz de legal
   karşılaştırma, `sum of`) ya da hesabı **upstream'e taşı** (tech/query çıktı-alanı olarak döndür).
   Fonksiyon-görünümlü tek meşru yapı: aggregate **`sum of x.y`** (bu bir `Call` DEĞİL; `sum(...)`
   yazımı zaten parse hatası).
+
+## 13. Sunum-niyeti sözlüğü — `@ui` / `@layout` / `@style` (frontend v3.0.0)
+
+> **Tek kaynak:** `CommandDSL/src/frontend/ui-vocabulary.json` (sürüm `3.0.0`). Aşağıdaki tablo o
+> dosyadan **türetilmiştir** — elle liste tutulmaz. Bundle `--version` grammarHash'i snapshot damgasıyla
+> uyuşmuyorsa bu tablo BAYAT sayılır (üstteki Envanter damgası).
+> **Kapsam-dışı:** bu bölümde **glyph/render tablosu YOKTUR** — dekorasyonun ekranda neye dönüştüğü
+> emitter'ın (wiremd/Salt/üreteç) işidir, yazarın değil. Yazar **niyeti** yazar.
+
+Dekorasyon **ne demek istediğini** söyler, **hangi widget'ın çizileceğini** DEĞİL. Namespace
+okuyucunun **degrade sınıfını** belirler: `@ui` = **semantic** (düşerse anlam kaybolur) ·
+`@layout` = **default-layout** (düşerse üreteç kendi yerleşimini uygular) · `@style` = **droppable**
+(düşerse hiçbir şey kaybolmaz).
+
+### 13.1 KURAL A — YERLEŞİM asimetriktir (en sık parse hatası)
+
+**Annotation, düğümün cinsini söyleyen kelimenin yanında durur.**
+
+| Düğüm | Yazım | Örnek |
+|---|---|---|
+| `region` · `list` · `detail` · `value` · `form` · `action` | keyword **SONRA** | `region @layout.grid(columns: 3) main { … }`<br>`list @style.sample(rows: 3) ListItems { … }`<br>`action @style.icon(name: "plus") Yeni -> screen X` |
+| `screen` · `field` (FormField) | annotation **ÖNDE** | `@layout.grid(columns: 2) screen Panel "Panel" { … }`<br>`@ui.readonly field note` |
+
+Sebep gramerdedir (`fragment Decorated`, `frontend-dsl.langium:66`): `Screen`/`FormField`
+dekorasyonu zaten önekliydi, 6 yeni site keyword'ün ardına eklendi. Bir düğüme **birden çok**
+annotation yazılabilir (sırayla, ayraçsız). Yanlış yerleşim = **parse hatası** (validator diagnostic'i
+değil — dosya hiç okunamaz).
+
+### 13.2 KURAL B — kapalı-küme değerler TIRNAKLI yazılır
+
+- **Kapalı küme (domain) → TIRNAK ZORUNLU:** `@ui.choice(cardinality: "one")` ✅ ·
+  `@ui.choice(cardinality: one)` ❌ **PARSE HATASI**. Aynısı `format` · `precision` · `accept` ·
+  `flow` için de geçerlidir.
+- **Bunu yazarsan ne görürsün (frontend v3.0.1'den beri):** ham parse hatasının YANINDA yönlendiren
+  bir ERROR daha üretilir —
+  `'@ui.choice': 'cardinality' argümanının DEĞERİ okunamadı — argüman değerleri yalnız metin ("…"),`
+  `sayı ya da true/false olabilir. 'cardinality' KAPALI KÜME bir argümandır ve değeri TIRNAK içinde`
+  `yazılır: cardinality: "one" (izinli: one, many).`
+  Düzeltme her zaman aynıdır: **değeri tırnak içine al.** (v3.0.1 ÖNCESİ bu yazım doğrulayıcıyı
+  ÇÖKERTİYORDU. v3.0.2'den beri **hiçbir** yazım çökertmez — §0.1 — yani `An error occurred during
+  validation` görüyorsan bundle'ın ESKİDİR, yazımın değil.) Kendi `extension` ns'inde tip evreni olmadığı için mesajın yalnız
+  genel bölümü çıkar (kapalı küme adı verilmez).
+- **Serbest metin → TIRNAKLI:** `@layout.split(ratio: "2:1")`, `@style.icon(name: "plus")`.
+- **Sayı ve boolean → TIRNAKSIZ:** `@layout.grid(columns: 3)`, `@ui.text(multiline: true)`,
+  `@style.emphasis(level: 2)`.
+- **`@style.sample(value:)` üç skaler tipin herhangi birini alır** (metin `"Örnek"` / sayı `42` /
+  `true`) — tipi taşıdığın alana uydur.
+- Argüman **ismiyle** verilir (`ad: değer`), konumsal argüman yok. Bilinmeyen ad / yanlış tip /
+  küme-dışı değer / aralık-dışı sayı = **ERROR** (v3.0.0'da artık gerçekten denetleniyor;
+  v2'deki "argüman almaz, yok sayılır" WARNING'i EMEKLİ).
+
+### 13.3 Sözlük (18 arketip · 8 site) — `ui-vocabulary.json`'dan türetildi
+
+| Namespace (degrade) | Arketip | Yazılabildiği site'lar | Argümanlar |
+|---|---|---|---|
+| `@ui` (semantic) | `text` | `field` | `multiline` true/false · `format` kapalı küme: "email" \| "url" \| "phone" |
+| `@ui` (semantic) | `secret` | `field` | — (argüman almaz) |
+| `@ui` (semantic) | `choice` | `field` | `cardinality` kapalı küme: "one" \| "many", varsayılan "one" |
+| `@ui` (semantic) | `boolean` | `field` | — (argüman almaz) |
+| `@ui` (semantic) | `quantity` | `field` | `bounded` true/false · `min` sayı · `max` sayı · `step` sayı |
+| `@ui` (semantic) | `temporal` | `field` | `precision` kapalı küme: "date" \| "time" \| "datetime" |
+| `@ui` (semantic) | `file` | `field` | `accept` kapalı küme: "image" \| "document" \| "any" |
+| `@ui` (semantic) | `search` | `field` | — (argüman almaz) |
+| `@ui` (semantic) | `readonly` | `field` | — (argüman almaz) |
+| `@ui` (semantic) | `hidden` | `field` | — (argüman almaz) |
+| `@layout` (default-layout) | `stack` | `screen` · `region` | `flow` kapalı küme: "sequential" \| "parallel" |
+| `@layout` (default-layout) | `split` | `screen` · `region` | `ratio` metin "…" |
+| `@layout` (default-layout) | `grid` | `screen` · `region` | `columns` sayı |
+| `@layout` (default-layout) | `group` | `screen` · `region` | `name` metin "…" |
+| `@layout` (default-layout) | `order` | `screen` · `region` | `n` sayı |
+| `@style` (droppable) | `emphasis` | `field` · `screen` · `action` · `list` · `detail` · `value` · `form` | `level` sayı, 0..3 |
+| `@style` (droppable) | `icon` | `action` · `field` | `name` metin "…" |
+| `@style` (droppable) | `sample` | `field` · `list` · `detail` · `value` | `value` skaler (metin "…" / sayı / true-false) · `options` metin "…" · `rows` sayı |
+
+**Sayım (tabloyu türeten script'in çıktısı):** toplam **18** arketip; `@ui`=10 · `@layout`=5 ·
+`@style`=3 · sözlük sürümü `3.0.0`. Site kümesi (**8**): `action, detail, field, form, list, region,
+screen, value`. Yanlış site = ERROR (ör. `@ui.readonly` bir `screen`'e yazılamaz; `@layout.grid` bir
+`field`'a yazılamaz).
+
+### 13.4 Kendi namespace'in — `extension`
+
+```
+extension acme.kanban { on region }        # bildirim: model kökünde
+region @acme.kanban yan (role: supplementary) { … }
+```
+
+Bildirilmemiş ns → ERROR; bildirilmemiş site → ERROR; bildirilmemiş arg adı → ERROR
+(**arg TİP denetimi yok**). ⚠ **Bilinen sınırlama (v3.0.0):** bildirilmiş `extension`
+dekorasyonları **`experience.json`'a taşınmaz** — validator onaylar, tüketici göremez.
+Kendi ns'inin çıktıya ulaşmasına GÜVENME; taşınması gereken bir gerçekse çekirdek arketibe
+(veya upstream'e) yaz.
+
+### 13.5 Parse-kanıtlı örnek (bu bundle'ın doğrulayıcısıyla 0 error/0 warning ölçüldü)
+
+```
+@layout.grid(columns: 2)
+@style.emphasis(level: 2)
+screen Panel "Panel" for Customer {
+  region @layout.split(ratio: "2:1") main (role: primary) {
+    list  @style.sample(rows: 3) ListItems refreshable { show title, amount }
+    value @style.sample(value: 42) ItemCount
+    action @style.icon(name: "plus") Yeni -> screen Duzenle(1)
+  }
+}
+
+form @style.emphasis(level: 1) SaveItem {
+  @ui.text(multiline: true)
+  @style.sample(value: "Örnek başlık")
+  field title { required }
+  @ui.choice(cardinality: "many")  field kind
+  @ui.temporal(precision: "date")  field dueDate
+  @ui.quantity(bounded: true, min: 0, max: 100, step: 5) field amount
+  @ui.file(accept: "image")        field avatar
+  @ui.secret                       field secretKey
+  @ui.readonly                     field note
+}
+```

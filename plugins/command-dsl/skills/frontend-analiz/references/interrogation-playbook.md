@@ -63,6 +63,16 @@ deniyorsa o ekran shared DEĞİL, o experience'ın ekranıdır.
 - "Satıra dokununca ne olsun?" → `on activate -> screen X(row.id)`.
 - "Grafik/harita/takvim gibi özel bir görsel mi gerekiyor?" → extension component
   (`@chart.…`); çekirdeğe widget adı girmez.
+- **★ "Bu ekrandakiler nasıl dizilsin — yan yana mı, alt alta mı? Menü/yan panel var mı?
+  Kartlar kaç sütuna insin? Şu alanlar bir başlık altında gruplansın mı?"** →
+  `@layout.stack(flow: "sequential")` · `@layout.split(ratio: "2:1")` · `@layout.grid(columns: 3)` ·
+  `@layout.group(name: "…")` · `@layout.order(n: 1)` (screen/region site'ları). Sorulmazsa
+  yerleşim niyeti **sessizce kaybolur** — üreteç kendi varsayılanını uygular. Piksel/flex/
+  breakpoint YOK (P-sınırı); tek responsive-niyet `collapse-when: compact`.
+- **○ "Taslakta gerçekçi örnek değerler görünsün mü; listede kaç örnek satır?"** →
+  `@style.sample(rows: 3)` (list) · `(value: 42)` (value/detail) · `(options: "A | B | C")` (field).
+  Söylenecek sınır: örnek veri **illüstrasyondur** — gerçek üretim üreteci yok sayar; gerçek
+  seçenek listesi DEĞİLDİR.
 
 **⚠ Guard — Form/detay karışması:** "hem görsün hem düzenlesin" → detail + ayrı edit-form
 (`loads query` deseni) veya tek form; ikisini tek bileşene sıkıştırma.
@@ -94,11 +104,21 @@ değişikliği ayrı iştir, sunum beyanı değil.
 - "Her alan **ne türde — sayı mı, tarih mi, para mı, metin mi**?" → alan tipi (`uses`
   `in {ad: Tip}`). Tipsiz alan **düz metin kutusu** olarak gelir (numerik klavye /
   tarih-seçici / para-maskesi çıkmaz) — required/min/max sorulup tip atlanmasın.
-- "Bu alan formda **salt-okunur** mu, **gizli** mi, yoksa **vurgulu** mu görünmeli?"
-  → `@ui.readonly` / `@ui.hidden` (field) · `@ui.emphasis` (field VEYA ekran). Frontend-yazarı
-  sunum-ipucu (backend-hassas maske DEĞİL — o `@sensitivity`→tech-driven). **Sorulmazsa**
-  bu niyet en iyi ihtimalle `#` yorumda kalır = **makinece-taşınmaz** (manifest'e girmez,
-  üreteç düz-alan üretir). Author edilince manifest `decorations: [...]` taşır.
+- **★ "Bu alan NE — serbest metin mi, sınırlı bir listeden seçim mi (tek/çok), evet-hayır mı,
+  sayı/miktar mı, tarih mi (yalnız gün mü, saat de mi), dosya mı, parola mı, arama kutusu mu;
+  yoksa görsün-ama-değiştirmesin mi (salt-okunur), hiç görünmesin mi (gizli)?"** →
+  `@ui.text(multiline: true | format: "email"|"url"|"phone")` · `@ui.choice(cardinality: "one"|"many")` ·
+  `@ui.boolean` · `@ui.quantity(bounded: true, min:, max:, step:)` ·
+  `@ui.temporal(precision: "date"|"time"|"datetime")` · `@ui.file(accept: "image"|"document"|"any")` ·
+  `@ui.secret` · `@ui.search` · `@ui.readonly` · `@ui.hidden` (hepsi **field** site'ı).
+  **Sorulmazsa** alan üreteçte **düz metin kutusuna** düşer (tarih-seçici / seçim listesi / parola
+  maskesi / dosya seçici / sayısal klavye ÇIKMAZ) ya da niyet `#` yorumda kalır =
+  **makinece-taşınmaz**. Author edilince manifest `decorations: [{ns, name, args}]` taşır.
+  Vurgu ayrı arketiptir: **`@style.emphasis(level: 0..3)`** (`@ui.emphasis` frontend v3.0.0'da
+  **ERROR**'dur). Backend-hassas maske DEĞİL — o `@sensitivity`→tech-driven.
+  **⚠ Guard — widget markası:** "açılır liste mi radio mu / checkbox mı switch mi / date-picker mı
+  takvim mi" SORMA. Bu üreteç-hedef kararıdır (P-sınırı emsali) ve cevabını DSL'e yazacak yer yok →
+  sorarsan cevabı atarsın. Kullanıcı kendiliğinden söylerse **niyete çevir ve çevirdiğini söyle**.
 - "Uzun form mu — adımlara bölünsün mü?" → `step`.
 - Uygulama-geneli (BİR KEZ sor): "Oturum düşmüşse ne olsun?" (→ Login'e nav) ·
   "Beklenmedik hata?" (→ toast+retry standardı) · "Alan hataları?" (→ formda yerinde).
