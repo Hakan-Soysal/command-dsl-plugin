@@ -41,6 +41,64 @@ node ${CLAUDE_SKILL_DIR}/validator/fcdsl.mjs --version
    arayüzün kasıtlı-yerel (ör. Login) olduğunun teyididir.
 4. 0-error'a gelince `--out <dizin>` ile son koşu → `.experience.json`'lar üretilir.
 
+## Dört yeni tanı (frontend v4.0.0 — biri ERROR)
+
+**Gramer DEĞİŞMEDİ; yasaklar yalnız doğrulayıcıdadır.** Her tanı için: *ne yakalar · ne zaman
+SUSAR (fail-open) · şiddeti*. ⚠ Susma koşullarını yanlış anlatmak aktif olarak yanıltır — bu
+liste `src/frontend/frontend-dsl-validation.ts`'ten birebir çıkarıldı.
+
+**1) Ekranın personası uygulamanın `audience` kümesinde değil — ⛔ HATA**
+
+- **Yakalar:** `experience` "bu uygulamayı şunlar kullanır" der, ekran `for <Persona>` ile başka
+  birine ait olduğunu söyler → o ekrana **hiçbir kullanıcı ulaşamaz** (ölü ekran). Stil kusuru
+  değil; bu yüzden uyarı değil hata.
+- **Susar:** ekran persona taşımıyorsa (çelişecek beyan yok) · `experience` hiç `audience`
+  yazmamışsa (karşılaştıracak küme yok) · ekran `shared` bloğundaysa (orada persona yazmak
+  zaten AYRI bir error'dur, ikinci kez bildirilmez).
+- **Şiddet: ERROR** — bu tanıyı üreten dosya `exit 1` alır. **Bu, sürümü MAJOR yapan tanıdır:
+  daha önce 0-error geçen modeller artık geçmeyebilir.** Kapanış: ya personayı `audience`'a
+  ekle ya ekranın personasını düzelt — **kullanıcıya sorarak** (hangisi doğru, sen bilemezsin).
+
+**2) Personalar arası `nav` geçişi — uyarı**
+
+- **Yakalar:** `nav A -> B` kenarının iki ucu farklı personalara aitse o kenarı hiçbir kullanıcı
+  yürüyemez → navigasyon haritasında ölü kenar.
+- **Susar:** kaynak ya da hedef çözülemiyorsa (yarım yazım; parse tarafı zaten uyarır) · iki
+  ekrandan **biri** persona taşımıyorsa · **hedef** `shared` bloğundaysa (paylaşımlı ekran
+  herkese açıktır) · personalar aynıysa.
+- **Şiddet: uyarı.** Kapanış: hedefi paylaşımlı yap · personaları eşitle · geçişi kaldır.
+
+**3) `currentUser.<alan>` teknik taraftaki kişi bildiriminde yok — uyarı**
+
+- **Yakalar:** oturumdaki kullanıcıdan okunan alan adının uydurma/yazım hatası olmasını
+  (`currentUser.rol` ↔ `role`). İzinli alan listesi **elle tutulmaz — TÜRETİLİR:** tech
+  `manifest.json`'daki `principals[]`'tan (kimlik alanının adı + bağlandığı kaydın alan adı)
+  + her zaman geçerli rol ekseni (`role`, `roles`).
+- **Susar:** teknik taraf bağlı değilse (standalone `.fcdsl`) · manifest **hiç `principals`
+  taşımıyorsa** — elde yazılmış ya da eski (`manifestVersion: 1`) bir manifest'te bu tanı
+  **kalıcı olarak SESSİZDİR** · `session.*` kökü **bilinçle kapsam dışıdır** (şeması olmayan
+  opak depo; yalnız `currentUser.*` denetlenir).
+- ⚠ **Bunu 4'e genelleme.** `principals[]` YALNIZ bu tanının kaynağıdır; 4 numaralı tanı işlem
+  başına `roles` alanına bakar — **bağımsız bir manifest alanı**. `roles` taşıyan ama
+  `principals` taşımayan bir manifest'te **rol-kapısı uyarısı ateşlemeye DEVAM eder**.
+- **Şiddet: uyarı.**
+
+**4) Aksiyonun rol koşulu ile işlemin rol kısıtı sapıyor — uyarı**
+
+- **Yakalar:** `visible-when: currentUser.role = X` gibi bir **rol kapısı**, bağlandığı işlemin
+  tech tarafta bildirdiği `roles` kümesinde YOKSA → kullanıcı butonu görür, basınca yetkisizlik
+  alır.
+- **Susar (beş yer):** teknik taraf bağlı değilse · aksiyon bir işleme bağlanmıyorsa
+  (client-only) / işlem çözülemiyorsa · işlem hiç `roles` bildirmiyorsa · koşul **rol
+  karşılaştırmıyorsa**. Son madde dar: yalnız `currentUser.role`/`currentUser.roles` üzerinden
+  **EŞİTLİK** (`=`) tanınır — `!=`, `>`, `in` ve rol-dışı karşılaştırmalar (`currentUser.id =
+  row.ownerId`) kapsam DIŞIDIR (fail-open: asla tahmin etmez).
+- **Şiddet: uyarı** — duruş `uxOnly`; yetki backend'de zorlanır, bu tanı sapmayı bildirir.
+
+> **Not (v4.0.0 çıktı ekseni):** `experience.json`'ın tip-uzayı DEĞİŞMEDİ — yeni alan/varyant/
+> discriminator yok. Tek değer değişikliği `meta.dslVersion` `"3.0.2"` → `"4.0.0"`. Frontend
+> manifest'ten artık `principals[]` + op-başına `roles` **okuyor**, ama bunlar çıktıya sızmaz.
+
 ## Tech'siz mod (yalnız business bağlıyken KAPALI kalan denetimler)
 
 `contract` var ama `tech` yoksa şunlar SESSİZCE çalışmaz — kullanıcıya baştan söyle:
@@ -50,8 +108,15 @@ node ${CLAUDE_SKILL_DIR}/validator/fcdsl.mjs --version
 - **Validation-divergence** (sunucu kuralı var, form boş).
 - **Pagination divergence** (3 kural — backend sayfalı/sayfasız uyumsuzlukları).
 - **Uncovered-op (union)** — "exposed" bilgisi tech'ten gelir; tech yoksa denetim yok.
+- **`currentUser.<alan>` sözlüğü** (v4.0.0 tanı 3) — sözlük manifest `principals[]`'tan türer;
+  tech yoksa **ya da manifest hiç `principals` taşımıyorsa** (elde yazılmış / `manifestVersion: 1`)
+  kalıcı olarak SESSİZ.
+- **Rol-kapısı sapması** (v4.0.0 tanı 4) — op başına `roles` tech'ten gelir. ⚠ Bu **`principals`'tan
+  BAĞIMSIZ** bir alandır: `roles` var + `principals` yok olan bir manifest'te bu uyarı ATEŞLER.
 
 Çalışmaya DEVAM edenler: anchor (tanımsız-op/kind), audience/persona cross-check,
+**persona↔audience ERROR'u ve personalar-arası nav uyarısı (v4.0.0 tanı 1-2 — ikisi de saf
+`.fcdsl` içi; tech gerekmez)**,
 flow-kapsama, entry/erişilebilirlik, cardinality, queue×out, handler-tamlık, path-kökleri
 ve tüm yapısal kurallar. Teknik analiz sonradan yapılınca: `contract` satırına
 `tech './manifest.json'` ekle + yeniden doğrula (yeni warning'ler = yeni takip soruları).

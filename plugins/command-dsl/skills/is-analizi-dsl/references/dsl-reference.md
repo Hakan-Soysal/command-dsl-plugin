@@ -21,12 +21,13 @@ DSL'ini** (`.cdsl`) üretir; tech DSL (`.tcdsl`) bu skill'in konusu değildir.
 - [§9 Import & dosya organizasyonu](#9-import--dosya-organizasyonu)
 - [§10 Kurallar (rule) & requires](#10-kurallar-rule--requires)
 - [§11 Başarı ölçütü (outcome)](#11-başarı-ölçütü-outcome)
+- [§12 Varlık muafiyeti (waive untouched)](#12-varlık-muafiyeti-waive-untouched)
 
 ---
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — süpürme + tetikleyici haritası)
 
-> **Snapshot:** grammar `8ad0263172c7` · commit `72b4298`+ADR-0044 (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar. Bu turdaki değişim journey katmanıdır (business v1.4.0, ADR-0044): `command-dsl.langium`'a üst-düzey `journey` construct'ı + `moment`/`waive` bildirimleri + kapalı yükümlülük/kind/reason dağarcıkları + özel-fiil `like` sınıf-eki eklendi; `operations.json` additive `journeys[]` + `coverage.journey` kazandı (mevcut alanların şekli/union'ı DEĞİŞMEDİ, meta.schemaVersion 3 korunur). (Önceki tur: M4-01 business v1.3.0, P2 opt-in — `relation`'a opsiyonel `inherited` bayrağı.)
+> **Snapshot:** grammar `241e362a4ba4` · src `a42144b2c81d` · commit `63ed79e`+**business v2.0.0** (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı. NOT: hash reçetesi aile gereği `shared.langium`'u da kapsar. Bu turdaki değişim **varlık muafiyeti**dir (business v2.0.0 — **MAJOR**, §12): `command-dsl.langium`'a üst-düzey `waive untouched at <Varlık> reason <kod> [until '…'] because """…"""` bildirimi + kapalı 3-üyeli gerekçe kümesi eklendi; validator **7 yeni tanı** kazandı; `operations.json` her varlık kaydına additive `entities[].waiver` alanı kazandı (mevcut alanların şekli/union'ı DEĞİŞMEDİ, `meta.schemaVersion` 3 korunur). **⚠ Neden MAJOR:** `untouched` artık **rezerve keyword**tir ve keyword-as-identifier onarımı GÖNDERİLMEDİ → `entity untouched { … }` gibi dün parse eden bir model bugün REDDEDİLİR (ölçüldü: exit 1; tek-token farkla `untouchedX` exit 0). Bu adı tanımlayıcı olarak kullanan modeller **yeniden adlandırılmalıdır**. (Önceki tur: journey katmanı, business v1.4.0, ADR-0044 — `journey`/`moment`/`waive` + `like` sınıf-eki. Ondan önce: M4-01 business v1.3.0, P2 opt-in `relation … inherited`.)
 
 Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını listeler (zorunlular — actor / operation 4'lü imza / entity — faz+validator'ca zorlanır; onların **yanlış-değer** riski SKILL "Emit öncesi" teşhir maddesindedir). Kullanım: (1) her fazda **"Gerçek-dünya sinyali"** kolonunu dinle → aday-soru kuyruğa (hibrit onay). (2) Emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate) — riski soyut değil **"Atlanırsa"** kolonundaki adıyla teşhir et. Sinyal soruyu **TETİKLER, cevabı DOLDURMAZ** (büyü yok).
 
@@ -48,6 +49,7 @@ Yalnız **opsiyonel, sessizce atlanabilir** iş-kuralı/yapı construct'larını
 | **Yıkım kapanışı:** terminal op'ta `perform <BağımlıSilmeOp>` / engelleyici guard / `note` (kaskad kararı — `on success do`'da `delete` eylemi YOKTUR; `perform` kapsam taşımaz → kapsam predikatı tech'te) | "şu kaydı silebilsin / iptal etsin / arşivlesin" + o kayda bağlı (`on`/`from` ile referans veren, ayrı yaşam döngülü) başka kayıt var | 0/3.5 | ★ | **kaskad-belirsizliği (öksüz-kayıt)** — silme/arşivleme var ama bağımlı kayıtların akıbeti kararsız; kayıtlar öksüz kalır (gizlilik + depolama), geliştirici keyfî karar verir |
 | **Arka plan hata dalı:** `System`/`schedule:`/`perform`-hedefi/üretim işleminde başarısızlık yolu (önlenebilir → guard; çalışma-anı → `note` — `on failure` bloğu YOK) | *(kullanıcı cümlesinden DOĞMAZ — model-türevli zorunlu kayıt; her `System`/üretim op'u için otomatik açılır)* | 3 | ★ | **hata-dalsız-arka-plan** — `perform` zincirindeki işlem başarısız olursa davranış tanımsız: zincir yarıda kalır, kayıtlar tutarsız kalır, QA yolu test edemez |
 | **Deneyim-borcu (journey):** her tetik-noktasında (`empty`/`blocked`/`waiting`/`failure`/`mutation`/`irreversible`/`departure`/`provenance`) `moment` ya gerekçeli `waive` | *(kullanıcı cümlesinden DOĞMAZ — **kanal-2 / COMPUTED**; `journey-scan.mjs` `hesaplaTetikler`'i çağırıp tam envanteri — deneyimleyen dahil — basar; tetikler volunteer edilmez, hesaplanır)* | 3.6 | ★ | **sessiz-deneyim-borcu** — sistemin ürettiği bir anda (boş liste / engel / bekleyiş / başarısızlık / kalıcı silme / ayrılma / köken) kullanıcıya karşılık borçlu muyuz kararı sessizce atlanır; özellikle deneyimleyensiz-düşen tetik (J22) saf-kapsama kapısına HİÇ görünmez → durable ★-kaydıyla confirm-or-fix zorunlu (SKILL Değişmez-7; `references/journey-closure.md`) |
+| **Varlık muafiyeti:** `waive untouched at <Varlık> reason <kod> [until '…'] because """…"""` (business v2.0.0, §12) | *(kullanıcı cümlesinden DOĞMAZ — **model-türevli**; modelde hiçbir yerden referans verilmeyen varlık kaldıysa validator `entity.unreferenced` uyarısı verir → o uyarı bu soruyu tetikler: "bu kayıt bilerek mi dokunulmadan duruyor?")* | 0/3 | ○ | **gerekçesiz-ölü-varlık** — bildirilip unutulmuş varlık ile bilerek dokunulmayan varlık ayırt edilemez; uyarı ya sessizce taşınır ya varlık gereksiz yere silinir/uydurma işlem yazılır. Muafiyet **sessiz susturucu DEĞİLDİR**: `entities[].waiver` olarak makine çıktısına gider ve sayılır |
 | `grant/revoke` (çalışma-anı yetki devri) | "geçici erişim ver (24s sonra kalksın) / vekâlet" | 3 | ○ | **kalıcı-veya-eksik-yetki** — geçici devir modellenmez; erişim ya süresiz ya hiç yok |
 | `send <Mesaj> to` (bildirim) | "onaylanınca / olunca haber gitsin, bildirim" | 3 | ○ | **sessiz-bildirim-kaybı** — haber gitmez; alıcı olaydan habersiz |
 | `create … from` (türetilmiş kayıt) | "talepten sipariş / şundan bu üretilir" | 3 | ○ | **üretilmeyen-türev-kayıt** — kaynaktan doğması gereken kayıt oluşmaz |
@@ -283,8 +285,10 @@ import './actors.cdsl'        # dosya başında; göreli veya mutlak path (tek t
 
 - Görünürlük **transitif değildir** (A→B→C'de A, C'yi görmez); bir dosya yalnız
   açıkça import ettiklerini görür.
-- `import`, `using`, `verb`, `process`, `stage`, `schedule` yalın ID olarak
-  kullanılamaz (keyword). İşlem/akış/süreç adı seçerken bunlardan kaçın.
+- `import`, `using`, `verb`, `process`, `stage`, `schedule`, **`untouched`** yalın ID olarak
+  kullanılamaz (keyword). İşlem/akış/süreç/**varlık** adı seçerken bunlardan kaçın.
+  (`untouched` business v2.0.0'da rezerve edildi ve **onarımı yoktur** — bu adı taşıyan eski
+  bir model artık parse ETMEZ, yeniden adlandırılmalıdır; §12.)
 - **Dosya bölme MODÜL bazlıdır** (bu skill'in tercihi): tek modül → tek
   `<modül>.cdsl`; çok modül → modül kadar dosya, aralarında `import`. Detay:
   `consistency-and-emit.md` §C. (Not: `examples/real` tipe-göre bölünmüştür —
@@ -472,9 +476,14 @@ Bir tetik-noktasındaki deneyim borcunu bir **yükümlülük kümesiyle** karş�
 
 ### `waive` — gerekçeli kapatma
 ```
-waive <kind> at <anchor> reason <kod> [until "YYYY-AA-GG"] because """…"""
+waive <kind> at <anchor> reason <kod> [until 'YYYY-AA-GG'] because """…"""
 ```
 Bir tetik-noktasını moment yerine **gerekçeyle** kapatır. `reason` kapalı koddur (makine-görünür); `until` opsiyonel son-tarihtir; `because` ZORUNLU serbest-metin gerekçedir.
+
+> ⚠ **`until` TEK tırnaklıdır** (DÜZELTME — bu doküman daha önce çift tırnak öğretiyordu, **yanlıştı**).
+> Bu DSL'de string terminali `'…'`'dır (`command-dsl.langium`: `terminal STRING: /'[^'\n]*'/`);
+> `until "2026-12-31"` **PARSE ETMEZ**. Yalnız `because` gövdesi üç-çift-tırnaklıdır (`"""…"""`).
+> Aynı kural §12'deki varlık muafiyeti için de geçerlidir.
 
 **5 gerekçe kodu (`reason`, kapalı):**
 - `unreachable` — tetik-noktası statik olarak ulaşılamaz.
@@ -485,3 +494,85 @@ Bir tetik-noktasını moment yerine **gerekçeyle** kapatır. `reason` kapalı k
 
 ### Kapı ilkesi (strict)
 Her tetik-noktası ya bir `moment` ya gerekçeli bir `waive` ile kapanır — kapsanmamış tetik = error (üçüncü hâl yok). Kapı, borcun ÖDENDİĞİNİ değil, her tetikte **authored bir kararın alındığını** garanti eder.
+
+---
+
+## §12 Varlık muafiyeti (waive untouched)
+
+**business v2.0.0 (MAJOR).** Modelde bildirilmiş ama hiçbir yerden söz edilmeyen bir varlık iki
+şeyden biridir: **bildirilip unutulmuş** (gerçek boşluk) ya da **bilerek dokunulmayan** (referans
+listesi, dış sistemin sahibi olduğu kayıt, sonraki faza ertelenmiş alan). Validator ikisini ayırt
+EDEMEZ → uyarır; ayrımı **yazar authored biçimde** yapar. Bu bildirim o ayrımın yeridir.
+
+### Yazım
+
+```
+waive untouched at <Varlık> reason <kod> [until 'YYYY-AA-GG'] because """gerekçe"""
+```
+
+**Birebir kopyalanabilir örnekler** (ikisi de doğrulayıcıdan geçirildi — 0 parse error, 0 tanı):
+
+```
+waive untouched at Country reason reference-data because """Ülke listesi sabit referans verisidir; hiçbir işlem ona dokunmaz."""
+waive untouched at Invoice reason deferred until '2026-12-31' because """Faturalama işlemleri bir sonraki fazda yazılacak."""
+```
+
+- **Yerleşim: TOP-LEVEL.** `journey` bloğunun İÇİNDEKİ `waive` ile karıştırma — ayrı bağlam, ayrı
+  gerekçe kümesi. Bu bildirim dosyanın en üst seviyesindedir.
+- **⚠ Devam satırları GİRİNTİLENEMEZ.** Top-level'da `journey`'nin `{…}` bloğundaki girinti-koruması
+  YOKTUR; girintili devam satırı lexer'da INDENT üretir → **parse error**. Tek satırda ya da
+  girintisiz devam satırlarıyla yaz.
+- **`because` SÖZDİZİMSEL OLARAK ZORUNLUDUR** — gerekçesiz muafiyet parse etmez. Sessiz susturma yok.
+- **`until` TEK tırnaklıdır** (`until '2026-12-31'`); çift tırnak parse etmez. Yalnız `because`
+  gövdesi `"""…"""`'dır.
+
+### Gerekçe kodları — KAPALI küme, TAM ÜÇ üye
+
+| Kod | Ne zaman | `until` |
+|---|---|---|
+| `reference-data` | Sabit liste / katalog; hiç işlem beklenmez (ülke, para birimi, il) | opsiyonel |
+| `external-owned` | Kaydı başka bir sistem yönetiyor; burada yalnız şeması var | opsiyonel |
+| `deferred` | İşlemleri sonra yazılacak — **geçici** | **ZORUNLU** |
+
+Küme gerçekten kapalıdır: küme dışı bir kod **parse etmez** (serbest metin değil). Yolculuk
+(`journey`) muafiyetinin diğer dört kodu (`unreachable` · `inherent` · `generic-policy` ·
+`accepted`) burada **GEÇERLİ DEĞİLDİR** — anlamları an/tetik bağlamına göre seçilmişti.
+**Yalnız `deferred` her iki kümede de vardır.**
+
+> **⚠ Sonraki yazar için:** bu üç üyeli kümeye **dördüncü bir üye eklemek KIRICIDIR** — tüketicinin
+> gördüğü kapalı bir küme genişler; kapalı dallanması olan her tüketici düşer. "Additive → minor"
+> refleksini burada uygulama.
+
+### `untouched` artık REZERVE bir anahtar kelimedir — göç notu
+
+`untouched` bu sürümde rezerve edildi ve **keyword-as-identifier onarımı GÖNDERİLMEDİ**. Sonuç:
+`entity untouched { … }` gibi bu adı **tanımlayıcı** olarak kullanan bir model **dün parse ediyordu,
+bugün REDDEDİLİYOR** (ölçüldü: exit 1 · *"Expecting token of type 'ID' but found `untouched`"*; tek
+token farkla `untouchedX` → exit 0). Böyle bir ad varsa **yeniden adlandırılmalıdır** — sürümün
+MAJOR olmasının sebebi budur. (Karşıt emsal: v1.4.0 ~40 keyword rezerve etti ama onarımlarını da
+gönderdiği için MINOR kaldı. Ayrım rezervasyonda değil, **onarımın yokluğundadır**.)
+
+### 7 yeni tanı (business v2.0.0)
+
+Altısı kodlu, biri kodsuz. **Üç error'un üçü de yeni yazıma KAPILIDIR** — muafiyet bildirimi
+içermeyen bir model hiçbirini tetikleyemez.
+
+| # | Kod | Şiddet | Ne yakalar |
+|---|---|---|---|
+| 1 | `entity-waive.duplicate` | **error** | Aynı varlık için ≥2 muafiyet — hangi gerekçenin geçerli olduğu belirsiz; tek bildirimde birleştir. Evren **çok-doküman** (muafiyet varlıkla aynı dosyada olmak zorunda değil), uyarı yalnız kendi dokümanına yazılır |
+| 2 | `entity-waive.until-format` | **error** | `until` `'YYYY-AA-GG'` biçiminde değil. Biçim bozuksa süre değerlendirmesi (#5) hiç koşmaz |
+| 3 | `entity-waive.deferred-needs-until` | **error** | `reason deferred` var ama `until` yok — `deferred` **süreli** ertelemedir. Kalıcı bir durumsa `reference-data` ya da `external-owned` kullan |
+| 4 | `entity-waive.dead` | uyarı | Muafiyet var AMA işlemler o varlığa gerçekten dokunuyor → ölü muafiyet, kaldır |
+| 5 | `entity-waive.expired` | uyarı | `until` tarihi geçmiş → muafiyet **hükümsüz**; ya işlemleri yaz ya muafiyeti güncelle |
+| 6 | `entity.unreferenced` | uyarı | **Modelde HİÇBİR YERDEN referans verilmeyen varlık.** ⚠ Soru *"hangi işlem dokunuyor"* DEĞİL, *"modelden bundan söz eden bir şey var mı"*: cross-ref ∪ alan tipi ∪ `rule` note ∪ işlem erişimi. Yani yalnız başka bir varlığın alan tipi olarak geçmesi bile uyarıyı susturur |
+| 7 | *(kodsuz)* | uyarı | **Girilemeyen durum:** bir `status` alanında bir değerden ÇIKIŞ geçişi tanımlı ama o değere HİÇ girilemiyor — hiçbir işlem onu atamıyor. Çıkmaz (terminal) durum bilinçle kapsam dışıdır; yakalanan yalnız *girilemeyen* durumdur |
+
+**Muafiyet ↔ #6 etkileşimi (ince nokta):** muafiyet `entity.unreferenced`'ı susturur — **ama yalnız
+SÜRESİ GEÇMEMİŞSE**. `until` tarihi geçtiğinde muafiyet susturuculuğunu KAYBEDER: #5 uyarısı çıkar
+**ve** #6 yeniden ateşlenir. Süreli muafiyet gerçekten süreli davranır.
+
+### Makine devri
+
+`operations.json` → **her** varlık kaydı `waiver` alanı taşır: `{ reason, until, because } | null`
+(muaf olmayanda `null`, `until` yazılmamışsa içeride `null`). "Alan yok" ile "muaf değil" ayrımı
+tüketiciye bırakılmaz. `meta.schemaVersion` **3 kalır** — yeni discriminator/union/enum YOK.

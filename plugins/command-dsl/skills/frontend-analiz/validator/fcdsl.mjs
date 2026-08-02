@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "b7ece23c2f90", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "2cc72c1", builtAt: "2026-07-27T19:15:20+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "b03494d660de", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "63ed79e", builtAt: "2026-07-29T14:18:05+03:00", langium: "4.2.4" };
   }
 });
 
@@ -39528,6 +39528,7 @@ function loadTech(techPath, documentUri) {
         validation: o.validation ?? [],
         hasRefinedInput: refinedRuleIds.length > 0,
         refinedRuleIds,
+        roles: o.roles ?? [],
         pagination: o.pagination ?? null,
         serving: o.serving ?? [],
         returns: o.signature?.returns ?? "",
@@ -39540,6 +39541,12 @@ function loadTech(techPath, documentUri) {
         byRealizes.set(op.realizes, list);
       }
     }
+    const principals = (json.principals ?? []).map((p) => ({
+      name: p.name,
+      identity: p.identity,
+      binds: p.binds ?? null,
+      roles: [...p.roles ?? []]
+    }));
     const errIndex = new Map((json.errors ?? []).map((e) => [`${e.module}.${e.id}`, e.resultType]));
     const decoByType = /* @__PURE__ */ new Map();
     for (const d of [...json.entities ?? [], ...json.types ?? []]) {
@@ -39551,6 +39558,7 @@ function loadTech(techPath, documentUri) {
       uri,
       byId,
       byRealizes,
+      principals,
       resultTypeOf: (module2, err) => errIndex.get(`${module2}.${err}`) ?? null,
       decorationsOfType: (typeName) => decoByType.get(typeName) ?? null
     };
@@ -39937,9 +39945,9 @@ function registerFrontendValidationChecks(services) {
   const v = services.validation.FrontendDslValidator;
   const checks = {
     Model: [v.checkContracts, v.checkUncoveredExposedOps, v.checkSingleReadParamSource],
-    Experience: [v.checkExperienceNames, v.checkAudience, v.checkEntry, v.checkReachability],
+    Experience: [v.checkExperienceNames, v.checkAudience, v.checkEntry, v.checkReachability, v.checkNavPersonaReach],
     UsesDecl: [v.checkUsesShape, v.checkAnchor],
-    Screen: [v.checkScreen],
+    Screen: [v.checkScreen, v.checkScreenPersonaInAudience],
     // T-3.3: `Region` bugüne dek HİÇ kayıtlı değildi → region'a yazılan her dekorasyon sessizce
     // yok sayılıyordu. Diğer beş yeni site'ın (list/detail/value/form/action) check fonksiyonu
     // ZATEN var; onlara İKİNCİ bir kayıt açılmaz (diagnostic iki kez üretilirdi) — çağrı mevcut
@@ -39950,7 +39958,7 @@ function registerFrontendValidationChecks(services) {
     ValueComponent: [v.checkDataComponent],
     FormComponent: [v.checkForm],
     FormField: [v.checkFormField],
-    ActionComponent: [v.checkAction],
+    ActionComponent: [v.checkAction, v.checkRoleGateDivergence],
     ResultHandler: [v.checkResultHandler],
     UiEvent: [v.checkUiEvent],
     WhenBlock: [v.checkWhenBlock],
@@ -39973,6 +39981,35 @@ function businessOf(node) {
   const model = modelOf(node);
   if (!model.contract?.path) return null;
   return loadBusiness(model.contract.path, ast_utils_exports.getDocument(node).uri);
+}
+function currentUserSegments(tech) {
+  if (!tech || tech.principals.length === 0) return null;
+  const s = /* @__PURE__ */ new Set(["role", "roles"]);
+  for (const p of tech.principals) {
+    if (p.identity) s.add(p.identity);
+    if (p.binds?.field) s.add(p.binds.field);
+  }
+  return s;
+}
+function roleLiteralsOf(expr) {
+  const out = [];
+  for (const p of pathsOf(expr)) {
+    if (p.segments.length !== 2) continue;
+    if (p.segments[0] !== "currentUser") continue;
+    if (p.segments[1] !== "role" && p.segments[1] !== "roles") continue;
+    const cmp = p.$container;
+    if (!isCmp(cmp)) continue;
+    if (cmp.op !== "=") continue;
+    const other = cmp.left === p ? cmp.right : cmp.left;
+    if (isPath(other) && other.segments.length === 1) {
+      out.push(other.segments[0]);
+      continue;
+    }
+    if (isLit(other) && typeof other.str === "string") {
+      out.push(other.str.replace(/^['"]|['"]$/g, ""));
+    }
+  }
+  return out;
 }
 function techOf(node) {
   const model = modelOf(node);
@@ -40070,11 +40107,22 @@ function checkPathRootsIn(expr, node, accept, opts) {
   for (const c of screen ? componentsOfScreen(screen) : []) {
     if (isDetailComponent(c) || isValueComponent(c)) roots.add(effectiveName(c));
   }
+  const cuVocab = currentUserSegments(techOf(node));
   for (const p of pathsOf(expr)) {
     if (p.segments.length < 2) continue;
     const root2 = p.segments[0];
     if (!roots.has(root2)) {
       accept("error", `Bilinmeyen path k\xF6k\xFC '${root2}' \u2014 izinli k\xF6kler: session, currentUser, ekran-param, state/derived adlar\u0131, ekran-kayd\u0131 (detail/value ad\u0131)${opts.rowAllowed ? ", row" : ""}${opts.extraRoots ? ", ba\u011Flam alanlar\u0131" : ""}.`, { node: p });
+    }
+    if (root2 === "currentUser" && cuVocab) {
+      const seg = p.segments[1];
+      if (!cuVocab.has(seg)) {
+        accept(
+          "warning",
+          `'currentUser.${seg}' \u2014 teknik tasar\u0131mdaki ki\u015Fi bildiriminde b\xF6yle bir alan yok (bilinenler: ${[...cuVocab].sort().join(", ")}). Yaz\u0131m hatas\u0131 olabilir; de\u011Filse ki\u015Fi bildirimini geni\u015Fletin.`,
+          { node: p }
+        );
+      }
     }
   }
 }
@@ -40423,6 +40471,26 @@ var FrontendDslValidator = class {
       }
     }
   };
+  /**
+   * `nav A -> B`: A ve B farklı personalara aitse kenar hiçbir kullanıcı için yürünebilir
+   * değildir. Fail-open: iki ekrandan biri persona taşımıyorsa · hedef paylaşımlı ekransa ·
+   * kaynak/hedef çözülemiyorsa (yarım yazım) SESSİZ.
+   */
+  checkNavPersonaReach = (exp, accept) => {
+    for (const nav of exp.members.filter(isNavDecl)) {
+      const from = nav.from?.ref;
+      const to = nav.to?.ref;
+      if (!from || !to) continue;
+      if (!from.persona || !to.persona) continue;
+      if (ast_utils_exports.getContainerOfType(to, isSharedBlock)) continue;
+      if (from.persona === to.persona) continue;
+      accept(
+        "warning",
+        `'${from.name}' ekran\u0131 '${from.persona}' i\xE7in, '${to.name}' ekran\u0131 '${to.persona}' i\xE7in yaz\u0131lm\u0131\u015F \u2014 bu ge\xE7i\u015Fi hi\xE7bir kullan\u0131c\u0131 yapamaz. Hedefi payla\u015F\u0131ml\u0131 yap\u0131n, personalar\u0131 e\u015Fitleyin ya da ge\xE7i\u015Fi kald\u0131r\u0131n.`,
+        { node: nav }
+      );
+    }
+  };
   /** #35 — linked'de audience adları actors[]'a karşı (bilinmeyen → warning). */
   checkAudience = (exp, accept) => {
     const business = businessOf(exp);
@@ -40489,6 +40557,54 @@ var FrontendDslValidator = class {
           }
         }
       }
+    }
+  };
+  /**
+   * Ekranın personası, içinde bulunduğu experience'ın `audience` kümesinde OLMALI.
+   * Değilse o ekrana hiçbir kullanıcı ulaşamaz — iki beyan birbirini yalanlıyor → ERROR.
+   * Fail-open: `audience` hiç yazılmamışsa çelişecek beyan yoktur, sessiz.
+   * Shared ekran KAPSAM DIŞI: orada persona yazmak zaten ayrı bir error.
+   */
+  checkScreenPersonaInAudience = (screen, accept) => {
+    if (!screen.persona) return;
+    if (ast_utils_exports.getContainerOfType(screen, isSharedBlock)) return;
+    const exp = ast_utils_exports.getContainerOfType(screen, isExperience);
+    if (!exp || exp.audience.length === 0) return;
+    if (exp.audience.includes(screen.persona)) return;
+    accept(
+      "error",
+      `Ekran '${screen.name}' '${screen.persona}' i\xE7in yaz\u0131lm\u0131\u015F ama uygulaman\u0131n audience k\xFCmesi bunu i\xE7ermiyor (${exp.audience.join(", ")}) \u2014 bu ekrana hi\xE7bir kullan\u0131c\u0131 ula\u015Famaz. Persona'y\u0131 audience'a ekleyin ya da ekran\u0131n personas\u0131n\u0131 d\xFCzeltin.`,
+      { node: screen, property: "persona" }
+    );
+  };
+  /**
+   * Aksiyonun görünürlük koşulundaki rol ile, bağlandığı işlemin teknik taraftaki rol kısıtı
+   * karşılaştırılır. Sapma → warning (uxOnly duruşu gereği error DEĞİL).
+   * Fail-open dört yerde: teknik taraf bağlı değil · işlem çözülemiyor · işlem rol
+   * bildirmiyor · koşul rol karşılaştırmıyor.
+   */
+  checkRoleGateDivergence = (action, accept) => {
+    const vw = action.members?.find(isVisibleWhen);
+    if (!vw) return;
+    const wanted = roleLiteralsOf(vw.expr);
+    if (wanted.length === 0) return;
+    const tech = techOf(action);
+    if (!tech) return;
+    const uses = resolveActionUses(action, this.documents);
+    if (!uses) return;
+    const realized = realizedBizOpId(uses, businessOf(action));
+    if (!realized) return;
+    const ops = tech.byRealizes.get(realized.id) ?? [];
+    if (ops.length === 0) return;
+    const declared = new Set(ops.flatMap((o) => o.roles));
+    if (declared.size === 0) return;
+    for (const r of wanted) {
+      if (declared.has(r)) continue;
+      accept(
+        "warning",
+        `Aksiyon '${action.name}' yaln\u0131z '${r}' rol\xFCne g\xF6steriliyor ama ba\u011Fland\u0131\u011F\u0131 i\u015Flemin teknik tarafta bildirdi\u011Fi roller bunu i\xE7ermiyor (${[...declared].sort().join(", ")}) \u2014 kullan\u0131c\u0131 butonu g\xF6r\xFCr, bas\u0131nca yetkisizlik al\u0131r. Rol\xFC d\xFCzeltin ya da teknik taraftaki k\u0131s\u0131t\u0131 geni\u015Fletin.`,
+        { node: vw, property: "expr" }
+      );
     }
   };
   /** #39 B7 shared-persona yasağı + #35 persona cross-check + #38 component ad-çakışması. */
@@ -40922,7 +41038,7 @@ function namedNode(n) {
 function usableUses(u) {
   return u.name != null && u.kind != null;
 }
-var FRONTEND_DSL_VERSION = "3.0.2";
+var FRONTEND_DSL_VERSION = "4.0.0";
 var ARITH = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
 function serializeExpr(e) {
   if (isBinary(e)) return { node: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };

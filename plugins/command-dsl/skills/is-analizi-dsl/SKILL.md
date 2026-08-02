@@ -271,6 +271,12 @@ buna referans vereceği için temel buradadır.
   Cevap, ilgili silme/arşivleme işleminin yıkım kapanışına girer (Faz 3.5 · D4).
   Sormazsan **öksüz-kayıt** doğar: geliştirici keyfî karar verir, gizlilik/depolama
   sorunu modelde görünmez.
+- **Dokunulmayan kayıtlar (varlık muafiyeti — business v2.0.0):** kullanıcı "bunu sadece
+  saklıyoruz / bu liste sabit / bunu başka sistem yönetiyor / buna şimdilik dokunmayacağız"
+  derse **not al ve devam et** — o kayıt için işlem uydurma. Karar Faz 3 bitince kapanır
+  (bkz. "Emit öncesi" · varlık kapanışı), ama sinyali BURADA yakala.
+  ⚠ Varlık/işlem adı seçerken **`untouched` rezerve bir anahtar kelimedir**
+  (`entity untouched { … }` PARSE ETMEZ ve onarımı yoktur — `references/dsl-reference.md` §12).
 - **Takvimler:** "Sadece mesai saatinde" gibi zaman pencereleri varsa `calendar`.
   Sinyal gelince TANIMINI da sor: "**Mesai saatleri tam olarak ne** — hangi
   günler/saatler, tatiller dahil mi?" — `calendar` yalnız bir etikettir, içeriği
@@ -521,6 +527,26 @@ her flow step → var olan operation; her process stage → var olan flow/operat
 `only if`/`on success` yok, komutta `order by` yok); benzersiz 4'lü imza;
 ownership ilişkileri ve takvimler bildirilmiş. Bir ihlal varsa **emit etme** —
 düzelt, tekrar denetle.
+
+**Varlık kapanışı — "bu kayda kimse dokunmuyor" (business v2.0.0).** Modelde bildirilmiş ama
+**hiçbir yerden söz edilmeyen** bir varlık kaldıysa validator `entity.unreferenced` uyarır. Bu
+uyarı ⚠ *"hiçbir işlem dokunmuyor"* DEMEZ — *"modelde bundan söz eden hiçbir şey yok"* der:
+başka bir varlığın alan tipi olması, bir `rule` note'unda geçmesi ya da bir `where` içinde
+okunması bile uyarıyı susturur. Üç meşru kapanış (üçüncü hâl yok):
+1. **Gerçek boşluk** → eksik işlemi/ilişkiyi sor ve ekle.
+2. **Bilerek dokunulmuyor** → **kullanıcıya sor**, cevabı authored biçimde yaz:
+   `waive untouched at <Varlık> reason <reference-data|external-owned|deferred> [until 'YYYY-AA-GG'] because """…"""`.
+   Gerekçeyi **UYDURMA** — kullanıcıdan al (`because` sözdizimsel olarak zorunludur; sessiz
+   susturma yoktur, muafiyet `entities[].waiver` olarak makine çıktısına gider ve sayılır).
+   `deferred` seçilirse `until` **ZORUNLU**dur ve **TEK tırnaklıdır**; süresi dolan muafiyet
+   susturuculuğunu kaybeder (`entity-waive.expired` + uyarı yeniden ateşlenir).
+3. **Varlık gereksiz** → kullanıcı onaylarsa kaldır. (Uydurma işlem yazarak uyarıyı susturmak
+   Değişmez ihlalidir.)
+
+**Girilemeyen durum uyarısı (kodsuz).** Bir `status` alanında bir değerden **çıkış** geçişi
+yazdın ama o değere **hiçbir işlem geçiremiyor** → uyarı. Bu genelde eksik bir `calculate
+<Entity>.status = '…'`tir: o duruma taşıyan işlemi sor. (Çıkmaz/terminal durum bilinçle
+kapsam dışıdır — uyarı yalnız *girilemeyen* durum içindir.)
 
 > ⚠ **`.cdsl`'i revize/düzenlerken:** DSL dosyalarında toplu metin dönüşümü **CONVENTIONS §12**'ye
 > tabidir — blok-türüne duyarsız sed/regex süpürmesi YASAK; parse-farkındalıklı düzenle +

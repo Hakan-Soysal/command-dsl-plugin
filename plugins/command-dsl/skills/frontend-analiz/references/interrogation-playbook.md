@@ -53,6 +53,20 @@ atanır; buradaki karar "hangi kullanıcı kitlesi + offline gereksinimi". Kayde
 **⚠ Guard — Shared'a persona:** ortak ekrana `for` yazılmaz; "bu ekranı sadece X görsün"
 deniyorsa o ekran shared DEĞİL, o experience'ın ekranıdır.
 
+**⚠ Guard — Persona uygulamanın `audience` kümesinde OLMALI (frontend v4.0.0 — ERROR):** bir ekrana
+`for <Persona>` yazmadan ÖNCE o personanın uygulamanın `audience` kümesinde olduğunu doğrula.
+Değilse o ekrana **hiçbir kullanıcı ulaşamaz** ve doğrulayıcı artık **HATA** verir (uyarı değil —
+dosya `exit 1` alır). Çelişki çıkarsa **kendin seçme, SOR:** "Bu ekranı gerçekten Temsilci mi
+görecek — o zaman uygulamanın kullanıcı kümesine Temsilci'yi ekleyelim mi; yoksa ekran aslında
+Müşteri'nin mi?" İki yanlış kapanış: (a) personayı sessizce silmek (bilgi kaybı), (b) `audience`'a
+sormadan persona eklemek — uygulama sınırını sessizce genişletir (Faz 1'deki "experience şişmesi"
+guard'ının ihlali).
+
+**⚠ Guard — Personalar arası geçiş (uyarı):** `nav A -> B` çizerken iki ekranın personası farklıysa
+o kenarı **hiçbir kullanıcı yürüyemez**. Sor: "Bu geçişi yapan kişi kim — aynı kullanıcı iki ekranı
+da görüyor mu?" Kapanış: hedefi `shared` yap · personaları eşitle · geçişi kaldır. (Hedef
+`shared`'daysa ya da iki ekrandan biri persona taşımıyorsa uyarı zaten çıkmaz.)
+
 ## Faz 4 — Ekran içeriği
 
 - "Bu ekranın ana işi ne — bir şey **bulmak/izlemek** mi (liste), **tek kaydı incelemek**
@@ -76,6 +90,21 @@ deniyorsa o ekran shared DEĞİL, o experience'ın ekranıdır.
 
 **⚠ Guard — Form/detay karışması:** "hem görsün hem düzenlesin" → detail + ayrı edit-form
 (`loads query` deseni) veya tek form; ikisini tek bileşene sıkıştırma.
+
+**⚠ Guard — Rol kapısı ile sunucunun rol kısıtı çelişmesin (frontend v4.0.0, uyarı):**
+`visible-when: currentUser.role = X` yazarken sor: "Bu düğmeye basınca **sunucu** da X rolüne izin
+veriyor mu?" Sapma varsa kullanıcı butonu görür, basınca yetkisizlik alır — doğrulayıcı tech
+bağlıyken bunu **uyarı** olarak bildirir. Kapanış: rolü düzelt ya da teknik taraftaki kısıtı
+genişlet (**teknik tarafı sen değiştiremezsin — kullanıcıya taşı**). Tanı yalnız `currentUser.role`
+/ `currentUser.roles` üzerinden **eşitlik** (`=`) yazımını tanır; `!=`/`in`/rol-dışı karşılaştırma
+kapsam dışıdır (sessiz — "uyarı gelmedi = doğru" DEME).
+
+**⚠ Guard — `currentUser.<alan>` uydurma (frontend v4.0.0, uyarı):** oturumdaki kullanıcıdan bir
+alan okurken (`currentUser.id`, `currentUser.ownerId`…) o adın teknik taraftaki **kişi bildiriminde**
+(`principals[]`) gerçekten var olduğunu doğrula; sözlük elle tutulmaz, manifest'ten türetilir.
+⚠ Manifest kişi bildirimi taşımıyorsa (elde yazılmış / eski manifest) bu denetim **kalıcı olarak
+sessizdir** — o durumda alan adını **kullanıcıya teyit ettir**. `session.*` kökü hiç denetlenmez
+(şemasız opak depo).
 
 ## Faz 5 — Veri mekaniği & offline
 

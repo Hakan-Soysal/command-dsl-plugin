@@ -185,8 +185,14 @@ Ağacı yürü; **ilk yakalanan eksen kazanır**, gerisi `because` içinde ikinc
    o politikayı `because`'ta ADLANDIR (o katmana yönlenen iş-kalemi olur, K4); journey'nin
    KENDİ momentine işaret EDEMEZ.
 4. **"Bilinçli üstlenmiyoruz — kalıcı mı, süreli mi?"** Kalıcı → **`accepted`** (`until`
-   yok). Süreli → **`deferred` + `until "YYYY-AA-GG"` ZORUNLU** (J10; süre geçerse J9
+   yok). Süreli → **`deferred` + `until 'YYYY-AA-GG'` ZORUNLU** (J10; süre geçerse J9
    tetiği error olarak yeniden açar, emit kilitlenir).
+   > ⚠ **DÜZELTME (2026-08-01):** bu satır daha önce `until "YYYY-AA-GG"` (ÇİFT tırnak)
+   > öğretiyordu — **yanlıştı; o yazım PARSE ETMEZ.** Business DSL'de string terminali TEK
+   > tırnaklıdır (`command-dsl.langium`: `terminal STRING: /'[^'\n]*'/`; ölçüldü — çift
+   > tırnakta *"Expecting token of type 'STRING'"*). **qa DSL'i AYRIDIR** (`shared.langium`
+   > terminali iki tırnağı da kabul eder), o yüzden qa dokümanlarındaki çift tırnaklı yazım
+   > doğrudur — bu düzeltmeyi oraya taşıma.
 5. **Hiçbiri ateşlemez → borçluyuz → `moment`** (skill çekirdek auto-fill + J17 kontrol).
 
 **`blocked` inceliği (düz):** "Bu engel kullanıcıya bir **yol** öğretiyor mu (ör.

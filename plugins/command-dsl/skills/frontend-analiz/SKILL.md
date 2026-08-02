@@ -220,6 +220,9 @@ warning / results-divergence warning), `checkUsesShape`, `checkUncoveredExposedO
 - "Hangi ekranlar var; **kim** görür?" → `screen Ad(param) "Görünen Ad" for Persona`.
   Ekran girdisi parametreyle açık geçer (`screen Detay(id)`); persona adları actors[]
   ile cross-check edilir. Shared ekranda `for` YASAK.
+  ⛔ **frontend v4.0.0:** persona, o experience'ın `audience` kümesinde **OLMAK ZORUNDA** —
+  değilse **HATA** (uyarı değil; ekrana hiçbir kullanıcı ulaşamaz = ölü ekran). Çelişki
+  çıkarsa kendin seçme: "audience'a mı eklensin, ekranın personası mı yanlış?" diye **SOR**.
 - "Ekranın **başlığında** kullanıcı ne okusun?" → görünen ad (`"Görünen Ad"`). Yazılmazsa
   manifest `title: null` emit eder — üreteç başlık İCAT ETMEZ (validator da uyarmaz =
   sessiz-eksik). **Her ekrana authored başlık yazdır.**
@@ -231,8 +234,12 @@ warning / results-divergence warning), `checkUsesShape`, `checkUncoveredExposedO
 
 **⚠ Anti-pattern — Kopuk harita:** entry'den hiçbir kenarla ulaşılamayan ekran (warning);
 kapsanmayan akış-adımı (warning) → "nav mı eksik, ekran mı fazla, adım mı kapsam-dışı?"
+**⚠ Anti-pattern — Yürünemeyen kenar (v4.0.0):** `nav A -> B`'nin iki ucu farklı personalara
+aitse o geçişi hiçbir kullanıcı yapamaz (warning) → "hedef shared mı olmalı, personalar mı
+eşitlenmeli, geçiş mi kalkmalı?" (Hedef `shared`'daysa ya da bir uç persona taşımıyorsa sessiz.)
 **Kapatır:** `checkEntry`, `checkReachability`, `checkScreen` (shared-persona error,
-persona cross-check), `checkFlowCoverage`.
+persona cross-check), **`checkScreenPersonaInAudience` (v4.0.0 — ERROR)**,
+**`checkNavPersonaReach` (v4.0.0 — warning)**, `checkFlowCoverage`.
 
 ---
 
@@ -395,11 +402,24 @@ tech'te validation varken formun boş olması offline'da yerel doğrulamayı bo�
   state/derived adları · **ekran-kaydı (detail/value adı — Fork B kökü)** · `row.*`
   (öğe-bağlamı: liste-satırı VE detail tek-kayıt) · literal. Başkası error. (Not: `row`
   yalnız öğe-bağlamında; experience/screen-düzeyi state init/derived ifadesinde `row` YOK.)
+- **frontend v4.0.0 — `currentUser.<alan>` artık sözlükle denetleniyor (uyarı):** ikinci segment,
+  teknik manifest'teki **kişi bildiriminden** (`principals[]`) TÜRETİLEN sözlükte olmalı (kimlik
+  alanı adı + bağlandığı kaydın alan adı + her zaman `role`/`roles`). ⚠ Tech bağlı değilse ya da
+  manifest hiç kişi bildirimi taşımıyorsa (elde yazılmış / eski manifest) denetim **kalıcı olarak
+  SESSİZ** — o durumda alan adını kullanıcıya teyit ettir. `session.*` hiç denetlenmez (şemasız).
+- **frontend v4.0.0 — rol kapısı ↔ işlemin rol kısıtı sapması (uyarı):** `visible-when:
+  currentUser.role = X` yazıp X, işlemin tech tarafta bildirdiği `roles` kümesinde yoksa kullanıcı
+  butonu görür, basınca yetkisizlik alır. Duruş `uxOnly` olduğu için **uyarı**dır, error değil.
+  Kapanış kullanıcıya taşınır (rolü düzelt ya da teknik kısıtı genişlet). ⚠ Tanı DAR: yalnız
+  `currentUser.role`/`.roles` üzerinden **eşitlik** (`=`) tanınır; `!=`/`in`/rol-dışı kıyas kapsam
+  dışıdır → **"uyarı gelmedi = doğru" DEME.** Ayrıca bu tanı op-başına `roles`'a bakar; `principals`
+  taşımayan bir manifest'te bile ATEŞLER (üstteki `currentUser` tanısından BAĞIMSIZ).
 
 **⚠ Anti-pattern — client-only action'a mekanik:** ağ çağrısı olmayan aksiyona
 `cache/queue/remote` anlamsız (warning); action query'ye bağlanamaz (error).
 **Kapatır:** `checkUiEvent` (hedef-çözümü), `checkAction`, `checkPathRootsIn`
-(bilinmeyen kök error), timer/interval semantik pini.
+(bilinmeyen kök error + **v4.0.0 `currentUser.<alan>` sözlük uyarısı**),
+**`checkRoleGateDivergence` (v4.0.0 — rol sapması uyarısı)**, timer/interval semantik pini.
 
 ---
 

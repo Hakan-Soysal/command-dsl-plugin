@@ -124,6 +124,24 @@ bundled/url snapshot olduğu için grammar/validation değişince bayatlar. Müm
 - T1-T4: sorguya komut cümleciği (veya tersi).
 - T5: yinelenen 4'lü imza.
 - Tanımsız entity/relation/calendar/actor.
+- **Varlık muafiyeti (business v2.0.0 — üçü de `waive untouched` yazımına KAPILI; muafiyet
+  bildirimi içermeyen bir model bunları tetikleyemez):**
+  - `entity-waive.duplicate` — aynı varlık için ≥2 muafiyet → tek bildirimde birleştir.
+  - `entity-waive.until-format` — `until` `'YYYY-AA-GG'` biçiminde değil. ⚠ **TEK tırnak**;
+    `until "2026-12-31"` zaten parse ETMEZ (aynı kural journey `waive` için de geçerli).
+  - `entity-waive.deferred-needs-until` — `reason deferred` var, `until` yok. Kalıcı bir
+    durumsa `reference-data` / `external-owned` kullan.
+- **Parse error — `untouched` rezerve:** bu adı tanımlayıcı olarak kullanan eski modeller
+  (`entity untouched { … }`) business v2.0.0'dan beri **REDDEDİLİR** (keyword-as-identifier
+  onarımı YOK) → varlığı yeniden adlandır.
+
+Aynı turun **uyarıları** (error değil, ama Değişmez-3 gereği authored kapanış ister):
+`entity-waive.dead` (muafiyet var ama işlemler dokunuyor) · `entity-waive.expired` (süre doldu →
+muafiyet hükümsüz ve `entity.unreferenced` YENİDEN ateşlenir) · `entity.unreferenced` (modelde
+hiçbir yerden söz edilmeyen varlık — *"hiçbir işlem dokunmuyor" DEĞİL*) · **kodsuz**
+girilemeyen-durum uyarısı (bir status değerinden çıkış geçişi var ama o değere hiç girilemiyor).
+Ayrıntı + kapanış reçeteleri: `dsl-reference.md` §12 ve SKILL.md "Emit öncesi".
+
 Hepsi `consistency-and-emit.md` self-check'inde önlenebilir; doğrulayıcı son emniyet kemeridir.
 
 ## 7. İnsan-okur rapor aracı (`report-business.mjs`)
