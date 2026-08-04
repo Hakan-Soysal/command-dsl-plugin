@@ -9,14 +9,14 @@
     "src/language",
     "src/shared"
   ],
-  "srcHash": "a42144b2c81d",
+  "srcHash": "99cf37174d56",
   "wrapperFiles": [
     "report-business.src.mts",
     "report-index.src.mts"
   ],
   "wrapperHash": "05f903ac4bca",
-  "commit": "63ed79e",
-  "builtAt": "2026-07-29T14:18:05+03:00",
+  "commit": "b42efce",
+  "builtAt": "2026-08-04T16:00:39+03:00",
   "langium": "4.2.4",
   "note": "İnsan-okur rapor bundle'ı — üreteçler: plantuml/plantuml-flow/plantuml-process/plantuml-blueprint/process-doc/cockburn/coverage + report-index (kanonik ortak kopya)"
 }

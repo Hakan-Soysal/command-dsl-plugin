@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-b727382dcf1a", grammarHash: "b727382dcf1a", srcDirs: ["src/shared", "src/tech"], techSrcHash: "091d0ec83d02", wrapperFiles: ["emit-manifest.src.mts"], wrapperHash: "d24fd2b42e78", commit: "63ed79e", builtAt: "2026-07-29T14:18:05+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-b727382dcf1a", grammarHash: "b727382dcf1a", srcDirs: ["src/shared", "src/tech"], techSrcHash: "69ea80910cc4", wrapperFiles: ["emit-manifest.src.mts"], wrapperHash: "d24fd2b42e78", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00", langium: "4.2.4" };
   }
 });
 
@@ -21028,8 +21028,8 @@ function repetitionSep(atn, rule, repetition2) {
   });
   defineDecisionState(atn, starState);
   const handle = makeAlts(atn, rule, starState, repetition2, block(atn, rule, repetition2));
-  const sep = tokenRef(atn, rule, repetition2.separator, repetition2);
-  return star(atn, rule, repetition2, handle, sep);
+  const sep2 = tokenRef(atn, rule, repetition2.separator, repetition2);
+  return star(atn, rule, repetition2, handle, sep2);
 }
 function repetitionMandatory(atn, rule, repetition2) {
   const plusState = newState(atn, rule, repetition2, {
@@ -21045,8 +21045,8 @@ function repetitionMandatorySep(atn, rule, repetition2) {
   });
   defineDecisionState(atn, plusState);
   const handle = makeAlts(atn, rule, plusState, repetition2, block(atn, rule, repetition2));
-  const sep = tokenRef(atn, rule, repetition2.separator, repetition2);
-  return plus(atn, rule, repetition2, handle, sep);
+  const sep2 = tokenRef(atn, rule, repetition2.separator, repetition2);
+  return plus(atn, rule, repetition2, handle, sep2);
 }
 function alternation(atn, rule, alternation2) {
   const start = newState(atn, rule, alternation2, {
@@ -21075,7 +21075,7 @@ function block(atn, rule, block2) {
     return makeBlock(atn, handles);
   }
 }
-function plus(atn, rule, plus2, handle, sep) {
+function plus(atn, rule, plus2, handle, sep2) {
   const blkStart = handle.left;
   const blkEnd = handle.right;
   const loop = newState(atn, rule, plus2, {
@@ -21087,22 +21087,22 @@ function plus(atn, rule, plus2, handle, sep) {
   });
   blkStart.loopback = loop;
   end.loopback = loop;
-  atn.decisionMap[buildATNKey(rule, sep ? "RepetitionMandatoryWithSeparator" : "RepetitionMandatory", plus2.idx)] = loop;
+  atn.decisionMap[buildATNKey(rule, sep2 ? "RepetitionMandatoryWithSeparator" : "RepetitionMandatory", plus2.idx)] = loop;
   epsilon(blkEnd, loop);
-  if (sep === void 0) {
+  if (sep2 === void 0) {
     epsilon(loop, blkStart);
     epsilon(loop, end);
   } else {
     epsilon(loop, end);
-    epsilon(loop, sep.left);
-    epsilon(sep.right, blkStart);
+    epsilon(loop, sep2.left);
+    epsilon(sep2.right, blkStart);
   }
   return {
     left: blkStart,
     right: end
   };
 }
-function star(atn, rule, star2, handle, sep) {
+function star(atn, rule, star2, handle, sep2) {
   const start = handle.left;
   const end = handle.right;
   const entry = newState(atn, rule, star2, {
@@ -21120,14 +21120,14 @@ function star(atn, rule, star2, handle, sep) {
   epsilon(entry, start);
   epsilon(entry, loopEnd);
   epsilon(end, loop);
-  if (sep !== void 0) {
+  if (sep2 !== void 0) {
     epsilon(loop, loopEnd);
-    epsilon(loop, sep.left);
-    epsilon(sep.right, start);
+    epsilon(loop, sep2.left);
+    epsilon(sep2.right, start);
   } else {
     epsilon(loop, entry);
   }
-  atn.decisionMap[buildATNKey(rule, sep ? "RepetitionWithSeparator" : "Repetition", star2.idx)] = entry;
+  atn.decisionMap[buildATNKey(rule, sep2 ? "RepetitionWithSeparator" : "Repetition", star2.idx)] = entry;
   return {
     left: entry,
     right: loopEnd
@@ -25406,7 +25406,7 @@ var UriUtils;
     return a2?.toString() === b?.toString();
   }
   UriUtils2.equals = equals;
-  function relative(from, to) {
+  function relative2(from, to) {
     const fromPath = typeof from === "string" ? URI2.parse(from).path : from.path;
     const toPath = typeof to === "string" ? URI2.parse(to).path : to.path;
     const fromParts = fromPath.split("/").filter((e) => e.length > 0);
@@ -25433,7 +25433,7 @@ var UriUtils;
     const toPart = toParts.slice(i).join("/");
     return backPart + toPart;
   }
-  UriUtils2.relative = relative;
+  UriUtils2.relative = relative2;
   function normalize(uri) {
     return URI2.parse(uri.toString()).toString();
   }
@@ -40632,6 +40632,46 @@ init_define_BUILD_INFO();
 // src/tech/manifest.ts
 init_define_BUILD_INFO();
 
+// src/shared/diagnostics.ts
+init_define_BUILD_INFO();
+import { relative, sep } from "node:path";
+var SEVERITY_NAMES = ["error", "warning", "info", "hint"];
+function defaultCwd() {
+  const p = globalThis.process;
+  return typeof p?.cwd === "function" ? p.cwd() : "/";
+}
+function normalizeDiagnosticPath(fsPath, cwd) {
+  const posix = (p) => p.split(sep).join("/");
+  const rel = posix(relative(cwd, fsPath));
+  if (rel === "" || rel === ".." || rel.startsWith("../")) return posix(fsPath);
+  return rel;
+}
+function cmpStr(a2, b) {
+  return a2 < b ? -1 : a2 > b ? 1 : 0;
+}
+function sortDiagnostics(list) {
+  return list.slice().sort((a2, b) => cmpStr(a2.path, b.path) || a2.line - b.line || a2.char - b.char || cmpStr(a2.code ?? "", b.code ?? "") || cmpStr(a2.message, b.message));
+}
+function toJson(d, path) {
+  const sev = d.severity ?? 1;
+  return {
+    severity: SEVERITY_NAMES[sev - 1] ?? "error",
+    code: d.code == null ? null : String(d.code),
+    path,
+    line: d.range.start.line + 1,
+    char: d.range.start.character + 1,
+    message: d.message
+  };
+}
+function collectDiagnostics(docs, cwd = defaultCwd()) {
+  const out = [];
+  for (const doc of docs) {
+    const path = normalizeDiagnosticPath(doc.uri.fsPath, cwd);
+    for (const d of doc.diagnostics ?? []) out.push(toJson(d, path));
+  }
+  return sortDiagnostics(out);
+}
+
 // src/tech/edges.ts
 init_define_BUILD_INFO();
 function buildModuleIndexes(model) {
@@ -41095,7 +41135,7 @@ function guaranteeJson(g) {
   };
   return g.note != null ? { ...base, note: unq(g.note.text) } : base;
 }
-function emitManifest(document) {
+function emitManifest(document, cwd) {
   const model = document.parseResult.value;
   const modulesAst = model.decls.filter(isModule);
   const contract = model.contract?.path ? loadContract(model.contract.path, document.uri) : null;
@@ -41113,10 +41153,11 @@ function emitManifest(document) {
   const externalNames = new Set(model.decls.filter(isExternal).map((x) => x.name));
   const indexes = buildModuleIndexes(model);
   const errorCount = (document.diagnostics ?? []).filter((d) => d.severity === 1).length;
+  const diagnostics = collectDiagnostics([document], cwd);
   const manifest = {
     mode: model.standalone ? "standalone" : "linked",
     contract: model.contract?.path ?? null,
-    meta: { schemaVersion: TECH_MANIFEST_SCHEMA_VERSION, hasErrors: errorCount > 0, errorCount },
+    meta: { schemaVersion: TECH_MANIFEST_SCHEMA_VERSION, hasErrors: errorCount > 0, errorCount, diagnostics },
     // T-4.4 + ADR-0040
     deployables: model.decls.filter(isDeployable).map((d) => ({
       name: d.name,
@@ -41333,7 +41374,7 @@ function detectNoteLint(text) {
   return hits;
 }
 
-// src/tech/witness.ts
+// src/shared/witness.ts
 init_define_BUILD_INFO();
 var EMPTY_RANGE = { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
 function toRelatedInformation(entry) {
@@ -41344,18 +41385,19 @@ function toRelatedInformation(entry) {
     message: entry.message
   };
 }
-function buildWitness(subjectNode, property2, verdict, entries) {
+function buildWitness(subjectNode, property2, verdict, entries, code) {
   return {
     node: subjectNode,
     property: property2,
+    ...code === void 0 ? {} : { code },
     relatedInformation: entries.map(toRelatedInformation),
     // `subject` = stabil özne adı (op/entity/module `name`); diagnostic'i (verdict:subject)
     // anahtarıyla eşlenebilir kılar (witness verdict'leri için stabil kimlik).
     data: { verdict, subject: subjectNode.name }
   };
 }
-function acceptWitness(accept, severity, message, subject, property2, verdict, entries) {
-  accept(severity, message, buildWitness(subject, property2, verdict, entries));
+function acceptWitness(accept, severity, message, subject, property2, verdict, entries, code) {
+  accept(severity, message, buildWitness(subject, property2, verdict, entries, code));
 }
 
 // src/tech/tech-dsl-validation.ts
@@ -43613,9 +43655,9 @@ var TechDslValidator = class {
     for (const [key, entries] of groups) {
       const distinctModules = new Set(entries.map((e) => e.module));
       if (distinctModules.size < 2) continue;
-      const sep = key.indexOf("\0");
-      const kind = key.slice(0, sep);
-      const name = key.slice(sep + 1);
+      const sep2 = key.indexOf("\0");
+      const kind = key.slice(0, sep2);
+      const name = key.slice(sep2 + 1);
       const mods = [...distinctModules].sort().join(", ");
       const allSame = new Set(entries.map((e) => e.shape)).size === 1;
       const msg = allSame ? `\xC7apraz-mod\xFCl duplikasyon: ${kind} '${name}' AYNI yap\u0131sal \u015Fekille \u015Fu mod\xFCllerde tekrar ediyor: ${mods}. Kas\u0131tl\u0131 yeniden-tan\u0131m m\u0131, yoksa tek kayna\u011Fa m\u0131 \xE7ekilmeli? (yap\u0131sal ad+shape e\u015Fitli\u011Fi; anlamsal-benzerlik de\u011Fil)` : `\xC7apraz-mod\xFCl ad-\xE7ak\u0131\u015Fmas\u0131: ${kind} '${name}' \u015Fu mod\xFCllerde FARKLI yap\u0131sal \u015Fekillerle tan\u0131ml\u0131: ${mods} \u2014 \xE7\xF6z\xFCmleyici son-tan\u0131mlayan\u0131 sessizce se\xE7ebilir (fail-open riski). Adlar\u0131 ayr\u0131\u015Ft\u0131r ya da tek \u015Fekle birle\u015Ftir. (yap\u0131sal ad+shape k\u0131yas\u0131; anlamsal-benzerlik de\u011Fil)`;

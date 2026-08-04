@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "b03494d660de", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "63ed79e", builtAt: "2026-07-29T14:18:05+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "5c187b5581e2", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00", langium: "4.2.4" };
   }
 });
 
@@ -21028,8 +21028,8 @@ function repetitionSep(atn, rule, repetition2) {
   });
   defineDecisionState(atn, starState);
   const handle = makeAlts(atn, rule, starState, repetition2, block(atn, rule, repetition2));
-  const sep = tokenRef(atn, rule, repetition2.separator, repetition2);
-  return star(atn, rule, repetition2, handle, sep);
+  const sep2 = tokenRef(atn, rule, repetition2.separator, repetition2);
+  return star(atn, rule, repetition2, handle, sep2);
 }
 function repetitionMandatory(atn, rule, repetition2) {
   const plusState = newState(atn, rule, repetition2, {
@@ -21045,8 +21045,8 @@ function repetitionMandatorySep(atn, rule, repetition2) {
   });
   defineDecisionState(atn, plusState);
   const handle = makeAlts(atn, rule, plusState, repetition2, block(atn, rule, repetition2));
-  const sep = tokenRef(atn, rule, repetition2.separator, repetition2);
-  return plus(atn, rule, repetition2, handle, sep);
+  const sep2 = tokenRef(atn, rule, repetition2.separator, repetition2);
+  return plus(atn, rule, repetition2, handle, sep2);
 }
 function alternation(atn, rule, alternation2) {
   const start = newState(atn, rule, alternation2, {
@@ -21075,7 +21075,7 @@ function block(atn, rule, block2) {
     return makeBlock(atn, handles);
   }
 }
-function plus(atn, rule, plus2, handle, sep) {
+function plus(atn, rule, plus2, handle, sep2) {
   const blkStart = handle.left;
   const blkEnd = handle.right;
   const loop = newState(atn, rule, plus2, {
@@ -21087,22 +21087,22 @@ function plus(atn, rule, plus2, handle, sep) {
   });
   blkStart.loopback = loop;
   end.loopback = loop;
-  atn.decisionMap[buildATNKey(rule, sep ? "RepetitionMandatoryWithSeparator" : "RepetitionMandatory", plus2.idx)] = loop;
+  atn.decisionMap[buildATNKey(rule, sep2 ? "RepetitionMandatoryWithSeparator" : "RepetitionMandatory", plus2.idx)] = loop;
   epsilon(blkEnd, loop);
-  if (sep === void 0) {
+  if (sep2 === void 0) {
     epsilon(loop, blkStart);
     epsilon(loop, end);
   } else {
     epsilon(loop, end);
-    epsilon(loop, sep.left);
-    epsilon(sep.right, blkStart);
+    epsilon(loop, sep2.left);
+    epsilon(sep2.right, blkStart);
   }
   return {
     left: blkStart,
     right: end
   };
 }
-function star(atn, rule, star2, handle, sep) {
+function star(atn, rule, star2, handle, sep2) {
   const start = handle.left;
   const end = handle.right;
   const entry = newState(atn, rule, star2, {
@@ -21120,14 +21120,14 @@ function star(atn, rule, star2, handle, sep) {
   epsilon(entry, start);
   epsilon(entry, loopEnd);
   epsilon(end, loop);
-  if (sep !== void 0) {
+  if (sep2 !== void 0) {
     epsilon(loop, loopEnd);
-    epsilon(loop, sep.left);
-    epsilon(sep.right, start);
+    epsilon(loop, sep2.left);
+    epsilon(sep2.right, start);
   } else {
     epsilon(loop, entry);
   }
-  atn.decisionMap[buildATNKey(rule, sep ? "RepetitionWithSeparator" : "Repetition", star2.idx)] = entry;
+  atn.decisionMap[buildATNKey(rule, sep2 ? "RepetitionWithSeparator" : "Repetition", star2.idx)] = entry;
   return {
     left: entry,
     right: loopEnd
@@ -25406,7 +25406,7 @@ var UriUtils;
     return a2?.toString() === b?.toString();
   }
   UriUtils2.equals = equals;
-  function relative(from, to) {
+  function relative2(from, to) {
     const fromPath = typeof from === "string" ? URI2.parse(from).path : from.path;
     const toPath = typeof to === "string" ? URI2.parse(to).path : to.path;
     const fromParts = fromPath.split("/").filter((e) => e.length > 0);
@@ -25433,7 +25433,7 @@ var UriUtils;
     const toPart = toParts.slice(i).join("/");
     return backPart + toPart;
   }
-  UriUtils2.relative = relative;
+  UriUtils2.relative = relative2;
   function normalize(uri) {
     return URI2.parse(uri.toString()).toString();
   }
@@ -39699,6 +39699,32 @@ var FrontendDslTokenBuilder = class extends DefaultTokenBuilder {
 // src/frontend/frontend-dsl-validation.ts
 init_define_BUILD_INFO();
 
+// src/shared/witness.ts
+init_define_BUILD_INFO();
+var EMPTY_RANGE = { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
+function toRelatedInformation(entry) {
+  const doc = ast_utils_exports.getDocument(entry.node);
+  const range = entry.node.$cstNode?.range ?? EMPTY_RANGE;
+  return {
+    location: { uri: doc.uri.toString(), range },
+    message: entry.message
+  };
+}
+function buildWitness(subjectNode, property2, verdict, entries, code) {
+  return {
+    node: subjectNode,
+    property: property2,
+    ...code === void 0 ? {} : { code },
+    relatedInformation: entries.map(toRelatedInformation),
+    // `subject` = stabil özne adı (op/entity/module `name`); diagnostic'i (verdict:subject)
+    // anahtarıyla eşlenebilir kılar (witness verdict'leri için stabil kimlik).
+    data: { verdict, subject: subjectNode.name }
+  };
+}
+function acceptWitness(accept, severity, message, subject, property2, verdict, entries, code) {
+  accept(severity, message, buildWitness(subject, property2, verdict, entries, code));
+}
+
 // src/frontend/ui-vocabulary.ts
 init_define_BUILD_INFO();
 
@@ -40229,12 +40255,25 @@ function checkDecorations(model, decorations, site, accept) {
     if (!isBlessedNs(d.ns)) {
       const decl = extensionsOf(model).get(key);
       if (!decl) {
-        const siblings = (model.extensions ?? []).filter((e) => e.ns === d.ns).map((e) => `@${e.ns}.${e.name}`);
-        accept(
-          "error",
-          siblings.length > 0 ? `Bildirilmemi\u015F dekorasyon '@${key}' \u2014 '@${d.ns}' alt\u0131nda bildirilenler: ${siblings.join(", ")}; ya birini kullan\u0131n ya dosyaya 'extension ${key} { on ${site} }' ekleyin.` : `Bilinmeyen dekorasyon namespace'i '@${d.ns}.*' \u2014 \xE7ekirdek: ${blessedNamespaces().map((n) => `@${n}`).join("/")}; kendi ns'iniz i\xE7in dosyada 'extension ${key} { on ${site} }' bildirin.`,
-          { node: d, property: "ns" }
-        );
+        const sibDecls = (model.extensions ?? []).filter((e) => e.ns === d.ns);
+        if (sibDecls.length > 0) {
+          const siblings = sibDecls.map((e) => `@${e.ns}.${e.name}`);
+          acceptWitness(
+            accept,
+            "error",
+            `Bildirilmemi\u015F dekorasyon '@${key}' \u2014 '@${d.ns}' alt\u0131nda bildirilenler: ${siblings.join(", ")}; ya birini kullan\u0131n ya dosyaya 'extension ${key} { on ${site} }' ekleyin.`,
+            d,
+            "ns",
+            "undeclared-decoration",
+            sibDecls.map((e) => ({ node: e, message: `bildirilmi\u015F karde\u015F dekorasyon: @${e.ns}.${e.name}` }))
+          );
+        } else {
+          accept(
+            "error",
+            `Bilinmeyen dekorasyon namespace'i '@${d.ns}.*' \u2014 \xE7ekirdek: ${blessedNamespaces().map((n) => `@${n}`).join("/")}; kendi ns'iniz i\xE7in dosyada 'extension ${key} { on ${site} }' bildirin.`,
+            { node: d, property: "ns" }
+          );
+        }
         continue;
       }
       const allowed = declaredSitesOf(decl);
@@ -40245,7 +40284,15 @@ function checkDecorations(model, decorations, site, accept) {
       const declaredArgs = decl.params.map((p) => p.name);
       for (const a2 of d.args) {
         if (!declaredArgs.includes(a2.name)) {
-          accept("error", `'@${key}' bilinmeyen arg\xFCman '${a2.name}' \u2014 bildirilen arg(lar): ${declaredArgs.length > 0 ? declaredArgs.join(", ") : "(yok)"}.`, { node: a2, property: "name" });
+          acceptWitness(
+            accept,
+            "error",
+            `'@${key}' bilinmeyen arg\xFCman '${a2.name}' \u2014 bildirilen arg(lar): ${declaredArgs.length > 0 ? declaredArgs.join(", ") : "(yok)"}.`,
+            a2,
+            "name",
+            "undeclared-arg",
+            decl.params.map((p) => ({ node: p, message: `bildirilen arg: ${p.name}` }))
+          );
         }
         if (a2.value == null) accept("error", argValueUnreadableMessage(key, a2.name, void 0), { node: a2, property: "name" });
       }
@@ -41019,6 +41066,48 @@ function createFrontendDslServices(context) {
 
 // src/frontend/experience.ts
 init_define_BUILD_INFO();
+
+// src/shared/diagnostics.ts
+init_define_BUILD_INFO();
+import { relative, sep } from "node:path";
+var SEVERITY_NAMES = ["error", "warning", "info", "hint"];
+function defaultCwd() {
+  const p = globalThis.process;
+  return typeof p?.cwd === "function" ? p.cwd() : "/";
+}
+function normalizeDiagnosticPath(fsPath, cwd) {
+  const posix = (p) => p.split(sep).join("/");
+  const rel = posix(relative(cwd, fsPath));
+  if (rel === "" || rel === ".." || rel.startsWith("../")) return posix(fsPath);
+  return rel;
+}
+function cmpStr(a2, b) {
+  return a2 < b ? -1 : a2 > b ? 1 : 0;
+}
+function sortDiagnostics(list) {
+  return list.slice().sort((a2, b) => cmpStr(a2.path, b.path) || a2.line - b.line || a2.char - b.char || cmpStr(a2.code ?? "", b.code ?? "") || cmpStr(a2.message, b.message));
+}
+function toJson(d, path) {
+  const sev = d.severity ?? 1;
+  return {
+    severity: SEVERITY_NAMES[sev - 1] ?? "error",
+    code: d.code == null ? null : String(d.code),
+    path,
+    line: d.range.start.line + 1,
+    char: d.range.start.character + 1,
+    message: d.message
+  };
+}
+function collectDiagnostics(docs2, cwd = defaultCwd()) {
+  const out = [];
+  for (const doc of docs2) {
+    const path = normalizeDiagnosticPath(doc.uri.fsPath, cwd);
+    for (const d of doc.diagnostics ?? []) out.push(toJson(d, path));
+  }
+  return sortDiagnostics(out);
+}
+
+// src/frontend/experience.ts
 function decorationsJson(decorations, site) {
   const out = [];
   for (const d of decorations) {
@@ -41038,7 +41127,7 @@ function namedNode(n) {
 function usableUses(u) {
   return u.name != null && u.kind != null;
 }
-var FRONTEND_DSL_VERSION = "4.0.0";
+var FRONTEND_DSL_VERSION = "4.1.0";
 var ARITH = { "+": "add", "-": "sub", "*": "mul", "/": "div" };
 function serializeExpr(e) {
   if (isBinary(e)) return { node: e.op, left: serializeExpr(e.left), right: serializeExpr(e.right) };
@@ -41063,19 +41152,20 @@ function serializeExpr(e) {
   }
   return { path: [] };
 }
-function emitExperience(document, documents2) {
+function emitExperience(document, documents2, cwd) {
   const model = document.parseResult.value;
   const docUri = document.uri;
   const contract = model.contract?.path ? model.contract : void 0;
   const business = contract ? loadBusiness(contract.path, docUri) : null;
   const tech = contract?.techPath ? loadTech(contract.techPath, docUri) : null;
   const errorCount = (document.diagnostics ?? []).filter((d) => (d.severity ?? 1) === 1).length;
+  const diagnostics2 = collectDiagnostics([document], cwd);
   return {
     mode: contract ? "linked" : "standalone",
     contract: contract ? { business: contract.path, tech: contract.techPath ?? null } : null,
     shared: model.shared ? sharedJson(model.shared, business, tech, documents2) : null,
     experiences: model.experiences.filter((e) => e.name != null).map((e) => experienceJson(e, business, tech, documents2)),
-    meta: { hasErrors: errorCount > 0, errorCount, dslVersion: FRONTEND_DSL_VERSION }
+    meta: { hasErrors: errorCount > 0, errorCount, dslVersion: FRONTEND_DSL_VERSION, diagnostics: diagnostics2 }
   };
 }
 function sharedJson(shared2, business, tech, documents2) {

@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-241e362a4ba4", grammarHash: "241e362a4ba4", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "a42144b2c81d", wrapperFiles: ["emit-operations.src.mts"], wrapperHash: "f705db09efc8", commit: "63ed79e", builtAt: "2026-07-29T14:18:05+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-241e362a4ba4", grammarHash: "241e362a4ba4", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "99cf37174d56", wrapperFiles: ["emit-operations.src.mts"], wrapperHash: "f705db09efc8", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00", langium: "4.2.4" };
   }
 });
 
@@ -21028,8 +21028,8 @@ function repetitionSep(atn, rule, repetition2) {
   });
   defineDecisionState(atn, starState);
   const handle = makeAlts(atn, rule, starState, repetition2, block(atn, rule, repetition2));
-  const sep = tokenRef(atn, rule, repetition2.separator, repetition2);
-  return star(atn, rule, repetition2, handle, sep);
+  const sep2 = tokenRef(atn, rule, repetition2.separator, repetition2);
+  return star(atn, rule, repetition2, handle, sep2);
 }
 function repetitionMandatory(atn, rule, repetition2) {
   const plusState = newState(atn, rule, repetition2, {
@@ -21045,8 +21045,8 @@ function repetitionMandatorySep(atn, rule, repetition2) {
   });
   defineDecisionState(atn, plusState);
   const handle = makeAlts(atn, rule, plusState, repetition2, block(atn, rule, repetition2));
-  const sep = tokenRef(atn, rule, repetition2.separator, repetition2);
-  return plus(atn, rule, repetition2, handle, sep);
+  const sep2 = tokenRef(atn, rule, repetition2.separator, repetition2);
+  return plus(atn, rule, repetition2, handle, sep2);
 }
 function alternation(atn, rule, alternation2) {
   const start = newState(atn, rule, alternation2, {
@@ -21075,7 +21075,7 @@ function block(atn, rule, block2) {
     return makeBlock(atn, handles);
   }
 }
-function plus(atn, rule, plus2, handle, sep) {
+function plus(atn, rule, plus2, handle, sep2) {
   const blkStart = handle.left;
   const blkEnd = handle.right;
   const loop = newState(atn, rule, plus2, {
@@ -21087,22 +21087,22 @@ function plus(atn, rule, plus2, handle, sep) {
   });
   blkStart.loopback = loop;
   end.loopback = loop;
-  atn.decisionMap[buildATNKey(rule, sep ? "RepetitionMandatoryWithSeparator" : "RepetitionMandatory", plus2.idx)] = loop;
+  atn.decisionMap[buildATNKey(rule, sep2 ? "RepetitionMandatoryWithSeparator" : "RepetitionMandatory", plus2.idx)] = loop;
   epsilon(blkEnd, loop);
-  if (sep === void 0) {
+  if (sep2 === void 0) {
     epsilon(loop, blkStart);
     epsilon(loop, end);
   } else {
     epsilon(loop, end);
-    epsilon(loop, sep.left);
-    epsilon(sep.right, blkStart);
+    epsilon(loop, sep2.left);
+    epsilon(sep2.right, blkStart);
   }
   return {
     left: blkStart,
     right: end
   };
 }
-function star(atn, rule, star2, handle, sep) {
+function star(atn, rule, star2, handle, sep2) {
   const start = handle.left;
   const end = handle.right;
   const entry = newState(atn, rule, star2, {
@@ -21120,14 +21120,14 @@ function star(atn, rule, star2, handle, sep) {
   epsilon(entry, start);
   epsilon(entry, loopEnd);
   epsilon(end, loop);
-  if (sep !== void 0) {
+  if (sep2 !== void 0) {
     epsilon(loop, loopEnd);
-    epsilon(loop, sep.left);
-    epsilon(sep.right, start);
+    epsilon(loop, sep2.left);
+    epsilon(sep2.right, start);
   } else {
     epsilon(loop, entry);
   }
-  atn.decisionMap[buildATNKey(rule, sep ? "RepetitionWithSeparator" : "Repetition", star2.idx)] = entry;
+  atn.decisionMap[buildATNKey(rule, sep2 ? "RepetitionWithSeparator" : "Repetition", star2.idx)] = entry;
   return {
     left: entry,
     right: loopEnd
@@ -25406,7 +25406,7 @@ var UriUtils;
     return a2?.toString() === b?.toString();
   }
   UriUtils2.equals = equals;
-  function relative(from, to) {
+  function relative2(from, to) {
     const fromPath = typeof from === "string" ? URI2.parse(from).path : from.path;
     const toPath = typeof to === "string" ? URI2.parse(to).path : to.path;
     const fromParts = fromPath.split("/").filter((e) => e.length > 0);
@@ -25433,7 +25433,7 @@ var UriUtils;
     const toPart = toParts.slice(i).join("/");
     return backPart + toPart;
   }
-  UriUtils2.relative = relative;
+  UriUtils2.relative = relative2;
   function normalize(uri) {
     return URI2.parse(uri.toString()).toString();
   }
@@ -39131,6 +39131,32 @@ function detectWaiveExcuse(reason) {
   return null;
 }
 
+// src/shared/witness.ts
+init_define_BUILD_INFO();
+var EMPTY_RANGE = { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
+function toRelatedInformation(entry) {
+  const doc2 = ast_utils_exports.getDocument(entry.node);
+  const range = entry.node.$cstNode?.range ?? EMPTY_RANGE;
+  return {
+    location: { uri: doc2.uri.toString(), range },
+    message: entry.message
+  };
+}
+function buildWitness(subjectNode, property2, verdict, entries, code) {
+  return {
+    node: subjectNode,
+    property: property2,
+    ...code === void 0 ? {} : { code },
+    relatedInformation: entries.map(toRelatedInformation),
+    // `subject` = stabil özne adı (op/entity/module `name`); diagnostic'i (verdict:subject)
+    // anahtarıyla eşlenebilir kılar (witness verdict'leri için stabil kimlik).
+    data: { verdict, subject: subjectNode.name }
+  };
+}
+function acceptWitness(accept, severity, message, subject, property2, verdict, entries, code) {
+  accept(severity, message, buildWitness(subject, property2, verdict, entries, code));
+}
+
 // src/language/imports.ts
 init_define_BUILD_INFO();
 function isAbsoluteImportPath(path) {
@@ -40365,6 +40391,46 @@ function kapsamaDegerlendir(journeys, T, flowStepIndex, today) {
   return entries;
 }
 
+// src/shared/diagnostics.ts
+init_define_BUILD_INFO();
+import { relative, sep } from "node:path";
+var SEVERITY_NAMES = ["error", "warning", "info", "hint"];
+function defaultCwd() {
+  const p = globalThis.process;
+  return typeof p?.cwd === "function" ? p.cwd() : "/";
+}
+function normalizeDiagnosticPath(fsPath, cwd) {
+  const posix = (p) => p.split(sep).join("/");
+  const rel = posix(relative(cwd, fsPath));
+  if (rel === "" || rel === ".." || rel.startsWith("../")) return posix(fsPath);
+  return rel;
+}
+function cmpStr(a2, b) {
+  return a2 < b ? -1 : a2 > b ? 1 : 0;
+}
+function sortDiagnostics(list) {
+  return list.slice().sort((a2, b) => cmpStr(a2.path, b.path) || a2.line - b.line || a2.char - b.char || cmpStr(a2.code ?? "", b.code ?? "") || cmpStr(a2.message, b.message));
+}
+function toJson(d, path) {
+  const sev = d.severity ?? 1;
+  return {
+    severity: SEVERITY_NAMES[sev - 1] ?? "error",
+    code: d.code == null ? null : String(d.code),
+    path,
+    line: d.range.start.line + 1,
+    char: d.range.start.character + 1,
+    message: d.message
+  };
+}
+function collectDiagnostics(docs, cwd = defaultCwd()) {
+  const out = [];
+  for (const doc2 of docs) {
+    const path = normalizeDiagnosticPath(doc2.uri.fsPath, cwd);
+    for (const d of doc2.diagnostics ?? []) out.push(toJson(d, path));
+  }
+  return sortDiagnostics(out);
+}
+
 // src/generator/ops-expr.ts
 init_define_BUILD_INFO();
 
@@ -40980,7 +41046,7 @@ function deriveOpAccess(op) {
   for (const w of writes) reads.delete(w);
   return { writes, reads };
 }
-function genOperationsIndex(model2, units2) {
+function genOperationsIndex(model2, units2, cwd) {
   const cov = computeCoverage(model2);
   const domains = computeDomains(model2);
   const processesByOp = stagedProcessesByOperation(model2);
@@ -41040,10 +41106,12 @@ function genOperationsIndex(model2, units2) {
   }
   const uncoveredEntities = [...referenced].filter((id) => !emittedIds.has(id)).sort();
   let errorCount = 0;
+  const diagDocs = [];
   for (const m of modelsOf(model2)) {
     for (const d of m.$document?.diagnostics ?? []) if (d.severity === 1) errorCount++;
+    if (m.$document) diagDocs.push(m.$document);
   }
-  const meta = { schemaVersion: 3, hasErrors: errorCount > 0, errorCount };
+  const meta = { schemaVersion: 3, hasErrors: errorCount > 0, errorCount, diagnostics: collectDiagnostics(diagDocs, cwd) };
   const journeyActive = elementsOf(model2).some(isJourneyDef);
   const jTriggers = journeyActive ? hesaplaTetikler(model2).triggers : [];
   return {
@@ -42063,19 +42131,25 @@ var CommandDslValidator = class {
     const verbDefs = [];
     for (const vm of unit) for (const el of vm.elements) if (isVerbDef(el)) verbDefs.push(el);
     let nC = 0, nU = 0, nD = 0, nX = 0;
-    const updatesList = [];
+    const updatesDefs = [];
     for (const v of verbDefs) {
       if (v.klass === "creates") nC++;
       else if (v.klass === "updates") {
         nU++;
-        updatesList.push(v.name);
+        updatesDefs.push(v);
       } else if (v.klass === "deletes") nD++;
       else nX++;
     }
-    accept(
+    const updatesList = updatesDefs.map((v) => v.name);
+    acceptWitness(
+      accept,
       "info",
       `Fiil-s\u0131n\u0131f\u0131 beyan tablosu: ${verbDefs.length} \xF6zel fiil \u2014 creates: ${nC}, updates: ${nU}, deletes: ${nD}, beyans\u0131z: ${nX}. 'like updates' beyanl\u0131lar: ${updatesList.join(", ")} (\u2605 teyidi: bu eylemler i\xE7erik \xFCretiyor ya da yok ediyor mu?).`,
-      { node: firstJourney, property: "name", code: "journey.J21" }
+      firstJourney,
+      "name",
+      "verb-updates-declared",
+      updatesDefs.map((v) => ({ node: v, message: `'like updates' beyanl\u0131 \xF6zel fiil: ${v.name}` })),
+      "journey.J21"
     );
     for (const t of hesaplaTetikler(unit).droppedJ22) {
       if (ast_utils_exports.getContainerOfType(t.anchor, isModel) !== model2) continue;
@@ -42596,18 +42670,27 @@ var CommandDslValidator = class {
       seen.add(key);
     }
   }
-  /** Aktör genelleştirmesi döngü içeremez (A extends B extends A) */
+  /** Aktör genelleştirmesi döngü içeremez (A extends B extends A).
+   *  İhlal-tanığı (ADR-0016 Karar 3): zincirin HER halkası `relatedInformation` girdisidir
+   *  (tıklanabilir konum) — mesajdaki `→` zinciriyle ELEMAN-ELEMAN, AYNI SIRADA örtüşür.
+   *  Son halka zincire geri dönen aktördür (mesajda da tekrar eder) → entry sayısı zincir
+   *  uzunluğuna eşittir, konumu ilk geçişiyle aynıdır. Mesaj METNİ DEĞİŞMEDİ. */
   checkActorHierarchy(actor, accept) {
     if (!actor.parent) return;
     const seen = /* @__PURE__ */ new Set([actor]);
     let current = actor.parent.ref;
     while (current) {
       if (seen.has(current)) {
-        const chain = [...seen].map((a2) => a2.name).concat(current.name).join(" \u2192 ");
-        accept(
+        const cycle = [...seen].concat(current);
+        const chain = cycle.map((a2) => a2.name).join(" \u2192 ");
+        acceptWitness(
+          accept,
           "error",
           `Akt\xF6r genelle\u015Ftirmesi d\xF6ng\xFC i\xE7eriyor: ${chain}`,
-          { node: actor, property: "parent" }
+          actor,
+          "parent",
+          "actor-cycle",
+          cycle.map((a2, i) => ({ node: a2, message: `\xE7evrim halkas\u0131 ${i + 1}/${cycle.length}: akt\xF6r '${a2.name}'` }))
         );
         return;
       }

@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-241e362a4ba4", grammarHash: "241e362a4ba4", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "a42144b2c81d", wrapperFiles: ["report-business.src.mts", "report-index.src.mts"], wrapperHash: "05f903ac4bca", commit: "63ed79e", builtAt: "2026-07-29T14:18:05+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "cdsl-v3.x-241e362a4ba4", grammarHash: "241e362a4ba4", srcDirs: ["src/generated", "src/generator", "src/language", "src/shared"], srcHash: "99cf37174d56", wrapperFiles: ["report-business.src.mts", "report-index.src.mts"], wrapperHash: "05f903ac4bca", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00", langium: "4.2.4" };
   }
 });
 
@@ -39116,6 +39116,32 @@ function detectWaiveExcuse(reason) {
   return null;
 }
 
+// src/shared/witness.ts
+init_define_BUILD_INFO();
+var EMPTY_RANGE = { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
+function toRelatedInformation(entry) {
+  const doc = ast_utils_exports.getDocument(entry.node);
+  const range = entry.node.$cstNode?.range ?? EMPTY_RANGE;
+  return {
+    location: { uri: doc.uri.toString(), range },
+    message: entry.message
+  };
+}
+function buildWitness(subjectNode, property2, verdict, entries, code) {
+  return {
+    node: subjectNode,
+    property: property2,
+    ...code === void 0 ? {} : { code },
+    relatedInformation: entries.map(toRelatedInformation),
+    // `subject` = stabil özne adı (op/entity/module `name`); diagnostic'i (verdict:subject)
+    // anahtarıyla eşlenebilir kılar (witness verdict'leri için stabil kimlik).
+    data: { verdict, subject: subjectNode.name }
+  };
+}
+function acceptWitness(accept, severity, message, subject, property2, verdict, entries, code) {
+  accept(severity, message, buildWitness(subject, property2, verdict, entries, code));
+}
+
 // src/language/imports.ts
 init_define_BUILD_INFO();
 function isAbsoluteImportPath(path) {
@@ -40373,6 +40399,9 @@ function kapsamaDegerlendir(journeys, T, flowStepIndex, today) {
   }
   return entries;
 }
+
+// src/shared/diagnostics.ts
+init_define_BUILD_INFO();
 
 // src/generator/ops-expr.ts
 init_define_BUILD_INFO();
@@ -42137,19 +42166,25 @@ var CommandDslValidator = class {
     const verbDefs = [];
     for (const vm of unit) for (const el of vm.elements) if (isVerbDef(el)) verbDefs.push(el);
     let nC = 0, nU = 0, nD = 0, nX = 0;
-    const updatesList = [];
+    const updatesDefs = [];
     for (const v of verbDefs) {
       if (v.klass === "creates") nC++;
       else if (v.klass === "updates") {
         nU++;
-        updatesList.push(v.name);
+        updatesDefs.push(v);
       } else if (v.klass === "deletes") nD++;
       else nX++;
     }
-    accept(
+    const updatesList = updatesDefs.map((v) => v.name);
+    acceptWitness(
+      accept,
       "info",
       `Fiil-s\u0131n\u0131f\u0131 beyan tablosu: ${verbDefs.length} \xF6zel fiil \u2014 creates: ${nC}, updates: ${nU}, deletes: ${nD}, beyans\u0131z: ${nX}. 'like updates' beyanl\u0131lar: ${updatesList.join(", ")} (\u2605 teyidi: bu eylemler i\xE7erik \xFCretiyor ya da yok ediyor mu?).`,
-      { node: firstJourney, property: "name", code: "journey.J21" }
+      firstJourney,
+      "name",
+      "verb-updates-declared",
+      updatesDefs.map((v) => ({ node: v, message: `'like updates' beyanl\u0131 \xF6zel fiil: ${v.name}` })),
+      "journey.J21"
     );
     for (const t of hesaplaTetikler(unit).droppedJ22) {
       if (ast_utils_exports.getContainerOfType(t.anchor, isModel) !== model) continue;
@@ -42670,18 +42705,27 @@ var CommandDslValidator = class {
       seen.add(key);
     }
   }
-  /** Aktör genelleştirmesi döngü içeremez (A extends B extends A) */
+  /** Aktör genelleştirmesi döngü içeremez (A extends B extends A).
+   *  İhlal-tanığı (ADR-0016 Karar 3): zincirin HER halkası `relatedInformation` girdisidir
+   *  (tıklanabilir konum) — mesajdaki `→` zinciriyle ELEMAN-ELEMAN, AYNI SIRADA örtüşür.
+   *  Son halka zincire geri dönen aktördür (mesajda da tekrar eder) → entry sayısı zincir
+   *  uzunluğuna eşittir, konumu ilk geçişiyle aynıdır. Mesaj METNİ DEĞİŞMEDİ. */
   checkActorHierarchy(actor, accept) {
     if (!actor.parent) return;
     const seen = /* @__PURE__ */ new Set([actor]);
     let current = actor.parent.ref;
     while (current) {
       if (seen.has(current)) {
-        const chain = [...seen].map((a2) => a2.name).concat(current.name).join(" \u2192 ");
-        accept(
+        const cycle = [...seen].concat(current);
+        const chain = cycle.map((a2) => a2.name).join(" \u2192 ");
+        acceptWitness(
+          accept,
           "error",
           `Akt\xF6r genelle\u015Ftirmesi d\xF6ng\xFC i\xE7eriyor: ${chain}`,
-          { node: actor, property: "parent" }
+          actor,
+          "parent",
+          "actor-cycle",
+          cycle.map((a2, i) => ({ node: a2, message: `\xE7evrim halkas\u0131 ${i + 1}/${cycle.length}: akt\xF6r '${a2.name}'` }))
         );
         return;
       }

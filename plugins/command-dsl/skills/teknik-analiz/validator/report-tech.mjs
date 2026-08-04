@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-tech", srcDirs: ["src/generator", "src/tech", "src/tech-report"], srcHash: "1d8fd8f0b277", wrapperFiles: ["report-index.src.mts", "report-tech.src.mts"], wrapperHash: "203a170d4320", commit: "63ed79e", builtAt: "2026-07-29T14:18:05+03:00" };
+var define_BUILD_INFO_default = { tool: "report-tech", srcDirs: ["src/generator", "src/tech", "src/tech-report"], srcHash: "0191119913e5", wrapperFiles: ["report-index.src.mts", "report-tech.src.mts"], wrapperHash: "203a170d4320", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00" };
 
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/teknik-analiz/validator/report-tech.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync, rmSync } from "node:fs";

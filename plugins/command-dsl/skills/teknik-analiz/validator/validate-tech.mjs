@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-b727382dcf1a", grammarHash: "b727382dcf1a", srcDirs: ["src/shared", "src/tech"], techSrcHash: "091d0ec83d02", wrapperFiles: ["validate-tech.src.mts"], wrapperHash: "b193075762a9", commit: "63ed79e", builtAt: "2026-07-29T14:18:05+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "tech-v1.x-b727382dcf1a", grammarHash: "b727382dcf1a", srcDirs: ["src/shared", "src/tech"], techSrcHash: "69ea80910cc4", wrapperFiles: ["validate-tech.src.mts"], wrapperHash: "b193075762a9", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00", langium: "4.2.4" };
   }
 });
 
@@ -40623,6 +40623,9 @@ init_define_BUILD_INFO();
 // src/tech/manifest.ts
 init_define_BUILD_INFO();
 
+// src/shared/diagnostics.ts
+init_define_BUILD_INFO();
+
 // src/tech/edges.ts
 init_define_BUILD_INFO();
 function buildModuleIndexes(model) {
@@ -40916,7 +40919,7 @@ function detectNoteLint(text) {
   return hits;
 }
 
-// src/tech/witness.ts
+// src/shared/witness.ts
 init_define_BUILD_INFO();
 var EMPTY_RANGE = { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } };
 function toRelatedInformation(entry) {
@@ -40927,18 +40930,19 @@ function toRelatedInformation(entry) {
     message: entry.message
   };
 }
-function buildWitness(subjectNode, property2, verdict, entries) {
+function buildWitness(subjectNode, property2, verdict, entries, code) {
   return {
     node: subjectNode,
     property: property2,
+    ...code === void 0 ? {} : { code },
     relatedInformation: entries.map(toRelatedInformation),
     // `subject` = stabil özne adı (op/entity/module `name`); diagnostic'i (verdict:subject)
     // anahtarıyla eşlenebilir kılar (witness verdict'leri için stabil kimlik).
     data: { verdict, subject: subjectNode.name }
   };
 }
-function acceptWitness(accept, severity, message, subject, property2, verdict, entries) {
-  accept(severity, message, buildWitness(subject, property2, verdict, entries));
+function acceptWitness(accept, severity, message, subject, property2, verdict, entries, code) {
+  accept(severity, message, buildWitness(subject, property2, verdict, entries, code));
 }
 
 // src/tech/tech-dsl-validation.ts
