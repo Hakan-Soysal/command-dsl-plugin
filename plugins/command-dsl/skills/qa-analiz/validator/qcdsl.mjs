@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "dc745e020074", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "d73350dce00e", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "175a1c4", builtAt: "2026-08-07T17:20:54+03:00", langium: "4.2.4" };
   }
 });
 
@@ -53399,6 +53399,10 @@ function abacAnchorOf(op) {
 function matchOf(callerField) {
   return callerField.type?.collection ? "membership" : "eq";
 }
+function concurrencyOf(entity) {
+  const clause = entity.concurrency.find(isConcurrencyClause);
+  return clause ? clause.strategy : null;
+}
 
 // src/shared/expr-ast.ts
 init_define_BUILD_INFO();
@@ -56417,6 +56421,7 @@ function opShape(op) {
   const onEvents = [];
   let paginated = false;
   const accessEntities = [];
+  const concurrentEntities = [];
   for (const clause of op.clauses ?? []) {
     if (isValidationClause(clause)) {
       for (const c of clause.checks) {
@@ -56456,7 +56461,11 @@ function opShape(op) {
     } else if (isAccessClause(clause)) {
       for (const eff of clause.effects) {
         for (const ent of eff.entities) {
-          if (ent.ref) accessEntities.push(ent.ref);
+          if (!ent.ref) continue;
+          accessEntities.push(ent.ref);
+          if ((eff.verb === "updates" || eff.verb === "deletes") && concurrencyOf(ent.ref) === "optimistic" && !concurrentEntities.includes(ent.ref)) {
+            concurrentEntities.push(ent.ref);
+          }
         }
       }
     }
@@ -56488,7 +56497,8 @@ function opShape(op) {
     paginated,
     returnsCollection: op.returns?.collection ?? false,
     returnsTypeName: op.returns?.name ?? null,
-    accessEntities
+    accessEntities,
+    concurrentEntities
   };
 }
 function callInfo(clause) {
@@ -56526,7 +56536,7 @@ function branchUniverse(shape) {
     out.push(filters && isRowScopeMechanism(m) ? { kind: "filtered", via: m } : { kind: "notAuthorized", via: m });
   }
   if (shape.hasAnonValidation) out.push({ kind: "anonymousNotValid" });
-  if (shape.hasAnonRule) out.push({ kind: "anonymousNotProcessable" });
+  if (shape.hasAnonRule || shape.concurrentEntities.length > 0) out.push({ kind: "anonymousNotProcessable" });
   for (const c of shape.failureBranchCalls) out.push({ kind: "callFailure", target: c.qualified });
   return out;
 }
@@ -56608,8 +56618,8 @@ function coversToBranch(covers, shape) {
     return { branch: { kind: "anonymousNotValid" }, problem: null };
   }
   if (covers.notProcessable) {
-    if (!shape.hasAnonRule) {
-      return { branch: null, problem: `'${shape.qualified}' id'siz rule check'i ta\u015F\u0131m\u0131yor \u2014 anonim NotProcessable dal\u0131 yok (S5).` };
+    if (!shape.hasAnonRule && shape.concurrentEntities.length === 0) {
+      return { branch: null, problem: `'${shape.qualified}' id'siz rule check'i ta\u015F\u0131m\u0131yor ve 'concurrency optimistic' bir entity'ye YAZMIYOR \u2014 anonim NotProcessable dal\u0131 yok (S5 / K2).` };
     }
     return { branch: { kind: "anonymousNotProcessable" }, problem: null };
   }
@@ -56696,12 +56706,30 @@ function computeWorkspaceCoverage(entries, documents2, today) {
   }
   const covered = /* @__PURE__ */ new Map();
   const waived = /* @__PURE__ */ new Map();
+  const emitAsserted = /* @__PURE__ */ new Map();
   const flowCovered = /* @__PURE__ */ new Map();
   const processCovered = /* @__PURE__ */ new Map();
   const outcomeSatisfied = /* @__PURE__ */ new Map();
   const flowsUniverse = /* @__PURE__ */ new Map();
   for (const { model, file } of entries) {
-    let addCover2 = function(op, covers, ref) {
+    let addEmitted2 = function(op, asserts, ref) {
+      if (!op || !asserts) return;
+      const key = `${docUriOf(op)}#${shapeOf(op).qualified}`;
+      for (const a2 of asserts) {
+        if (!isEmittedAssert(a2)) continue;
+        const ev = a2.event?.ref;
+        if (!ev) continue;
+        const q = eventQualified(ev);
+        let m = emitAsserted.get(key);
+        if (!m) {
+          m = /* @__PURE__ */ new Map();
+          emitAsserted.set(key, m);
+        }
+        const list = m.get(q) ?? [];
+        list.push(ref);
+        m.set(q, list);
+      }
+    }, addCover2 = function(op, covers, ref) {
       if (!op || !covers) return;
       const shape = shapeOf(op);
       const res = coversToBranch(covers, shape);
@@ -56717,7 +56745,7 @@ function computeWorkspaceCoverage(entries, documents2, today) {
       list.push(ref);
       m.set(bk, list);
     };
-    var addCover = addCover2;
+    var addEmitted = addEmitted2, addCover = addCover2;
     const doc = ast_utils_exports.getDocument(model);
     const flowsUse = model.uses.find((x) => x.kind === "flows");
     const flowsIdx = flowsUse ? loadFlows(flowsUse.path, doc.uri) : null;
@@ -56731,6 +56759,7 @@ function computeWorkspaceCoverage(entries, documents2, today) {
     for (const member of model.members) {
       if (isQaTest(member)) {
         addCover2(member.op?.ref, member.covers, { file, test: member.title });
+        addEmitted2(member.op?.ref, member.then?.asserts, { file, test: member.title });
       } else if (isScenario(member)) {
         if (flowsIdx) {
           if (member.flow && flowsIdx.flowIds.has(member.flow)) {
@@ -56749,6 +56778,7 @@ function computeWorkspaceCoverage(entries, documents2, today) {
         for (const item of member.items) {
           if (isStep(item)) {
             addCover2(item.op?.ref, item.expect, { file, scenario: member.title, step: stepIndex });
+            addEmitted2(item.op?.ref, item.asserts, { file, scenario: member.title, step: stepIndex });
             stepIndex++;
           } else if (isAdvanceTime(item)) {
             stepIndex++;
@@ -56788,6 +56818,25 @@ function computeWorkspaceCoverage(entries, documents2, today) {
       });
     }
   }
+  const emits = [];
+  for (const [key, opCov] of opIndex) {
+    const successCovered = opCov.branches.some((b) => b.branch.kind === "success" && b.status === "covered");
+    const seen = /* @__PURE__ */ new Set();
+    for (const ev of opCov.shape.emits) {
+      const q = eventQualified(ev);
+      if (seen.has(q)) continue;
+      seen.add(q);
+      const refs = emitAsserted.get(key)?.get(q) ?? [];
+      emits.push({
+        op: opCov.id,
+        event: q,
+        techUri: opCov.techUri,
+        rootUri: opCov.rootUri,
+        status: refs.length > 0 ? "covered" : successCovered ? "uncovered" : "notRequired",
+        coveredBy: refs
+      });
+    }
+  }
   const opByNode = /* @__PURE__ */ new Map();
   for (const oc of opIndex.values()) opByNode.set(oc.shape.op, oc);
   const guarantees = guaranteeSyms.map((gs) => guaranteeCoverage(gs.node, gs.rootUri, opByNode));
@@ -56808,7 +56857,7 @@ function computeWorkspaceCoverage(entries, documents2, today) {
       outcomes.push({ id, flowsUri: uri, status: refs.length > 0 ? "covered" : "uncovered", coveredBy: refs });
     }
   }
-  return { operations: [...opIndex.values()], flows, processes, outcomes, guarantees };
+  return { operations: [...opIndex.values()], flows, processes, outcomes, guarantees, emits };
 }
 function unqC(s) {
   return s.replace(/^["']/, "").replace(/["']$/, "");
@@ -57027,6 +57076,7 @@ function condedFieldKeys(asserts, entity) {
 }
 var UNCOVERED_GUARANTEE_CODE = "qa.uncovered-guarantee";
 var MUTATION_INCOMPLETE_CODE = "qa.mutation-incomplete";
+var UNASSERTED_EVENT_CODE = "qa.unasserted-event";
 var WAIVE_EXCUSE_CODE = "qa.waive-excuse";
 function condLiteral(expr) {
   let n = expr;
@@ -57264,6 +57314,14 @@ var QaDslValidator = class {
       }
       if (lines.length > 0) {
         accept("warning", `Kapsanmam\u0131\u015F dallar (workspace-union; her dal ya test/step ya waive \u2014 \xA71): ${lines.join(" \xB7 ")}`, { node: use, property: "path", code: UNCOVERED_BRANCHES_CODE });
+      }
+      const evLines = coverage.emits.filter((e) => e.rootUri === rootUri && e.status === "uncovered").map((e) => `${e.op} \u2192 ${e.event}`);
+      if (evLines.length > 0) {
+        accept(
+          "warning",
+          `Do\u011Frulanmam\u0131\u015F olaylar (op'un ba\u015Far\u0131 dal\u0131 test edilmi\u015F ama emit etti\u011Fi olay hi\xE7bir assert'le KANITLANMAMI\u015E \u2014 sahte-kapsam): ${evLines.join(" \xB7 ")}. D\xFCzeltme: o testin 'then' blo\u011Funa 'emitted <Event>' ekle ('with { \u2026 }' ile y\xFCk alanlar\u0131n\u0131 da pinleyebilirsin). 'not emitted' SAYILMAZ \u2014 yokluk iddias\u0131 varl\u0131\u011F\u0131 kan\u0131tlamaz. Olay\u0131 bilin\xE7le test etmiyorsan ba\u015Far\u0131 dal\u0131n\u0131 waive et: 'waive <Op> covers Success because "\u2026"'.`,
+          { node: use, property: "path", code: UNASSERTED_EVENT_CODE }
+        );
       }
       const gLines = [];
       for (const g of coverage.guarantees) {
@@ -58569,9 +58627,16 @@ function emitMergedQa(models, documents2, cwd = process.cwd()) {
       coveredBy: o.coveredBy
     }))
   }));
+  const emits = coverage.emits.slice().sort((a2, b) => a2.op.localeCompare(b.op, "en") || a2.event.localeCompare(b.event, "en") || a2.techUri.localeCompare(b.techUri, "en")).map((e) => ({
+    op: e.op,
+    event: e.event,
+    tech: rel(uriToFsPath(e.techUri)),
+    status: e.status,
+    coveredBy: e.coveredBy
+  }));
   return {
     meta: { dsl: "qa", schemaVersion: QA_SCHEMA_VERSION, merged: true, sources: entries.map((e) => e.file), hasErrors: errorCount > 0, errorCount, diagnostics: collectDiagnostics(countedDocs, cwd) },
-    coverage: { operations, flows: mapRealize(coverage.flows), processes: mapRealize(coverage.processes), outcomes: mapRealize(coverage.outcomes), guarantees },
+    coverage: { operations, flows: mapRealize(coverage.flows), processes: mapRealize(coverage.processes), outcomes: mapRealize(coverage.outcomes), guarantees, emits },
     files: entries.map((e) => emitQaFile(e.model, cwd))
   };
 }

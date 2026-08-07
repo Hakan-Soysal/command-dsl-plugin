@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/playground"], srcHash: "02d56d91adba", wrapperFiles: ["report-frontend.src.mts", "report-index.src.mts"], wrapperHash: "1d80610aab15", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00" };
+var define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/playground"], srcHash: "02d56d91adba", wrapperFiles: ["report-frontend.src.mts", "report-index.src.mts"], wrapperHash: "1d80610aab15", commit: "175a1c4", builtAt: "2026-08-07T17:20:54+03:00" };
 
 // ../DSL Business Analyses/command-dsl-plugin/plugins/command-dsl/skills/frontend-analiz/validator/report-frontend.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync, readdirSync as readdirSync2, statSync as statSync2, rmSync } from "node:fs";

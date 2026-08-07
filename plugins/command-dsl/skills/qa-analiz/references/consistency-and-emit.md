@@ -49,7 +49,10 @@ Doğrulayıcı yakalar ama döngü israfıdır — emit'ten önce şunları kend
   `node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs <dosyalar|dizin> --strict --out <dizin> --merged <dizin>/qa.json --json`
 - **`--strict` bundle'da VARSAYILANDIR** (kullanıcı kararı §8/3) — kapsanmamış dal
   (`qa.uncovered-branches`) error'a yükselir; skill çağrısı okunabilirlik için yine
-  açık `--strict` yazar. Flow/process presence-uyarıları strict'te de **warning**
+  açık `--strict` yazar. **Strict-yükseltilen küme qa v5.4.0 itibarıyla DÖRT:**
+  `qa.uncovered-branches` · `qa.uncovered-guarantee` · `qa.mutation-incomplete` ·
+  **`qa.unasserted-event`**. ⚠ Yükseltme CLI'ye YERELDİR — `--json` çıktısında bu kayıtlar
+  `"warning"` görünür, `errorCount` 0 kalabilir; **kapı EXIT KODUDUR**. Flow/process presence-uyarıları strict'te de **warning**
   kalır (S6 yalnız dal-coverage vaadi) — onlar takip-sorusudur, kapı değil.
 - **Gate garantisi:** herhangi bir dosyada severity-1 error varsa
   (strict-yükseltilmişler DAHİL) araç HİÇBİR JSON yazmaz (partial da yok; exit 1).
@@ -67,7 +70,10 @@ Doğrulayıcı yakalar ama döngü israfıdır — emit'ten önce şunları kend
   union'ı göremez (correctness-over-completeness).
 - **`qa.json` (merged, `--merged`):** workspace birleşimi + **coverage YALNIZ burada**
   (karar #18): op-başına `branches[]` (covered/waived/uncovered + `coveredBy[]`),
-  flows/processes presence durumu. "Her dal kapalı" iddiasının makine-okur KANITI
+  flows/processes presence durumu, **ve qa v5.4.0'dan beri `coverage.emits[]`** — her
+  `(op → event)` yükümlülüğü `{op, event, tech, status: covered|uncovered|notRequired,
+  coveredBy[]}` (`tech-to-qa-translation.md` §A1b). `emits` de per-file'da YOKTUR.
+  "Her dal kapalı" iddiasının makine-okur KANITI
   budur — bu yüzden merged üretimi ertelenemez (frontend'ten bilinçli fark).
 - **Determinizm (S13):** branch türetim-sırası sabit (Success → refinement sınır-ihlali
   dalları param kaynak-sırası → validation-guard'lar kaynak-sırası → rule-guard'lar →

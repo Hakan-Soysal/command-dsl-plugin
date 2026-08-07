@@ -325,6 +325,22 @@ error), defaults tekilliği (aynı op'a bir dosyada tek defaults), İQ3 stub-ç�
   taşıyan op'ta bu white-box kanıt TEK BAŞINA yetmez** — mutasyon ayrıca **kamu okuma
   yüzeyinden** de gözlenmeli (business-seviyesi readback; senaryo işi → Faz 5 + Emit
   bölümü "Kapsandı ≠ doğrulandı" geçidi md.4).
+- **Olay kanıtı — op `emits` ediyorsa ZORUNLU (qa v5.4.0 · `qa.unasserted-event`):** Success dalını
+  test ettiğin op tech'te olay yayıyorsa, her olay için sor: *"Bu işlem başarıyla bittiğinde hangi
+  olay yayılır ve testte neyi kanıtlayacağız?"* → `then { … emitted <Event> with { … } }`.
+  **Pozitif `emitted` ŞART; `not emitted` bu yükümlülüğü KAPATMAZ** (varlık kanıtlamaz). Eksikse
+  strict'te **error**. Test yazılmayacaksa tek çıkış `waive <Op> covers Success because "…"` — o
+  zaman olay `notRequired` sayılır, tanı susar. Olay ADLARINI tech'ten oku (kullanıcıya sorma);
+  sorulan şey `with { … }` içinde **neyin kanıtlanacağıdır**.
+- **Eşzamanlılık dalı (qa v5.4.0 · ADR-0046):** Faz 2 envanterinde beklemediğin bir anonim
+  `NotProcessable` gördüysen kaynağı şu olabilir: op `access { updates … }` \| `{ deletes … }`
+  yapıyor ve dokunduğu entity tech'te `concurrency optimistic` bildiriyor (`creates` bu dalı
+  DOĞURMAZ — karşılaştırılacak sürüm yok; `reads` zaten yazmaz). Düz dille sor: *"Bu kayıt aynı
+  anda iki yerden güncellenirse ne olmalı — çakışma nasıl test edilecek?"* → `covers NotProcessable`
+  ya da gerekçeli `waive <Op> covers NotProcessable because "…"`.
+  **⚠ Op'ta id'siz `rule` check'i DE varsa ikisi TEK dal anahtarında BİRLEŞİR** — tek test ikisini
+  birden "kapatır" ve strict temiz der. Böyle op'ta çakışmayı **AYRICA sor**; validator hatırlatmaz
+  (satın alınmış bedel, ADR-0046).
 - Çöküş dalı için: telafi kanıtını öner: `given { stub Payments.ReserveFee fails }` +
   `then { compensated Payments.ReleaseFee  not emitted … }`.
 - Zamana duyarlı guard'da saat pinini öner: "Bu kural tarihe bakıyor — testi sabit bir
@@ -441,6 +457,15 @@ Branch-coverage tam olsa bile YETMEZ: bir dal SAYILDI diye gerçekten test edild
 2. Her komut/Success testinde kalıcı etki (`state`/`emitted`/`called`) doğrulandı mı, yoksa
    assert'siz sığ mı? Zamana-duyarlı op'ta `time` pini, state-rule'da `seed` var mı? `until`'siz
    waive kaldı mı? Sorulmamış her ★'ı göster ya da tek soruyla kapat.
+   **⚠ qa v5.4.0 — `emitted` kısmı artık ★ DEĞİL, KAPI:** Success kapsanan her `emits`'li op'ta
+   pozitif `emitted <Event>` validator tarafından ZORLANIR (`qa.unasserted-event`, strict'te error;
+   `not emitted` saymaz). Yani bu maddede `emitted` "önerilecek derinlik" değil, **eksikse emit
+   engellenir**. `state`/`called` kısmı ★ olarak kalır.
+   **2a. Eşzamanlılık süpürmesi (qa v5.4.0 · ADR-0046) — validator'ın GÖREMEDİĞİ yer:** `updates`/
+   `deletes` yapan op'un dokunduğu entity `concurrency optimistic` mi? Dal (anonim
+   `NotProcessable`) strict'te zorunludur — AMA op'ta id'siz bir `rule` check'i DE varsa ikisi
+   **TEK dal anahtarında birleşir** ve tek test ikisini birden kapatır. Bu durumda "dal kapandı"
+   YETMEZ: çakışmanın gerçekten sınandığını gözle doğrula ya da kullanıcıya AYRICA sor.
    **2b. İçerik-oracle'ı (v5.0.0, reference §8.1):** bir alanın DEĞERİNİ assert'lediğin her yerde —
    o alan girdinin **birebir kopyası** mı (`total = input.amount`), yoksa **hesaplanmış** mı
    (**literal** beklenen değer)? Bu tech'ten TÜRETİLMEZ (alan-atama gövdesi Generation-Gap
@@ -473,6 +498,11 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs <dosya|dizin ...> --strict --out <�
 - **error** varsa → düzelt/sor, tekrar çalıştır. **0 error olmadan döngüden çıkma.**
   Strict'te kapsanmamış-dal da error'dur (`qa.uncovered-branches`) → her biri Faz 6
   sorusudur: "test mi, waive mi?"
+  **Strict-yükseltilen kod kümesi (qa v5.4.0 itibarıyla DÖRT):** `qa.uncovered-branches` ·
+  `qa.uncovered-guarantee` · `qa.mutation-incomplete` · **`qa.unasserted-event`** (yeni —
+  doğrulanmamış olay; Faz 4 maddesi). **⚠ Yükseltme CLI'ye YERELDİR** — `--json` çıktısında bu
+  kayıtlar `"warning"` görünür ve `errorCount` 0 kalabilir. **Kapı olarak EXIT KODUNU oku**,
+  listedeki severity'yi değil.
 - **warning**'leri **kullanıcıya takip sorusu** olarak geri yansıt (flow/process
   presence → senaryo kararı; waive+test çelişkisi → hangisi kalsın; S9 access-dışı
   state-assert → kasıtlı yan-etki avı mı, yanlış entity mi). Soru kalıpları:
@@ -500,6 +530,16 @@ ve `partial`/`uncovered` garantilerin kapsanmayan yükümlülüklerini `⚠` ile
 garanti YAZMAZ** (guarantee tech'te authored); QA yalnız test-kapsamasını **raporlar** —
 `partial`/`uncovered` bir garanti = çapraz-kesen bir güvencenin testi eksik → kullanıcıya
 takip sorusu ("bu garantinin şu guard'ı test edilmemiş — test mi, waive mı?").
+
+**olay-coverage (`coverage.emits[]`) — qa v5.4.0, YALNIZ merged'de.** Bağlı tech'te `emits` taşıyan
+her op için `(op → event)` yükümlülüğü merged `qa.json`'a
+`{op, event, tech, status, coveredBy[]}` olarak yazılır. `status`: **`covered`** (o op'u hedefleyen
+bir test/step'te pozitif `emitted <Event>` var) · **`uncovered`** (Success kapsanıyor ama olay
+kanıtlanmamış → `qa.unasserted-event`, strict'te error) · **`notRequired`** (Success kapsanmıyor —
+uncovered ya da waived → olay İSTENMEZ, tanı sessiz). `coverage`'ın diğer beş anahtarı
+(`operations`/`flows`/`processes`/`outcomes`/`guarantees`) **aynen** duruyor; per-file
+`<ad>.qa.json`'ın ŞEKLİ değişmedi (`emits` merged'e özgüdür) ama İÇERİĞİ değişebilir —
+`meta.diagnostics[]` artık `qa.unasserted-event` taşıyabilir.
 
 Konum çözümleme, strict varsayılanı, bayatlık (iki-hash) uyarısı,
 aile-eşzamanlı-build kuralı: `references/validator.md`.

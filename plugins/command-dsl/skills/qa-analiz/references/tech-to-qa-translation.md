@@ -64,6 +64,7 @@ Op-başına, **validator'ın listelediği her dalı** bu tabloyla kullanıcıya 
 | `scope …` | NotAuthorized·scope | `covers NotAuthorized scope` | "kapsam dışı çağrı" |
 | id'siz validation check(ler)i | TEK anonim NotValid dalı (S5) | `covers NotValid` | "adsız girdi kuralları (topluca)" |
 | id'siz rule check(ler)i | TEK anonim NotProcessable dalı (S5) | `covers NotProcessable` | "adsız iş kuralları (topluca)" |
+| **eşzamanlılık (qa v5.4.0 · ADR-0046):** op `access { updates … }` \| `access { deletes … }` **ve** dokunulan entity tech'te `concurrency optimistic` bildiriyor (`creates` HARİÇ) | **MEVCUT anonim NotProcessable dalı** — yeni `kind` YOK, yeni sözdizimi YOK | `covers NotProcessable` | "aynı kaydı iki kişi aynı anda değiştirirse — sürüm çakışması" |
 | `calls <Ext.Op> compensate with <Ext.Op2>` — hedef `external`\|`uncharted` | callFailure dalı | `covers callFailure <Ext.Op>` | "dış servis çökerse (telafisiyle)" |
 | `on Module.Event` (consumer op) | dal uzayı AYNI kurallarla; tek fark act biçimi | test `when event … with { … }` yazar (karar #11) | "olay gelince ne yapıyor" |
 
@@ -74,6 +75,23 @@ Op-başına, **validator'ın listelediği her dalı** bu tabloyla kullanıcıya 
   "<param>.<kind>" because "…"` ile de kapatılabilir (strict: test ya da waive — üçüncü yol yok).
   İhlal girdisini ELLE kur (§I negatif-veri kuralı): range için sınır-dışı sayı, union için
   liste-dışı değer — validator girdinin gerçekten ihlal ettiğini İDDİA ETMEZ.
+- **Eşzamanlılık dalının sınırları (ADR-0046 · qa v5.4.0):** ayıraç **TECH'indir** — qa kendi
+  ölçütünü türetmez; entity'de `concurrency optimistic` YOKSA dal da YOKTUR (`ownership … by`
+  emsali, ADR-0040). Gerekçe: optimistic-lock çakışması *"istek şu anki durumda işlenemez"*dir
+  (girdi geçerli, çağıran yetkili, sunucu hatası yok — kaydın sürümü ilerlemiştir) → kapalı sonuç
+  taksonomisinde birebir **`NotProcessable`**. Paylaşım kolaylık değil, **aynı sonuç sınıfına
+  düşme**dir.
+  - **`creates` HARİÇ — iki gerekçe:** (1) yeni oluşturulan kayıtta karşılaştırılacak bir **sürüm
+    yoktur**, çakışma kavramsal olarak doğmaz; (2) ateşlemeyen bir dal doğurmak yazarı
+    **zorunlu-boş bir waiver'a** iterdi. `reads` zaten yazmaz.
+  - Dal, mevcut **`qa.uncovered-branches`** (strict-elevated) kapısına kendiliğinden düşer:
+    ya `covers NotProcessable` testi ya `waive <Op> covers NotProcessable because "…"` — üçüncü
+    yol yok. Waive de `covers` ile **aynı dal-çözümünden** geçer.
+  - **⚠ SATIN ALINMIŞ BEDEL (yumuşatma yok):** bir op **hem** id'siz bir `rule` check'i **hem**
+    eşzamanlılık taşıyorsa iki yükümlülük **tek dal anahtarında birleşir** ve **tek test ikisini
+    birden kapatır** — yazar rule ihlalini test edip çakışmayı hiç sınamayabilir, strict yine de
+    temiz der. Bu yüzden böyle bir op'ta çakışmayı **AYRICA sor** (bkz. `interrogation-playbook.md`
+    Faz 4 — eşzamanlılık maddesi); validator senin yerine hatırlatmaz.
 - Karşılıksız hedef (olmayan guard-id, olmayan error, mekanizmasız op'a NotAuthorized,
   olmayan mekanizma-niteleyicisi, compensate'siz/iç calls'a callFailure) → **error**
   (covers/expect/waive üçünde de aynı kural — spec §4.3/m6).
@@ -102,6 +120,43 @@ türü → durum kaynağı:
 - **Sorgulama sinyali:** `partial`/`uncovered` bir garanti = çapraz-kesen bir güvencenin
   test-kapsaması eksik. CLI `garantiler:` özeti + `⚠` ile kapsanmayan yükümlülükleri listeler;
   kapanışta (Faz 6) "bu garantinin şu guard'ı test edilmemiş — test mi, waive mı?" sorusuna çevir.
+
+## A1b. Tech `emits` → **doğrulanmış** olay yükümlülüğü (`qa.unasserted-event` · qa v5.4.0)
+
+`emits` **yeni dal DOĞURMAZ** — `Success` dalının üstüne bir **kanıt yükümlülüğü** koyar.
+
+**Kural:** bir op'un **`Success` dalı KAPSANIYORSA**, o op'un tech'te `emits` ettiği **her** olay,
+**o op'u hedefleyen** bir test/step'in **pozitif `emitted <Event>`** assert'iyle kanıtlanmalıdır.
+Aksi hâlde **warning `qa.unasserted-event`**, `--strict` altında **ERROR**.
+
+- **Neden:** başarı dalı "kapsandı" görünürken olayın hiç sınanmaması **sahte-kapsamdır**
+  (ADR-0043 sınıfı) — event tümüyle kaybolsa da test yeşil kalırdı.
+- **`not emitted` SAYILMAZ.** O ayrı bir gramer kuralıdır (`NotAssert`) ve **varlık kanıtlamaz**.
+  v5.2.0'ın `absent` / `count 0` / `!=` saymama emsaliyle **aynı ilke**: kapı *"bir şey yazılmış"*
+  değil, *"varlık gerçekten kanıtlanmış"* ister. (Telafi testlerindeki `not emitted` — §E — yerinde
+  kalır; ama Success yükümlülüğünü **kapatmaz**.)
+- **Yükümlülük yalnız `Success` kapsanınca doğar.** Kapsanmıyorsa — uncovered **ya da waived** —
+  olay da **İSTENMEZ**: durum `notRequired`, tanı **sessizdir**. Dolayısıyla **çıkış yolu mevcut
+  `waive <Op> covers Success because "…"`**tır; ayrı bir waive sözdizimi YOK.
+- Aynı olay bir op'ta iki kez emit ediliyorsa **TEK** yükümlülük doğar.
+- Assert'in **op'u hedeflemesi** şarttır: başka bir op'un testinde yazılan `emitted <Event>` bu
+  yükümlülüğü kapatmaz.
+- **⚠ `qa.unasserted-event` strict-YÜKSELTİLEN kod kümesindedir** (`qa.uncovered-branches` ·
+  `qa.uncovered-guarantee` · `qa.mutation-incomplete` ile birlikte). v5.3.0'ın bilinen sınırı
+  **aynen geçerli**: yükseltme **CLI'ye yereldir**, `meta.diagnostics[]`'e yansımaz → exit 1 alan
+  bir strict koşusunda bile bu kayıt listede **`"warning"`** görünür ve `errorCount` **0** kalabilir.
+  **Exit koduna bak, listedeki severity'ye değil.**
+
+**Merged `qa.json` → `coverage.emits[]`** (yalnız merged yüzeyde; per-file `<ad>.qa.json`'ın ŞEKLİ
+değişmedi — ama İÇERİĞİ değişebilir: `meta.diagnostics[]` artık bu kodu taşıyabilir):
+
+```json
+{ "op": "Proposals.SubmitProposal", "event": "Proposals.ProposalSubmitted",
+  "tech": "proposals.tcdsl", "status": "covered",
+  "coveredBy": [ { "file": "proposals.qa", "test": "başarılı teklif" } ] }
+```
+
+`status` ∈ `covered` | `uncovered` | `notRequired` (Success kapsanmıyor → yükümlülük yok).
 
 ## A2. `Filtered` arketipi — satır-kapsaması REDDETMEZ, KISAR (ADR-0040 · qa v2.0.0)
 
@@ -256,7 +311,8 @@ açıkla (politika detayları: `interrogation-playbook.md` §P):
 | `consistency durable` | politika (async'in P12 emsali) | dayanıklı-teslim (kalıcı kuyruk/retry/crash-sonrası devam) altyapı güvencesidir, davranış dalı değil; test yürütmesinde efektler yine senkron-eşdeğer tamamlanmış kabul edilir — ayrı dal/test yazılmaz, dayanıklılık kanıtı üreteç/altyapı işi |
 | entity `invariant` | politika | P13/S16: dokunulan entity'lerin invariant'ları her test/step sonunda ÖRTÜK assert edilir — ayrıca yazdırma |
 | "her testten sonra temizlik" | politika | P6: her test/senaryo temiz state ile başlar |
-| `idempotent by` / `concurrency optimistic` | v1.1 dal-adayı (spec §9) | bugün istenirse senaryo + `state count 1` ile elle modellenebilir; zorunlu coverage değil |
+| `idempotent by` | v1.1 dal-adayı (spec §9) | bugün istenirse senaryo + `state count 1` ile elle modellenebilir; zorunlu coverage değil |
+| ~~`concurrency optimistic`~~ | **ARTIK DAL — bu satır qa v5.4.0'da GEÇERSİZ** | `updates`/`deletes` ile yazan op'ta **anonim NotProcessable** dalı doğurur → **zorunlu coverage** (test ya da waive). Bkz. §A tablosu + ADR-0046. `creates` ve `reads` dal doğurmaz. |
 | "yük/performans/kaos testi" | kapsam dışı (spec §9) | bu DSL davranış-doğrulama modelidir; başka araç işi |
 
 Kullanıcı bu politikalardan FARKLI davranış isterse not düş — üreteç-politikası

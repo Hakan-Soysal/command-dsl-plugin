@@ -107,6 +107,23 @@ değeri kullanıcı beyanıyla yaz, doğrulama iddiasında bulunma.
   alanı da varsa pin+alanı tutarlı yaz.
 - Başarı kanıtı: "Başarıda ayrıca neyi kanıtlayalım — kayıt oluştu mu, bildirim
   yayınlandı mı, dış servise doğru tutarla mı gidildi?" → state/emitted/called.
+- **Olay kanıtı — op `emits` ediyorsa ZORUNLU (qa v5.4.0 · `qa.unasserted-event`):** tech'te
+  `emits` taşıyan bir op'un Success dalını test ediyorsan, her olay için sor:
+  *"Bu işlem başarıyla bittiğinde hangi olay yayılır ve testte neyi kanıtlayacağız?"*
+  → o testin `then`'ine **pozitif** `emitted <Event> [with { … }]`. Bu artık opsiyonel derinlik
+  DEĞİL: eksikse strict'te **error**. **`not emitted` KAPATMAZ** (varlık kanıtlamaz — negatif
+  assert ayrı bir kuraldır). Test yazılmayacaksa tek çıkış `waive <Op> covers Success because "…"` —
+  o zaman olay `notRequired` olur ve tanı susar. Olay adlarını **tech'ten oku, kullanıcıya sorma**
+  (envanter türetilir); kullanıcıya sorulan **hangi alanların kanıtlanacağıdır** (`with { … }`).
+- **Eşzamanlılık çakışması — op `updates`/`deletes` + entity `concurrency optimistic`
+  (qa v5.4.0 · ADR-0046):** dal envanterinde beklemediğin bir anonim `NotProcessable` çıktıysa
+  kaynağı budur. Sor: *"Bu kayıt aynı anda iki yerden güncellenirse ne olmalı — çakışma nasıl
+  test edilecek?"* → `covers NotProcessable` testi (ön-durum: kaydın sürümü testin okuduğundan
+  ilerlemiş olmalı) ya da gerekçeli `waive <Op> covers NotProcessable because "…"`.
+  **⚠ ★ süpürmesi (validator GÖREMEZ):** op **hem** id'siz `rule` check'i **hem** eşzamanlılık
+  taşıyorsa ikisi **TEK dal anahtarında birleşir** — kullanıcı rule ihlalini test edip çakışmayı
+  hiç sınamayabilir, strict yine temiz der. Böyle op'ta çakışmayı **AYRICA sor**; "dal kapandı"
+  yeterli sayma. (`creates` bu dalı doğurmaz — karşılaştırılacak sürüm yok.)
 - **İçerik-oracle'ı — alan başına "kopya mı, hesaplanan mı" (v5.0.0, ref §8.1):** bir alanın
   DEĞERİNİ assert'liyorsan (`state Order exists { total = … }`) bu **SORULACAK bir karardır,
   türetilecek bir olgu değil** — çünkü tech DSL op'un **alan-atama gövdesini modellemez**
@@ -189,7 +206,7 @@ tek cümle gerekçe. Yazarın (senin+kullanıcının) alanı yalnız sağ sütun
 | P6 | Test izolasyonu (temiz state) | — |
 | P7 | Fail-fast yürütme + "skipped" raporu | Senaryo adım sırası ve expect'leri |
 | P8 | Stub gerçekleme; `fails` → ServerError sınıfı | Stub davranışı (`returns { … }` içeriği / `fails`) |
-| P9 | Event tesliminin senkron-eşdeğerliği; emit edilen event consumer'ı TETİKLEMEZ | `emitted/not emitted` assert'leri; consumer'ın izole `when event` testi |
+| P9 | Event tesliminin senkron-eşdeğerliği; emit edilen event consumer'ı TETİKLEMEZ | `emitted/not emitted` assert'leri (**pozitif `emitted` qa v5.4.0'dan beri Success kapsanan `emits`'li op'ta ZORUNLU** — `qa.unasserted-event`); consumer'ın izole `when event` testi |
 | P10 | Outbound gözlem noktası (çağrı kaydı/outbox) | `called/not called/compensated` assert'leri |
 | P11 | Deterministik kimlik üretimi (çokluk-seed dahil) | Seed binding adları ve alan değerleri |
 | P12 | `consistency async` efektlerinin senkron-eşdeğer kabulü (polling yasak) | — |
@@ -207,6 +224,11 @@ Ek: rol-matrisi jenerik NotAuthorized üretimi (QA-18) **üreteç-tavsiyesi** st
 - **Güvenlik testi:** her NotAuthorized alt-dalının kararı AÇIK mı (test/waive)?
   Waive'lerde gerekçe güvenlik-zayıflatmayı örtmüyor mu?
 - **Kanıt testi:** kritik yan-etkili op'larda (para, bildirim, dış çağrı) Success
-  testi çıplak mı kaldı? Ek kanıt öner (state/emitted/called).
+  testi çıplak mı kaldı? Ek kanıt öner (state/emitted/called). **qa v5.4.0'dan beri `emitted`
+  kısmı ÖNERİ değil ZORUNLU** — Success kapsanan her `emits`'li op'ta pozitif `emitted` gerekir
+  (`qa.unasserted-event`); `state`/`called` öneri olarak kalır.
+- **Eşzamanlılık süpürmesi (qa v5.4.0):** `updates`/`deletes` yapan op'un dokunduğu entity tech'te
+  `concurrency optimistic` mi? Öyleyse çakışma kararı AÇIK mı (test/waive) — ve op'ta id'siz `rule`
+  de varsa çakışma **ayrıca** sınandı mı (tek dal anahtarı ikisini birden "kapatır")?
 - **Akış-yetimliği testi:** operations.json'daki her flow/process için karar var mı
   (senaryo ya da belgeli-açık)?

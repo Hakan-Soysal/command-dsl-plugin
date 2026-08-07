@@ -13,7 +13,7 @@
 
 ## Yetenek Envanteri (sessiz-eksik risk yüzeyi — "kapsandı ≠ doğrulandı")
 
-> **Snapshot:** grammar `912002af9beb` · src `dc745e020074` · commit `b42efce`+**qa v5.3.0** — ⚠ **`.qa` YAZIM YÜZEYİ DEĞİŞMEDİ:** bu tur (2026-08-04) qa gramerine dokunmadı, yeni tanı gelmedi ve mevcut tanı **mesajları değişmedi**. Değişen iki şey: `<ad>.qa.json` / `qa.json` çıktısı + bazı tanıların **editör yan-bilgisi** (LSP `relatedInformation` — tıklanabilir konum, çapraz-doküman da olabilir; mesaj aynı). Ne değiştiği: `docs/releases/qa-dsl.md` §v5.3.0. (Ondan önceki tur yalnız business `v2.0.0` ve frontend `v4.0.0`'ı ilerletmişti; qa yüzeyi orada da değişmemişti.) · +**qa v3.1.0 (`seed … @owner(persona)` sahiplik-pini — additive) + v4.0.0 (liste-literal `[…]` + eleman-tip denetimi + İQ2 muafiyet-kaldırma — KIRICI: çıktı `kind:'list'` + girdi) + v5.0.0 (`input.<param>` cond-RHS kökü — KIRICI: girdi ad-rezervasyonu + çıktı path-kök uzayı)** (grammarHash tech-gramerini embed eder → Kalem-0 tech `by <param> on <col>` grameriyle güncellendi; qa-authoring construct'ı DEĞİŞMEDİ. **v5.0.0'da grammarHash DEĞİŞMEDİ — yetenek gramersiz geldi (validator-only); srcHash değişti**) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
+> **Snapshot:** grammar `912002af9beb` · src `d73350dce00e` · commit `175a1c4`+**qa v5.4.0** — ⚠ **`.qa` YAZIM YÜZEYİ (gramer) yine DEĞİŞMEDİ, ama STRICT KABUL-UZAYI DARALDI:** bu tur (2026-08-07) iki yeni yükümlülük geldi — **K2 eşzamanlılık dalı** (yeni `kind` YOK; mevcut anonim `NotProcessable`) ve **K3 `qa.unasserted-event`** (yeni tanı; strict'te ERROR). Dün 0-error geçen bazı `.qa` modelleri bugün REDDEDİLEBİLİR. Merged `qa.json`'a `coverage.emits[]` kardeş alanı eklendi (union GENİŞLEMEDİ → MINOR). Ayrıntı: bu dosyanın **qa v5.4.0** bloğu + `tech-to-qa-translation.md` §A1b/§A · `docs/releases/qa-dsl.md` §v5.4.0 · ADR-0046. — *(bir önceki tur, v5.3.0)* ⚠ **`.qa` YAZIM YÜZEYİ DEĞİŞMEDİ:** bu tur (2026-08-04) qa gramerine dokunmadı, yeni tanı gelmedi ve mevcut tanı **mesajları değişmedi**. Değişen iki şey: `<ad>.qa.json` / `qa.json` çıktısı + bazı tanıların **editör yan-bilgisi** (LSP `relatedInformation` — tıklanabilir konum, çapraz-doküman da olabilir; mesaj aynı). Ne değiştiği: `docs/releases/qa-dsl.md` §v5.3.0. (Ondan önceki tur yalnız business `v2.0.0` ve frontend `v4.0.0`'ı ilerletmişti; qa yüzeyi orada da değişmemişti.) · +**qa v3.1.0 (`seed … @owner(persona)` sahiplik-pini — additive) + v4.0.0 (liste-literal `[…]` + eleman-tip denetimi + İQ2 muafiyet-kaldırma — KIRICI: çıktı `kind:'list'` + girdi) + v5.0.0 (`input.<param>` cond-RHS kökü — KIRICI: girdi ad-rezervasyonu + çıktı path-kök uzayı)** (grammarHash tech-gramerini embed eder → Kalem-0 tech `by <param> on <col>` grameriyle güncellendi; qa-authoring construct'ı DEĞİŞMEDİ. **v5.0.0'da grammarHash DEĞİŞMEDİ — yetenek gramersiz geldi (validator-only); srcHash değişti**) (bundle `--version` ile çapraz-kontrol; uyuşmazsa envanter BAYAT → elle tazele). Elle bakımlı.
 >
 > **⚠️ ADR-0040 · qa v2.0.0 — KIRICI (2026-07-16).** İki ayrı şey oldu, karıştırma:
 > 1. **Yankı (yüzey DEĞİL):** tech'e `principal`/`axis` girdi → qa gramerini import ettiği için hash
@@ -61,6 +61,28 @@
 > 3. **Yazım disiplini (§8.1) — gate zorlamaz:** `input.<param>` yalnız **birebir-kopya** alanlar
 >    için; hesaplanan alanlar **literal** ister. Envanter'de ★ satırı var, Pre-Emit Gate süpürür.
 
+> **⚠️ qa v5.4.0 — MINOR çıktı / DARALAN girdi (2026-08-07) · [ADR-0046].** İki sessiz-yeşil kapandı;
+> **gramer DEĞİŞMEDİ, yeni sözdizimi YOK** — ikisi de validator-only geldi, bu yüzden `grammarHash`
+> sabit kaldı (bayatlık dedektörünün keyword-tabanlı içerik-kapsaması bu sınıfı **yakalayamaz** →
+> envanter damgası ELLE tazelendi; v5.0.0 emsali).
+> 1. **K2 — eşzamanlılık dalı.** Op `access { updates … }` \| `{ deletes … }` yapıyor ve dokunduğu
+>    entity tech'te `concurrency optimistic` bildiriyorsa, op **MEVCUT anonim `NotProcessable`**
+>    dalını kazanır (`covers NotProcessable` / `waive … covers NotProcessable`). **Yeni `kind` YOK ·
+>    yeni discriminator YOK.** `creates` HARİÇ (karşılaştırılacak sürüm yok → zorunlu-boş waiver
+>    doğurmaz), `reads` zaten yazmaz. Bugüne dek optimistic-lock çakışması **hiç test edilmemiş** bir
+>    op strict'te **temiz** geçiyordu — yol dal-uzayında YOKTU. **Kabul-uzayı da genişledi:**
+>    `covers NotProcessable` artık id'siz `rule` check'i olmayan eşzamanlılık op'larında da geçerli
+>    (önce "karşılıksız hedef" error'ı alıyordu). Ayrıntı + satın alınmış bedel (rule ⊕ concurrency
+>    **tek dal anahtarında birleşir**): `tech-to-qa-translation.md` §A.
+> 2. **K3 — `qa.unasserted-event` (YENİ tanı; strict'te ERROR).** Op'un `Success` dalı kapsanıyorsa,
+>    tech'te `emits` ettiği **her** olay o op'u hedefleyen bir test/step'te **pozitif `emitted <Event>`**
+>    ile kanıtlanmalı. **`not emitted` SAYMAZ** (v5.2.0'ın `absent`/`count 0`/`!=` saymama emsali).
+>    Yükümlülük **yalnız Success kapsanınca** doğar → çıkış yolu mevcut `waive <Op> covers Success`.
+>    Ayrıntı: `tech-to-qa-translation.md` §A1b.
+> 3. **Çıktı:** merged `qa.json` → **`coverage.emits[]`** (yeni KARDEŞ alan; `branch.kind` union'ı,
+>    `branches[].status` üçlüsü ve `meta.schemaVersion`=1 **korunuyor** → MINOR). Per-file
+>    `<ad>.qa.json`'ın ŞEKLİ aynı, **İÇERİĞİ** değişebilir (`meta.diagnostics[]` yeni kodu taşır).
+
 QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kapsanmamış dal → warning). Buradaki sessiz risk farklıdır: bir dal **"covered" sayılır ama test onu gerçekten TETİKLEMEZ veya etkisini DOĞRULAMAZ** (karar #8 — validator kapsamı SAYAR, ihlali iddia ETMEZ). Bu tablo, sayılan-kapsamı gerçek-doğrulamaya çeviren **opsiyonel derinliği** listeler. Kullanım: "sinyal" kolonunu dinle; emit'ten önce **★** satırlarını süpür (SKILL Pre-Emit Gate).
 
 **★★** = en yüksek (kapsam sayılır, ihlal doğrulanmaz) · **★** = yüksek · **○** = orta
@@ -69,7 +91,9 @@ QA'da branch-coverage validator zorunlu **dal uzayını** zaten süpürür (kaps
 |---|---|---|---|---|
 | Negatif-testin dalı GERÇEKTEN tetiklemesi | `covers guard/error/NotAuthorized` yazdın — `when`/`given` girdisi o dalı gerçekten ihlal ediyor mu? (validator coverage sayar, ihlali doğrulamaz — karar #8). **Refinement dalı** (`covers guard "<param>.range\|union"`, v3.0.0) da bu sınıftadır: girdi gerçekten **sınır-dışı** mı (in-range değer boundary'yi tetiklemez)? | 4 | ★★ | **yalancı-kapsam (tetiklemeyen-negatif)** — dal "covered" sayılır ama ihlal hiç tetiklenmez; yetkisiz/hatalı yol (ya da sınır-içi kalıp boundary'yi ıskalayan refinement testi) sessizce geçebilir |
 | **`Filtered` dalında üyelik İKİLİSİ** (`result contains` + `result absent`) | op `list of X` dönüyor VE `ownership`/`permit` taşıyor → dal `Filtered <via>` (ADR-0040). Filtre **bozukken de `Success` döner** → "çağrı geçti"/"N satır geldi" hiçbir şey kanıtlamaz | 4 | ★★ | **kanıtsız-filtre** — `contains` yoksa **aşırı-filtreleme** (hak edilen satır düşüyor), `absent` yoksa **SIZINTI** (kapsam-dışı satır dönüyor) görünmez. `result count` = **false-negative üreteci** (yanlış satırlar dönse de sayı tutar). *(Validator bu ikiliyi error'la zorlar — tablo tetikleyici olarak durur.)* |
-| `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ | **doğrulanmamış-etki** — dönüş doğru ama kalıcı etki (kayıt/event/dış-çağrı) hiç assert'lenmez; sığ-yeşil test |
+| `then` etki-assert'leri (`state`/`emitted`/`called`) | komut/Success testi — dönüş DIŞINDA kalıcı etki (kayıt yazıldı mı, event çıktı mı, dış çağrı yapıldı mı) doğrulanmalı mı? assert'siz Success = sığ test | 4 | ★ | **doğrulanmamış-etki** — dönüş doğru ama kalıcı etki (kayıt/event/dış-çağrı) hiç assert'lenmez; sığ-yeşil test. **⚠ qa v5.4.0 — `emitted` KISMI artık OPSİYONEL DEĞİL:** op'un tech'te `emits` ettiği olaylar, Success kapsanıyorsa validator tarafından ZORLANIR (`qa.unasserted-event`, strict'te error). `state`/`called` kısmı bu tabloda kalmaya devam eder (hâlâ zorlanmıyor) |
+| **Eşzamanlılık çakışması** (`covers NotProcessable` — qa v5.4.0 · ADR-0046) | op `updates`/`deletes` yapıyor VE dokunduğu entity tech'te `concurrency optimistic` bildiriyor. **Sor:** *"Bu kayıt aynı anda iki yerden güncellenirse ne olmalı — çakışma nasıl test edilecek?"* | 4 | ★ (**validator zorlar** — dal-uzayında) | **sınanmamış-çakışma** — *dal artık strict'te ZORUNLU (test ya da waive), ama ★ kalıyor:* op **hem** id'siz `rule` check'i **hem** eşzamanlılık taşıyorsa ikisi **TEK dal anahtarında birleşir** ve tek test ikisini birden kapatır → yazar rule'u test edip çakışmayı hiç sınamayabilir, strict yine temiz der (satın alınmış bedel, ADR-0046). Bu süpürme validator'ın göremediği yeri kapatır |
+| **Olayın POZİTİF kanıtı** (`emitted <Event>` — qa v5.4.0) | op tech'te `emits` ediyor VE Success dalını test ediyorsun. **Sor:** *"Bu işlem başarıyla bittiğinde hangi olay yayılır ve testte neyi kanıtlayacağız?"* | 4 | ★ (**validator zorlar** — `qa.unasserted-event`) | **kanıtsız-olay** — Success "covered" görünürken olay hiç sınanmaz; event tümüyle kaybolsa da test yeşil kalır (ADR-0043 sınıfı). **`not emitted` KAPATMAZ** (varlık kanıtlamaz). Çıkış yolu yalnız `waive <Op> covers Success` — o zaman olay `notRequired` olur |
 | **İçerik-oracle'ında kopya/hesaplanan ayrımı** (`input.<param>` vs literal — v5.0.0, §8.1) | create/update testinde bir alanın DEĞERİNİ assert'liyorsun. Alan başına **SOR** (tech söylemez — alan-atama gövdesi Generation-Gap HOLE'u): bu alan girdinin **birebir kopyası** mı (→ `input.<param>`), yoksa **hesaplanmış/türetilmiş** mi (→ **literal** beklenen değer)? | 4 | ★ | **anlaşmalı-oracle (false-green)** — hesaplanan alana `input.<param>` yazılırsa cond ile handler AYNI hatayı paylaşır (ikisi de vergiyi/dönüşümü atlar) → test yeşil, gereksinim ihlal; ters yön **oracle-drift**: kopya alana literal yazılırsa girdi değişince cond bayatlar (false-red). **Strict gate ikisini ayırt EDEMEZ** (ikisi de authored) — yalnız bu süpürme yakalar |
 | `time` pini + `advance time` | op/guard zamana duyarlı mı ("gece 2'de", "48 saat içinde", "süre dolunca")? pin yoksa dal "covered" ama zaman-koşulu KOŞULMAZ | 4/5 | ★ | **koşulmayan-zaman-dalı** — zaman-koşullu dal "covered" ama zaman ilerletilmediğinden hiç koşmaz |
 | `seed` / `given` yeterliliği | rule/ownership dalı ön-durum ister mi (var olan kayıt, başkasının kaydı, limit-aşımı)? seed yoksa dal gerçekten tetiklenmez | 3/4 | ★ | **kurulumsuz-dal** — ön-durum (mevcut kayıt/başkasının kaydı/limit-aşımı) kurulmadığından dal gerçekten tetiklenmez |
@@ -329,8 +353,8 @@ then {
 | `state <Entity> exists { koşullar }` | koşulları sağlayan en az bir kayıt var | Entity op'un `access`'inde değilse warning (S9) |
 | `state <Entity> absent { koşullar }` | koşulları sağlayan kayıt yok | aynı |
 | `state <Entity> count <NUMBER> [{ koşullar }]` | kayıt sayısı | aynı |
-| `emitted <Event> [with { alan = değer … }]` | event yayınlandı (yayın-niyeti — P9) | Event, op'un `emits` listesinde olmalı (error) |
-| `not emitted <Event>` | event yayınlanMAdı | aynı |
+| `emitted <Event> [with { alan = değer … }]` | event yayınlandı (yayın-niyeti — P9) | Event, op'un `emits` listesinde olmalı (error). **qa v5.4.0: bu assert artık ZORUNLU olabilir** — op'un Success dalı kapsanıyorsa `emits`'teki her olay için bir POZİTİF `emitted` gerekir (`qa.unasserted-event`, strict'te error) |
+| `not emitted <Event>` | event yayınlanMAdı | aynı — **ama qa v5.4.0 yükümlülüğünü KAPATMAZ**: negatif assert varlık kanıtlamaz (ayrı gramer kuralı `NotAssert`). Telafi/negatif testlerde yerinde kalır |
 | `called <Ext.Op> [with { … }]` / `not called <Ext.Op>` | outbound çağrı [bu argümanlarla] yapıldı/yapılmadı | hedef, op'un `calls` hedefleri ∪ compensator'ları içinde olmalı (İQ11 — happy-path'te `not called <compensator>` meşru); gözlem P10. **Kompozit arg** iç-alanı **noktalı yol**la (`request.amount = …`) hedeflenir; yol, param'ın composite tipinin gerçek şekline karşı doğrulanır (leaf skalar/enum, çözülemeyen yol → error) |
 | `compensated <Ext.Op>` | telafi çağrısı koştu | hedef, op'un `calls … compensate with` compensator'ı olmalı |
 | `page count <NUMBER>` / `page more` / `page end` | dönen sayfa: öğe sayısı / devamı var / son sayfa | yalnız `paginated` query'de (S4) |
@@ -519,8 +543,15 @@ Bir Operation'ın zorunlu dalları tech kaynağından **türetilir**:
 - **Guard-id tekilliği (S17):** op-içi `validation ∪ rule` birleşiminde guard-id'ler
   tekil olmalı; ihlal qa link-time **error** (referanssız da PROAKTİF) — düzeltme yeri
   TECH'tir.
+- **Eşzamanlılık dalı (qa v5.4.0 · ADR-0046):** `updates`/`deletes` yapan bir op, dokunduğu entity
+  tech'te `concurrency optimistic` bildiriyorsa **MEVCUT anonim `NotProcessable`** dalını kazanır
+  (yeni `kind` YOK). `creates`/`reads` kazanmaz. `covers NotProcessable` ya da
+  `waive <Op> covers NotProcessable`.
+- **Olay kanıtı yükümlülüğü (qa v5.4.0):** dal DEĞİLDİR — Success dalının üstündeki bir assert
+  yükümlülüğüdür (`qa.unasserted-event`). Bkz. `tech-to-qa-translation.md` §A1b.
 - Dal uzayına GİRMEYENLER (NotAuthenticated, ServerError, sayfalama, consistency,
-  invariant, idempotent/concurrency): `tech-to-qa-translation.md` §F.
+  invariant, `idempotent by`): `tech-to-qa-translation.md` §F. **⚠ `concurrency optimistic` bu
+  listeden ÇIKTI** (qa v5.4.0 — artık dal doğurur; yukarı bak).
 
 ## 12. Keyword tuzakları (yazım-anı)
 

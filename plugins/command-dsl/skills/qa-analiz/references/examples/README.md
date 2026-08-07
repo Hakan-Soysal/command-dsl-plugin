@@ -86,9 +86,18 @@ yazmaz, exit 1).
 | `Proposals.GetProposal` | NotAuthorized (roles) | waived (until 2026-12-31) |
 | `Proposals.OnProposalSubmitted` | Success (event-consumer testi) | covered |
 
+**olay-coverage (`coverage.emits[]` — qa v5.4.0):** exemplar 1 `(op → event)` yükümlülüğü taşır —
+`Proposals.SubmitProposal → Proposals.ProposalSubmitted`, durum **covered**; kanıtı `"başarılı
+teklif"` testindeki pozitif `emitted ProposalSubmitted with { title = … }`. `OnProposalSubmitted`
+consumer'dır (`emits` etmez) → yükümlülük doğurmaz. Exemplar ayrıca **`not emitted`'ın yükümlülüğü
+KAPATMADIĞINI** gösterir: `proposals.qa`'daki iki `not emitted ProposalSubmitted` negatif-dal
+kanıtıdır, Success yükümlülüğüne SAYILMAZ.
+
 Per-file `proposals.qa.json`'da coverage YOK (uses/personas/datasets/tests/scenarios/
 waives var) — coverage yalnız merged'de hesaplanır; `meta.source: "proposals.qa"`
-(göreli, temiz).
+(göreli, temiz). **`meta.diagnostics[]`** ise per-file'da da vardır (qa v5.3.0'dan beri);
+exemplar'da 1 info + 2 `qa.mutation-incomplete` warning'i taşır — **warning emit'i engellemez**,
+ama gerçek bir oturumda ★ süpürmesinde ele alınır.
 
 ## Ne öğretir (exemplar'da işaretli kararlar)
 

@@ -4,7 +4,33 @@
     "schemaVersion": 1,
     "source": "proposals.qa",
     "hasErrors": false,
-    "errorCount": 0
+    "errorCount": 0,
+    "diagnostics": [
+      {
+        "severity": "info",
+        "code": null,
+        "path": "proposals.qa",
+        "line": 2,
+        "char": 4,
+        "message": "2 negatif-dal tetikleyici-doğrulamasının dışında kaldı — ifade değerlendirilemedi (fail-open, ADR-0043): boş başlık reddedilir / title-required (girdi verilmedi ('title')) · sıfır tutar reddedilir / amount-positive (girdi verilmedi ('amount'))."
+      },
+      {
+        "severity": "warning",
+        "code": "qa.mutation-incomplete",
+        "path": "proposals.qa",
+        "line": 25,
+        "char": 6,
+        "message": "'Proposals.SubmitProposal' başarı dalı 'Proposal' kaydını yazıyor ama testin state assert'leri şu alanları PİNLEMİYOR: amount, status. Pinlenmeyen alan yanlış yazılsa da test GEÇER (sahte-kapsam). Düzeltme: 'state Proposal exists { amount = <beklenen>, status = <beklenen> }' — değer bir op param'ından geliyorsa 'input.<param>' yazabilirsin."
+      },
+      {
+        "severity": "warning",
+        "code": "qa.mutation-incomplete",
+        "path": "proposals.qa",
+        "line": 72,
+        "char": 6,
+        "message": "'Proposals.OnProposalSubmitted' başarı dalı 'AuditLine' kaydını yazıyor ama testin state assert'leri şu alanları PİNLEMİYOR: proposalId, remark. Pinlenmeyen alan yanlış yazılsa da test GEÇER (sahte-kapsam). Düzeltme: 'state AuditLine exists { proposalId = <beklenen>, remark = <beklenen> }' — değer bir op param'ından geliyorsa 'input.<param>' yazabilirsin."
+      }
+    ]
   },
   "uses": {
     "tech": [

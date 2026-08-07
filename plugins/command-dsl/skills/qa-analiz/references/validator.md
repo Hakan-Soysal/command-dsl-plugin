@@ -23,6 +23,13 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs --version
   kapsanmamış-dal warning'i (kalıcı diagnostic-code `qa.uncovered-branches`) error'a
   yükselir. Kapatmak için `--no-strict` (skill akışında KULLANMA — strict ilkesi
   skill'in varlık sebebidir; yalnız teşhis amaçlı ara-koşularda meşru).
+- **Strict-YÜKSELTİLEN kod kümesi (qa v5.4.0 itibarıyla DÖRT):**
+  `qa.uncovered-branches` · `qa.uncovered-guarantee` · `qa.mutation-incomplete` ·
+  **`qa.unasserted-event`** (yeni — bkz. `tech-to-qa-translation.md §A1b`).
+- **⚠ BİLİNEN SINIR (v5.3.0'dan beri, v5.4.0'da da geçerli):** yükseltme **CLI'ye YERELDİR** —
+  `meta.diagnostics[]`'e YANSIMAZ. Exit 1 alan bir strict koşusunda bile bu dört kayıt JSON
+  listesinde **`"warning"`** görünür ve `errorCount` **0** kalabilir. **Kapı olarak EXIT KODUNU
+  oku, listedeki severity'yi değil.**
 - Skill'in çağrısı yine açık `--strict` yazar (okunabilirlik).
 - Flow/process presence-uyarıları strict'te de **warning** kalır (S6 yalnız
   dal-coverage vaadi) — takip-sorusudur, kapı değil.
@@ -52,6 +59,12 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs --version
   sinerjisi; `tech-to-qa-translation.md §A1a`); CLI, dal özetinin altında `garantiler:
   N · … covered / … partial / … uncovered / … structural` satırını ve `partial`/
   `uncovered` garantilerin kapsanmayan yükümlülüklerini `⚠` ile basar.
+  **qa v5.4.0 — `coverage.emits[]` (YENİ, yalnız merged):** her `(op → event)` yükümlülüğü için
+  `{op, event, tech, status: covered|uncovered|notRequired, coveredBy[]}`
+  (`tech-to-qa-translation.md §A1b`). `coverage`'ın diğer beş anahtarı
+  (`operations`/`flows`/`processes`/`outcomes`/`guarantees`) **aynen** duruyor; per-file
+  `<ad>.qa.json`'ın ŞEKLİ değişmedi (`emits` merged'e özgüdür) — ama İÇERİĞİ değişebilir:
+  `meta.diagnostics[]` artık `qa.unasserted-event` taşıyabilir.
 
 ## Diagnostics → düzeltme döngüsü
 
@@ -77,6 +90,8 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs --version
 | S1 başlık tekrarı / S3 binding ihlali / S4 after-page ihlali / S15 senaryo-callFailure / pinsiz `advance` / F8 senaryo given-call'da `as` yok / dangling seedRef / çokluk-seed bind | ilgili kuralı uygula (qa-dsl-reference.md §6/§9) |
 | `when event` op'un `on` aboneliği değil | event'i op'un aboneliğine eşitle |
 | `qa.uncovered-branches` (strict yükseltmesi) | Faz 6 sorusu: her dal için "test mi, waive mi?" — normalize ETME |
+| `qa.uncovered-branches` içinde **anonim NotProcessable** çıktı ama op'ta id'siz `rule` YOK | **eşzamanlılık dalıdır** (op `updates`/`deletes` + entity `concurrency optimistic`; ADR-0046). Soru: *"Bu kayıt aynı anda iki yerden güncellenirse ne olmalı — çakışma nasıl test edilecek?"* → `covers NotProcessable` testi ya da `waive <Op> covers NotProcessable because "…"` |
+| `qa.unasserted-event` (strict yükseltmesi · qa v5.4.0) | Op'un Success testi var ama emit ettiği olay kanıtlanmamış. Soru: *"Bu işlem başarıyla bittiğinde hangi olay yayılır ve testte neyi kanıtlayacağız?"* → o op'un testine **pozitif** `emitted <Event>` ekle (`not emitted` SAYMAZ). Test yazılmayacaksa tek çıkış: `waive <Op> covers Success because "…"` — o zaman olay da İSTENMEZ |
 
 ### warning → takip-sorusu tablosu (tasarım §4)
 

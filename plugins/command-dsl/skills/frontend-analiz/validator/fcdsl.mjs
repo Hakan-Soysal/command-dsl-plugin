@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "5c187b5581e2", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "b42efce", builtAt: "2026-08-04T16:00:39+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "frontend-v1.x-7401ab4e6bbc", grammarHash: "7401ab4e6bbc", srcDirs: ["src/frontend", "src/shared"], frontendSrcHash: "5ae017ad0333", wrapperFiles: ["fcdsl.src.mts"], wrapperHash: "5935b3e47923", commit: "175a1c4", builtAt: "2026-08-07T17:20:54+03:00", langium: "4.2.4" };
   }
 });
 

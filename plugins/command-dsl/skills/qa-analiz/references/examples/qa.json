@@ -7,7 +7,89 @@
       "proposals.qa"
     ],
     "hasErrors": false,
-    "errorCount": 0
+    "errorCount": 0,
+    "diagnostics": [
+      {
+        "severity": "info",
+        "code": null,
+        "path": "proposals.qa",
+        "line": 2,
+        "char": 4,
+        "message": "2 negatif-dal tetikleyici-doğrulamasının dışında kaldı — ifade değerlendirilemedi (fail-open, ADR-0043): boş başlık reddedilir / title-required (girdi verilmedi ('title')) · sıfır tutar reddedilir / amount-positive (girdi verilmedi ('amount'))."
+      },
+      {
+        "severity": "warning",
+        "code": "qa.mutation-incomplete",
+        "path": "proposals.qa",
+        "line": 25,
+        "char": 6,
+        "message": "'Proposals.SubmitProposal' başarı dalı 'Proposal' kaydını yazıyor ama testin state assert'leri şu alanları PİNLEMİYOR: amount, status. Pinlenmeyen alan yanlış yazılsa da test GEÇER (sahte-kapsam). Düzeltme: 'state Proposal exists { amount = <beklenen>, status = <beklenen> }' — değer bir op param'ından geliyorsa 'input.<param>' yazabilirsin."
+      },
+      {
+        "severity": "warning",
+        "code": "qa.mutation-incomplete",
+        "path": "proposals.qa",
+        "line": 72,
+        "char": 6,
+        "message": "'Proposals.OnProposalSubmitted' başarı dalı 'AuditLine' kaydını yazıyor ama testin state assert'leri şu alanları PİNLEMİYOR: proposalId, remark. Pinlenmeyen alan yanlış yazılsa da test GEÇER (sahte-kapsam). Düzeltme: 'state AuditLine exists { proposalId = <beklenen>, remark = <beklenen> }' — değer bir op param'ından geliyorsa 'input.<param>' yazabilirsin."
+      },
+      {
+        "severity": "info",
+        "code": null,
+        "path": "proposals.tcdsl",
+        "line": 16,
+        "char": 27,
+        "message": "'SubmitProposal': 'amount-positive' guard'ı için karşılaştırılabilir business AST yok — yanlış id ya da 'during' (temporal). Karşılaştırılabilir guard id'leri: (yok)."
+      },
+      {
+        "severity": "info",
+        "code": null,
+        "path": "proposals.tcdsl",
+        "line": 16,
+        "char": 27,
+        "message": "'SubmitProposal': 'proposal-limit' guard'ı için karşılaştırılabilir business AST yok — yanlış id ya da 'during' (temporal). Karşılaştırılabilir guard id'leri: (yok)."
+      },
+      {
+        "severity": "info",
+        "code": null,
+        "path": "proposals.tcdsl",
+        "line": 16,
+        "char": 27,
+        "message": "'SubmitProposal': 'title-required' guard'ı için karşılaştırılabilir business AST yok — yanlış id ya da 'during' (temporal). Karşılaştırılabilir guard id'leri: (yok)."
+      },
+      {
+        "severity": "warning",
+        "code": null,
+        "path": "proposals.tcdsl",
+        "line": 29,
+        "char": 15,
+        "message": "Operation 'ApproveProposal' için görünürlük belirsiz: en az bir yayın protokolü (örn. @rest(...)), @internal veya 'on <Module.Event>' ekle."
+      },
+      {
+        "severity": "warning",
+        "code": null,
+        "path": "proposals.tcdsl",
+        "line": 34,
+        "char": 15,
+        "message": "Operation 'GetProposal' için görünürlük belirsiz: en az bir yayın protokolü (örn. @rest(...)), @internal veya 'on <Module.Event>' ekle."
+      },
+      {
+        "severity": "warning",
+        "code": null,
+        "path": "proposals.tcdsl",
+        "line": 34,
+        "char": 15,
+        "message": "Rol 'Yonetici' (→ {Admin}) op'un yetkili kümesi {Customer} (actor 'Customer') dışında — güvenlik-zayıflatma ('GetProposal')."
+      },
+      {
+        "severity": "warning",
+        "code": null,
+        "path": "proposals.tcdsl",
+        "line": 41,
+        "char": 12,
+        "message": "'OnProposalSubmitted': 'Proposals.ProposalSubmitted' same-module abonelik — intra-module zaten sync, doğrudan çağır (ADR-0027 K4)."
+      }
+    ]
   },
   "coverage": {
     "operations": [
@@ -297,6 +379,20 @@
           }
         ]
       }
+    ],
+    "emits": [
+      {
+        "op": "Proposals.SubmitProposal",
+        "event": "Proposals.ProposalSubmitted",
+        "tech": "proposals.tcdsl",
+        "status": "covered",
+        "coveredBy": [
+          {
+            "file": "proposals.qa",
+            "test": "başarılı teklif"
+          }
+        ]
+      }
     ]
   },
   "files": [
@@ -306,7 +402,33 @@
         "schemaVersion": 1,
         "source": "proposals.qa",
         "hasErrors": false,
-        "errorCount": 0
+        "errorCount": 0,
+        "diagnostics": [
+          {
+            "severity": "info",
+            "code": null,
+            "path": "proposals.qa",
+            "line": 2,
+            "char": 4,
+            "message": "2 negatif-dal tetikleyici-doğrulamasının dışında kaldı — ifade değerlendirilemedi (fail-open, ADR-0043): boş başlık reddedilir / title-required (girdi verilmedi ('title')) · sıfır tutar reddedilir / amount-positive (girdi verilmedi ('amount'))."
+          },
+          {
+            "severity": "warning",
+            "code": "qa.mutation-incomplete",
+            "path": "proposals.qa",
+            "line": 25,
+            "char": 6,
+            "message": "'Proposals.SubmitProposal' başarı dalı 'Proposal' kaydını yazıyor ama testin state assert'leri şu alanları PİNLEMİYOR: amount, status. Pinlenmeyen alan yanlış yazılsa da test GEÇER (sahte-kapsam). Düzeltme: 'state Proposal exists { amount = <beklenen>, status = <beklenen> }' — değer bir op param'ından geliyorsa 'input.<param>' yazabilirsin."
+          },
+          {
+            "severity": "warning",
+            "code": "qa.mutation-incomplete",
+            "path": "proposals.qa",
+            "line": 72,
+            "char": 6,
+            "message": "'Proposals.OnProposalSubmitted' başarı dalı 'AuditLine' kaydını yazıyor ama testin state assert'leri şu alanları PİNLEMİYOR: proposalId, remark. Pinlenmeyen alan yanlış yazılsa da test GEÇER (sahte-kapsam). Düzeltme: 'state AuditLine exists { proposalId = <beklenen>, remark = <beklenen> }' — değer bir op param'ından geliyorsa 'input.<param>' yazabilirsin."
+          }
+        ]
       },
       "uses": {
         "tech": [
