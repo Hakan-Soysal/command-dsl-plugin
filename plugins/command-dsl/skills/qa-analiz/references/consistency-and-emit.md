@@ -51,8 +51,9 @@ Doğrulayıcı yakalar ama döngü israfıdır — emit'ten önce şunları kend
   (`qa.uncovered-branches`) error'a yükselir; skill çağrısı okunabilirlik için yine
   açık `--strict` yazar. **Strict-yükseltilen küme qa v5.4.0 itibarıyla DÖRT:**
   `qa.uncovered-branches` · `qa.uncovered-guarantee` · `qa.mutation-incomplete` ·
-  **`qa.unasserted-event`**. ⚠ Yükseltme CLI'ye YERELDİR — `--json` çıktısında bu kayıtlar
-  `"warning"` görünür, `errorCount` 0 kalabilir; **kapı EXIT KODUDUR**. Flow/process presence-uyarıları strict'te de **warning**
+  **`qa.unasserted-event`**. ⚠ İki JSON yüzeyi FARKLIDIR: `--json` stdout'unda yükseltilenler
+  `severity:1` + `strictElevated:true` gelir; emit edilen manifest'lerin `meta.diagnostics[]`'inde
+  seviye HAM'dır (`"warning"` kalır, `errorCount` 0 kalabilir); **kapı EXIT KODUDUR**. Flow/process presence-uyarıları strict'te de **warning**
   kalır (S6 yalnız dal-coverage vaadi) — onlar takip-sorusudur, kapı değil.
 - **Gate garantisi:** herhangi bir dosyada severity-1 error varsa
   (strict-yükseltilmişler DAHİL) araç HİÇBİR JSON yazmaz (partial da yok; exit 1).

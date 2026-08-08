@@ -66,11 +66,19 @@ interface GuaranteeCoverage {
     status: 'covered' | 'partial' | 'uncovered' | 'structural';
     obligations: Obligation[];
 }
+// Olay-kapsaması (K3, qa v5.4.0): op×event — `covered` = pozitif `emitted <Event>` assert'i var ·
+// `uncovered` = başarı dalı kapsandığı hâlde yok (strict'te HATA) · `notRequired` = yükümlülük doğmadı.
+// `emits` OPSİYONEL okunur (guarantees emsali, fail-open BİLİNÇLİ: v5.4.0 öncesi merged'lerde alan yok).
+interface EmitCoverage {
+    op: string; event: string; tech?: string;
+    status: 'covered' | 'uncovered' | 'notRequired';
+    coveredBy?: CoverRef[];
+}
 interface QaMerged {
     meta: { dsl: string; schemaVersion: number; merged?: boolean; sources?: string[]; hasErrors?: boolean; errorCount?: number };
     coverage: {
         operations: OpCoverage[]; flows: RealizeCoverage[]; processes: RealizeCoverage[];
-        outcomes?: RealizeCoverage[]; guarantees?: GuaranteeCoverage[];
+        outcomes?: RealizeCoverage[]; guarantees?: GuaranteeCoverage[]; emits?: EmitCoverage[];
     };
 }
 
@@ -182,6 +190,7 @@ function renderHtml(merged: QaMerged, title: string | undefined, sourceLabel: st
     h.push('.cov-branch{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}.cov-info{color:#9aa0a8}');
     h.push('.chip{display:inline-block;padding:1px 8px;border-radius:9px;font-size:11px}');
     h.push('.chip-covered{background:#16825d33;color:#3fbf8f}.chip-waived{background:#cca70033;color:#d9b13b}.chip-uncovered{background:#f1434333;color:#f26d6d}');
+    h.push('.chip-notRequired{background:#9aa0a833;color:#9aa0a8}');
     h.push('table.presence{border-collapse:collapse;font-size:12px}table.presence td{padding:3px 12px 3px 0;border-top:1px solid #33363c}');
     h.push('.err-band{background:#f14343;color:#fff;font-weight:600;padding:10px 14px;border-radius:4px;margin:14px 0}');
     h.push('.meta{color:#9aa0a8;font-size:11.5px;margin-top:24px;border-top:1px solid #33363c;padding-top:8px}');
@@ -264,6 +273,27 @@ function renderHtml(merged: QaMerged, title: string | undefined, sourceLabel: st
             }
             h.push('</table></section>');
         }
+    }
+
+    // Olay-kapsaması (K3, qa v5.4.0) — op×event: pozitif `emitted <Event>` assert'i kanıtı.
+    // `emits` opsiyonel (guarantees emsali, fail-open): v5.4.0 öncesi merged'lerde bölüm atlanır.
+    const emits = merged.coverage.emits ?? [];
+    if (emits.length > 0) {
+        const eCov = emits.filter(e => e.status === 'covered').length;
+        const eUncov = emits.filter(e => e.status === 'uncovered').length;
+        const eNotReq = emits.length - eCov - eUncov;
+        h.push(`<h2>Olay-kapsaması (op → event)</h2>`);
+        h.push(`<p class="meta">${eCov} covered · ${eUncov} uncovered · ${eNotReq} notRequired</p>`);
+        h.push('<table class="presence"><tr><th>Op</th><th>Event</th><th>Durum</th><th></th></tr>');
+        for (const e of emits) {
+            const info = e.status === 'covered' ? (e.coveredBy ?? []).map(coverRefLabel).join(' · ')
+                : e.status === 'notRequired' ? 'yükümlülük doğmadı (başarı dalı kapsanmıyor/waived)'
+                : `başarı dalı kapsandığı hâlde 'emitted ${e.event}' assert'i yok — strict'te HATA`;
+            h.push(`<tr><td><code>${esc(e.op)}</code></td><td><code>${esc(e.event)}</code></td>` +
+                `<td><span class="chip chip-${e.status}">${e.status}</span></td>` +
+                `<td class="cov-info">${esc(info)}</td></tr>`);
+        }
+        h.push('</table>');
     }
 
     // Waiver konsolidasyonu (F2.2 tam-parite): TÜM authored waive'ler durum-sınıflı

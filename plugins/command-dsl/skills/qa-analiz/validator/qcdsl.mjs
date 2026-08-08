@@ -45,7 +45,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var define_BUILD_INFO_default;
 var init_define_BUILD_INFO = __esm({
   "<define:__BUILD_INFO__>"() {
-    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "d73350dce00e", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "98389ad627fa", commit: "175a1c4", builtAt: "2026-08-07T17:20:54+03:00", langium: "4.2.4" };
+    define_BUILD_INFO_default = { grammarVersion: "qa-v1.x-912002af9beb", grammarHash: "912002af9beb", srcDirs: ["src/qa", "src/shared", "src/tech"], qaSrcHash: "6515269915d0", wrapperFiles: ["qcdsl.src.mts"], wrapperHash: "2e67c6c74517", commit: "2ffc6c0", builtAt: "2026-08-08T12:35:09+03:00", langium: "4.2.4" };
   }
 });
 
@@ -58745,8 +58745,9 @@ function usage() {
   <dosya|dizin>    .qa dosyalar\u0131; dizinler recursive taran\u0131r; TEK ko\u015Fuda derlenir (workspace-pass)
   --out <dizin>    0 error \u0130SE dosya ba\u015F\u0131na <ad>.qa.json emit eder (coverage i\xE7ermez \u2014 karar #18)
   --merged <dosya> 0 error \u0130SE birle\u015Fik workspace-g\xF6r\xFCn\xFCm\xFC, coverage dahil (coverage YALNIZ burada)
-  --strict         VARSAYILAN A\xC7IK (no-op): kapsanmam\u0131\u015F-dal warning'i error'a y\xFCkselir
-  --no-strict      strict'i kapat\u0131r (repo CLI varsay\u0131lan\u0131; kapsanmam\u0131\u015F dal warning kal\u0131r)
+  --strict         VARSAYILAN A\xC7IK (no-op): \u015Fu D\xD6RT warning error'a y\xFCkselir: kapsanmam\u0131\u015F-dal \xB7
+                   kapsanmam\u0131\u015F-guarantee \xB7 mutasyon-taml\u0131\u011F\u0131 \xB7 do\u011Frulanmam\u0131\u015F-olay
+  --no-strict      strict'i kapat\u0131r (repo CLI varsay\u0131lan\u0131; d\xF6rt warning de warning kal\u0131r)
   --json           stdout'a saf diagnostics dizisi (meta banner stderr'e)
   --quiet          bilgi (info) sat\u0131rlar\u0131 bast\u0131r\u0131l\u0131r
   --version        g\xF6m\xFCl\xFC BUILD_INFO (grammar + src hash \u2014 bayatl\u0131k tespiti)
@@ -58814,9 +58815,10 @@ var jsonDiags = [];
 var errors = 0;
 var warnings = 0;
 var infos = 0;
+var STRICT_ELEVATED_CODES = /* @__PURE__ */ new Set([UNCOVERED_BRANCHES_CODE, UNCOVERED_GUARANTEE_CODE, MUTATION_INCOMPLETE_CODE, UNASSERTED_EVENT_CODE]);
 function effectiveSeverity(d) {
   const sev = d.severity ?? 1;
-  if (args.strict && sev === 2 && d.code === UNCOVERED_BRANCHES_CODE) return 1;
+  if (args.strict && sev === 2 && typeof d.code === "string" && STRICT_ELEVATED_CODES.has(d.code)) return 1;
   return sev;
 }
 function report(doc, tag) {

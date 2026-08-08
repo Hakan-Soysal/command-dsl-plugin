@@ -13,10 +13,12 @@
  *      (strict-yükseltilmişler DAHİL) HİÇBİR JSON yazılmaz (exit 1, partial yok) —
  *      "0-error → otomatik emit" garantisi prose'a değil araca gömülüdür
  *      (fcdsl / teknik-analiz fail-loud emsali).
- *   2. `--strict` VARSAYILAN AÇIKTIR (kullanıcı kararı, tasarım §8/3): kapsanmamış-dal
- *      warning'i (diagnostic code `qa.uncovered-branches` — mesaj-eşleme DEĞİL)
- *      error'a yükselir. `--strict` bayrağı kabul edilir (no-op, okunabilirlik);
- *      `--no-strict` ile kapatılır (repo davranışına dönüş).
+ *   2. `--strict` VARSAYILAN AÇIKTIR (kullanıcı kararı, tasarım §8/3): repo CLI'ın
+ *      STRICT_ELEVATED_CODES kümesindeki DÖRT warning — kapsanmamış-dal (S6) ·
+ *      kapsanmamış-guarantee · mutasyon-tamlığı (G10) · doğrulanmamış-olay (K3) —
+ *      error'a yükselir (code ile tanınır — mesaj-eşleme DEĞİL). `--strict` bayrağı
+ *      kabul edilir (no-op, okunabilirlik); `--no-strict` ile kapatılır (repo
+ *      varsayılan davranışına dönüş; dördü de warning kalır).
  *   3. `--json`: stdout = SAF diagnostics dizisi
  *      ({severity,line,col,message,file,code?,strictElevated?}); strict-yükseltilmiş
  *      tanılar severity:1 + `strictElevated:true` işaretiyle gelir. stderr =
@@ -45,7 +47,7 @@ import { NodeFileSystem } from 'langium/node';
 // build.qa.mjs bunları canlı CommandDSL'in src/qa'sına alias'lar.
 // createQaServices, registerQaValidationChecks + registerTechValidationChecks'i İÇERDE çağırır.
 import { createQaServices } from '@qadsl/services';
-import { UNCOVERED_BRANCHES_CODE } from '@qadsl/validation';
+import { UNCOVERED_BRANCHES_CODE, UNCOVERED_GUARANTEE_CODE, MUTATION_INCOMPLETE_CODE, UNASSERTED_EVENT_CODE } from '@qadsl/validation';
 import { isQaModel, type QaModel } from '@qadsl/ast';
 import { emitQaFile, emitMergedQa } from '@qadsl/manifest';
 import { generateWaiverReport, renderWaiverLines } from '@qadsl/waiver-report';
@@ -101,8 +103,9 @@ function usage(): void {
   <dosya|dizin>    .qa dosyaları; dizinler recursive taranır; TEK koşuda derlenir (workspace-pass)
   --out <dizin>    0 error İSE dosya başına <ad>.qa.json emit eder (coverage içermez — karar #18)
   --merged <dosya> 0 error İSE birleşik workspace-görünümü, coverage dahil (coverage YALNIZ burada)
-  --strict         VARSAYILAN AÇIK (no-op): kapsanmamış-dal warning'i error'a yükselir
-  --no-strict      strict'i kapatır (repo CLI varsayılanı; kapsanmamış dal warning kalır)
+  --strict         VARSAYILAN AÇIK (no-op): şu DÖRT warning error'a yükselir: kapsanmamış-dal ·
+                   kapsanmamış-guarantee · mutasyon-tamlığı · doğrulanmamış-olay
+  --no-strict      strict'i kapatır (repo CLI varsayılanı; dört warning de warning kalır)
   --json           stdout'a saf diagnostics dizisi (meta banner stderr'e)
   --quiet          bilgi (info) satırları bastırılır
   --version        gömülü BUILD_INFO (grammar + src hash — bayatlık tespiti)
@@ -185,10 +188,13 @@ type Diag = {
 const jsonDiags: Diag[] = [];
 let errors = 0, warnings = 0, infos = 0;
 
-/** strict: S6 kapsanmamış-dal warning'i error muamelesi görür (code ile tanınır — mesaj-eşleme değil). */
+/** strict: kapsanmamış-dal (S6) + kapsanmamış-guarantee + mutasyon-tamlığı (G10) + doğrulanmamış-olay (K3)
+ *  warning'i error muamelesi görür (code ile tanınır — mesaj-eşleme değil; repo qcdsl.ts STRICT_ELEVATED_CODES paritesi). */
+const STRICT_ELEVATED_CODES: ReadonlySet<string> =
+    new Set([UNCOVERED_BRANCHES_CODE, UNCOVERED_GUARANTEE_CODE, MUTATION_INCOMPLETE_CODE, UNASSERTED_EVENT_CODE]);
 function effectiveSeverity(d: { severity?: number; code?: number | string }): number {
     const sev = d.severity ?? 1;
-    if (args.strict && sev === 2 && d.code === UNCOVERED_BRANCHES_CODE) return 1;
+    if (args.strict && sev === 2 && typeof d.code === 'string' && STRICT_ELEVATED_CODES.has(d.code)) return 1;
     return sev;
 }
 

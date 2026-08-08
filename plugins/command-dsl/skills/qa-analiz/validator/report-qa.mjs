@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // <define:__BUILD_INFO__>
-var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "bfda6141370b", builtAt: "2026-08-04T16:01:45+03:00" };
+var define_BUILD_INFO_default = { tool: "report-qa", wrapperFiles: ["report-index.src.mts", "report-qa.src.mts"], wrapperHash: "e15a56726e9e", builtAt: "2026-08-08T00:20:45+03:00" };
 
 // report-qa.src.mts
 import { readFileSync as readFileSync2, writeFileSync as writeFileSync2, mkdirSync } from "node:fs";
@@ -222,6 +222,7 @@ function renderHtml(merged2, title2, sourceLabel) {
   h.push(".cov-branch{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}.cov-info{color:#9aa0a8}");
   h.push(".chip{display:inline-block;padding:1px 8px;border-radius:9px;font-size:11px}");
   h.push(".chip-covered{background:#16825d33;color:#3fbf8f}.chip-waived{background:#cca70033;color:#d9b13b}.chip-uncovered{background:#f1434333;color:#f26d6d}");
+  h.push(".chip-notRequired{background:#9aa0a833;color:#9aa0a8}");
   h.push("table.presence{border-collapse:collapse;font-size:12px}table.presence td{padding:3px 12px 3px 0;border-top:1px solid #33363c}");
   h.push(".err-band{background:#f14343;color:#fff;font-weight:600;padding:10px 14px;border-radius:4px;margin:14px 0}");
   h.push(".meta{color:#9aa0a8;font-size:11.5px;margin-top:24px;border-top:1px solid #33363c;padding-top:8px}");
@@ -286,6 +287,20 @@ function renderHtml(merged2, title2, sourceLabel) {
       }
       h.push("</table></section>");
     }
+  }
+  const emits = merged2.coverage.emits ?? [];
+  if (emits.length > 0) {
+    const eCov = emits.filter((e) => e.status === "covered").length;
+    const eUncov = emits.filter((e) => e.status === "uncovered").length;
+    const eNotReq = emits.length - eCov - eUncov;
+    h.push(`<h2>Olay-kapsamas\u0131 (op \u2192 event)</h2>`);
+    h.push(`<p class="meta">${eCov} covered \xB7 ${eUncov} uncovered \xB7 ${eNotReq} notRequired</p>`);
+    h.push('<table class="presence"><tr><th>Op</th><th>Event</th><th>Durum</th><th></th></tr>');
+    for (const e of emits) {
+      const info = e.status === "covered" ? (e.coveredBy ?? []).map(coverRefLabel).join(" \xB7 ") : e.status === "notRequired" ? "y\xFCk\xFCml\xFCl\xFCk do\u011Fmad\u0131 (ba\u015Far\u0131 dal\u0131 kapsanm\u0131yor/waived)" : `ba\u015Far\u0131 dal\u0131 kapsand\u0131\u011F\u0131 h\xE2lde 'emitted ${e.event}' assert'i yok \u2014 strict'te HATA`;
+      h.push(`<tr><td><code>${esc(e.op)}</code></td><td><code>${esc(e.event)}</code></td><td><span class="chip chip-${e.status}">${e.status}</span></td><td class="cov-info">${esc(info)}</td></tr>`);
+    }
+    h.push("</table>");
   }
   const waives = merged2.coverage.operations.flatMap((op) => op.branches.filter((b) => b.status === "waived").map((b) => ({ op: op.id, branch: branchLabel(b.branch), reason: b.reason, until: b.until })));
   if (waives.length > 0) {

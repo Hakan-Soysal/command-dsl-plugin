@@ -20,16 +20,17 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs --version
 ## Strict varsayılanı
 
 - **`--strict` bundle'da VARSAYILANDIR** (kullanıcı kararı, tasarım §8/3):
-  kapsanmamış-dal warning'i (kalıcı diagnostic-code `qa.uncovered-branches`) error'a
-  yükselir. Kapatmak için `--no-strict` (skill akışında KULLANMA — strict ilkesi
-  skill'in varlık sebebidir; yalnız teşhis amaçlı ara-koşularda meşru).
+  aşağıdaki DÖRT koddaki warning error'a yükselir. Kapatmak için `--no-strict`
+  (skill akışında KULLANMA — strict ilkesi skill'in varlık sebebidir; yalnız
+  teşhis amaçlı ara-koşularda meşru).
 - **Strict-YÜKSELTİLEN kod kümesi (qa v5.4.0 itibarıyla DÖRT):**
   `qa.uncovered-branches` · `qa.uncovered-guarantee` · `qa.mutation-incomplete` ·
   **`qa.unasserted-event`** (yeni — bkz. `tech-to-qa-translation.md §A1b`).
-- **⚠ BİLİNEN SINIR (v5.3.0'dan beri, v5.4.0'da da geçerli):** yükseltme **CLI'ye YERELDİR** —
-  `meta.diagnostics[]`'e YANSIMAZ. Exit 1 alan bir strict koşusunda bile bu dört kayıt JSON
-  listesinde **`"warning"`** görünür ve `errorCount` **0** kalabilir. **Kapı olarak EXIT KODUNU
-  oku, listedeki severity'yi değil.**
+- **⚠ BİLİNEN SINIR (v5.3.0'dan beri):** yükseltme `meta.diagnostics[]`'e YANSIMAZ — emit
+  edilen manifest'lerde seviye HAM'dır: bu dört kayıt **`"warning"`** görünür ve `errorCount`
+  **0** kalabilir (bundle'da emit yalnız exit 0'da olur; repo CLI error'da da emit eder).
+  `--json` stdout'unda ise yükseltilenler `severity:1` + `strictElevated:true` gelir.
+  **Kapı olarak EXIT KODUNU oku, listedeki severity'yi değil.**
 - Skill'in çağrısı yine açık `--strict` yazar (okunabilirlik).
 - Flow/process presence-uyarıları strict'te de **warning** kalır (S6 yalnız
   dal-coverage vaadi) — takip-sorusudur, kapı değil.

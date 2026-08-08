@@ -500,9 +500,10 @@ node ${CLAUDE_SKILL_DIR}/validator/qcdsl.mjs <dosya|dizin ...> --strict --out <�
   sorusudur: "test mi, waive mi?"
   **Strict-yükseltilen kod kümesi (qa v5.4.0 itibarıyla DÖRT):** `qa.uncovered-branches` ·
   `qa.uncovered-guarantee` · `qa.mutation-incomplete` · **`qa.unasserted-event`** (yeni —
-  doğrulanmamış olay; Faz 4 maddesi). **⚠ Yükseltme CLI'ye YERELDİR** — `--json` çıktısında bu
-  kayıtlar `"warning"` görünür ve `errorCount` 0 kalabilir. **Kapı olarak EXIT KODUNU oku**,
-  listedeki severity'yi değil.
+  doğrulanmamış olay; Faz 4 maddesi). **⚠ İki JSON yüzeyi FARKLIDIR:** `--json` stdout'unda
+  yükseltilen kayıtlar `severity:1` + `strictElevated:true` gelir; emit edilen manifest'lerin
+  `meta.diagnostics[]`'inde ise seviye HAM'dır — bu kayıtlar `"warning"` görünür, `errorCount`
+  0 kalabilir. **Kapı olarak EXIT KODUNU oku**, listedeki severity'yi değil.
 - **warning**'leri **kullanıcıya takip sorusu** olarak geri yansıt (flow/process
   presence → senaryo kararı; waive+test çelişkisi → hangisi kalsın; S9 access-dışı
   state-assert → kasıtlı yan-etki avı mı, yanlış entity mi). Soru kalıpları:
